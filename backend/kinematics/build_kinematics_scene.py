@@ -4,9 +4,14 @@ import argparse
 import json
 import os
 import re
+import sys
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Tuple
+
+# Add backend/core to sys.path so shared utilities resolve cleanly.
+_BACKEND_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_BACKEND_DIR / "core"))
 
 import cv2
 import matplotlib.pyplot as plt
@@ -26,7 +31,7 @@ from scene_builder import SceneBuilder, export_matterjs_compat
 from sprite_utils import save_rgba_sprite
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_IMAGE = PROJECT_ROOT / "images" / "multi_balls_test.jpg"
 DEFAULT_FULL_JSON = PROJECT_ROOT / "physics_scene_full.json"
 DEFAULT_MATTER_JSON = PROJECT_ROOT / "physics_scene.json"
@@ -63,7 +68,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def discover_from_working_verifier() -> Tuple[Path, str] | None:
-    verifier = PROJECT_ROOT / "experiments" / "verify_multiple_objects.py"
+    verifier = PROJECT_ROOT / "backend" / "kinematics" / "verify_multiple_objects.py"
     if not verifier.exists():
         return None
     text = verifier.read_text(encoding="utf-8", errors="ignore")

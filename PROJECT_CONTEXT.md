@@ -68,11 +68,11 @@ This project transforms static physics textbook pages (specifically NCTB Banglad
 - **Key Discovery**: The candidate mask with the highest raw SAM predicted-IoU score is often an internal sub-part rather than the whole object. Motivated multi-signal re-ranking (prompt consistency, contour stability, connectedness, overlap penalty).
 
 ### ✅ Milestone 3: Robust Interactive Scene Authoring Pipeline
-- Built modular CV pipeline under `experiments/`:
-  - `build_physics_scene_robust.py`: Interactive Matplotlib GUI (Left click = positive prompt, Right click = negative prompt, D = dynamic, S = static, Enter = accept, Q = export).
-  - `mask_quality.py`: Evaluates candidates across SAM score, stability, prompt satisfaction, and connected-component locality.
-  - `geometry_utils.py`: Converts pixel masks into simulation geometry (centroid, bounding box, oriented bounding box with angle $\theta$, circle fit radius, simplified convex collision hull, skeleton path).
-  - `scene_builder.py`: Maps image coordinates to an $800 \times 600$ simulation canvas while preserving aspect ratio. Generates canonical `physics_scene_full.json` (v2.0) and compatibility `physics_scene.json` (v1.0-compat).
+- Built modular CV pipeline under `backend/`:
+  - `backend/core/`: Shared CV utilities (`geometry_utils.py`, `mask_quality.py`, `scene_builder.py`, `sprite_utils.py`).
+  - `backend/kinematics/`: Mechanics authoring GUI (`build_kinematics_scene.py`) exporting Matter.js scenes.
+  - `backend/optics/`: Optics authoring GUI (`build_optics_scene.py`) supporting thin lenses, prisms, and mirrors for Optics2D.
+
 
 ### ✅ Milestone 4: Embedded Diagram Simulation, Sprites & Complex Kinematics
 - **Transparent RGBA Sprite Extraction**: Implemented `sprite_utils.py`. Dynamic objects are automatically cut out from the source diagram as transparent PNGs (`/sprites/element_001.png`).

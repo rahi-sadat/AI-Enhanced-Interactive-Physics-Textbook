@@ -40,14 +40,26 @@ AugmentedPhysics/
 ├── PROJECT_CONTEXT.md           # Deep architectural knowledge base & roadmap
 ├── requirements.txt             # Python backend dependencies
 │
-├── experiments/                 # CV Pipeline & Scene Authoring
-│   ├── build_physics_scene_robust.py  # Interactive GUI authoring tool (left/right click prompts)
-│   ├── geometry_utils.py        # Polygon hull, OBB, circles, center of mass
-│   ├── mask_quality.py          # Candidate mask re-ranking logic
-│   ├── scene_builder.py         # Coordinate mapping & canonical JSON schema builder
-│   ├── sprite_utils.py          # Transparent RGBA sprite cutout generation
-│   ├── test_sam.py              # Single-object segmentation test
-│   └── verify_multiple_objects.py # Multi-object verification script
+├── backend/                     # Python Backend & CV Perception Engines
+│   ├── core/                    # Shared CV & Scene utilities
+│   │   ├── geometry_utils.py    # Polygon hull, OBB, circles, center of mass
+│   │   ├── mask_quality.py      # Multi-candidate SAM 2 mask re-ranking logic
+│   │   ├── scene_builder.py     # Viewport coordinate mapper & JSON schema builder
+│   │   └── sprite_utils.py      # Transparent RGBA sprite cutout generation
+│   │
+│   ├── kinematics/              # Rigid-body mechanics pipeline
+│   │   ├── build_kinematics_scene.py  # Interactive GUI authoring for Matter.js scenes
+│   │   ├── test_sam.py          # Single-object segmentation test
+│   │   └── verify_multiple_objects.py # Multi-object verification script
+│   │
+│   └── optics/                  # Domain-specific optics pipeline
+│       ├── build_optics_scene.py      # Interactive GUI authoring for Optics2D scenes
+│       ├── optics_authoring.py  # Optics GUI session with F/2F annotation mode
+│       ├── optics_geometry.py   # Lens center, aperture, arrow tip/base, prism, axis
+│       ├── optics_registry.py   # Semantic presets (lens, object, prism, mirror)
+│       ├── optics_scene_builder.py    # Canonical PhysicsScene v2.1 builder
+│       ├── optics_semantics.py  # Rule-based semantic binding & VLM prompt generation
+│       └── optics_text.py       # F/2F classification & pixel-to-cm calibration
 │
 ├── images/                      # Benchmark textbook diagrams & test images
 │   ├── curved_ramp_spring.png   # Curved ramp with spring reference
@@ -55,9 +67,9 @@ AugmentedPhysics/
 │   └── test.jpg                 # Single-object benchmark
 │
 ├── physics_scene_full.json      # Canonical v2 schema (visual perception contract)
-├── physics_scene.json           # Matter.js v1 compatibility schema
+├── physics_scene.json           # Simulator compatibility schema
 │
-└── simulation_frontend/         # Interactive Matter.js Web Simulation
+└── simulation_frontend/         # Interactive Matter.js & Optics Web Simulation
     └── physics simulation/
         ├── index.html           # 2-Layer embedded textbook stage
         ├── package.json
@@ -102,20 +114,25 @@ The pre-trained weights (`sam2.1_hiera_tiny.pt`) should be placed in `checkpoint
 ```bash
 mkdir checkpoints
 # Download sam2.1_hiera_tiny.pt (approx. 156 MB)
-# URL: https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
 curl -L -o checkpoints/sam2.1_hiera_tiny.pt https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
 ```
 
-### 3. Run the Interactive Scene Authoring GUI
+### 3. Run the Interactive Authoring GUIs
 
+**For Mechanics / Kinematics (Matter.js):**
 ```bash
-python experiments/build_physics_scene_robust.py images/with_spring.png
+python backend/kinematics/build_kinematics_scene.py images/with_spring.png
+```
+
+**For Optics (Thin Lens / Prism / Mirror):**
+```bash
+python backend/optics/build_optics_scene.py --image images/with_spring.png --subtype thin_lens
 ```
 
 - **Left-Click**: Add positive prompt point (object).
 - **Right-Click**: Add negative prompt point (background).
-- **Press D**: Mark selected entity as **Dynamic** (e.g., ball).
-- **Press S**: Mark selected entity as **Static** (e.g., ramp, wall).
+- **Press D / S**: Mark selected entity as **Dynamic** or **Static**.
+- **Press F (in Optics)**: Toggle F / 2F annotation mode to place focal markers on the axis.
 - **Press Enter**: Accept candidate mask & extract geometry + RGBA sprite.
 - **Click '▶ SIMULATE'**: Automatically syncs assets to the frontend and launches the simulation.
 
