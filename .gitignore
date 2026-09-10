@@ -1,0 +1,39 @@
+﻿# Python & Environment
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+*.class
+*.so
+
+# PyTorch & SAM 2 Model Checkpoints (large binary weights)
+checkpoints/
+*.pt
+*.pth
+*.bin
+*.onnx
+
+# Cloned External Dependencies
+sam2/
+
+# Frontend builds and dependencies
+**/node_modules/
+**/dist/
+node_modules/
+dist/
+
+# Outputs, Logs & Zip Archives
+outputs/
+*.zip
+*.log
+*.tmp
+
+# System & OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Settings
+.vscode/
+.idea/
