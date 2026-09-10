@@ -1,4 +1,4 @@
-﻿# Python & Environment
+# Python & Environment
 .venv/
 env/
 venv/
@@ -37,3 +37,8 @@ desktop.ini
 # IDE & Editor Settings
 .vscode/
 .idea/
+
+# Stray copied assets in frontend root (canonical copies live in public/)
+simulation_frontend/physics simulation/*.json
+simulation_frontend/physics simulation/*.png
+
