@@ -1,0 +1,102 @@
+{
+  "schema_version": "2.0",
+  "scene_type": "physics_diagram",
+  "source": {
+    "image": "D:/AugmentedPhysics/images/nctb_lens_diagram.png",
+    "image_width_px": 800,
+    "image_height_px": 600
+  },
+  "coordinate_system": {
+    "render": {
+      "canvas_width_px": 800,
+      "canvas_height_px": 600,
+      "source_to_canvas_scale": 1.0
+    },
+    "calibration": {
+      "pixels_per_cm": {
+        "value": 6.5,
+        "unit": "pixels_per_cm",
+        "source": "focal_length_ocr_and_geometry_ratio",
+        "confidence": 0.91
+      }
+    }
+  },
+  "simulation": {
+    "domain": "optics",
+    "subtype": "thin_lens",
+    "engine": "optics2d"
+  },
+  "visual": {
+    "background_url": "D:/AugmentedPhysics/images/nctb_lens_diagram.png"
+  },
+  "elements": [
+    {
+      "id": "lens_001",
+      "semantic_label": "convex_lens",
+      "author_role": "static",
+      "geometry": {
+        "optical_center": {
+          "x": 400.0,
+          "y": 299.0
+        },
+        "aperture_height_px": 250.0
+      },
+      "optics": {
+        "model": "thin_lens",
+        "focal_length_px": {
+          "value": 130.0,
+          "source": "F1_F2_geometry",
+          "confidence": 0.94
+        },
+        "focal_length_cm": {
+          "value": 20.0,
+          "source": "ocr_text",
+          "confidence": 0.96,
+          "raw_match": "f = 20.0 cm"
+        }
+      }
+    },
+    {
+      "id": "object_001",
+      "semantic_label": "object_arrow",
+      "author_role": "dynamic",
+      "geometry": {
+        "position": {
+          "x": 140.0,
+          "y": 299.0
+        },
+        "height_px": -95.0
+      }
+    }
+  ],
+  "annotations": [
+    {
+      "label": "F1",
+      "position": {
+        "x": 272.0,
+        "y": 299.0
+      }
+    },
+    {
+      "label": "F2",
+      "position": {
+        "x": 532.0,
+        "y": 299.0
+      }
+    },
+    {
+      "label": "2F1",
+      "position": {
+        "x": 142.5,
+        "y": 299.0
+      }
+    },
+    {
+      "label": "2F2",
+      "position": {
+        "x": 662.5,
+        "y": 299.0
+      }
+    }
+  ]
+}

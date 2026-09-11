@@ -224,22 +224,31 @@ def main() -> None:
     full_scene = builder.write(full_path)
     compat_scene = builder.export_optics_compat(optics_path, background_url="/physics_scene.png")
 
-    # Seamless deployment to frontend public folder
-    frontend_dir = PROJECT_ROOT / "simulation_frontend" / "physics simulation"
-    frontend_public = frontend_dir / "public"
-    if frontend_public.exists():
-        shutil.copy2(optics_path, frontend_public / "physics_scene.json")
-        shutil.copy2(optics_path, frontend_dir / "physics_scene.json")
-        shutil.copy2(image_path, frontend_public / "physics_scene.png")
-        shutil.copy2(image_path, frontend_dir / "physics_scene.png")
+    # Seamless deployment to frontend public folders
+    target_dirs = [
+        PROJECT_ROOT / "simulation_frontend" / "augmented_physics_v2",
+        PROJECT_ROOT / "simulation_frontend" / "physics simulation",
+    ]
+    for frontend_dir in target_dirs:
+        frontend_public = frontend_dir / "public"
+        if frontend_public.exists():
+            shutil.copy2(optics_path, frontend_public / "physics_scene.json")
+            shutil.copy2(optics_path, frontend_dir / "physics_scene.json")
+            shutil.copy2(image_path, frontend_public / "physics_scene.png")
+            shutil.copy2(image_path, frontend_dir / "physics_scene.png")
 
-        frontend_sprites = frontend_public / "sprites"
-        frontend_sprites.mkdir(parents=True, exist_ok=True)
-        for sprite_file in debug_dir.glob("*_sprite.png"):
-            target_name = sprite_file.name.replace("_sprite.png", ".png")
-            shutil.copy2(sprite_file, frontend_sprites / target_name)
+            frontend_sprites = frontend_public / "sprites"
+            frontend_sprites.mkdir(parents=True, exist_ok=True)
+            for sprite_file in debug_dir.glob("*_sprite.png"):
+                target_name = sprite_file.name.replace("_sprite.png", ".png")
+                shutil.copy2(sprite_file, frontend_sprites / target_name)
 
-        print(f"Synced optics scene, background image, and sprites -> {frontend_public}")
+            optics_scenes_dir = frontend_public / "scenes" / "optics"
+            if optics_scenes_dir.exists():
+                shutil.copy2(optics_path, optics_scenes_dir / "physics_scene.json")
+                shutil.copy2(image_path, optics_scenes_dir / "nctb_lens_diagram.png")
+
+            print(f"Synced optics scene, background image, and sprites -> {frontend_public}")
 
     print("\n" + "=" * 68)
     print("OPTICS EXPORT COMPLETE")

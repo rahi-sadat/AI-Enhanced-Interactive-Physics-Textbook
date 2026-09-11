@@ -4,14 +4,9 @@ import argparse
 import json
 import os
 import re
-import sys
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Tuple
-
-# Add backend/core to sys.path so shared utilities resolve cleanly.
-_BACKEND_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(_BACKEND_DIR / "core"))
 
 import cv2
 import matplotlib.pyplot as plt
@@ -31,7 +26,7 @@ from scene_builder import SceneBuilder, export_matterjs_compat
 from sprite_utils import save_rgba_sprite
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_IMAGE = PROJECT_ROOT / "images" / "multi_balls_test.jpg"
 DEFAULT_FULL_JSON = PROJECT_ROOT / "physics_scene_full.json"
 DEFAULT_MATTER_JSON = PROJECT_ROOT / "physics_scene.json"
@@ -68,7 +63,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def discover_from_working_verifier() -> Tuple[Path, str] | None:
-    verifier = PROJECT_ROOT / "backend" / "kinematics" / "verify_multiple_objects.py"
+    verifier = PROJECT_ROOT / "experiments" / "verify_multiple_objects.py"
     if not verifier.exists():
         return None
     text = verifier.read_text(encoding="utf-8", errors="ignore")
@@ -554,30 +549,22 @@ def main() -> None:
     full_scene = builder.write(full_path)
     compat_scene = export_matterjs_compat(full_scene, matter_path, background_url="/physics_scene.png")
 
-    # Seamless deployment to frontend public folders
-    target_dirs = [
-        PROJECT_ROOT / "simulation_frontend" / "augmented_physics_v2",
-        PROJECT_ROOT / "simulation_frontend" / "physics simulation",
-    ]
-    for frontend_dir in target_dirs:
-        frontend_public = frontend_dir / "public"
-        if frontend_public.exists():
-            shutil.copy2(matter_path, frontend_public / "physics_scene.json")
-            shutil.copy2(matter_path, frontend_dir / "physics_scene.json")
-            shutil.copy2(image_path, frontend_public / "physics_scene.png")
-            shutil.copy2(image_path, frontend_dir / "physics_scene.png")
+    # Seamless deployment to frontend public folder
+    frontend_dir = PROJECT_ROOT / "simulation_frontend" / "physics simulation"
+    frontend_public = frontend_dir / "public"
+    if frontend_public.exists():
+        shutil.copy2(matter_path, frontend_public / "physics_scene.json")
+        shutil.copy2(matter_path, frontend_dir / "physics_scene.json")
+        shutil.copy2(image_path, frontend_public / "physics_scene.png")
+        shutil.copy2(image_path, frontend_dir / "physics_scene.png")
 
-            frontend_sprites = frontend_public / "sprites"
-            frontend_sprites.mkdir(parents=True, exist_ok=True)
-            for sprite_file in debug_dir.glob("*_sprite.png"):
-                target_name = sprite_file.name.replace("_sprite.png", ".png")
-                shutil.copy2(sprite_file, frontend_sprites / target_name)
+        frontend_sprites = frontend_public / "sprites"
+        frontend_sprites.mkdir(parents=True, exist_ok=True)
+        for sprite_file in debug_dir.glob("*_sprite.png"):
+            target_name = sprite_file.name.replace("_sprite.png", ".png")
+            shutil.copy2(sprite_file, frontend_sprites / target_name)
 
-            kinematics_scenes_dir = frontend_public / "scenes" / "kinematics"
-            if kinematics_scenes_dir.exists():
-                shutil.copy2(matter_path, kinematics_scenes_dir / "physics_scene.json")
-
-            print(f"Synced scene, background image, and sprites -> {frontend_public}")
+        print(f"Synced scene, background image, and sprites -> {frontend_public}")
 
     print("\n" + "=" * 68)
     print("EXPORT COMPLETE")
