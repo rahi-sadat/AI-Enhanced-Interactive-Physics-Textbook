@@ -1,0 +1,52 @@
+{
+  "schema_version": "2.0",
+  "scene_type": "physics_diagram",
+  "source": {
+    "image": null,
+    "image_width_px": 800,
+    "image_height_px": 600
+  },
+  "coordinate_system": {
+    "render": {
+      "canvas_width_px": 800,
+      "canvas_height_px": 600,
+      "source_to_canvas_scale": 1.0
+    }
+  },
+  "simulation": {
+    "domain": "optics",
+    "subtype": "prism",
+    "engine": "optics2d"
+  },
+  "visual": {
+    "background_url": null
+  },
+  "elements": [
+    {
+      "id": "prism_001",
+      "semantic_label": "prism",
+      "author_role": "static",
+      "geometry": {
+        "vertices": [
+          { "x": 400.0, "y": 170.0 },
+          { "x": 260.0, "y": 430.0 },
+          { "x": 540.0, "y": 430.0 }
+        ]
+      },
+      "optics": {
+        "refractive_index": 1.52
+      }
+    },
+    {
+      "id": "light_001",
+      "semantic_label": "light_source",
+      "author_role": "dynamic",
+      "geometry": {
+        "position": { "x": 160.0, "y": 380.0 }
+      },
+      "optics": {
+        "target": { "x": 340.0, "y": 280.0 }
+      }
+    }
+  ]
+}

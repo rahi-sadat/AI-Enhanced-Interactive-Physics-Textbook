@@ -1,0 +1,53 @@
+{
+  "schema_version": "2.1-optics-compat",
+  "simulation": {
+    "domain": "optics",
+    "subtype": "interface_refraction",
+    "engine": "optics2d"
+  },
+  "visual": {
+    "background_url": "/uploads/diagram_7dcbe9c0.png"
+  },
+  "elements": [
+    {
+      "id": "element_boundary",
+      "semantic_label": "medium_boundary",
+      "author_role": "fixed",
+      "optics": {
+        "model": "interface_boundary",
+        "y": 300.0,
+        "orientation": "horizontal",
+        "medium1": { "name": "Air (Rarer)", "n": 1.0, "label": "n1" },
+        "medium2": { "name": "Glass / Denser", "n": 1.5, "label": "n2" }
+      }
+    },
+    {
+      "id": "element_normal",
+      "semantic_label": "normal_line",
+      "author_role": "fixed",
+      "optics": {
+        "model": "normal",
+        "x": 408.0
+      }
+    },
+    {
+      "id": "element_light_source",
+      "semantic_label": "incident_ray_source",
+      "author_role": "dynamic",
+      "optics": {
+        "model": "ray_source",
+        "position": { "x": 165.0, "y": 95.0 },
+        "target": { "x": 408.0, "y": 300.0 }
+      }
+    }
+  ],
+  "annotations": [
+    { "label": "i", "position": { "x": 380, "y": 250 } },
+    { "label": "r", "position": { "x": 435, "y": 350 } }
+  ],
+  "render": {
+    "canvas_width_px": 800,
+    "canvas_height_px": 600,
+    "source_to_canvas_scale": 1.0
+  }
+}

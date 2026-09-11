@@ -1,0 +1,55 @@
+{
+  "schema_version": "2.0",
+  "scene_type": "physics_diagram",
+  "source": {
+    "diagram_name": "nctb_glass_slab_diagram",
+    "description": "NCTB Class 9-10 Physics Chapter 5 - Refraction through Rectangular Glass Slab & Lateral Displacement",
+    "image_width_px": 800,
+    "image_height_px": 600
+  },
+  "coordinate_system": {
+    "render": {
+      "canvas_width_px": 800,
+      "canvas_height_px": 600
+    }
+  },
+  "simulation": {
+    "domain": "optics",
+    "subtype": "prism",
+    "engine": "optics2d"
+  },
+  "elements": [
+    {
+      "id": "slab_001",
+      "semantic_label": "refractive_polygon",
+      "author_role": "static",
+      "geometry": {
+        "vertices": [
+          { "x": 240.0, "y": 210.0 },
+          { "x": 560.0, "y": 210.0 },
+          { "x": 560.0, "y": 390.0 },
+          { "x": 240.0, "y": 390.0 }
+        ]
+      },
+      "optics": {
+        "refractive_index": {
+          "value": 1.50,
+          "source": "textbook_standard",
+          "confidence": 1.0
+        }
+      }
+    },
+    {
+      "id": "source_001",
+      "semantic_label": "light_source",
+      "author_role": "dynamic",
+      "geometry": {
+        "position": { "x": 120.0, "y": 90.0 },
+        "target": { "x": 340.0, "y": 210.0 }
+      }
+    }
+  ],
+  "annotations": [
+    { "label": "Glass Slab (n = 1.50)", "position": { "x": 400.0, "y": 300.0 } }
+  ]
+}

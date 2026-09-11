@@ -1,0 +1,71 @@
+{
+  "schema_version": "2.0",
+  "scene_type": "physics_diagram",
+  "source": {
+    "diagram_name": "nctb_concave_lens_diagram",
+    "description": "NCTB Class 9-10 Physics Chapter 5 - Image Formation by Concave (Diverging) Lens",
+    "image_width_px": 800,
+    "image_height_px": 600
+  },
+  "coordinate_system": {
+    "render": {
+      "canvas_width_px": 800,
+      "canvas_height_px": 600
+    },
+    "calibration": {
+      "pixels_per_cm": {
+        "value": 6.5,
+        "source": "nctb_standard_scale",
+        "confidence": 0.95
+      }
+    }
+  },
+  "simulation": {
+    "domain": "optics",
+    "subtype": "thin_lens",
+    "engine": "optics2d"
+  },
+  "elements": [
+    {
+      "id": "lens_001",
+      "semantic_label": "concave_lens",
+      "author_role": "static",
+      "geometry": {
+        "optical_center": { "x": 400.0, "y": 300.0 },
+        "aperture_height_px": 240.0
+      },
+      "optics": {
+        "model": "concave",
+        "focal_length_px": {
+          "value": -130.0,
+          "source": "author_specified",
+          "confidence": 1.0
+        },
+        "focal_length_cm": {
+          "value": -20.0,
+          "source": "textbook_text",
+          "confidence": 0.96
+        }
+      }
+    },
+    {
+      "id": "object_001",
+      "semantic_label": "object_arrow",
+      "author_role": "dynamic",
+      "geometry": {
+        "position": { "x": 200.0, "y": 300.0 },
+        "height_px": -90.0
+      },
+      "visual": {
+        "sprite_url": "/scenes/optics/sprites/candle.png"
+      }
+    }
+  ],
+  "annotations": [
+    { "label": "2F1", "position": { "x": 140.0, "y": 300.0 } },
+    { "label": "F1",  "position": { "x": 270.0, "y": 300.0 } },
+    { "label": "O",   "position": { "x": 400.0, "y": 300.0 } },
+    { "label": "F2",  "position": { "x": 530.0, "y": 300.0 } },
+    { "label": "2F2", "position": { "x": 660.0, "y": 300.0 } }
+  ]
+}

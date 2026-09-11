@@ -1,0 +1,65 @@
+{
+  "schema_version": "2.0",
+  "scene_type": "physics_diagram",
+  "source": {
+    "image": null,
+    "image_width_px": 800,
+    "image_height_px": 600
+  },
+  "coordinate_system": {
+    "render": {
+      "canvas_width_px": 800,
+      "canvas_height_px": 600,
+      "source_to_canvas_scale": 1.0
+    },
+    "calibration": {
+      "pixels_per_cm": {
+        "value": 7.0,
+        "source": "assumed_standard",
+        "confidence": 0.9
+      }
+    }
+  },
+  "simulation": {
+    "domain": "optics",
+    "subtype": "mirror",
+    "engine": "optics2d"
+  },
+  "visual": {
+    "background_url": null
+  },
+  "elements": [
+    {
+      "id": "mirror_001",
+      "semantic_label": "concave_mirror",
+      "author_role": "static",
+      "geometry": {
+        "optical_center": {
+          "x": 600.0,
+          "y": 300.0
+        }
+      },
+      "optics": {
+        "model": "concave",
+        "focal_length_px": 140.0
+      }
+    },
+    {
+      "id": "object_001",
+      "semantic_label": "object_arrow",
+      "author_role": "dynamic",
+      "geometry": {
+        "position": {
+          "x": 260.0,
+          "y": 300.0
+        },
+        "height_px": -85.0
+      }
+    }
+  ],
+  "annotations": [
+    { "label": "C", "position": { "x": 320.0, "y": 300.0 } },
+    { "label": "F", "position": { "x": 460.0, "y": 300.0 } },
+    { "label": "P", "position": { "x": 600.0, "y": 300.0 } }
+  ]
+}
