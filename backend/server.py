@@ -56,7 +56,7 @@ from optics_geometry import extract_lens_geometry, extract_arrow_geometry, detec
 from optics_text import create_manual_label, classify_focal_points, infer_pixel_scale
 
 # Kinematics imports
-from scene_builder import SceneBuilder, export_matterjs_compat
+from scene_builder import SceneBuilder, CanvasMapper, export_matterjs_compat
 
 app = FastAPI(title="AugmentedPhysics API", version="2.1")
 
@@ -273,6 +273,8 @@ def classify_diagram_concept(
 
 def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
     h, w = img_bgr.shape[:2]
+    mapper = CanvasMapper(w, h, 800, 600)
+
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=int(w * 0.3), maxLineGap=20)
@@ -284,7 +286,8 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
         best_h = 0
         best_v = 0
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[:4]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             if (ang < 6.0 or ang > 174.0) and length > best_h:
@@ -294,14 +297,11 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
                 best_v = length
                 normal_x = (x1 + x2) / 2.0
 
-    canvas_w, canvas_h = 800.0, 600.0
-    scale_x = canvas_w / float(w)
-    scale_y = canvas_h / float(h)
-
-    c_bound_y = float(bound_y * scale_y)
-    c_normal_x = float(normal_x * scale_x)
-    src_x = max(60.0, c_normal_x - 180.0)
-    src_y = max(40.0, c_bound_y - 170.0)
+    c_bound = mapper.point(0, bound_y)
+    c_normal = mapper.point(normal_x, 0)
+    c_bound_y = c_bound["y"]
+    c_normal_x = c_normal["x"]
+    src_pt = mapper.point(max(20.0, normal_x - 140.0), max(20.0, bound_y - 140.0))
 
     return {
         "schema_version": "2.1-optics-compat",
@@ -339,7 +339,7 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
                 "author_role": "dynamic",
                 "optics": {
                     "model": "ray_source",
-                    "position": {"x": src_x, "y": src_y},
+                    "position": {"x": src_pt["x"], "y": src_pt["y"]},
                     "target": {"x": c_normal_x, "y": c_bound_y},
                 },
             },
@@ -348,19 +348,18 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
             {"label": "θ₁", "position": {"x": c_normal_x - 30, "y": c_bound_y - 45}},
             {"label": "θ₂", "position": {"x": c_normal_x + 25, "y": c_bound_y + 45}},
         ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "render": mapper.metadata(),
     }
 
 
-def build_mirror_scene(img_bgr: np.ndarray, image_rel_url: str, mirror_type: str = "concave") -> dict:
+def build_mirror_scene(
+    img_bgr: np.ndarray,
+    image_rel_url: str,
+    mirror_type: str = "concave",
+    focal_length_cm: float = 20.0,
+) -> dict:
     h, w = img_bgr.shape[:2]
-    canvas_w, canvas_h = 800.0, 600.0
-    scale_x = canvas_w / float(w)
-    scale_y = canvas_h / float(h)
+    mapper = CanvasMapper(w, h, 800, 600)
 
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
@@ -372,24 +371,34 @@ def build_mirror_scene(img_bgr: np.ndarray, image_rel_url: str, mirror_type: str
     if lines is not None:
         best_len = 0
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[:4]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
-            if (ang < 6.0 or ang > 174.0) and length > best_len:
+            if (ang < 6.0 or ang > 174.0) and (h * 0.2 < (y1 + y2) / 2.0 < h * 0.72) and length > best_len:
                 best_len = length
                 axis_y = (y1 + y2) / 2.0
-                if min(x1, x2) > w * 0.08:
-                    mirror_x = min(x1, x2)
+                min_ep = min(x1, x2)
+                max_ep = max(x1, x2)
+                if min_ep < w * 0.25:
+                    mirror_x = min_ep
                 else:
-                    mirror_x = max(x1, x2)
+                    mirror_x = max_ep
 
-    c_axis_y = float(axis_y * scale_y)
-    c_mirror_x = float(mirror_x * scale_x)
-    if c_mirror_x < 350 or c_mirror_x > 720:
-        c_mirror_x = 580.0
+    # Determine mirror facing: if mirror is on the left, it faces right
+    facing = "right" if mirror_x < w * 0.5 else "left"
+    dir_sign = 1 if facing == "right" else -1
 
-    f_px = 135.0
-    obj_x = max(60.0, c_mirror_x - 2.2 * f_px)
+    c_pole = mapper.point(mirror_x, axis_y)
+    c_mirror_x = c_pole["x"]
+    c_axis_y = c_pole["y"]
+
+    f_px = mapper.length(82.0 if facing == "right" else 135.0)
+    obj_u = mapper.length(212.0 if facing == "right" else 2.2 * 135.0)
+    obj_x = c_mirror_x + dir_sign * obj_u
+    obj_h = mapper.length(106.0 if facing == "right" else 85.0)
+    aper_h = mapper.length(328.0 if facing == "right" else 240.0)
+    r_curv = f_px * 2.0
 
     return {
         "schema_version": "2.1-optics-compat",
@@ -402,14 +411,16 @@ def build_mirror_scene(img_bgr: np.ndarray, image_rel_url: str, mirror_type: str
         "elements": [
             {
                 "id": "element_001",
-                "semantic_label": "concave_mirror",
+                "semantic_label": "concave_mirror" if mirror_type == "concave" else "convex_mirror",
                 "author_role": "fixed",
                 "optics": {
                     "model": mirror_type,
                     "concavity": mirror_type,
+                    "facing": facing,
                     "pole": {"x": c_mirror_x, "y": c_axis_y},
                     "focal_length_px": f_px,
-                    "aperture_height_px": 240.0,
+                    "aperture_height_px": aper_h,
+                    "radius_of_curvature_px": r_curv,
                 },
             },
             {
@@ -419,21 +430,17 @@ def build_mirror_scene(img_bgr: np.ndarray, image_rel_url: str, mirror_type: str
                 "optics": {
                     "model": "optical_object",
                     "base": {"x": obj_x, "y": c_axis_y},
-                    "tip": {"x": obj_x, "y": c_axis_y - 85.0},
-                    "height_px": 85.0,
+                    "tip": {"x": obj_x, "y": c_axis_y - obj_h},
+                    "height_px": obj_h,
                 },
             },
         ],
         "annotations": [
-            {"label": "C", "position": {"x": c_mirror_x - 2 * f_px, "y": c_axis_y}},
-            {"label": "F", "position": {"x": c_mirror_x - f_px, "y": c_axis_y}},
+            {"label": "C", "position": {"x": c_mirror_x + dir_sign * 2 * f_px, "y": c_axis_y}},
+            {"label": "F", "position": {"x": c_mirror_x + dir_sign * f_px, "y": c_axis_y}},
             {"label": "P", "position": {"x": c_mirror_x, "y": c_axis_y}},
         ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "render": mapper.metadata(),
     }
 
 
@@ -444,9 +451,7 @@ def build_thin_lens_scene(
     model: str = "convex",
 ) -> dict:
     h, w = img_bgr.shape[:2]
-    canvas_w, canvas_h = 800.0, 600.0
-    scale_x = canvas_w / float(w)
-    scale_y = canvas_h / float(h)
+    mapper = CanvasMapper(w, h, 800, 600)
 
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
@@ -458,20 +463,21 @@ def build_thin_lens_scene(
     if lines is not None:
         best_len = 0
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[:4]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             if (ang < 6.0 or ang > 174.0) and length > best_len:
                 best_len = length
                 axis_y = (y1 + y2) / 2.0
 
-    c_axis_y = float(axis_y * scale_y)
-    c_lens_x = float(lens_x * scale_x)
-    if c_lens_x < 300 or c_lens_x > 550:
-        c_lens_x = 400.0
+    c_center = mapper.point(lens_x, axis_y)
+    c_axis_y = c_center["y"]
+    c_lens_x = c_center["x"]
 
-    f_px = 130.0 if model == "convex" else -130.0
+    f_px = mapper.length(130.0 if model == "convex" else -130.0)
     obj_x = c_lens_x - 2.0 * abs(f_px)
+    obj_h = mapper.length(85.0)
 
     return {
         "schema_version": "2.1-optics-compat",
@@ -490,7 +496,7 @@ def build_thin_lens_scene(
                     "model": "thin_lens",
                     "concavity": model,
                     "optical_center": {"x": c_lens_x, "y": c_axis_y},
-                    "aperture_height_px": 220.0,
+                    "aperture_height_px": mapper.length(220.0),
                     "focal_length_px": {
                         "value": f_px,
                         "source": "cv_inference",
@@ -504,8 +510,8 @@ def build_thin_lens_scene(
                 "optics": {
                     "model": "optical_object",
                     "base": {"x": obj_x, "y": c_axis_y},
-                    "tip": {"x": obj_x, "y": c_axis_y - 85.0},
-                    "height_px": 85.0,
+                    "tip": {"x": obj_x, "y": c_axis_y - obj_h},
+                    "height_px": obj_h,
                 },
             },
         ],
@@ -516,16 +522,14 @@ def build_thin_lens_scene(
             {"label": "F2", "position": {"x": c_lens_x + abs(f_px), "y": c_axis_y}},
             {"label": "2F2", "position": {"x": c_lens_x + 2 * abs(f_px), "y": c_axis_y}},
         ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "render": mapper.metadata(),
     }
 
 
 def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
     h, w = img_bgr.shape[:2]
+    mapper = CanvasMapper(w, h, 800, 600)
+
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -538,22 +542,17 @@ def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
             prism_contour = approx.reshape(-1, 2)
             break
 
-    canvas_w, canvas_h = 800.0, 600.0
-    scale_x = canvas_w / float(w)
-    scale_y = canvas_h / float(h)
-
     if prism_contour is not None:
-        pts = [{"x": float(p[0] * scale_x), "y": float(p[1] * scale_y)} for p in prism_contour]
+        pts = [mapper.point(float(p[0]), float(p[1])) for p in prism_contour]
         sorted_by_y = sorted(pts, key=lambda p: p["y"])
         apex = sorted_by_y[0]
         base1, base2 = sorted_by_y[1], sorted_by_y[2]
     else:
-        apex = {"x": 400.0, "y": 170.0}
-        base1 = {"x": 260.0, "y": 430.0}
-        base2 = {"x": 540.0, "y": 430.0}
+        apex = mapper.point(w * 0.5, h * 0.28)
+        base1 = mapper.point(w * 0.32, h * 0.72)
+        base2 = mapper.point(w * 0.68, h * 0.72)
 
-    src_x = max(40.0, base1["x"] - 130.0)
-    src_y = (apex["y"] + base1["y"]) / 2.0 + 35.0
+    src_pt = mapper.point(max(40.0, (w * 0.32) - 130.0), h * 0.55)
 
     return {
         "schema_version": "2.1-optics-compat",
@@ -580,74 +579,138 @@ def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
                 "author_role": "dynamic",
                 "optics": {
                     "model": "ray_source",
-                    "position": {"x": src_x, "y": src_y},
+                    "position": {"x": src_pt["x"], "y": src_pt["y"]},
                     "target": {"x": (apex["x"] + base1["x"]) / 2.0, "y": (apex["y"] + base1["y"]) / 2.0},
                 },
             },
         ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "render": mapper.metadata(),
     }
 
 
 def build_pendulum_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
     h, w = img_bgr.shape[:2]
-    canvas_w, canvas_h = 800.0, 600.0
-    scale_x = canvas_w / float(w)
-    scale_y = canvas_h / float(h)
+    mapper = CanvasMapper(w, h, 800, 600)
 
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+    blurred = cv2.GaussianBlur(gray, (9, 9), 2)
     circles = cv2.HoughCircles(
-        blurred, cv2.HOUGH_GRADIENT, 1.2, 40,
-        param1=50, param2=35, minRadius=14, maxRadius=int(min(h, w) * 0.25)
+        blurred, cv2.HOUGH_GRADIENT, 1.2, 30,
+        param1=50, param2=30, minRadius=8, maxRadius=int(min(h, w) * 0.35)
     )
 
-    bob_x = 280.0
-    bob_y = 390.0
-    bob_r = 24.0
+    edges = cv2.Canny(gray, 50, 150)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=60, maxLineGap=20)
 
+    source_bob_x = w * 0.35
+    source_bob_y = h * 0.65
+    source_bob_r = 30.0
+    source_pivot_x = w * 0.5
+    source_pivot_y = h * 0.2
+
+    detected_circles = []
     if circles is not None:
-        c = circles[0][0]
-        bob_x = float(c[0] * scale_x)
-        bob_y = float(c[1] * scale_y)
-        bob_r = float(max(18.0, min(36.0, c[2] * scale_x)))
+        c_arr = np.around(circles[0]).astype(int)
+        for c in c_arr:
+            detected_circles.append((float(c[0]), float(c[1]), float(c[2])))
 
-    pivot_x = float(min(700.0, max(100.0, bob_x + 90.0)))
-    pivot_y = float(max(50.0, bob_y - 280.0))
+    has_pivot_circle = False
+    if detected_circles:
+        detected_circles.sort(key=lambda item: item[1], reverse=True)
+        source_bob_x, source_bob_y, source_bob_r = detected_circles[0]
+        higher_circles = [c for c in detected_circles[1:] if c[1] < source_bob_y - 80]
+        if higher_circles:
+            higher_circles.sort(key=lambda item: item[1])
+            source_pivot_x, source_pivot_y, _ = higher_circles[0]
+            has_pivot_circle = True
+
+    if lines is not None and not has_pivot_circle:
+        candidate_lines = []
+        for l in lines:
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[:4]
+            d1 = np.hypot(x1 - source_bob_x, y1 - source_bob_y)
+            d2 = np.hypot(x2 - source_bob_x, y2 - source_bob_y)
+            if min(d1, d2) < source_bob_r * 2.5:
+                upper_pt = (x1, y1) if y1 < y2 else (x2, y2)
+                candidate_lines.append(upper_pt)
+        if candidate_lines:
+            candidate_lines.sort(key=lambda pt: pt[1])
+            source_pivot_x, source_pivot_y = candidate_lines[0][0], candidate_lines[0][1]
+
+    bob_pt = mapper.point(source_bob_x, source_bob_y)
+    pivot_pt = mapper.point(source_pivot_x, source_pivot_y)
+    bob_r = mapper.length(source_bob_r)
+
+    bg_url = image_rel_url
+    sprite_url = None
+    try:
+        mask = np.zeros((h, w), dtype=np.uint8)
+        cv2.circle(mask, (int(source_bob_x), int(source_bob_y)), int(source_bob_r), 255, -1)
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        dilated_mask = cv2.dilate(mask, kernel, iterations=2)
+        masked_bg = cv2.inpaint(img_bgr, dilated_mask, 7, cv2.INPAINT_TELEA)
+
+        clean_name = Path(image_rel_url).stem
+        masked_filename = f"masked_{clean_name}.jpg"
+        out_bg = FRONTEND_UPLOADS / masked_filename
+        cv2.imwrite(str(out_bg), masked_bg)
+        # Keep original image intact so the diagram elements are preserved
+        bg_url = image_rel_url
+
+        rgba = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2BGRA)
+        rgba[:, :, 3] = mask
+        pad = 2
+        bx, by, br = int(source_bob_x), int(source_bob_y), int(source_bob_r)
+        x1, x2 = max(0, bx - br - pad), min(w, bx + br + pad + 1)
+        y1, y2 = max(0, by - br - pad), min(h, by + br + pad + 1)
+        sprite = rgba[y1:y2, x1:x2]
+
+        sprite_filename = f"bob_{uuid.uuid4().hex[:8]}.png"
+        out_sprite = FRONTEND_SPRITES / sprite_filename
+        cv2.imwrite(str(out_sprite), sprite)
+        sprite_url = f"/sprites/{sprite_filename}"
+    except Exception as e:
+        print(f"[Backend] Sprite extraction / masking notice: {e}")
+
+    pendulum_system = {
+        "id": "pendulum_system",
+        "role": "dynamic",
+        "type": "pendulum",
+        "pivot": {"x": pivot_pt["x"], "y": pivot_pt["y"]},
+        "bob_position": {"x": bob_pt["x"], "y": bob_pt["y"]},
+        "radius": bob_r,
+        "mass_kg": 1.5,
+        "initial_velocity": {"x": 0.0, "y": 0.0},
+        "friction": 0.001,
+        "friction_air": 0.0005,
+        "restitution": 0.95,
+    }
+
+    if sprite_url:
+        pendulum_system["visual"] = {
+            "sprite_url": sprite_url,
+            "x_scale": mapper.scale,
+            "y_scale": mapper.scale,
+        }
 
     return {
         "schema_version": "1.0-compat",
         "simulation_type": "kinematics",
-        "visual": {"background_url": image_rel_url},
+        "visual": {"background_url": bg_url},
         "environment": {"gravity": gravity},
-        "objects": [
-            {
-                "id": "pendulum_system",
-                "role": "dynamic",
-                "type": "pendulum",
-                "pivot": {"x": pivot_x, "y": pivot_y},
-                "bob_position": {"x": bob_x, "y": bob_y},
-                "radius": bob_r,
-                "mass_kg": 1.5,
-                "initial_velocity": {"x": 2.2, "y": 0.0},
-                "friction": 0.001,
-                "friction_air": 0.0005,
-                "restitution": 0.95,
-            }
-        ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "objects": [pendulum_system],
+        "render": mapper.metadata(),
     }
 
 
 def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
+    h, w = img_bgr.shape[:2]
+    mapper = CanvasMapper(w, h, 800, 600)
+    ramp_pos = mapper.point(w * 0.48, h * 0.7)
+    block_pos = mapper.point(w * 0.25, h * 0.47)
+    ground_pos = mapper.point(w * 0.5, h * 0.95)
+
     return {
         "schema_version": "1.0-compat",
         "simulation_type": "kinematics",
@@ -658,8 +721,8 @@ def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float 
                 "id": "ramp_collider",
                 "role": "static",
                 "type": "inclined_plane",
-                "initial_position": {"x": 380.0, "y": 420.0},
-                "size": {"width": 520.0, "height": 22.0},
+                "initial_position": ramp_pos,
+                "size": {"width": mapper.length(520.0), "height": mapper.length(22.0)},
                 "angle": -25.0,
                 "friction": 0.08,
                 "restitution": 0.1,
@@ -668,8 +731,8 @@ def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float 
                 "id": "sliding_block",
                 "role": "dynamic",
                 "type": "block",
-                "initial_position": {"x": 200.0, "y": 280.0},
-                "size": {"width": 44.0, "height": 44.0},
+                "initial_position": block_pos,
+                "size": {"width": mapper.length(44.0), "height": mapper.length(44.0)},
                 "mass_kg": 2.0,
                 "friction": 0.06,
                 "restitution": 0.1,
@@ -678,41 +741,21 @@ def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float 
                 "id": "ground_floor",
                 "role": "static",
                 "type": "ground",
-                "initial_position": {"x": 400.0, "y": 570.0},
-                "size": {"width": 800.0, "height": 40.0},
+                "initial_position": ground_pos,
+                "size": {"width": mapper.length(800.0), "height": mapper.length(40.0)},
                 "friction": 0.1,
             },
         ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "render": mapper.metadata(),
     }
 
 
 def build_projectile_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
     h, w = img_bgr.shape[:2]
-    canvas_w, canvas_h = 800.0, 600.0
-    scale_x = canvas_w / float(w)
-    scale_y = canvas_h / float(h)
+    mapper = CanvasMapper(w, h, 800, 600)
 
-    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
-    circles = cv2.HoughCircles(
-        blurred, cv2.HOUGH_GRADIENT, 1.2, 40,
-        param1=50, param2=35, minRadius=14, maxRadius=int(min(h, w) * 0.25)
-    )
-
-    ball_x = 120.0
-    ball_y = 440.0
-    ball_r = 22.0
-
-    if circles is not None:
-        c = circles[0][0]
-        ball_x = float(c[0] * scale_x)
-        ball_y = float(c[1] * scale_y)
-        ball_r = float(max(16.0, min(32.0, c[2] * scale_x)))
+    ball_pos = mapper.point(w * 0.15, h * 0.73)
+    ground_pos = mapper.point(w * 0.5, h * 0.94)
 
     return {
         "schema_version": "1.0-compat",
@@ -724,8 +767,8 @@ def build_projectile_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: flo
                 "id": "projectile_ball",
                 "role": "dynamic",
                 "type": "circle",
-                "initial_position": {"x": ball_x, "y": ball_y},
-                "radius": ball_r,
+                "initial_position": ball_pos,
+                "radius": mapper.length(22.0),
                 "mass_kg": 1.2,
                 "initial_velocity": {"x": 7.5, "y": -8.5},
                 "friction": 0.05,
@@ -735,21 +778,24 @@ def build_projectile_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: flo
                 "id": "ground_floor",
                 "role": "static",
                 "type": "ground",
-                "initial_position": {"x": 400.0, "y": 565.0},
-                "size": {"width": 800.0, "height": 40.0},
+                "initial_position": ground_pos,
+                "size": {"width": mapper.length(800.0), "height": mapper.length(40.0)},
                 "friction": 0.12,
                 "restitution": 0.5,
             },
         ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "render": mapper.metadata(),
     }
 
 
 def build_spring_mass_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
+    h, w = img_bgr.shape[:2]
+    mapper = CanvasMapper(w, h, 800, 600)
+    ball_pos = mapper.point(w * 0.2, h * 0.7)
+    ground_pos = mapper.point(w * 0.5, h * 0.77)
+    free_pt = mapper.point(w * 0.7, h * 0.7)
+    anchor_pt = mapper.point(w * 0.9, h * 0.7)
+
     return {
         "schema_version": "1.0-compat",
         "simulation_type": "kinematics",
@@ -759,9 +805,9 @@ def build_spring_mass_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: fl
             {
                 "id": "oscillator_ball",
                 "role": "dynamic",
-                "initial_position": {"x": 160.0, "y": 420.0},
+                "initial_position": ball_pos,
                 "type": "circle",
-                "radius": 24.0,
+                "radius": mapper.length(24.0),
                 "mass_kg": 1.5,
                 "initial_velocity": {"x": 3.0, "y": 0.0},
                 "friction": 0.04,
@@ -771,26 +817,22 @@ def build_spring_mass_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: fl
                 "id": "ground_platform",
                 "role": "static",
                 "type": "ground",
-                "initial_position": {"x": 400.0, "y": 460.0},
-                "size": {"width": 700.0, "height": 30.0},
+                "initial_position": ground_pos,
+                "size": {"width": mapper.length(700.0), "height": mapper.length(30.0)},
                 "friction": 0.08,
             },
             {
                 "id": "spring_damper",
                 "type": "spring",
-                "free_point": {"x": 560.0, "y": 420.0},
-                "anchor_point": {"x": 720.0, "y": 420.0},
-                "plunger_size": {"width": 16.0, "height": 55.0},
+                "free_point": free_pt,
+                "anchor_point": anchor_pt,
+                "plunger_size": {"width": mapper.length(16.0), "height": mapper.length(55.0)},
                 "stiffness": 0.05,
                 "damping": 0.04,
                 "plunger_mass": 0.6,
             },
         ],
-        "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
-            "source_to_canvas_scale": 1.0,
-        },
+        "render": mapper.metadata(),
     }
 
 
@@ -821,7 +863,7 @@ def analyze_diagram(req: AnalyzeRequest):
         if scenario == "interface_refraction":
             scene = build_interface_refraction_scene(img, req.image_url)
         elif scenario == "mirror":
-            scene = build_mirror_scene(img, req.image_url, mirror_type="concave")
+            scene = build_mirror_scene(img, req.image_url, mirror_type="concave", focal_length_cm=req.focal_length_cm or 20.0)
         elif scenario == "prism":
             scene = build_prism_scene(img, req.image_url)
         elif scenario == "concave_lens":

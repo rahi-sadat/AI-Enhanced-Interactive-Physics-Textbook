@@ -42,3 +42,8 @@ desktop.ini
 simulation_frontend/physics simulation/*.json
 simulation_frontend/physics simulation/*.png
 
+# Dynamic Perception Output & Sprites
+simulation_frontend/augmented_physics_v2/public/sprites/bob_*.png
+*_masked.jpg
+masked_*.jpg
+
