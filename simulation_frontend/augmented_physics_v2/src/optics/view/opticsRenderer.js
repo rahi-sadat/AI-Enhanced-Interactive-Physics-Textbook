@@ -228,7 +228,7 @@ export class OpticsRenderer {
   /**
    * Draws a spherical or plane mirror.
    */
-  drawMirror(mx, ay, radius = 280, height = 240, type = 'concave') {
+  drawMirror(mx, ay, radius = 280, height = 240, type = 'concave', facing = 'left') {
     const p = this.p;
     const ctx = p.drawingContext;
     p.push();
@@ -241,13 +241,16 @@ export class OpticsRenderer {
     if (type === 'plane') {
       p.line(mx, ay - height / 2, mx, ay + height / 2);
     } else {
-      // Curved arc for concave or convex
       const isConcave = type === 'concave';
-      const cx = isConcave ? mx - radius : mx + radius;
-      const angleSpan = Math.asin((height / 2) / radius);
-      const start = isConcave ? -angleSpan : Math.PI - angleSpan;
-      const end = isConcave ? angleSpan : Math.PI + angleSpan;
-      p.arc(cx, ay, radius * 2, radius * 2, start, end);
+      const isFacingRight = facing === 'right';
+      // For realistic optics diagram display, visual arc radius ensures paraxial curvature
+      const r = Math.max(radius, height * 1.15);
+      const cx = (isConcave !== isFacingRight) ? (mx - r) : (mx + r);
+      const angleSpan = Math.asin(Math.min(0.42, (height / 2) / r));
+      const poleAngle = cx < mx ? 0 : Math.PI;
+      const start = poleAngle - angleSpan;
+      const end = poleAngle + angleSpan;
+      p.arc(cx, ay, r * 2, r * 2, start, end);
     }
 
     ctx.shadowBlur = 0;

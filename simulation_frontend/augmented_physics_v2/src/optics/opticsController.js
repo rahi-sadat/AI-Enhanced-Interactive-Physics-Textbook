@@ -14,9 +14,8 @@ export class OpticsController {
     this.overlayStage = overlayStage;
     this.scene = scene;
     this._useCandleSprite = false;
-    this.currentConcept = 'thin_lens';
-
     this.model = adaptOpticsScene(scene);
+    this.currentConcept = this.model.subtype || scene.simulation?.subtype || 'thin_lens';
     this._applyBackground();
 
     this.overlayStage.clearOverlay();
@@ -77,16 +76,17 @@ export class OpticsController {
       this.model.mirror.model = type;
       const f = Math.abs(this.model.mirror.focalLength || 130);
       const mx = this.model.mirror.x;
+      const dir = this.model.mirror.facing === 'right' ? 1 : -1;
       if (type === 'convex') {
         this.model.focalPoints = [
           { label: 'P', x: mx },
-          { label: 'F', x: mx + f },
-          { label: 'C', x: mx + 2 * f }
+          { label: 'F', x: mx - dir * f },
+          { label: 'C', x: mx - dir * 2 * f }
         ];
       } else if (type === 'concave') {
         this.model.focalPoints = [
-          { label: 'C', x: mx - 2 * f },
-          { label: 'F', x: mx - f },
+          { label: 'C', x: mx + dir * 2 * f },
+          { label: 'F', x: mx + dir * f },
           { label: 'P', x: mx }
         ];
       } else { // plane
@@ -125,18 +125,16 @@ export class OpticsController {
 
     const url = conceptUrls[concept] || conceptUrls.thin_lens;
     try {
-      const res = await fetch(url + '?t=' + Date.now());
-      const sceneData = await res.json();
-      this.scene = sceneData;
-      this.model = adaptOpticsScene(sceneData);
-      if (this._useCandleSprite && this.model.object) {
-        this.model.object.spriteUrl = '/scenes/optics/sprites/candle.png';
-      }
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.statusText}`);
+      const sc = await resp.json();
+      this.scene = sc;
+      this.model = adaptOpticsScene(sc);
       this._applyBackground();
       this._syncControlsUI();
       this._update();
-    } catch (err) {
-      console.error('[OpticsController] Failed to load concept:', concept, err);
+    } catch (e) {
+      console.error('[OpticsController] Error loading preset scene:', e);
     }
   }
 
@@ -145,8 +143,7 @@ export class OpticsController {
   }
 
   _applyBackground() {
-    const bgUrl = this.scene?.visual?.background_url ?? this.scene?.source?.image ?? null;
-    this.overlayStage.setBackground(bgUrl);
+    this.overlayStage.setBackground(this.scene?.visual?.background_url ?? null);
   }
 
   _update() {
@@ -155,8 +152,8 @@ export class OpticsController {
     if (sub === 'prism') {
       const { prism, lightSource } = this.model;
       const rayDir = {
-        x: lightSource.targetX - lightSource.x,
-        y: lightSource.targetY - lightSource.y,
+        x: (lightSource.targetX ?? 340) - lightSource.x,
+        y: (lightSource.targetY ?? 280) - lightSource.y,
       };
       const result = solvePrismRefraction({
         prismVertices: prism.vertices,
@@ -178,6 +175,7 @@ export class OpticsController {
         objectX: object.x,
         objectHeight: object.height,
         focalLength: mirror.focalLength,
+        facing: mirror.facing || 'left',
       });
       this.view.render(this.model, result);
       this.hud.update('mirror', result, mirror.focalLength, this.model.pixelPerCm);

@@ -10,6 +10,7 @@
     "test": "node test/test_optics_engines.js"
   },
   "devDependencies": {
+    "puppeteer-core": "^25.10.0",
     "vite": "^8.3.0"
   },
   "dependencies": {

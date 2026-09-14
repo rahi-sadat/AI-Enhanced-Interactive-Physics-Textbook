@@ -10,28 +10,31 @@ export function solveMirror({
   axisY,
   objectX,
   objectHeight,
-  focalLength
+  focalLength,
+  facing = 'left' // 'left' | 'right'
 }) {
   const isPlane = mirrorType === 'plane';
   const isConvex = mirrorType === 'convex';
+  const dir = facing === 'right' ? 1 : -1;
 
-  // Object distance u (positive to the left of mirror)
-  const u = mirrorX - objectX;
+  // Object distance u (positive on the reflective side of mirror)
+  const u = dir * (objectX - mirrorX);
 
   if (isPlane) {
     const v = -u; // behind mirror
     const m = 1.0;
     return {
       mirrorType,
+      facing,
       u,
       v,
       magnification: m,
-      imageX: mirrorX - v,
+      imageX: mirrorX + dir * v,
       imageHeight: objectHeight,
       imageType: 'virtual_same_size',
       isReal: false,
       isInverted: false,
-      rays: _planeMirrorRays(mirrorX, axisY, objectX, objectHeight, u)
+      rays: _planeMirrorRays(mirrorX, axisY, objectX, objectHeight, u, dir)
     };
   }
 
@@ -41,6 +44,7 @@ export function solveMirror({
   if (Math.abs(u - f) < EPS) {
     return {
       mirrorType,
+      facing,
       u,
       v: Infinity,
       magnification: Infinity,
@@ -57,7 +61,8 @@ export function solveMirror({
   const v = (f * u) / (u - f);
   const m = -(v / u);
   const isReal = v > 0;
-  const ix = mirrorX - v; // In front of mirror if v > 0 (left), behind if v < 0 (right)
+  // In front of mirror if v > 0, behind if v < 0
+  const ix = mirrorX + dir * v;
   const ih = objectHeight * m;
 
   let imageType = isReal ? 'real' : 'virtual';
@@ -67,6 +72,7 @@ export function solveMirror({
 
   return {
     mirrorType,
+    facing,
     u,
     v,
     magnification: m,
@@ -75,21 +81,22 @@ export function solveMirror({
     imageType,
     isReal,
     isInverted: m < 0,
-    rays: _sphericalMirrorRays(mirrorX, axisY, objectX, objectHeight, f, ix, ih, v, isConvex)
+    rays: _sphericalMirrorRays(mirrorX, axisY, objectX, objectHeight, f, ix, ih, v, isConvex, dir)
   };
 }
 
-function _planeMirrorRays(mx, ay, ox, oh, u) {
+function _planeMirrorRays(mx, ay, ox, oh, u, dir = -1) {
   const tip = { x: ox, y: ay + oh };
-  const ix = mx + u; // virtual image behind mirror
+  const ix = mx - dir * u; // virtual image behind mirror
   const ih = oh;
+  const farX = dir === 1 ? 800 : 0;
 
   return [
     // Ray 1: Normal incident (horizontal)
     {
       id: 'mr1',
       dashed: false,
-      points: [tip, { x: mx, y: ay + oh }, { x: 0, y: ay + oh }]
+      points: [tip, { x: mx, y: ay + oh }, { x: farX, y: ay + oh }]
     },
     {
       id: 'mr1v',
@@ -100,7 +107,7 @@ function _planeMirrorRays(mx, ay, ox, oh, u) {
     {
       id: 'mr2',
       dashed: false,
-      points: [tip, { x: mx, y: ay }, { x: 0, y: ay - oh }]
+      points: [tip, { x: mx, y: ay }, { x: farX, y: ay - oh }]
     },
     {
       id: 'mr2v',
@@ -110,18 +117,19 @@ function _planeMirrorRays(mx, ay, ox, oh, u) {
   ];
 }
 
-function _sphericalMirrorRays(mx, ay, ox, oh, f, ix, ih, v, isConvex) {
+function _sphericalMirrorRays(mx, ay, ox, oh, f, ix, ih, v, isConvex, dir = -1) {
   const tip = { x: ox, y: ay + oh };
   const rays = [];
-  const focusX = mx - f;
+  const focusX = mx + dir * f;
+  const farX = dir === 1 ? 800 : 0;
 
   // Ray 1: Parallel to principal axis -> reflects through Focus
-  const slopeF = isConvex ? (ay - (ay + oh)) / (focusX - mx) : (ay - (ay + oh)) / (focusX - mx);
+  const slopeF = (ay - (ay + oh)) / (focusX - mx);
 
   rays.push({
     id: 'smr1',
     dashed: false,
-    points: [tip, { x: mx, y: ay + oh }, { x: 0, y: (ay + oh) - slopeF * mx }]
+    points: [tip, { x: mx, y: ay + oh }, { x: farX, y: (ay + oh) + slopeF * (farX - mx) }]
   });
 
   if (v < 0) {
@@ -138,7 +146,7 @@ function _sphericalMirrorRays(mx, ay, ox, oh, f, ix, ih, v, isConvex) {
   rays.push({
     id: 'smr2',
     dashed: false,
-    points: [tip, { x: mx, y: ay }, { x: 0, y: ay - slopePole * mx }]
+    points: [tip, { x: mx, y: ay }, { x: farX, y: ay + slopePole * (farX - mx) }]
   });
 
   if (v < 0) {

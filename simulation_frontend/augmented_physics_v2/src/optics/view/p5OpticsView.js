@@ -145,11 +145,16 @@ export class P5OpticsView {
 
         const obj = this._model.object;
         if (!obj) return;
-        const maxX = (sub === 'mirror' ? this._model.mirror.x : this._model.lens.x) - 10;
+        let minX = 20;
+        let maxX = (sub === 'mirror' ? this._model.mirror.x : this._model.lens.x) - 10;
+        if (sub === 'mirror' && this._model.mirror.facing === 'right') {
+          minX = this._model.mirror.x + 10;
+          maxX = CW - 20;
+        }
 
         if (this._dragTarget === 'object_tip') {
           // Adjust height vertically and position horizontally
-          const newX = p.constrain(p.mouseX, 20, maxX);
+          const newX = p.constrain(p.mouseX, minX, maxX);
           const rawHeight = p.mouseY - this._model.axisY;
           // Constrain height between -160 (tall upright) and -30 (short)
           const newH = p.constrain(rawHeight, -160, -30);
@@ -157,7 +162,7 @@ export class P5OpticsView {
           else this.onDragLens(newX, newH);
         } else if (this._dragTarget === 'object_pos') {
           // Adjust position horizontally
-          const newX = p.constrain(p.mouseX, 20, maxX);
+          const newX = p.constrain(p.mouseX, minX, maxX);
           if (sub === 'mirror') this.onDragMirror(newX, obj.height);
           else this.onDragLens(newX, obj.height);
         }
@@ -339,7 +344,9 @@ export class P5OpticsView {
       ren.drawFocalPoint(fp.x, m.axisY, fp.label);
     });
 
-    ren.drawMirror(m.mirror.x, m.axisY, 280, 240, m.mirror.model);
+    const radius = m.mirror.radiusOfCurvature || Math.abs(m.mirror.focalLength || 140) * 2 || 280;
+    const aperH = m.mirror.apertureHeight || 240;
+    ren.drawMirror(m.mirror.x, m.axisY, radius, aperH, m.mirror.model, m.mirror.facing || 'left');
 
     // Draw mirror principal rays
     (r.rays || []).forEach((ray, i) => {

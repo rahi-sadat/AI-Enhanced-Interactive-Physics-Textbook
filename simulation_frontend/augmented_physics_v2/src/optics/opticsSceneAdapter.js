@@ -79,8 +79,12 @@ export function adaptOpticsScene(scene) {
     const mirrorX = unwrapVal(mirrorEl?.optics?.pole?.x ?? mirrorEl?.geometry?.optical_center?.x ?? mirrorEl?.geometry?.render?.centroid?.x, 600);
     const axisY = unwrapVal(mirrorEl?.optics?.pole?.y ?? mirrorEl?.geometry?.optical_center?.y ?? mirrorEl?.geometry?.render?.centroid?.y, 300);
     const fPx = unwrapVal(mirrorEl?.optics?.focal_length_px, 140);
+    const aperH = unwrapVal(mirrorEl?.optics?.aperture_height_px ?? mirrorEl?.geometry?.aperture_height_px, 240);
+    const radiusOfCurv = unwrapVal(mirrorEl?.optics?.radius_of_curvature_px, Math.abs(fPx) * 2);
     const model = mirrorEl?.optics?.concavity ?? mirrorEl?.optics?.model ?? 'concave';
-    const objX = unwrapVal(objEl?.optics?.base?.x ?? objEl?.geometry?.position?.x ?? objEl?.geometry?.render?.centroid?.x, 260);
+    const facing = mirrorEl?.optics?.facing ?? (mirrorX < 400 ? 'right' : 'left');
+    const defaultObjX = facing === 'right' ? (mirrorX + Math.abs(fPx) * 2.2) : (mirrorX - Math.abs(fPx) * 2.2);
+    const objX = unwrapVal(objEl?.optics?.base?.x ?? objEl?.geometry?.position?.x ?? objEl?.geometry?.render?.centroid?.x, defaultObjX);
     const objH = unwrapVal(
       objEl?.optics?.tip && objEl?.optics?.base ? (objEl.optics.tip.y - objEl.optics.base.y) :
       (objEl?.geometry?.height_px ?? (objEl?.optics?.height_px ? -objEl.optics.height_px : -85)),
@@ -90,10 +94,17 @@ export function adaptOpticsScene(scene) {
 
     return {
       subtype: 'mirror',
-      mirror: { x: mirrorX, focalLength: fPx, model },
+      mirror: {
+        x: mirrorX,
+        focalLength: fPx,
+        apertureHeight: aperH,
+        radiusOfCurvature: radiusOfCurv,
+        model,
+        facing
+      },
       object: { x: objX, height: objH, spriteUrl },
       axisY,
-      focalPoints: _buildMirrorFP(ann, mirrorX, fPx),
+      focalPoints: _buildMirrorFP(ann, mirrorX, fPx, facing),
       pixelPerCm,
     };
   }
@@ -139,12 +150,13 @@ function _buildFP(ann, lx, f) {
   ];
 }
 
-function _buildMirrorFP(ann, mx, f) {
+function _buildMirrorFP(ann, mx, f, facing = 'left') {
   const fromAnn = ann.map(a => ({ label: a.label, x: a.position.x }));
   if (fromAnn.length > 0) return fromAnn;
+  const dir = facing === 'right' ? 1 : -1;
   return [
-    { label: 'C', x: mx - 2*f },
-    { label: 'F', x: mx - f },
+    { label: 'C', x: mx + dir * 2 * f },
+    { label: 'F', x: mx + dir * f },
     { label: 'P', x: mx },
   ];
 }

@@ -218,6 +218,22 @@ console.log('\n[4/4] Testing Spherical & Plane Mirror Engine');
   assert(resPlane.isReal === false, 'Plane mirror: image is virtual');
   assertClose(resPlane.v, -150, 0.01, 'Plane mirror: v = -u = -150');
   assertClose(resPlane.magnification, 1.0, 0.01, 'Plane mirror: m = 1.0');
+
+  // Right-facing concave mirror (Figure 8.23 geometry: pole at 133, object at 400 => u = 267)
+  const resRightFacing = solveMirror({
+    mirrorType: 'concave',
+    mirrorX: 133,
+    axisY: 300,
+    objectX: 383, // u = 250 to the right
+    objectHeight: -60,
+    focalLength: 100,
+    facing: 'right'
+  });
+  assert(resRightFacing.isReal === true, 'Right-facing concave mirror (u > 2f): image is real');
+  assertClose(resRightFacing.u, 250, 0.1, 'Right-facing concave mirror u = 250');
+  assertClose(resRightFacing.v, 166.67, 0.5, 'Right-facing concave mirror: v = 166.7');
+  assertClose(resRightFacing.imageX, 133 + 166.67, 0.5, 'Right-facing imageX is to the right of pole');
+  assert(resRightFacing.isInverted === true, 'Right-facing concave mirror: image is inverted');
 }
 
 // ----------------------------------------------------
