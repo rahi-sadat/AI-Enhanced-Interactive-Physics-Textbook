@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="0.8"/>
+    </pattern>
+    <filter id="paper-shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background Paper -->
+  <rect width="800" height="500" fill="#faf9f5"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+
+  <!-- Textbook Header Annotation -->
+  <rect x="30" y="24" width="740" height="42" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="45" y="46" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="700" fill="#334155">
+    NCTB Physics — Class IX-X: Chapter 11 (Current Electricity)
+  </text>
+  <text x="45" y="58" font-family="'Inter', system-ui, sans-serif" font-size="10.5" font-weight="500" fill="#64748b">
+    চিত্র ১১.০৪: অনুক্রমিক বর্তনী (Series Circuit with DC Voltage Source, Switch &amp; Resistors)
+  </text>
+  <text x="750" y="48" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="600" fill="#475569">
+    Fig 11.4 [Source: 800 × 500 px]
+  </text>
+
+  <!-- Circuit Outline / Wires -->
+  <g stroke="#1e293b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Wire from Battery (+) up to corner (140, 120), then over to switch at (200, 120) -->
+    <polyline points="140,230 140,120 200,120"/>
+
+    <!-- Switch S1 gap between 200,120 and 260,120 -->
+    <!-- Closed switch lever representation -->
+    <line x1="202" y1="120" x2="256" y2="120" stroke="#0284c7" stroke-width="2.8"/>
+
+    <!-- Wire from switch (260, 120) to R1 (340, 120) -->
+    <line x1="260" y1="120" x2="340" y2="120"/>
+
+    <!-- Resistor R1 zigzag from (340, 120) to (460, 120) -->
+    <polyline points="340,120 348,120 356,106 372,134 388,106 404,134 420,106 436,134 444,120 460,120"/>
+
+    <!-- Wire from R1 (460, 120) to corner (660, 120) and down to R2 (660, 210) -->
+    <polyline points="460,120 660,120 660,210"/>
+
+    <!-- Resistor R2 vertical zigzag from (660, 210) to (660, 290) -->
+    <polyline points="660,210 660,218 646,226 674,242 646,258 674,274 660,282 660,290"/>
+
+    <!-- Return Wire from R2 (660, 290) to corner (660, 380), across to (140, 380), and up to Battery (-) at (140, 270) -->
+    <polyline points="660,290 660,380 140,380 140,270"/>
+
+    <!-- Battery Symbol between y=230 and y=270 on x=140 -->
+    <!-- Positive terminal plate (longer, thinner) at y=230 -->
+    <line x1="116" y1="230" x2="164" y2="230" stroke="#0f172a" stroke-width="3"/>
+    <!-- Negative terminal plate (shorter, thicker) at y=270 -->
+    <line x1="126" y1="270" x2="154" y2="270" stroke="#0f172a" stroke-width="5.5"/>
+  </g>
+
+  <!-- Switch Terminals Dots -->
+  <circle cx="200" cy="120" r="4.5" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+  <circle cx="260" cy="120" r="4.5" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+
+  <!-- Battery Polarity & Labels -->
+  <g font-family="'Inter', system-ui, sans-serif">
+    <!-- Battery V1 -->
+    <text x="100" y="235" font-size="18" font-weight="700" fill="#dc2626" text-anchor="end">+</text>
+    <text x="100" y="275" font-size="20" font-weight="700" fill="#475569" text-anchor="end">−</text>
+    <text x="75" y="254" font-size="14" font-weight="700" fill="#0f172a" text-anchor="end">12 V</text>
+    <text x="75" y="268" font-size="10" font-weight="600" fill="#64748b" text-anchor="end">Battery (V₁)</text>
+
+    <!-- Switch S1 Label -->
+    <text x="230" y="98" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="middle">Key (S₁)</text>
+    <text x="230" y="146" font-size="10.5" font-weight="600" fill="#0284c7" text-anchor="middle">[Closed]</text>
+
+    <!-- Resistor R1 Label -->
+    <rect x="360" y="72" width="80" height="24" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="400" y="88" font-size="13" font-weight="700" fill="#0f172a" text-anchor="middle">R₁ = 10 Ω</text>
+
+    <!-- Resistor R2 Label -->
+    <rect x="682" y="238" width="80" height="24" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="722" y="254" font-size="13" font-weight="700" fill="#0f172a" text-anchor="middle">R₂ = 20 Ω</text>
+
+    <!-- Node Annotations (Textbook reference) -->
+    <text x="160" y="112" font-size="11" font-weight="600" fill="#64748b">N₁</text>
+    <text x="480" y="112" font-size="11" font-weight="600" fill="#64748b">N₂</text>
+    <text x="400" y="405" font-size="11" font-weight="600" fill="#64748b">N₀ (Reference Ground)</text>
+
+    <!-- Educational Textbook Question Callout -->
+    <rect x="180" y="435" width="440" height="42" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="400" y="454" font-size="11.5" font-weight="600" fill="#334155" text-anchor="middle">
+      প্রশ্ন: বর্তনীতে চাবি S₁ বন্ধ থাকলে মোট প্রবাহ I এবং R₁ ও R₂ এর বিভব পার্থক্য কত?
+    </text>
+    <text x="400" y="468" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">
+      (Find total current I and potential drops across R₁ and R₂ when key S₁ is closed)
+    </text>
+  </g>
+</svg>

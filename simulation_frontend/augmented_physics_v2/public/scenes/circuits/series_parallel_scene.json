@@ -1,0 +1,158 @@
+{
+  "schema_version": "3.0",
+  "simulation": {
+    "domain": "circuits",
+    "subtype": "dc_linear",
+    "engine": "mna"
+  },
+  "visual": {
+    "background_url": "/scenes/circuits/textbook_circuit_diagram.svg"
+  },
+  "source": {
+    "image": "/scenes/circuits/textbook_circuit_diagram.svg",
+    "image_width_px": 800,
+    "image_height_px": 500
+  },
+  "circuit": {
+    "reference_node": "N0",
+    "nodes": [
+      { "id": "N0", "reference": true, "label": "N₀ (0 V Reference)" },
+      { "id": "N1", "reference": false, "label": "N₁ (Battery Rail)" },
+      { "id": "N1b", "reference": false, "label": "N₁_sw (Post-Switch Rail)" },
+      { "id": "N2", "reference": false, "label": "N₂ (Midpoint Rail)" }
+    ],
+    "components": [
+      {
+        "id": "V1",
+        "type": "voltage_source",
+        "label": "Battery (V₁)",
+        "value": 12.0,
+        "unit": "V",
+        "nodes": ["N1", "N0"],
+        "terminals": [
+          { "id": "V1.p", "node": "N1", "polarity": "+", "source_px": [140.0, 230.0] },
+          { "id": "V1.n", "node": "N0", "polarity": "-", "source_px": [140.0, 270.0] }
+        ],
+        "geometry": {
+          "bbox_source_px": [110.0, 220.0, 170.0, 280.0],
+          "center_source_px": [140.0, 250.0]
+        },
+        "provenance": {
+          "text": "12 V",
+          "value": 12.0,
+          "source": "textbook_ocr",
+          "confidence": 0.995
+        }
+      },
+      {
+        "id": "S1",
+        "type": "switch",
+        "label": "Key (S₁)",
+        "state": "closed",
+        "nodes": ["N1", "N1b"],
+        "terminals": [
+          { "id": "S1.a", "node": "N1", "source_px": [200.0, 120.0] },
+          { "id": "S1.b", "node": "N1b", "source_px": [260.0, 120.0] }
+        ],
+        "geometry": {
+          "bbox_source_px": [195.0, 100.0, 265.0, 140.0],
+          "center_source_px": [230.0, 120.0]
+        },
+        "provenance": {
+          "text": "Key S1 [Closed]",
+          "source": "textbook_diagram",
+          "confidence": 0.988
+        }
+      },
+      {
+        "id": "R1",
+        "type": "resistor",
+        "label": "Resistor R₁",
+        "value": 10.0,
+        "unit": "ohm",
+        "nodes": ["N1b", "N2"],
+        "terminals": [
+          { "id": "R1.a", "node": "N1b", "source_px": [340.0, 120.0] },
+          { "id": "R1.b", "node": "N2", "source_px": [460.0, 120.0] }
+        ],
+        "geometry": {
+          "bbox_source_px": [335.0, 95.0, 465.0, 145.0],
+          "center_source_px": [400.0, 120.0]
+        },
+        "provenance": {
+          "text": "R1 = 10 Ω",
+          "value": 10.0,
+          "source": "textbook_ocr",
+          "confidence": 0.985
+        }
+      },
+      {
+        "id": "R2",
+        "type": "resistor",
+        "label": "Resistor R₂",
+        "value": 20.0,
+        "unit": "ohm",
+        "nodes": ["N2", "N0"],
+        "terminals": [
+          { "id": "R2.a", "node": "N2", "source_px": [660.0, 210.0] },
+          { "id": "R2.b", "node": "N0", "source_px": [660.0, 290.0] }
+        ],
+        "geometry": {
+          "bbox_source_px": [635.0, 205.0, 685.0, 295.0],
+          "center_source_px": [660.0, 250.0]
+        },
+        "provenance": {
+          "text": "R2 = 20 Ω",
+          "value": 20.0,
+          "source": "textbook_ocr",
+          "confidence": 0.982
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1",
+        "node": "N1",
+        "polyline_source_px": [
+          [140.0, 230.0],
+          [140.0, 120.0],
+          [200.0, 120.0]
+        ]
+      },
+      {
+        "id": "wire_2",
+        "node": "N1b",
+        "polyline_source_px": [
+          [260.0, 120.0],
+          [340.0, 120.0]
+        ]
+      },
+      {
+        "id": "wire_3",
+        "node": "N2",
+        "polyline_source_px": [
+          [460.0, 120.0],
+          [660.0, 120.0],
+          [660.0, 210.0]
+        ]
+      },
+      {
+        "id": "wire_4",
+        "node": "N0",
+        "polyline_source_px": [
+          [660.0, 290.0],
+          [660.0, 380.0],
+          [140.0, 380.0],
+          [140.0, 270.0]
+        ]
+      }
+    ]
+  },
+  "confidence": {
+    "components": 0.992,
+    "terminals": 0.985,
+    "wires": 0.978,
+    "topology": 0.99,
+    "parameters": 0.983
+  }
+}

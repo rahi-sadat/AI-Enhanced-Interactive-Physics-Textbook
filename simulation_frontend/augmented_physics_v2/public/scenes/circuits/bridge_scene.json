@@ -1,0 +1,109 @@
+{
+  "schema_version": "3.0",
+  "simulation": {
+    "domain": "circuits",
+    "subtype": "wheatstone_bridge",
+    "engine": "mna"
+  },
+  "visual": {
+    "background_url": "/scenes/circuits/textbook_circuit_diagram.svg"
+  },
+  "source": {
+    "image": "/scenes/circuits/textbook_circuit_diagram.svg",
+    "image_width_px": 800,
+    "image_height_px": 500
+  },
+  "circuit": {
+    "reference_node": "B",
+    "nodes": [
+      { "id": "B", "reference": true, "label": "Node B (0 V Ref)" },
+      { "id": "A", "reference": false, "label": "Node A (+10 V)" },
+      { "id": "C", "reference": false, "label": "Node C" },
+      { "id": "D", "reference": false, "label": "Node D" }
+    ],
+    "components": [
+      {
+        "id": "V1",
+        "type": "voltage_source",
+        "label": "Battery (V₁)",
+        "value": 10.0,
+        "unit": "V",
+        "nodes": ["A", "B"],
+        "terminals": [
+          { "id": "V1.p", "node": "A", "polarity": "+", "source_px": [140.0, 230.0] },
+          { "id": "V1.n", "node": "B", "polarity": "-", "source_px": [140.0, 270.0] }
+        ],
+        "geometry": { "bbox_source_px": [110.0, 220.0, 170.0, 280.0], "center_source_px": [140.0, 250.0] }
+      },
+      {
+        "id": "R1",
+        "type": "resistor",
+        "label": "Resistor R₁",
+        "value": 100.0,
+        "unit": "ohm",
+        "nodes": ["A", "C"],
+        "terminals": [
+          { "id": "R1.a", "node": "A", "source_px": [340.0, 120.0] },
+          { "id": "R1.b", "node": "C", "source_px": [460.0, 120.0] }
+        ],
+        "geometry": { "bbox_source_px": [335.0, 95.0, 465.0, 145.0], "center_source_px": [400.0, 120.0] }
+      },
+      {
+        "id": "R2",
+        "type": "resistor",
+        "label": "Resistor R₂",
+        "value": 100.0,
+        "unit": "ohm",
+        "nodes": ["A", "D"],
+        "terminals": [
+          { "id": "R2.a", "node": "A", "source_px": [340.0, 380.0] },
+          { "id": "R2.b", "node": "D", "source_px": [460.0, 380.0] }
+        ],
+        "geometry": { "bbox_source_px": [335.0, 355.0, 465.0, 405.0], "center_source_px": [400.0, 380.0] }
+      },
+      {
+        "id": "R3",
+        "type": "resistor",
+        "label": "Resistor R₃",
+        "value": 100.0,
+        "unit": "ohm",
+        "nodes": ["C", "B"],
+        "terminals": [
+          { "id": "R3.a", "node": "C", "source_px": [540.0, 120.0] },
+          { "id": "R3.b", "node": "B", "source_px": [660.0, 120.0] }
+        ],
+        "geometry": { "bbox_source_px": [535.0, 95.0, 665.0, 145.0], "center_source_px": [600.0, 120.0] }
+      },
+      {
+        "id": "R4",
+        "type": "resistor",
+        "label": "Resistor R₄",
+        "value": 100.0,
+        "unit": "ohm",
+        "nodes": ["D", "B"],
+        "terminals": [
+          { "id": "R4.a", "node": "D", "source_px": [540.0, 380.0] },
+          { "id": "R4.b", "node": "B", "source_px": [660.0, 380.0] }
+        ],
+        "geometry": { "bbox_source_px": [535.0, 355.0, 665.0, 405.0], "center_source_px": [600.0, 380.0] }
+      },
+      {
+        "id": "R5",
+        "type": "resistor",
+        "label": "Galvanometer (R₅)",
+        "value": 50.0,
+        "unit": "ohm",
+        "nodes": ["C", "D"],
+        "terminals": [
+          { "id": "R5.a", "node": "C", "source_px": [500.0, 160.0] },
+          { "id": "R5.b", "node": "D", "source_px": [500.0, 340.0] }
+        ],
+        "geometry": { "bbox_source_px": [475.0, 180.0, 525.0, 320.0], "center_source_px": [500.0, 250.0] }
+      }
+    ],
+    "wires": [
+      { "id": "w_bridge_top", "node": "A", "polyline_source_px": [[140.0, 230.0], [140.0, 120.0], [340.0, 120.0]] },
+      { "id": "w_bridge_bottom", "node": "B", "polyline_source_px": [[660.0, 120.0], [700.0, 120.0], [700.0, 420.0], [140.0, 420.0], [140.0, 270.0]] }
+    ]
+  }
+}
