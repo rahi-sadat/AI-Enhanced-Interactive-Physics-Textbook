@@ -57,6 +57,7 @@ from optics_text import create_manual_label, classify_focal_points, infer_pixel_
 
 # Kinematics imports
 from scene_builder import SceneBuilder, CanvasMapper, export_matterjs_compat
+from pendulum_geometry import detect_pendulum_geometry
 
 app = FastAPI(title="AugmentedPhysics API", version="2.1")
 
@@ -112,7 +113,11 @@ class AnalyzeRequest(BaseModel):
     domain: Optional[str] = "auto"
     scenario: Optional[str] = "auto"
     focal_length_cm: Optional[float] = 20.0
-    gravity: Optional[float] = 1.0
+    gravity: Optional[float] = 9.81
+    pendulum_length_m: Optional[float] = None
+    pixels_per_meter: Optional[float] = None
+    projectile_speed_m_s: Optional[float] = None
+    projectile_angle_deg: Optional[float] = None
 
 
 @app.get("/api/health")
@@ -588,119 +593,81 @@ def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
     }
 
 
-def build_pendulum_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
+def build_pendulum_scene(
+    img_bgr: np.ndarray,
+    image_rel_url: str,
+    gravity: float = 9.81,
+    length_m: Optional[float] = None,
+) -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
-
-    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (9, 9), 2)
-    circles = cv2.HoughCircles(
-        blurred, cv2.HOUGH_GRADIENT, 1.2, 30,
-        param1=50, param2=30, minRadius=8, maxRadius=int(min(h, w) * 0.35)
+    detection = detect_pendulum_geometry(
+        img_bgr=img_bgr,
+        output_dir=FRONTEND_SPRITES,
+        clean_bg_dir=FRONTEND_UPLOADS,
+        image_rel_url=image_rel_url,
     )
 
-    edges = cv2.Canny(gray, 50, 150)
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=60, maxLineGap=20)
+    length_px = detection["string_length_px"]
+    pixels_per_meter = (length_px / length_m) if (length_m is not None and length_m > 0) else None
 
-    source_bob_x = w * 0.35
-    source_bob_y = h * 0.65
-    source_bob_r = 30.0
-    source_pivot_x = w * 0.5
-    source_pivot_y = h * 0.2
-
-    detected_circles = []
-    if circles is not None:
-        c_arr = np.around(circles[0]).astype(int)
-        for c in c_arr:
-            detected_circles.append((float(c[0]), float(c[1]), float(c[2])))
-
-    has_pivot_circle = False
-    if detected_circles:
-        detected_circles.sort(key=lambda item: item[1], reverse=True)
-        source_bob_x, source_bob_y, source_bob_r = detected_circles[0]
-        higher_circles = [c for c in detected_circles[1:] if c[1] < source_bob_y - 80]
-        if higher_circles:
-            higher_circles.sort(key=lambda item: item[1])
-            source_pivot_x, source_pivot_y, _ = higher_circles[0]
-            has_pivot_circle = True
-
-    if lines is not None and not has_pivot_circle:
-        candidate_lines = []
-        for l in lines:
-            pts = l.reshape(-1)
-            x1, y1, x2, y2 = pts[:4]
-            d1 = np.hypot(x1 - source_bob_x, y1 - source_bob_y)
-            d2 = np.hypot(x2 - source_bob_x, y2 - source_bob_y)
-            if min(d1, d2) < source_bob_r * 2.5:
-                upper_pt = (x1, y1) if y1 < y2 else (x2, y2)
-                candidate_lines.append(upper_pt)
-        if candidate_lines:
-            candidate_lines.sort(key=lambda pt: pt[1])
-            source_pivot_x, source_pivot_y = candidate_lines[0][0], candidate_lines[0][1]
-
-    bob_pt = mapper.point(source_bob_x, source_bob_y)
-    pivot_pt = mapper.point(source_pivot_x, source_pivot_y)
-    bob_r = mapper.length(source_bob_r)
-
-    bg_url = image_rel_url
-    sprite_url = None
-    try:
-        mask = np.zeros((h, w), dtype=np.uint8)
-        cv2.circle(mask, (int(source_bob_x), int(source_bob_y)), int(source_bob_r), 255, -1)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        dilated_mask = cv2.dilate(mask, kernel, iterations=2)
-        masked_bg = cv2.inpaint(img_bgr, dilated_mask, 7, cv2.INPAINT_TELEA)
-
-        clean_name = Path(image_rel_url).stem
-        masked_filename = f"masked_{clean_name}.jpg"
-        out_bg = FRONTEND_UPLOADS / masked_filename
-        cv2.imwrite(str(out_bg), masked_bg)
-        # Keep original image intact so the diagram elements are preserved
-        bg_url = image_rel_url
-
-        rgba = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2BGRA)
-        rgba[:, :, 3] = mask
-        pad = 2
-        bx, by, br = int(source_bob_x), int(source_bob_y), int(source_bob_r)
-        x1, x2 = max(0, bx - br - pad), min(w, bx + br + pad + 1)
-        y1, y2 = max(0, by - br - pad), min(h, by + br + pad + 1)
-        sprite = rgba[y1:y2, x1:x2]
-
-        sprite_filename = f"bob_{uuid.uuid4().hex[:8]}.png"
-        out_sprite = FRONTEND_SPRITES / sprite_filename
-        cv2.imwrite(str(out_sprite), sprite)
-        sprite_url = f"/sprites/{sprite_filename}"
-    except Exception as e:
-        print(f"[Backend] Sprite extraction / masking notice: {e}")
-
-    pendulum_system = {
+    pendulum_obj = {
         "id": "pendulum_system",
         "role": "dynamic",
         "type": "pendulum",
-        "pivot": {"x": pivot_pt["x"], "y": pivot_pt["y"]},
-        "bob_position": {"x": bob_pt["x"], "y": bob_pt["y"]},
-        "radius": bob_r,
-        "mass_kg": 1.5,
-        "initial_velocity": {"x": 0.0, "y": 0.0},
-        "friction": 0.001,
-        "friction_air": 0.0005,
-        "restitution": 0.95,
+        "geometry": {
+            "space": "source_px",
+            "pivot": detection["pivot"],
+            "bob_center": detection["bob_center"],
+            "bob_radius_px": detection["bob_radius_px"],
+            "string_length_px": length_px,
+        },
+        "physics": {
+            "length_m": length_m,
+            "theta0_rad": detection["theta0_rad"],
+            "omega0_rad_s": 0.0,
+            "damping_s_inv": 0.0,
+            "mass_kg": None,
+        },
+        "perception": {
+            "geometry_confidence": detection["confidence"],
+            "bob_source": "subpixel_circle_fit",
+            "pivot_source": "subpixel_string_tls",
+            "human_confirmed": False,
+        },
     }
 
-    if sprite_url:
-        pendulum_system["visual"] = {
-            "sprite_url": sprite_url,
-            "x_scale": mapper.scale,
-            "y_scale": mapper.scale,
+    if detection.get("sprite_url"):
+        pendulum_obj["visual"] = {
+            "sprite_url": detection["sprite_url"],
         }
 
     return {
-        "schema_version": "1.0-compat",
-        "simulation_type": "kinematics",
-        "visual": {"background_url": bg_url},
-        "environment": {"gravity": gravity},
-        "objects": [pendulum_system],
-        "render": mapper.metadata(),
+        "schema_version": "3.0",
+        "simulation": {
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "engine": "analytic_rk4",
+        },
+        "source": {
+            "image_width_px": w,
+            "image_height_px": h,
+        },
+        "coordinate_system": {
+            "geometry_space": "source_px",
+            "fit": "contain",
+        },
+        "visual": {
+            "background_url": detection.get("clean_bg_url") or image_rel_url,
+            "original_image_url": image_rel_url,
+        },
+        "environment": {
+            "gravity_m_s2": float(gravity),
+        },
+        "calibration": {
+            "pixels_per_meter": pixels_per_meter,
+            "status": "calibrated" if pixels_per_meter is not None else "physical_length_unresolved",
+        },
+        "objects": [pendulum_obj],
     }
 
 
@@ -869,7 +836,12 @@ def analyze_diagram(req: AnalyzeRequest):
         elif scenario == "concave_lens":
             scene = build_thin_lens_scene(img, req.image_url, req.focal_length_cm or 20.0, model="concave")
         elif scenario == "pendulum":
-            scene = build_pendulum_scene(img, req.image_url, req.gravity or 1.0)
+            scene = build_pendulum_scene(
+                img,
+                req.image_url,
+                gravity=req.gravity if req.gravity is not None else 9.81,
+                length_m=req.pendulum_length_m,
+            )
         elif scenario == "incline":
             scene = build_incline_scene(img, req.image_url, req.gravity or 1.0)
         elif scenario == "projectile":

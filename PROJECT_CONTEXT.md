@@ -77,18 +77,32 @@ This project transforms static physics textbook pages (specifically NCTB Banglad
 ### ✅ Milestone 4: Embedded Diagram Simulation, Sprites & Complex Kinematics
 - **Transparent RGBA Sprite Extraction**: Implemented `sprite_utils.py`. Dynamic objects are automatically cut out from the source diagram as transparent PNGs (`/sprites/element_001.png`).
 - **Embedded Composite Stage**:
-  - `index.html` + `style.css` now use a 2-layer stage:
+  - 2-layer stage:
     - Layer 1: `<img id="diagram-image">` (original textbook diagram).
     - Layer 2: Transparent Matter.js canvas overlaid with 1:1 pixel coordinate alignment.
 - **Invisible Static Collider Architecture**:
-  - For static scenery (curved ramps, ground, walls), the textbook illustration is already visible underneath. Matter.js sets `render.visible = false` on static colliders so no ugly black/gray shapes block the textbook diagram.
-- **Concave Polygon Decomposition**:
-  - Integrated `poly-decomp` and `Common.setDecomp(decomp)` in Matter.js so curved ramps are automatically decomposed into convex collision pieces, enabling smooth rolling without snagging.
+  - For static scenery (curved ramps, ground, walls), the textbook illustration is visible underneath. Matter.js sets `render.visible = false` on static colliders so no synthetic shapes obscure the diagram.
+- **Concave Polygon Decomposition & Sub-Pixel Alignment**:
+  - Integrated `poly-decomp` and `Common.setDecomp(decomp)` in Matter.js.
+  - Resolved Matter.js `Bodies.fromVertices` decomposed centroid shift: after decomposition, the composite body bounds are aligned to the exact input vertices with sub-pixel precision (`< 1e-14` error), ensuring balls roll exactly on the visible surface without sinking inside the ramp.
 - **Dynamic Spring System**:
-  - Built a 1D restoring spring constraint with movable plunger plate in `physicsBodyFactory.js` and `simulation.js`. When the ball rolls down the curve, it collides with the plunger, compresses the spring, and gets propelled backward.
-- **Entity Registry & Semantic Authoring**:
-  - GUI buttons for `Ball (1)` [dynamic], `Track (2)` [static], `Spring (3)` [static], and `Wall (4)` [static].
-  - One-click `▶ SIMULATE`: Automatically extracts sprites, syncs assets to `public/`, spins up the Vite server, and launches the browser tab.
+  - Built a 1D restoring spring constraint with movable plunger plate in `physicsBodyFactory.js` and `simulation.js`, perfectly aligned with diagram coordinates (`y = 367.29 px`). When the ball rolls down the curve, it collides with the plunger, compresses the spring, and rebounds.
+
+### ✅ Milestone 5: Domain Engine Splitting & Modern Architecture (`augmented_physics_v2`)
+- **Authoritative Source-Pixel Coordinate System**:
+  - Implemented `CoordinateMapper` (`src/core/coordinateMapper.js`) mapping native source diagram pixels directly to viewport CSS and physical device pixels via standard CSS `object-fit: contain` letterboxing with bidirectional inversion.
+- **Dedicated Analytical RK4 Integrator for Simple Pendulums**:
+  - Replaced imprecise spring/constraint approximations with `PendulumSimulation` (`src/mechanics/pendulumSimulation.js`), integrating full nonlinear equations $\ddot{\theta} + \frac{g}{L}\sin\theta + \beta\dot{\theta} = 0$ at 240 Hz with energy drift $< 0.05\%$.
+- **Analytical Projectile Kinematics Engine**:
+  - Built `ProjectileSimulation` (`src/mechanics/projectileSimulation.js`) with exact closed-form trajectories ($x(t)$, $y(t)$, apex, landing velocity) and interactive trace overlay.
+- **Geometric Optics 2D Precision Ray Tracer**:
+  - Built comprehensive ray optics suite (`src/optics/`):
+    - Thin lens formula ($1/f = 1/u + 1/v$) with real/virtual image states and principal rays.
+    - Spherical mirror solver (concave/convex, left/right bidirectional).
+    - Snell's Law refractor with critical angle $\theta_c$ calculation and Total Internal Reflection (TIR).
+    - Prisms & refractive polygon tracing with angle of deviation $\delta$ and dispersion.
+- **Domain-Aware Diagram Routing**:
+  - Updated `diagramAnalyzer.js` and `server.py` to prevent domain cross-talk: kinematics/Newton diagrams consistently route to mechanics solvers without defaulting to optics lenses.
 
 ---
 
@@ -109,15 +123,19 @@ flowchart TD
     J --> L[Scene Builder scene_builder.py]
     K --> L
     L --> M[physics_scene_full.json Canonical v2]
-    L --> N[physics_scene.json Matter.js v1 Compat]
-    N --> O[Embedded Web Stage]
-    O --> P[Layer 1: Diagram Image]
-    O --> Q[Layer 2: Transparent Matter.js + Sprites]
+    L --> N[physics_scene.json Multi-Domain Compat]
+    N --> O[SceneRouter / DiagramAnalyzer]
+    O -->|Mechanics: Rigid/Ramp/Spring| P1[Matter.js + SI Unit Adapter]
+    O -->|Mechanics: Pendulum| P2[Analytical RK4 Solver 240Hz]
+    O -->|Mechanics: Projectile| P3[Closed-Form Kinematics]
+    O -->|Optics: Lens/Mirror/Prism| P4[Optics2D Ray Tracer]
+    P1 & P2 & P3 & P4 --> Q[OverlayStage + CoordinateMapper]
+    Q --> R[Layer 1: Diagram Image | Layer 2: Transparent Precision Canvas]
 ```
 
 ### Perception vs Physics Separation (Critical Rule)
 The canonical `physics_scene_full.json` strictly records **what is visually perceived or confirmed by the author**:
-- Geometry (centroids, vertices, radii, angles)
+- Geometry (centroids, vertices, radii, angles) in source pixels
 - Masks and coordinates
 - Author role (`dynamic`, `static`, `unknown`)
 - Semantic labels and sprite dimensions
@@ -128,23 +146,50 @@ It **never** invents physical facts:
 - `friction`, `restitution`: `null`
 - `gravity`: `null`
 
-Defaults (like `mass_kg = 1.0` or `gravity = 1.0`) are only placed in `physics_scene.json` for engine compatibility, marked with provenance flags.
+Defaults (like `mass_kg = 1.0` or `gravity = 9.81 m/s²`) are translated only at runtime via `MatterUnitAdapter`.
 
 ---
 
-## 5. Teammate Simulation Module: Analysis & Current State
+## 5. Frontend Architecture & Codebase Structure
 
 ```
-simulation_frontend/physics simulation/
-├── package.json               # vite, matter-js, poly-decomp
-├── index.html                 # Embedded stage (diagram image + transparent canvas)
-├── public/                    # physics_scene.json, physics_scene.png, sprites/
-└── src/
-    ├── main.js                # App entrypoint, scene loading, dynamic object selector
-    ├── sceneLoader.js         # Fetches /physics_scene.json with cache-busting
-    ├── physicsBodyFactory.js  # Converts JSON objects into Matter.js Bodies + sprites + spring system
-    ├── simulation.js          # Transparent renderer, runner, 1D spring constraints, controls
-    └── style.css              # Embedded stage layout styling
+simulation_frontend/augmented_physics_v2/
+├── package.json               # vite, matter-js, p5, poly-decomp
+├── index.html                 # Embedded stage + domain switcher + telemetry HUDs
+├── public/
+│   ├── scenes/
+│   │   ├── kinematics/        # physics_scene.json, with_spring.png, sprites/
+│   │   └── optics/            # thin_lens_scene.json, mirror_scene.json, prism_scene.json
+│   └── physics_scene.json     # Root compatibility scene
+├── src/
+│   ├── main.js                # App entrypoint, scene loading, domain bootstrap
+│   ├── core/
+│   │   ├── coordinateMapper.js# Sub-pixel source-to-viewport coordinate mapping
+│   │   ├── diagramAnalyzer.js # In-browser & FastAPI CV scene classification
+│   │   ├── matterUnitAdapter.js# SI units (m/s², m/s, kg) to Matter.js scale translation
+│   │   ├── overlayStage.js    # 2-layer stage management with transparent overlay
+│   │   ├── sceneLoader.js     # JSON scene fetcher with cache-busting
+│   │   └── sceneRouter.js     # Routes scenes to mechanics or optics controllers
+│   ├── mechanics/
+│   │   ├── mechanicsController.js # Engine lifecycle, UI bindings, AbortController
+│   │   ├── physicsBodyFactory.js  # Matter.js bodies, polygon sub-pixel bounds alignment, springs
+│   │   ├── pendulumSimulation.js  # High-order RK4 numerical integrator with energy conservation
+│   │   ├── projectileSimulation.js# Closed-form kinematics with flight analytics
+│   │   └── simulation.js          # Matter.js contact physics, runner & piston spring constraints
+│   ├── optics/
+│   │   ├── opticsController.js    # Optics UI bindings, preset loaders
+│   │   ├── opticsSimulation.js    # P5.js ray tracing canvas renderer
+│   │   ├── opticalBench.js        # Optical axis and bench state
+│   │   ├── lensEquation.js        # Analytical Gaussian lens equations
+│   │   ├── rayTracer.js           # Snell ray refraction & reflection engine
+│   │   ├── elements/              # ThinLens, ThickLens, SphericalMirror, Prism, Slab
+│   │   └── scenes/                # Optics preset configurations
+│   └── style.css                  # Dark-mode glassmorphic interface styles
+└── test/
+    ├── test_coordinateMapper.js   # Letterbox & round-trip numerical tests
+    ├── test_pendulum_physics.js   # Period verification & energy conservation tests
+    ├── test_optics_engines.js     # 70 automated physics tests across lenses, mirrors & prisms
+    └── test_browser_automation.js # Puppeteer end-to-end browser verification
 ```
 
 ---
@@ -156,12 +201,14 @@ graph LR
     P0[Phase 0: Env & SAM 2 Setup ✅] --> P1[Phase 1: Robust CV Scene Builder ✅]
     P1 --> P2[Phase 2: Verified Matter.js Integration ✅]
     P2 --> P3[Phase 3: Sprites & Embedded Diagram Stage ✅]
-    P3 --> P4[Phase 4: OCR + Multimodal VLM Interpretation 🔄]
-    P4 --> P5[Phase 5: Constraints & Domain Engines]
-    P5 --> P6[Phase 6: NCTB Full Page & Bangla AI Tutor]
+    P3 --> P4[Phase 4: Multi-Domain Precision Engines ✅]
+    P4 --> P5[Phase 5: Automated Diagram Extraction & Inpainting ✅]
+    P5 --> P6[Phase 6: NCTB Full Page & Bangla AI Tutor 🔄]
 ```
 
-- **Phase 3 (Completed)**: Embedded transparent overlay, RGBA sprite generation, concave ramp decomposition with `poly-decomp`, and spring constraint system.
-- **Phase 4 (Next Target - OCR / VLM Semantic Layer)**: Use Gemini / GPT-4V to automatically identify textbook text ($30^\circ$, $m=2\text{ kg}$, $k=200\text{ N/m}$) and bind parameters directly to the canonical scene.
-- **Phase 5 (Domain Extensions)**: Support strings, pulleys, pendulums, optics (P5.js ray tracing), circuits, and path animations.
-- **Phase 6 (NCTB Book & Bangla Tutor)**: Full-page layout parsing, simulation overlay on original PDF, and dialogue tutor speaking conversational Bangla.
+- **Phase 4 (Completed)**: Sub-pixel CoordinateMapper, analytical RK4 pendulum simulation, closed-form projectile solver, complete Optics2D ray tracer (lenses, spherical mirrors, prisms, TIR), and Matter.js concave polygon boundary alignment.
+- **Phase 5 (Completed)**: Background inpainting for static diagrams, sub-pixel bob and string detection via PCA & TLS, and domain-aware diagram analyzer.
+- **Phase 6 (Active Target - NCTB Full Page & Bangla Pedagogical Tutor)**:
+  - Multimodal OCR/VLM pipeline (Gemini / GPT-4V) for automated diagram and problem prompt parameter extraction.
+  - Multi-diagram full-page PDF layout parsing.
+  - Intelligent pedagogical tutor speaking conversational Bengali grounded in live simulation state and textbook theory.

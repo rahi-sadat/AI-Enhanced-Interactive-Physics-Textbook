@@ -62,18 +62,22 @@
               <input type="checkbox" id="toggle-colliders" /> Show Colliders (Debug)
             </label>
             <div class="control">
-              <label for="gravity-slider">Gravity: <span id="gravity-value" class="val-badge">1.0</span></label>
-              <input id="gravity-slider" class="slider" type="range" min="0" max="2" step="0.1" value="1" />
+              <label for="gravity-slider">Gravity: <span id="gravity-value" class="val-badge">9.81 m/s²</span></label>
+              <input id="gravity-slider" class="slider" type="range" min="0" max="25" step="0.01" value="9.81" />
             </div>
             <div class="control">
               <label for="speed-slider">Speed: <span id="speed-value" class="val-badge">1x</span></label>
               <input id="speed-slider" class="slider" type="range" min="0.1" max="2" step="0.1" value="1" />
             </div>
-            <div class="control">
+            <div id="pendulum-controls-group" class="control" style="display:none">
+              <label for="pendulum-length-input">Pendulum Length L (m):</label>
+              <input id="pendulum-length-input" class="text-input" type="number" min="0.05" max="50" step="0.05" value="1.00" style="width: 100%; padding: 6px 10px; background: rgba(30, 41, 59, 0.8); border: 1px solid #475569; border-radius: 6px; color: #f8fafc; font-size: 13px;" />
+            </div>
+            <div id="target-object-group" class="control">
               <label for="target-object-select">Target object</label>
               <select id="target-object-select" class="select"></select>
             </div>
-            <div class="control">
+            <div id="velocity-control-group" class="control">
               <label for="velocity-slider">Initial X velocity: <span id="velocity-value" class="val-badge">0 m/s</span></label>
               <input id="velocity-slider" class="slider" type="range" min="-10" max="10" step="1" value="0" />
               <button id="apply-velocity-button" class="btn btn-accent">Apply</button>
@@ -208,6 +212,7 @@
               <button class="preset-pill" data-preset="projectile_test">&#9917; Flight Projectile (Kinematics)</button>
               <button class="preset-pill" data-preset="prism">&#9651; Triangular Prism</button>
               <button class="preset-pill" data-preset="spring">&#9881;&#65039; Ball &amp; Spring Oscillator</button>
+              <button class="preset-pill" data-preset="cradle">&#127921; Newton's Cradle (5-Ball Pendulum - pendulum.png)</button>
             </div>
           </div>
 
@@ -217,15 +222,16 @@
               <label for="upload-scenario-select">Target Concept / Scenario</label>
               <select id="upload-scenario-select" class="select" style="font-weight: 600; color: #93c5fd;">
                 <option value="auto">&#10024; Auto-Detect (AI Scanner)</option>
+                <option value="newtons_cradle">&#127921; Newton's Cradle (5-Ball Pendulum)</option>
+                <option value="pendulum">&#9878;&#65039; Simple Pendulum (Kinematics)</option>
+                <option value="spring_mass">&#9881;&#65039; Spring Oscillator</option>
+                <option value="incline">&#128208; Inclined Plane &amp; Ramp</option>
+                <option value="projectile">&#9917; Free Fall &amp; Projectile</option>
                 <option value="interface_refraction">&#127754; Interface Refraction (Snell Rarer &rarr; Denser)</option>
                 <option value="thin_lens">&#128269; Thin Lens (Convex Converging)</option>
                 <option value="concave_lens">&#128269; Thin Lens (Concave Diverging)</option>
                 <option value="mirror">&#129694; Spherical Mirror (Concave / Convex)</option>
                 <option value="prism">&#9651; Triangular Prism (Dispersion)</option>
-                <option value="pendulum">&#9878;&#65039; Simple Pendulum (Kinematics)</option>
-                <option value="incline">&#128208; Inclined Plane &amp; Ramp</option>
-                <option value="projectile">&#9917; Free Fall &amp; Projectile</option>
-                <option value="spring_mass">&#9881;&#65039; Spring Oscillator</option>
               </select>
             </div>
             <div class="control-col">

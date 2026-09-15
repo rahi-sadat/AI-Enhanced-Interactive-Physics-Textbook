@@ -209,6 +209,10 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       setPreview('with_spring.png', '/scenes/kinematics/with_spring.png', 800, 600);
       domainSelect.value = 'mechanics';
       if (scenarioSelect) scenarioSelect.value = 'spring_mass';
+    } else if (preset === 'cradle') {
+      setPreview('pendulum.png', '/uploads/pendulum.png', 387, 367);
+      domainSelect.value = 'mechanics';
+      if (scenarioSelect) scenarioSelect.value = 'newtons_cradle';
     }
   });
 });
