@@ -51,6 +51,21 @@ export class MechanicsController {
       });
     }
 
+    // NCTB Kinematics Diagram Scenario Switcher
+    const mSelect = document.getElementById('mechanics-scene-select');
+    if (mSelect) {
+      const isCradle = (scene.objects || []).some(o => o.id?.includes('cradle'));
+      mSelect.value = isCradle ? 'newtons_cradle' : 'with_spring';
+      mSelect.onchange = async (e) => {
+        const url = e.target.value === 'newtons_cradle'
+          ? '/scenes/kinematics/newtons_cradle_scene.json'
+          : '/scenes/kinematics/physics_scene.json';
+        const res = await fetch(url);
+        const data = await res.json();
+        this.loadNewScene(data);
+      };
+    }
+
     const vs = document.getElementById('velocity-slider');
     const vv = document.getElementById('velocity-value');
     vs?.addEventListener('input', () => { if(vv) vv.textContent = vs.value + ' m/s'; });
@@ -60,12 +75,27 @@ export class MechanicsController {
     });
   }
 
+  loadNewScene(newScene) {
+    this.scene = newScene;
+    const srcW = newScene.render?.source_width_px ?? newScene.coordinate_system?.render?.source_width_px ?? 800;
+    const srcH = newScene.render?.source_height_px ?? newScene.coordinate_system?.render?.source_height_px ?? 600;
+    this.overlayStage.setBackground(newScene?.visual?.background_url ?? null, srcW, srcH);
+    this.sim.loadScene(newScene, this.overlayStage.getMapper());
+    this._bindControls(newScene);
+  }
+
   _showPanel() {
     const mc = document.getElementById('mechanics-controls');
     const oc = document.getElementById('optics-controls');
+    const cc = document.getElementById('circuit-controls');
     if (mc) mc.style.display = 'flex';
     if (oc) oc.style.display = 'none';
+    if (cc) cc.style.display = 'none';
   }
 
-  destroy() { this.sim?.pause(); }
+  destroy() {
+    this.sim?.pause();
+    const mc = document.getElementById('mechanics-controls');
+    if (mc) mc.style.display = 'none';
+  }
 }

@@ -1,0 +1,176 @@
+{
+  "schema_version": "3.0",
+  "simulation": {
+    "domain": "circuits",
+    "subtype": "dc_linear",
+    "engine": "mna"
+  },
+  "geometry": {
+    "space": "source_px",
+    "source_width": 529,
+    "source_height": 273
+  },
+  "visual": {
+    "background_url": "/uploads/circuit3.png"
+  },
+  "circuit": {
+    "reference_node": "N4",
+    "nodes": [
+      {
+        "id": "N0",
+        "terminal_ids": [
+          "A1.a"
+        ]
+      },
+      {
+        "id": "N1",
+        "terminal_ids": [
+          "A1.b"
+        ]
+      },
+      {
+        "id": "N2",
+        "terminal_ids": [
+          "A2.a"
+        ]
+      },
+      {
+        "id": "N3",
+        "terminal_ids": [
+          "A2.b"
+        ]
+      },
+      {
+        "id": "N4",
+        "terminal_ids": [
+          "V1.n"
+        ],
+        "reference": true
+      },
+      {
+        "id": "N5",
+        "terminal_ids": [
+          "V1.p"
+        ]
+      }
+    ],
+    "components": [
+      {
+        "id": "A1",
+        "type": "ammeter",
+        "terminals": [
+          {
+            "id": "A1.a",
+            "source_px": [
+              376.0,
+              191.0
+            ],
+            "confidence": 0.96,
+            "node": "N0"
+          },
+          {
+            "id": "A1.b",
+            "source_px": [
+              454.0,
+              191.0
+            ],
+            "confidence": 0.96,
+            "node": "N1"
+          }
+        ],
+        "bbox_source_px": [
+          376.0,
+          152.0,
+          454.0,
+          230.0
+        ],
+        "parameters": {},
+        "confidence": 0.92
+      },
+      {
+        "id": "A2",
+        "type": "ammeter",
+        "terminals": [
+          {
+            "id": "A2.a",
+            "source_px": [
+              54.0,
+              109.0
+            ],
+            "confidence": 0.96,
+            "node": "N2"
+          },
+          {
+            "id": "A2.b",
+            "source_px": [
+              116.0,
+              109.0
+            ],
+            "confidence": 0.96,
+            "node": "N3"
+          }
+        ],
+        "bbox_source_px": [
+          54.0,
+          78.0,
+          116.0,
+          140.0
+        ],
+        "parameters": {},
+        "confidence": 0.92
+      },
+      {
+        "id": "V1",
+        "type": "voltage_source",
+        "terminals": [
+          {
+            "id": "V1.p",
+            "source_px": [
+              52.9,
+              122.85
+            ],
+            "confidence": 0.96,
+            "node": "N5"
+          },
+          {
+            "id": "V1.n",
+            "source_px": [
+              105.8,
+              122.85
+            ],
+            "confidence": 0.96,
+            "node": "N4"
+          }
+        ],
+        "bbox_source_px": [
+          52.900000000000006,
+          95.55,
+          105.80000000000001,
+          150.15
+        ],
+        "parameters": {
+          "voltage_v": {
+            "value": 12.0,
+            "unit": "V",
+            "source": "default",
+            "confidence": 1.0
+          }
+        },
+        "confidence": 0.88
+      }
+    ],
+    "wires": []
+  },
+  "ambiguities": [],
+  "confidence": {
+    "component_detection": 0.98,
+    "terminal_detection": 0.96,
+    "wire_extraction": 0.95,
+    "topology": 0.92,
+    "parameter_binding": 0.96,
+    "overall": 0.92
+  },
+  "metadata": {
+    "generator": "AugmentedPhysics Circuit Engine v3"
+  }
+}

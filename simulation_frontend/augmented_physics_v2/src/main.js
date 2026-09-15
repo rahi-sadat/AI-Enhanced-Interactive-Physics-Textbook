@@ -8,8 +8,17 @@ import { uploadDiagramFile, analyzeDiagram } from './core/diagramAnalyzer.js';
 const SCENES = {
   mechanics: '/scenes/kinematics/physics_scene.json',
   optics:    '/scenes/optics/thin_lens_scene.json',
-  circuits:  '/scenes/circuits/series_parallel_scene.json',
+  circuits:  '/scenes/circuits/circuit1_scene.json',
 };
+
+export function showDomainControls(domain) {
+  const mc = document.getElementById('mechanics-controls');
+  const oc = document.getElementById('optics-controls');
+  const cc = document.getElementById('circuit-controls');
+  if (mc) mc.style.display = (domain === 'mechanics') ? 'flex' : 'none';
+  if (oc) oc.style.display = (domain === 'optics') ? 'flex' : 'none';
+  if (cc) cc.style.display = (domain === 'circuits') ? 'block' : 'none';
+}
 
 let currentController = null;
 let currentStage = null;
@@ -45,6 +54,7 @@ export async function bootstrap(domain, sceneDataOrUrl = null) {
     else if (resolvedDomain === 'optics') activeBtnId = 'switch-optics';
 
     setActive(activeBtnId);
+    showDomainControls(resolvedDomain);
     currentController = createSimulation(scene, currentStage);
     console.log('[Main] Loaded simulation domain:', resolvedDomain, scene);
   } catch (err) {
@@ -192,7 +202,23 @@ const scenarioSelect = document.getElementById('upload-scenario-select');
 document.querySelectorAll('.preset-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     const preset = pill.dataset.preset;
-    if (preset === 'snell_water') {
+    if (preset === 'circuit1') {
+      setPreview('circuit1.png', '/uploads/circuit1.png', 484, 399);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit1';
+    } else if (preset === 'circuit2') {
+      setPreview('circuit2.png', '/uploads/circuit2.png', 784, 462);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit2';
+    } else if (preset === 'circuit3') {
+      setPreview('circuit3.png', '/uploads/circuit3.png', 448, 385);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit3';
+    } else if (preset === 'circuit4') {
+      setPreview('circuit4.png', '/uploads/circuit4.png', 924, 488);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit4';
+    } else if (preset === 'snell_water') {
       setPreview('diagram_0ae6ee8e.png', '/uploads/diagram_0ae6ee8e.png', 1536, 1024);
       domainSelect.value = 'optics';
       if (scenarioSelect) scenarioSelect.value = 'interface_refraction';
@@ -208,10 +234,10 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       setPreview('diagram_ceceeb1a.jpg', '/uploads/diagram_ceceeb1a.jpg', 1024, 768);
       domainSelect.value = 'optics';
       if (scenarioSelect) scenarioSelect.value = 'thin_lens';
-    } else if (preset === 'pendulum_test1') {
-      setPreview('test1.jpg', '/uploads/test1.jpg', 797, 652);
+    } else if (preset === 'newtons_cradle') {
+      setPreview('pendulum.png', '/uploads/pendulum.png', 800, 600);
       domainSelect.value = 'mechanics';
-      if (scenarioSelect) scenarioSelect.value = 'pendulum';
+      if (scenarioSelect) scenarioSelect.value = 'newtons_cradle';
     } else if (preset === 'projectile_test') {
       setPreview('test.jpg', '/uploads/test.jpg', 700, 467);
       domainSelect.value = 'mechanics';
@@ -223,13 +249,13 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
     } else if (preset === 'spring') {
       setPreview('with_spring.png', '/scenes/kinematics/with_spring.png', 800, 600);
       domainSelect.value = 'mechanics';
-      if (scenarioSelect) scenarioSelect.value = 'spring_mass';
+      if (scenarioSelect) scenarioSelect.value = 'incline';
     }
   });
 });
 
 domainSelect?.addEventListener('change', () => {
-  opticsOpts.style.display = domainSelect.value === 'mechanics' ? 'none' : 'flex';
+  opticsOpts.style.display = domainSelect.value === 'optics' ? 'flex' : 'none';
 });
 
 // GENERATE SIMULATION BUTTON
@@ -256,15 +282,39 @@ btnGenerateSim?.addEventListener('click', async () => {
       }
     }
 
+    // Check if selecting a pre-compiled textbook scene without custom file upload
+    const PRESET_SCENES = {
+      circuit1: { domain: 'circuits', url: '/scenes/circuits/circuit1_scene.json' },
+      circuit2: { domain: 'circuits', url: '/scenes/circuits/circuit2_scene.json' },
+      circuit3: { domain: 'circuits', url: '/scenes/circuits/circuit3_scene.json' },
+      circuit4: { domain: 'circuits', url: '/scenes/circuits/circuit4_scene.json' },
+      bridge: { domain: 'circuits', url: '/scenes/circuits/bridge_scene.json' },
+      series_parallel: { domain: 'circuits', url: '/scenes/circuits/series_parallel_scene.json' },
+      newtons_cradle: { domain: 'mechanics', url: '/scenes/kinematics/newtons_cradle_scene.json' },
+      incline: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
+    };
+
+    if (!uploadedFile && PRESET_SCENES[scenarioChoice]) {
+      updateProgress('Loading pre-compiled textbook scenario...', 80);
+      const presetInfo = PRESET_SCENES[scenarioChoice];
+      const pRes = await fetch(presetInfo.url);
+      const pScene = await pRes.json();
+      setTimeout(() => {
+        closeModal();
+        bootstrap(presetInfo.domain, pScene);
+      }, 300);
+      return;
+    }
+
     // Run AI / CV analysis
     const domainChoice = domainSelect.value;
-    const scenarioChoice = scenarioSelect?.value || 'auto';
+    const scenarioChoiceVal = scenarioSelect?.value || 'auto';
     const focalCm = parseFloat(focalInput.value) || 20.0;
     const result = await analyzeDiagram(
       finalImageUrl,
       domainChoice,
       {
-        scenario: scenarioChoice,
+        scenario: scenarioChoiceVal,
         focalLengthCm: focalCm,
       },
       updateProgress

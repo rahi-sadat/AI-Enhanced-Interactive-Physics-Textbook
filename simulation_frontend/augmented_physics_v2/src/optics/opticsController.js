@@ -472,7 +472,15 @@ export class OpticsController {
   _showPanel() {
     const mc = document.getElementById('mechanics-controls');
     const oc = document.getElementById('optics-controls');
+    const cc = document.getElementById('circuit-controls');
     if (mc) mc.style.display = 'none';
     if (oc) oc.style.display = 'flex';
+    if (cc) cc.style.display = 'none';
+  }
+
+  destroy() {
+    this.view?.destroy();
+    const oc = document.getElementById('optics-controls');
+    if (oc) oc.style.display = 'none';
   }
 }

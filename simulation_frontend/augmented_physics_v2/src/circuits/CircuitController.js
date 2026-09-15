@@ -86,8 +86,8 @@ export class CircuitController {
     const bgUrl = this.scene.visual?.background_url ||
                   this.scene.source?.image ||
                   '/scenes/circuits/textbook_circuit_diagram.svg';
-    const sw = this.scene.source?.image_width_px || 800;
-    const sh = this.scene.source?.image_height_px || 500;
+    const sw = this.scene.geometry?.source_width || this.scene.source?.image_width_px || 800;
+    const sh = this.scene.geometry?.source_height || this.scene.source?.image_height_px || 500;
     this.overlayStage.setBackground(bgUrl, sw, sh);
   }
 
@@ -223,8 +223,16 @@ export class CircuitController {
       <div class="control" style="margin-bottom: 8px;">
         <label for="circuit-scene-select">NCTB Diagram Scenario</label>
         <select id="circuit-scene-select" class="select" style="font-weight: 600; padding: 7px 10px; background: rgba(14,165,233,0.15); border-color: rgba(56,189,248,0.4); color: #38bdf8;">
-          <option value="series_parallel">⚡ অনুক্রমিক বর্তনী (Series Circuit: 12V, 10Ω, 20Ω)</option>
-          <option value="bridge">⚖️ হুইটস্টোন ব্রিজ (Wheatstone Bridge Network)</option>
+          <optgroup label="📋 Uploaded Textbook Schematics">
+            <option value="circuit1">⚡ Circuit 1: DC Loop with Ammeters (circuit1.png)</option>
+            <option value="circuit2">⚡ Circuit 2: Multi-Branch Network (circuit2.png)</option>
+            <option value="circuit3">⚡ Circuit 3: Series Measurement Loop (circuit3.png)</option>
+            <option value="circuit4">⚡ Circuit 4: Ladder Resistor Network (circuit4.png)</option>
+          </optgroup>
+          <optgroup label="📖 NCTB Standard Scenarios">
+            <option value="series_parallel">⚡ অনুক্রমিক বর্তনী (Series Circuit: 12V, 10Ω, 20Ω)</option>
+            <option value="bridge">⚖️ হুইটস্টোন ব্রিজ (Wheatstone Bridge Network)</option>
+          </optgroup>
         </select>
       </div>
 
@@ -376,16 +384,32 @@ export class CircuitController {
 
     // Scenario switch
     const sceneSelect = document.getElementById('circuit-scene-select');
-    sceneSelect?.addEventListener('change', async (e) => {
-      const scenario = e.target.value;
-      const path = scenario === 'bridge'
-        ? '/scenes/circuits/bridge_scene.json'
-        : '/scenes/circuits/series_parallel_scene.json';
+    if (sceneSelect) {
+      const bg = this.scene?.visual?.background_url || '';
+      if (bg.includes('circuit1')) sceneSelect.value = 'circuit1';
+      else if (bg.includes('circuit2')) sceneSelect.value = 'circuit2';
+      else if (bg.includes('circuit3')) sceneSelect.value = 'circuit3';
+      else if (bg.includes('circuit4')) sceneSelect.value = 'circuit4';
+      else if (bg.includes('bridge')) sceneSelect.value = 'bridge';
+      else sceneSelect.value = 'series_parallel';
 
-      const res = await fetch(path);
-      const newScene = await res.json();
-      this.loadNewScene(newScene);
-    });
+      sceneSelect.addEventListener('change', async (e) => {
+        const scenario = e.target.value;
+        const SCENE_MAP = {
+          circuit1: '/scenes/circuits/circuit1_scene.json',
+          circuit2: '/scenes/circuits/circuit2_scene.json',
+          circuit3: '/scenes/circuits/circuit3_scene.json',
+          circuit4: '/scenes/circuits/circuit4_scene.json',
+          series_parallel: '/scenes/circuits/series_parallel_scene.json',
+          bridge: '/scenes/circuits/bridge_scene.json',
+        };
+        const path = SCENE_MAP[scenario] || '/scenes/circuits/circuit1_scene.json';
+
+        const res = await fetch(path);
+        const newScene = await res.json();
+        this.loadNewScene(newScene);
+      });
+    }
 
     // Reset button
     const btnReset = document.getElementById('btn-circuit-reset');
@@ -419,7 +443,15 @@ export class CircuitController {
     this.store.overrides.clear();
 
     this._applyBackground();
-    this.editor.close();
+    this.mapper = this.overlayStage.getMapper();
+    if (this.view) {
+      this.view.mapper = this.mapper;
+      this.view.resize();
+    }
+    if (this.editor) {
+      this.editor.mapper = this.mapper;
+      this.editor.close();
+    }
     this.probeManager.clearProbes();
 
     this.store.setMode('inspect');
@@ -439,5 +471,7 @@ export class CircuitController {
     this.editor?.destroy();
     this.tutor?.destroy();
     this.overlayStage.clearOverlay();
+    const circuitSection = document.getElementById('circuit-controls');
+    if (circuitSection) circuitSection.style.display = 'none';
   }
 }
