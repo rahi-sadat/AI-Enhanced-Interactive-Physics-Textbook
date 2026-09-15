@@ -181,7 +181,11 @@ const scenarioSelect = document.getElementById('upload-scenario-select');
 document.querySelectorAll('.preset-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     const preset = pill.dataset.preset;
-    if (preset === 'snell') {
+    if (preset === 'snell_water') {
+      setPreview('diagram_0ae6ee8e.png', '/uploads/diagram_0ae6ee8e.png', 1536, 1024);
+      domainSelect.value = 'optics';
+      if (scenarioSelect) scenarioSelect.value = 'interface_refraction';
+    } else if (preset === 'snell') {
       setPreview('diagram_7dcbe9c0.png', '/uploads/diagram_7dcbe9c0.png', 393, 328);
       domainSelect.value = 'optics';
       if (scenarioSelect) scenarioSelect.value = 'interface_refraction';
@@ -209,10 +213,6 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       setPreview('with_spring.png', '/scenes/kinematics/with_spring.png', 800, 600);
       domainSelect.value = 'mechanics';
       if (scenarioSelect) scenarioSelect.value = 'spring_mass';
-    } else if (preset === 'cradle') {
-      setPreview('pendulum.png', '/uploads/pendulum.png', 387, 367);
-      domainSelect.value = 'mechanics';
-      if (scenarioSelect) scenarioSelect.value = 'newtons_cradle';
     }
   });
 });
@@ -261,6 +261,10 @@ btnGenerateSim?.addEventListener('click', async () => {
 
     setTimeout(() => {
       closeModal();
+      if (uploadedImageUrl && result?.scene) {
+        if (!result.scene.visual) result.scene.visual = {};
+        result.scene.visual.background_url = uploadedImageUrl;
+      }
       bootstrap(result.domain, result.scene);
     }, 400);
   } catch (err) {

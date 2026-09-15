@@ -12,7 +12,6 @@ import {
   createSpringSystem,
   createPendulumSystem
 } from "./physicsBodyFactory.js";
-import { MatterUnitAdapter } from "../core/matterUnitAdapter.js";
 
 
 export class Simulation {
@@ -22,14 +21,10 @@ export class Simulation {
     this.container = container;
 
     // -----------------------------
-    // Create Matter.js engine & solver settings
+    // Create Matter.js engine
     // -----------------------------
 
     this.engine = Engine.create();
-    this.engine.positionIterations = 10;
-    this.engine.velocityIterations = 8;
-    this.engine.constraintIterations = 4;
-    this.unitAdapter = new MatterUnitAdapter(100);
 
     // -----------------------------
     // Create renderer
@@ -55,10 +50,10 @@ export class Simulation {
 
 
     // -----------------------------
-    // Create high-precision runner (120 Hz fixed timestep)
+    // Create runner
     // -----------------------------
 
-    this.runner = Runner.create({ delta: 1000 / 120 });
+    this.runner = Runner.create();
 
 
     // -----------------------------
@@ -112,9 +107,10 @@ export class Simulation {
   // LOAD SCENE
   // =================================
 
-  loadScene(scene) {
+  loadScene(scene, mapper = null) {
 
     this.scene = scene;
+    this.mapper = mapper;
 
 
     // Clear previous objects
@@ -130,15 +126,14 @@ export class Simulation {
 
 
     // -----------------------------
-    // Configure gravity & units
+    // Set gravity
     // -----------------------------
 
-    const ppm = scene.calibration?.pixels_per_meter || 100;
-    this.unitAdapter.setPixelsPerMeter(ppm);
+    if (scene.environment) {
 
-    const g = scene.environment?.gravity_m_s2 ??
-      (scene.environment?.gravity !== undefined ? (scene.environment.gravity === 1.0 ? 9.81 : scene.environment.gravity) : 9.81);
-    this.unitAdapter.setGravity(this.engine, g);
+      this.engine.gravity.y =
+        scene.environment.gravity ?? 1;
+    }
 
 
     // -----------------------------
@@ -148,7 +143,7 @@ export class Simulation {
     for (const object of scene.objects) {
 
       if (object.type === "spring") {
-        const system = createSpringSystem(object);
+        const system = createSpringSystem(object, mapper);
         Composite.add(this.engine.world, [
           system.plunger,
           system.spring
@@ -159,7 +154,7 @@ export class Simulation {
       }
 
       if (object.type === "pendulum") {
-        const pSystem = createPendulumSystem(object);
+        const pSystem = createPendulumSystem(object, mapper);
         Composite.add(this.engine.world, [
           pSystem.pivot,
           pSystem.bob,
@@ -170,7 +165,7 @@ export class Simulation {
       }
 
       const body =
-        createPhysicsBody(object);
+        createPhysicsBody(object, mapper);
 
 
       if (body) {
@@ -263,7 +258,9 @@ export class Simulation {
   // =================================
 
   setGravity(value) {
-    this.unitAdapter.setGravity(this.engine, Number(value));
+
+    this.engine.gravity.y =
+      Number(value);
   }
 
 
@@ -304,12 +301,10 @@ export class Simulation {
     }
 
 
-    const matterVx = this.unitAdapter.velocityMpsToMatter(Number(velocityX));
-
     Body.setVelocity(
       body,
       {
-        x: matterVx,
+        x: Number(velocityX),
         y: body.velocity.y
       }
     );
@@ -334,16 +329,5 @@ export class Simulation {
 
   setWireframes(enabled) {
     this.render.options.wireframes = Boolean(enabled);
-  }
-
-  destroy() {
-    this.pause();
-    Runner.stop(this.runner);
-    Render.stop(this.render);
-    Events.off(this.engine);
-    Composite.clear(this.engine.world, false);
-    if (this.render.canvas) {
-      this.render.canvas.remove();
-    }
   }
 }

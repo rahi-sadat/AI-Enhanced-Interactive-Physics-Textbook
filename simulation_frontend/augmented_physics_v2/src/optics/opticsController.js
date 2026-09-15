@@ -14,9 +14,20 @@ export class OpticsController {
     this.overlayStage = overlayStage;
     this.scene = scene;
     this._useCandleSprite = false;
+
     this.model = adaptOpticsScene(scene);
-    this.currentConcept = this.model.subtype || scene.simulation?.subtype || 'thin_lens';
+    this.model.coordinateMapper = this.overlayStage.getMapper();
+    this.currentConcept = this.model.subtype || 'thin_lens';
     this._applyBackground();
+
+    this.overlayStage.onMapperChanged((mapper) => {
+      if (this.model) {
+        this.model.coordinateMapper = mapper;
+        this.model.sourceWidth = mapper.sourceW;
+        this.model.sourceHeight = mapper.sourceH;
+        this._update();
+      }
+    });
 
     this.overlayStage.clearOverlay();
 
@@ -52,7 +63,32 @@ export class OpticsController {
     if (!this.model.lightSource) return;
     this.model.lightSource.x = newX;
     this.model.lightSource.y = newY;
+    this._syncControlsUI();
     this._update();
+  }
+
+  setInterfaceIndices(n1, n2) {
+    if (this.model.subtype === 'interface_refraction') {
+      if (n1 !== undefined && this.model.medium1) this.model.medium1.n = n1;
+      if (n2 !== undefined && this.model.medium2) this.model.medium2.n = n2;
+      this._syncControlsUI();
+      this._update();
+    }
+  }
+
+  setInterfaceTheta1(deg) {
+    if (this.model.subtype === 'interface_refraction' && this.model.lightSource) {
+      const srcW = this.model.sourceWidth || 800;
+      const srcH = this.model.sourceHeight || 600;
+      const bY = this.model.boundary?.y ?? (srcH * 0.5);
+      const nX = this.model.normal?.x ?? (srcW * 0.5);
+      const rad = (deg * Math.PI) / 180;
+      const r = Math.hypot(nX - this.model.lightSource.x, bY - this.model.lightSource.y) || (srcH * 0.45);
+      this.model.lightSource.x = nX - r * Math.sin(rad);
+      this.model.lightSource.y = bY - r * Math.cos(rad);
+      this._syncControlsUI();
+      this._update();
+    }
   }
 
   setFocalLength(f) {
@@ -76,17 +112,16 @@ export class OpticsController {
       this.model.mirror.model = type;
       const f = Math.abs(this.model.mirror.focalLength || 130);
       const mx = this.model.mirror.x;
-      const dir = this.model.mirror.facing === 'right' ? 1 : -1;
       if (type === 'convex') {
         this.model.focalPoints = [
           { label: 'P', x: mx },
-          { label: 'F', x: mx - dir * f },
-          { label: 'C', x: mx - dir * 2 * f }
+          { label: 'F', x: mx + f },
+          { label: 'C', x: mx + 2 * f }
         ];
       } else if (type === 'concave') {
         this.model.focalPoints = [
-          { label: 'C', x: mx + dir * 2 * f },
-          { label: 'F', x: mx + dir * f },
+          { label: 'C', x: mx - 2 * f },
+          { label: 'F', x: mx - f },
           { label: 'P', x: mx }
         ];
       } else { // plane
@@ -125,16 +160,19 @@ export class OpticsController {
 
     const url = conceptUrls[concept] || conceptUrls.thin_lens;
     try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.statusText}`);
-      const sc = await resp.json();
-      this.scene = sc;
-      this.model = adaptOpticsScene(sc);
+      const res = await fetch(url + '?t=' + Date.now());
+      const sceneData = await res.json();
+      this.scene = sceneData;
+      this.model = adaptOpticsScene(sceneData);
+      this.model.coordinateMapper = this.overlayStage.getMapper();
+      if (this._useCandleSprite && this.model.object) {
+        this.model.object.spriteUrl = '/scenes/optics/sprites/candle.png';
+      }
       this._applyBackground();
       this._syncControlsUI();
       this._update();
-    } catch (e) {
-      console.error('[OpticsController] Error loading preset scene:', e);
+    } catch (err) {
+      console.error('[OpticsController] Failed to load concept:', concept, err);
     }
   }
 
@@ -143,23 +181,36 @@ export class OpticsController {
   }
 
   _applyBackground() {
-    this.overlayStage.setBackground(this.scene?.visual?.background_url ?? null);
+    const bgUrl = this.scene?.visual?.background_url ?? this.scene?.source?.image ?? null;
+    const srcW = this.scene?.render?.source_width_px ?? this.scene?.coordinate_system?.render?.source_width_px;
+    const srcH = this.scene?.render?.source_height_px ?? this.scene?.coordinate_system?.render?.source_height_px;
+    this.overlayStage.setBackground(bgUrl, srcW, srcH);
+    if (this.model) {
+      this.model.coordinateMapper = this.overlayStage.getMapper();
+    }
   }
 
   _update() {
     const sub = this.model.subtype || 'thin_lens';
+    const bounds = {
+      minX: 0,
+      minY: 0,
+      maxX: this.model.sourceWidth || 800,
+      maxY: this.model.sourceHeight || 600,
+    };
 
     if (sub === 'prism') {
       const { prism, lightSource } = this.model;
       const rayDir = {
-        x: (lightSource.targetX ?? 340) - lightSource.x,
-        y: (lightSource.targetY ?? 280) - lightSource.y,
+        x: lightSource.targetX - lightSource.x,
+        y: lightSource.targetY - lightSource.y,
       };
       const result = solvePrismRefraction({
         prismVertices: prism.vertices,
         refractiveIndex: prism.refractiveIndex,
         rayOrigin: { x: lightSource.x, y: lightSource.y },
         rayDirection: rayDir,
+        bounds,
       });
       this.view.render(this.model, result);
       this.hud.update('prism', result, prism.refractiveIndex);
@@ -175,7 +226,7 @@ export class OpticsController {
         objectX: object.x,
         objectHeight: object.height,
         focalLength: mirror.focalLength,
-        facing: mirror.facing || 'left',
+        bounds,
       });
       this.view.render(this.model, result);
       this.hud.update('mirror', result, mirror.focalLength, this.model.pixelPerCm);
@@ -190,7 +241,8 @@ export class OpticsController {
         n1: medium1?.n ?? 1.0,
         n2: medium2?.n ?? 1.5,
         source: { x: lightSource.x, y: lightSource.y },
-        targetPoint: pointOfIncidence ? { x: pointOfIncidence.x, y: pointOfIncidence.y } : { x: normal?.x ?? 400, y: boundary?.y ?? 300 }
+        targetPoint: pointOfIncidence ? { x: pointOfIncidence.x, y: pointOfIncidence.y } : { x: normal?.x ?? 400, y: boundary?.y ?? 300 },
+        bounds,
       });
       this.view.render(this.model, result);
       this.hud.update('interface_refraction', result);
@@ -205,6 +257,7 @@ export class OpticsController {
       objectX: object.x,
       objectHeight: object.height,
       focalLength: lens.focalLength,
+      bounds,
     });
     this.view.render(this.model, result);
     this.hud.update('thin_lens', result, lens.focalLength, this.model.pixelPerCm);
@@ -250,7 +303,7 @@ export class OpticsController {
     }
 
     // Concept switcher tabs
-    ['optics-tab-lens', 'optics-tab-prism', 'optics-tab-mirror'].forEach(tabId => {
+    ['optics-tab-lens', 'optics-tab-prism', 'optics-tab-mirror', 'optics-tab-interface'].forEach(tabId => {
       const tab = document.getElementById(tabId);
       if (tab) {
         tab.addEventListener('click', () => {
@@ -259,6 +312,50 @@ export class OpticsController {
         });
       }
     });
+
+    // Interface Refraction controls
+    const n1Slider = document.getElementById('interface-n1-slider');
+    const n1Val = document.getElementById('interface-n1-val');
+    if (n1Slider) {
+      n1Slider.addEventListener('input', () => {
+        const val = parseFloat(n1Slider.value);
+        if (n1Val) n1Val.textContent = val.toFixed(2);
+        this.setInterfaceIndices(val, undefined);
+      });
+    }
+
+    const n2Slider = document.getElementById('interface-n2-slider');
+    const n2Val = document.getElementById('interface-n2-val');
+    if (n2Slider) {
+      n2Slider.addEventListener('input', () => {
+        const val = parseFloat(n2Slider.value);
+        if (n2Val) n2Val.textContent = val.toFixed(2);
+        this.setInterfaceIndices(undefined, val);
+      });
+    }
+
+    const thetaSlider = document.getElementById('interface-theta-slider');
+    const thetaVal = document.getElementById('interface-theta-val');
+    if (thetaSlider) {
+      thetaSlider.addEventListener('input', () => {
+        const val = parseFloat(thetaSlider.value);
+        if (thetaVal) thetaVal.textContent = Math.round(val) + '°';
+        this.setInterfaceTheta1(val);
+      });
+    }
+
+    const presetSelect = document.getElementById('interface-preset-select');
+    if (presetSelect) {
+      presetSelect.addEventListener('change', (e) => {
+        const pVal = e.target.value;
+        if (pVal === 'nctb_diagram') this.setInterfaceIndices(1.00, 1.83);
+        else if (pVal === 'air_water') this.setInterfaceIndices(1.00, 1.33);
+        else if (pVal === 'air_glass') this.setInterfaceIndices(1.00, 1.52);
+        else if (pVal === 'air_diamond') this.setInterfaceIndices(1.00, 2.42);
+        else if (pVal === 'water_air') this.setInterfaceIndices(1.33, 1.00);
+        else if (pVal === 'glass_air') this.setInterfaceIndices(1.52, 1.00);
+      });
+    }
 
     // Diagram scenario dropdown
     const sceneSelect = document.getElementById('optics-scene-select');
@@ -284,18 +381,22 @@ export class OpticsController {
     const focalGroup = document.getElementById('focal-slider-group');
     const prismNGroup = document.getElementById('prism-n-slider-group');
     const mirrorGroup = document.getElementById('mirror-type-group');
+    const interfaceGroup = document.getElementById('interface-controls-group');
     const prismHint = document.getElementById('prism-hint');
     const lensHint = document.getElementById('lens-hint');
     const mirrorHint = document.getElementById('mirror-hint');
+    const interfaceHint = document.getElementById('interface-hint');
     const spriteGroup = document.getElementById('sprite-toggle-group');
 
     const isPlaneMirror = sub === 'mirror' && this.model.mirror?.model === 'plane';
     if (focalGroup) focalGroup.style.display = (sub === 'thin_lens' || (sub === 'mirror' && !isPlaneMirror)) ? 'flex' : 'none';
     if (prismNGroup) prismNGroup.style.display = sub === 'prism' ? 'flex' : 'none';
     if (mirrorGroup) mirrorGroup.style.display = sub === 'mirror' ? 'flex' : 'none';
+    if (interfaceGroup) interfaceGroup.style.display = sub === 'interface_refraction' ? 'flex' : 'none';
     if (prismHint) prismHint.style.display = sub === 'prism' ? 'block' : 'none';
     if (lensHint) lensHint.style.display = sub === 'thin_lens' ? 'block' : 'none';
     if (mirrorHint) mirrorHint.style.display = sub === 'mirror' ? 'block' : 'none';
+    if (interfaceHint) interfaceHint.style.display = sub === 'interface_refraction' ? 'block' : 'none';
     if (spriteGroup) spriteGroup.style.display = (sub === 'prism' || sub === 'interface_refraction') ? 'none' : 'flex';
     const sceneSelect = document.getElementById('optics-scene-select');
     if (sceneSelect && this.currentConcept) {
@@ -307,7 +408,8 @@ export class OpticsController {
       const isLens = concept === 'thin_lens' && (this.currentConcept === 'thin_lens' || this.currentConcept === 'concave_lens');
       const isPrism = concept === 'prism' && (this.currentConcept === 'prism' || this.currentConcept === 'glass_slab' || this.currentConcept === 'tir_prism');
       const isMirror = concept === 'mirror' && this.currentConcept === 'mirror';
-      tab.classList.toggle('active', isLens || isPrism || isMirror);
+      const isInterface = concept === 'interface_refraction' && this.currentConcept === 'interface_refraction';
+      tab.classList.toggle('active', isLens || isPrism || isMirror || isInterface);
     });
 
     if (sub === 'thin_lens' && this.model.lens) {
@@ -328,6 +430,42 @@ export class OpticsController {
 
       const mirrorSel = document.getElementById('mirror-type-select');
       if (mirrorSel) mirrorSel.value = this.model.mirror.model || 'concave';
+    } else if (sub === 'interface_refraction') {
+      const s1 = document.getElementById('interface-n1-slider');
+      const v1 = document.getElementById('interface-n1-val');
+      const s2 = document.getElementById('interface-n2-slider');
+      const v2 = document.getElementById('interface-n2-val');
+      const st = document.getElementById('interface-theta-slider');
+      const vt = document.getElementById('interface-theta-val');
+      if (s1 && this.model.medium1) s1.value = this.model.medium1.n;
+      if (v1 && this.model.medium1) v1.textContent = Number(this.model.medium1.n).toFixed(2);
+      if (s2 && this.model.medium2) s2.value = this.model.medium2.n;
+      if (v2 && this.model.medium2) v2.textContent = Number(this.model.medium2.n).toFixed(2);
+
+      if (this.model.lightSource) {
+        const srcW = this.model.sourceWidth || 800;
+        const srcH = this.model.sourceHeight || 600;
+        const bY = this.model.boundary?.y ?? (srcH * 0.5);
+        const nX = this.model.normal?.x ?? (srcW * 0.5);
+        const dx = Math.abs(nX - this.model.lightSource.x);
+        const dy = Math.max(0.1, bY - this.model.lightSource.y);
+        const deg = (Math.atan2(dx, dy) * 180) / Math.PI;
+        if (st) st.value = Math.round(deg);
+        if (vt) vt.textContent = Math.round(deg) + '°';
+      }
+
+      const pSel = document.getElementById('interface-preset-select');
+      if (pSel && this.model.medium1 && this.model.medium2) {
+        const n1 = this.model.medium1.n;
+        const n2 = this.model.medium2.n;
+        if (Math.abs(n1 - 1.00) < 0.02 && Math.abs(n2 - 1.83) < 0.02) pSel.value = 'nctb_diagram';
+        else if (Math.abs(n1 - 1.00) < 0.02 && Math.abs(n2 - 1.33) < 0.02) pSel.value = 'air_water';
+        else if (Math.abs(n1 - 1.00) < 0.02 && Math.abs(n2 - 1.52) < 0.02) pSel.value = 'air_glass';
+        else if (Math.abs(n1 - 1.00) < 0.02 && Math.abs(n2 - 2.42) < 0.02) pSel.value = 'air_diamond';
+        else if (Math.abs(n1 - 1.33) < 0.02 && Math.abs(n2 - 1.00) < 0.02) pSel.value = 'water_air';
+        else if (Math.abs(n1 - 1.52) < 0.02 && Math.abs(n2 - 1.00) < 0.02) pSel.value = 'glass_air';
+        else pSel.value = 'custom';
+      }
     }
   }
 

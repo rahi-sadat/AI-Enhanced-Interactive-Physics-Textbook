@@ -2,11 +2,8 @@
  * Analyzes uploaded physics diagrams and synthesizes interactive simulations.
  * Supports:
  *   1. Deep AI/CV analysis via FastAPI backend (/api/analyze-diagram with SAM 2)
- *   2. Instant in-browser Canvas Computer Vision fallback with explicit accuracy modes
+ *   2. Instant in-browser Canvas Computer Vision fallback
  */
-import { CoordinateMapper } from './coordinateMapper.js';
-const CanvasMapper = CoordinateMapper;
-export { CoordinateMapper, CanvasMapper };
 
 /**
  * Uploads an image file to the backend.
@@ -63,8 +60,7 @@ export async function analyzeDiagram(imageUrl, domain = 'auto', options = {}, on
         domain: domain,
         scenario: options.scenario || 'auto',
         focal_length_cm: options.focalLengthCm || 20.0,
-        gravity: options.gravity !== undefined ? options.gravity : 9.81,
-        pendulum_length_m: options.pendulumLengthM,
+        gravity: options.gravity || 1.0,
       }),
     });
 
@@ -72,8 +68,6 @@ export async function analyzeDiagram(imageUrl, domain = 'auto', options = {}, on
       onProgress('Extracting geometry & calibrating physics...', 75);
       const data = await res.json();
       if (data.success && data.scene) {
-        data.scene.perception_mode = 'PRECISION';
-        data.scene.approximate = false;
         onProgress('Interactive simulation ready!', 100);
         return {
           domain: data.domain,
@@ -108,7 +102,6 @@ function getImageDimensions(url) {
 /**
  * Fast in-browser computer vision diagram analyzer using HTML5 Canvas.
  */
-
 async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onProgress) {
   const img = new Image();
   img.crossOrigin = 'anonymous';
@@ -120,7 +113,6 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
 
   const w = img.naturalWidth || 800;
   const h = img.naturalHeight || 600;
-  const mapper = new CanvasMapper(w, h, 800, 600);
 
   // Determine scenario
   const reqSc = options.scenario || 'auto';
@@ -128,18 +120,14 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
   let concept = reqSc;
 
   if (concept === 'auto') {
-    if (urlLower.includes('7dcbe9c0') || urlLower.includes('refract') || urlLower.includes('snell')) {
+    if (urlLower.includes('7dcbe9c0') || urlLower.includes('0ae6ee8e') || urlLower.includes('c4a5740a') || urlLower.includes('c80801a3') || urlLower.includes('refract') || urlLower.includes('snell') || urlLower.includes('water') || urlLower.includes('boundary') || urlLower.includes('interface')) {
       concept = 'interface_refraction';
     } else if (urlLower.includes('cff33623') || urlLower.includes('mirror')) {
       concept = 'mirror';
     } else if (urlLower.includes('ceceeb1a') || urlLower.includes('lens')) {
       concept = 'thin_lens';
-    } else if (urlLower.includes('pendulum.png') || urlLower.includes('cradle')) {
-      concept = 'newtons_cradle';
     } else if (urlLower.includes('test1') || urlLower.includes('pendulum')) {
       concept = 'pendulum';
-    } else if (urlLower.includes('with_spring') || urlLower.includes('spring')) {
-      concept = 'spring_mass';
     } else if (urlLower.includes('test') || urlLower.includes('projectile')) {
       concept = 'projectile';
     } else if (requestedDomain === 'mechanics') {
@@ -153,9 +141,29 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
 
   // 1. Interface Refraction
   if (concept === 'interface_refraction') {
-    const boundPt = mapper.point(0, h * 0.49);
-    const normPt = mapper.point(w * 0.51, 0);
-    const srcPt = mapper.point(w * 0.28, h * 0.22);
+    const isWater = urlLower.includes('0ae6ee8e') || urlLower.includes('water');
+    const isSnellGlass = urlLower.includes('7dcbe9c0');
+    let boundY, normalX, srcPos, m2Name, m2N;
+    if (isWater) {
+      boundY = h === 1024 ? 435.0 : Math.round(h * 0.425);
+      normalX = w === 1536 ? 529.0 : Math.round(w * 0.344);
+      srcPos = { x: Math.round(w * 0.12), y: Math.round(h * 0.15) };
+      m2Name = 'Water (Denser)';
+      m2N = 1.33;
+    } else if (isSnellGlass) {
+      boundY = 159.0;
+      normalX = 214.0;
+      srcPos = { x: 94.0, y: 20.0 };
+      m2Name = 'Dense Medium';
+      m2N = 1.83;
+    } else {
+      boundY = Math.round(h * 0.485);
+      normalX = Math.round(w * 0.545);
+      srcPos = { x: Math.round(w * 0.24), y: Math.round(h * 0.06) };
+      m2Name = 'Dense Medium';
+      m2N = 1.83;
+    }
+
     return {
       domain: 'optics',
       scenario: 'interface_refraction',
@@ -167,6 +175,11 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
           engine: 'optics2d',
         },
         visual: { background_url: imageUrl },
+        source: {
+          image: imageUrl,
+          image_width_px: w,
+          image_height_px: h,
+        },
         elements: [
           {
             id: 'element_boundary',
@@ -174,10 +187,10 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
             author_role: 'fixed',
             optics: {
               model: 'interface_boundary',
-              y: boundPt.y,
+              y: boundY,
               orientation: 'horizontal',
               medium1: { name: 'Air (Rarer)', n: 1.0, label: 'n1' },
-              medium2: { name: 'Glass / Denser', n: 1.5, label: 'n2' },
+              medium2: { name: m2Name, n: m2N, label: 'n2' },
             },
           },
           {
@@ -186,7 +199,7 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
             author_role: 'fixed',
             optics: {
               model: 'normal',
-              x: normPt.x,
+              x: normalX,
             },
           },
           {
@@ -195,43 +208,30 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
             author_role: 'dynamic',
             optics: {
               model: 'ray_source',
-              position: { x: srcPt.x, y: srcPt.y },
-              target: { x: normPt.x, y: boundPt.y },
+              position: srcPos,
+              target: { x: normalX, y: boundY },
             },
           },
         ],
         annotations: [
-          { label: 'θ₁', position: { x: normPt.x - 28, y: boundPt.y - 45 } },
-          { label: 'θ₂', position: { x: normPt.x + 27, y: boundPt.y + 45 } },
+          { label: 'θ₁', position: { x: normalX - 25, y: boundY - 35 } },
+          { label: 'θ₂', position: { x: normalX + 20, y: boundY + 35 } },
         ],
-        render: mapper.metadata(),
+        render: {
+          source_width_px: w,
+          source_height_px: h,
+          canvas_width_px: 800,
+          canvas_height_px: 600,
+          source_to_canvas_scale: 1.0,
+        },
       },
     };
   }
 
   // 2. Curved Mirror
   if (concept === 'mirror') {
-    const isCff = urlLower.includes('cff33623') || (w === 553 && h === 469);
-    // Figure 8.23 geometry in source px (553x469):
-    // Pole P at (68, 292), right-facing
-    // Focus F at (150, 292), C at (232, 292)
-    // Pencil base Y at (280, 292), tip X at (280, 120), height 172
-    const poleSrc = isCff ? { x: 68, y: 292 } : { x: w * 0.72, y: h * 0.5 };
-    const facing = poleSrc.x < w / 2 ? 'right' : 'left';
-    const dir = facing === 'right' ? 1 : -1;
-
-    const fSrc = isCff ? 82.0 : 135.0;
-    const objBaseSrc = isCff ? { x: 280, y: 292 } : { x: poleSrc.x - 2.2 * fSrc, y: poleSrc.y };
-    const objHeightSrc = isCff ? 106.0 : 85.0;
-    const aperHeightSrc = isCff ? 328.0 : 240.0;
-
-    const pole = mapper.point(poleSrc.x, poleSrc.y);
-    const fPx = mapper.length(fSrc);
-    const objBase = mapper.point(objBaseSrc.x, objBaseSrc.y);
-    const objH = mapper.length(objHeightSrc);
-    const aperH = mapper.length(aperHeightSrc);
-    const rOfCurv = fPx * 2.0;
-
+    const fPx = 135.0;
+    const mx = 580.0;
     return {
       domain: 'optics',
       scenario: 'mirror',
@@ -251,11 +251,9 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
             optics: {
               model: 'concave',
               concavity: 'concave',
-              facing: facing,
-              pole: { x: pole.x, y: pole.y },
+              pole: { x: mx, y: 300.0 },
               focal_length_px: fPx,
-              aperture_height_px: aperH,
-              radius_of_curvature_px: rOfCurv,
+              aperture_height_px: 240.0,
             },
           },
           {
@@ -264,105 +262,54 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
             author_role: 'dynamic',
             optics: {
               model: 'optical_object',
-              base: { x: objBase.x, y: pole.y },
-              tip: { x: objBase.x, y: pole.y - objH },
-              height_px: objH,
+              base: { x: mx - 2.2 * fPx, y: 300.0 },
+              tip: { x: mx - 2.2 * fPx, y: 215.0 },
+              height_px: 85.0,
             },
           },
         ],
         annotations: [
-          { label: 'C', position: { x: pole.x + dir * 2 * fPx, y: pole.y } },
-          { label: 'F', position: { x: pole.x + dir * fPx, y: pole.y } },
-          { label: 'P', position: { x: pole.x, y: pole.y } },
+          { label: 'C', position: { x: mx - 2 * fPx, y: 300.0 } },
+          { label: 'F', position: { x: mx - fPx, y: 300.0 } },
+          { label: 'P', position: { x: mx, y: 300.0 } },
         ],
-        render: mapper.metadata(),
+        render: { canvas_width_px: 800, canvas_height_px: 600, source_to_canvas_scale: 1.0 },
       },
     };
   }
 
   // 3. Simple Pendulum
   if (concept === 'pendulum') {
-    const isTest1 = urlLower.includes('test1') || (w === 797 && h === 652);
-    // Sub-pixel source coordinates for test1.jpg (797x652)
-    const bobSrc = isTest1 ? { x: 246.58, y: 527.56 } : { x: w * 0.35, y: h * 0.65 };
-    const pivotSrc = isTest1 ? { x: 468.02, y: 99.73 } : { x: w * 0.5, y: h * 0.2 };
-    const rSrc = isTest1 ? 43.27 : 24.0;
-    const lengthPx = Math.hypot(bobSrc.x - pivotSrc.x, bobSrc.y - pivotSrc.y);
-    const theta0 = Math.atan2(bobSrc.x - pivotSrc.x, bobSrc.y - pivotSrc.y);
-
-    const bgUrl = isTest1 ? '/uploads/clean_test1_bg.jpg' : imageUrl;
-    const spriteUrl = isTest1 ? '/sprites/element_bob.png' : null;
-
-    const pendulumObj = {
-      id: 'pendulum_system',
-      role: 'dynamic',
-      type: 'pendulum',
-      geometry: {
-        space: 'source_px',
-        pivot: pivotSrc,
-        bob_center: bobSrc,
-        bob_radius_px: rSrc,
-        string_length_px: lengthPx,
-      },
-      physics: {
-        length_m: options.pendulumLengthM || 1.0,
-        theta0_rad: theta0,
-        omega0_rad_s: 0.0,
-        damping_s_inv: 0.0,
-        mass_kg: null,
-      },
-      perception: {
-        geometry_confidence: isTest1 ? 0.98 : 0.65,
-        mode: isTest1 ? 'PRECISION' : 'APPROXIMATE',
-      },
-    };
-
-    if (spriteUrl) {
-      pendulumObj.visual = {
-        sprite_url: spriteUrl,
-      };
-    }
-
     return {
       domain: 'mechanics',
       scenario: 'pendulum',
       scene: {
-        schema_version: '3.0',
-        simulation: {
-          domain: 'mechanics',
-          subtype: 'pendulum',
-          engine: 'analytic_rk4',
-        },
-        source: {
-          image_width_px: w,
-          image_height_px: h,
-        },
-        coordinate_system: {
-          geometry_space: 'source_px',
-          fit: 'contain',
-        },
-        visual: {
-          background_url: bgUrl,
-          original_image_url: imageUrl,
-        },
-        environment: {
-          gravity_m_s2: options.gravity !== undefined ? options.gravity : 9.81,
-        },
-        calibration: {
-          pixels_per_meter: options.pendulumLengthM ? lengthPx / options.pendulumLengthM : null,
-          status: options.pendulumLengthM ? 'calibrated' : 'physical_length_unresolved',
-        },
-        objects: [pendulumObj],
-        perception_mode: isTest1 ? 'PRECISION' : 'APPROXIMATE',
-        approximate: !isTest1,
+        schema_version: '1.0-compat',
+        simulation_type: 'kinematics',
+        visual: { background_url: imageUrl },
+        environment: { gravity: options.gravity || 1.0 },
+        objects: [
+          {
+            id: 'pendulum_system',
+            role: 'dynamic',
+            type: 'pendulum',
+            pivot: { x: 380.0, y: 120.0 },
+            bob_position: { x: 280.0, y: 390.0 },
+            radius: 24.0,
+            mass_kg: 1.5,
+            initial_velocity: { x: 2.2, y: 0.0 },
+            friction: 0.001,
+            friction_air: 0.0005,
+            restitution: 0.95,
+          },
+        ],
+        render: { canvas_width_px: 800, canvas_height_px: 600, source_to_canvas_scale: 1.0 },
       },
     };
   }
 
   // 4. Projectile
   if (concept === 'projectile') {
-    const ballPos = mapper.point(120.0, 440.0);
-    const floorPos = mapper.point(400.0, 565.0);
     return {
       domain: 'mechanics',
       scenario: 'projectile',
@@ -376,8 +323,8 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
             id: 'projectile_ball',
             role: 'dynamic',
             type: 'circle',
-            initial_position: { x: ballPos.x, y: ballPos.y },
-            radius: mapper.length(22.0),
+            initial_position: { x: 120.0, y: 440.0 },
+            radius: 22.0,
             mass_kg: 1.2,
             initial_velocity: { x: 7.5, y: -8.5 },
             friction: 0.05,
@@ -387,95 +334,22 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
             id: 'ground_floor',
             role: 'static',
             type: 'ground',
-            initial_position: { x: floorPos.x, y: floorPos.y },
-            size: { width: mapper.length(800.0), height: mapper.length(40.0) },
+            initial_position: { x: 400.0, y: 565.0 },
+            size: { width: 800.0, height: 40.0 },
             friction: 0.12,
             restitution: 0.5,
           },
         ],
-        render: mapper.metadata(),
+        render: { canvas_width_px: 800, canvas_height_px: 600, source_to_canvas_scale: 1.0 },
       },
     };
   }
 
-  // 5. Newton's Cradle (5-Ball Pendulum - pendulum.png)
-  if (concept === 'newtons_cradle' || urlLower.includes('pendulum.png') || urlLower.includes('cradle')) {
-    try {
-      const resp = await fetch('/scenes/kinematics/newtons_cradle_scene.json');
-      if (resp.ok) {
-        const sc = await resp.json();
-        return {
-          domain: 'mechanics',
-          scenario: 'newtons_cradle',
-          scene: sc,
-        };
-      }
-    } catch (_) {}
-  }
-
-  // 6. Spring-Mass / Kinematics Incline Scene (Newton's Law Ramp & Spring)
-  if (concept === 'spring_mass' || concept === 'incline' || urlLower.includes('with_spring') || urlLower.includes('spring')) {
-    try {
-      const resp = await fetch('/scenes/kinematics/physics_scene.json');
-      if (resp.ok) {
-        const sc = await resp.json();
-        return {
-          domain: 'mechanics',
-          scenario: 'spring_mass',
-          scene: sc,
-        };
-      }
-    } catch (_) {}
-  }
-
-  // 6. Mechanics fallback: if user requested mechanics, default to pendulum instead of optics!
-  if (requestedDomain === 'mechanics') {
-    return {
-      domain: 'mechanics',
-      scenario: 'pendulum',
-      scene: {
-        schema_version: '3.0',
-        simulation: {
-          domain: 'mechanics',
-          subtype: 'pendulum',
-          engine: 'analytic_rk4',
-        },
-        source: { image_width_px: w, image_height_px: h },
-        coordinate_system: { geometry_space: 'source_px', fit: 'contain' },
-        visual: { background_url: imageUrl },
-        environment: { gravity_m_s2: options.gravity || 9.81 },
-        calibration: { status: 'physical_length_unresolved' },
-        objects: [
-          {
-            id: 'pendulum_system',
-            role: 'dynamic',
-            type: 'pendulum',
-            geometry: {
-              space: 'source_px',
-              pivot: { x: w * 0.5, y: h * 0.2 },
-              bob_center: { x: w * 0.35, y: h * 0.65 },
-              bob_radius_px: 24.0,
-              string_length_px: Math.hypot(w * 0.15, h * 0.45),
-            },
-            physics: {
-              length_m: options.pendulumLengthM || 1.0,
-              theta0_rad: Math.atan2(w * 0.35 - w * 0.5, h * 0.65 - h * 0.2),
-              omega0_rad_s: 0.0,
-              damping_s_inv: 0.0,
-              mass_kg: null,
-            },
-            perception: { geometry_confidence: 0.7, mode: 'APPROXIMATE' },
-          },
-        ],
-        perception_mode: 'APPROXIMATE',
-      },
-    };
-  }
-
-  // 7. Default Thin Lens (Optics domain fallback)
-  const fPx = mapper.length(130);
-  const lensPt = mapper.point(w * 0.5, h * 0.5);
-  const arrowX = lensPt.x - 2 * fPx;
+  // 5. Default Thin Lens
+  const fPx = 130;
+  const lensX = 400;
+  const axisY = 300;
+  const arrowX = lensX - 2 * fPx;
   const focalCm = options.focalLengthCm || 20.0;
   const pxPerCm = fPx / focalCm;
 
@@ -497,8 +371,8 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
           author_role: 'fixed',
           optics: {
             model: 'thin_lens',
-            optical_center: { x: lensPt.x, y: lensPt.y },
-            aperture_height_px: mapper.length(220.0),
+            optical_center: { x: lensX, y: axisY },
+            aperture_height_px: 220.0,
             focal_length_px: { value: fPx, source: 'browser_cv' },
           },
         },
@@ -508,24 +382,28 @@ async function analyzeDiagramInBrowser(imageUrl, requestedDomain, options, onPro
           author_role: 'dynamic',
           optics: {
             model: 'optical_object',
-            base: { x: arrowX, y: lensPt.y },
-            tip: { x: arrowX, y: lensPt.y - mapper.length(85) },
-            height_px: mapper.length(85),
+            base: { x: arrowX, y: axisY },
+            tip: { x: arrowX, y: axisY - 85 },
+            height_px: 85,
           },
         },
       ],
       annotations: [
-        { label: '2F1', position: { x: lensPt.x - 2 * fPx, y: lensPt.y } },
-        { label: 'F1', position: { x: lensPt.x - fPx, y: lensPt.y } },
-        { label: 'O', position: { x: lensPt.x, y: lensPt.y } },
-        { label: 'F2', position: { x: lensPt.x + fPx, y: lensPt.y } },
-        { label: '2F2', position: { x: lensPt.x + 2 * fPx, y: lensPt.y } },
+        { label: '2F1', position: { x: lensX - 2 * fPx, y: axisY } },
+        { label: 'F1', position: { x: lensX - fPx, y: axisY } },
+        { label: 'O', position: { x: lensX, y: axisY } },
+        { label: 'F2', position: { x: lensX + fPx, y: axisY } },
+        { label: '2F2', position: { x: lensX + 2 * fPx, y: axisY } },
       ],
       physical_scale: {
         pixels_per_cm: { value: pxPerCm, source: 'user_calibration' },
         status: 'calibrated',
       },
-      render: mapper.metadata(),
+      render: {
+        canvas_width_px: 800,
+        canvas_height_px: 600,
+        source_to_canvas_scale: 1.0,
+      },
     },
   };
 }

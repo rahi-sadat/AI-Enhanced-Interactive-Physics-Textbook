@@ -1,12 +1,8 @@
-import Matter from "matter-js";
-import decomp from "poly-decomp";
-
-const { Bodies, Body, Constraint, Common } = Matter;
-
-if (typeof window !== "undefined") {
-  window.decomp = decomp;
-}
-Common.setDecomp(decomp);
+import {
+  Bodies,
+  Body,
+  Constraint
+} from "matter-js";
 
 function buildRenderOptions(object, defaultFill = "#3b82f6") {
   const render = {
@@ -26,22 +22,27 @@ function buildRenderOptions(object, defaultFill = "#3b82f6") {
   return render;
 }
 
-export function createPhysicsBody(object) {
+export function createPhysicsBody(object, mapper = null) {
 
   let body = null;
-
+  const rawPos = object.initial_position || { x: 0, y: 0 };
+  const pos = mapper ? mapper.sourceToView(rawPos.x, rawPos.y) : rawPos;
 
   // --------------------------------
   // BLOCK
   // --------------------------------
 
   if (object.type === "block") {
+    const rawW = object.size?.width ?? 60;
+    const rawH = object.size?.height ?? 60;
+    const w = mapper ? mapper.sourceLengthToView(rawW) : rawW;
+    const h = mapper ? mapper.sourceLengthToView(rawH) : rawH;
 
     body = Bodies.rectangle(
-      object.initial_position.x,
-      object.initial_position.y,
-      object.size.width,
-      object.size.height,
+      pos.x,
+      pos.y,
+      w,
+      h,
       {
         isStatic: object.role === "static",
         render: buildRenderOptions(object, "#64748b")
@@ -55,11 +56,13 @@ export function createPhysicsBody(object) {
   // --------------------------------
 
   else if (object.type === "circle") {
+    const rawR = object.radius ?? 20;
+    const r = mapper ? mapper.sourceLengthToView(rawR) : rawR;
 
     body = Bodies.circle(
-      object.initial_position.x,
-      object.initial_position.y,
-      object.radius,
+      pos.x,
+      pos.y,
+      r,
       {
         isStatic: object.role === "static",
         friction: object.friction ?? 0.08,
@@ -77,12 +80,16 @@ export function createPhysicsBody(object) {
   // --------------------------------
 
   else if (object.type === "ground") {
+    const rawW = object.size?.width ?? 800;
+    const rawH = object.size?.height ?? 40;
+    const w = mapper ? mapper.sourceLengthToView(rawW) : rawW;
+    const h = mapper ? mapper.sourceLengthToView(rawH) : rawH;
 
     body = Bodies.rectangle(
-      object.initial_position.x,
-      object.initial_position.y,
-      object.size.width,
-      object.size.height,
+      pos.x,
+      pos.y,
+      w,
+      h,
       {
         isStatic: true,
         friction: object.friction ?? 0.1,
@@ -138,23 +145,6 @@ export function createPhysicsBody(object) {
       },
       true
     );
-
-    // Matter.js Bodies.fromVertices decomposes concave polygons into convex parts
-    // and places the composite body at (initial_position.x, initial_position.y), which
-    // causes an offset if initial_position differs from the decomposed centroid.
-    // We adjust the body position so the bounds match the input vertices exactly with sub-pixel precision.
-    if (body) {
-      const minInputX = Math.min(...vertices.map(v => v.x));
-      const minInputY = Math.min(...vertices.map(v => v.y));
-      const dx = body.bounds.min.x - minInputX;
-      const dy = body.bounds.min.y - minInputY;
-      if (Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4) {
-        Body.setPosition(body, {
-          x: body.position.x - dx,
-          y: body.position.y - dy
-        });
-      }
-    }
   }
 
 
@@ -302,28 +292,29 @@ export function createSpringSystem(object) {
 // PENDULUM SYSTEM FACTORY
 // --------------------------------
 
-export function createPendulumSystem(object) {
-  const pivotPoint = object.pivot || { x: 400, y: 120 };
-  const bobPos = object.bob_position || object.initial_position || { x: 280, y: 380 };
-  const bobRadius = object.radius || 24;
+export function createPendulumSystem(object, mapper = null) {
+  const rawPivot = object.pivot || { x: 400, y: 120 };
+  const rawBobPos = object.bob_position || object.initial_position || { x: 280, y: 380 };
+  const rawRadius = object.radius || 24;
+
+  const pivotPoint = mapper ? mapper.sourceToView(rawPivot.x, rawPivot.y) : rawPivot;
+  const bobPos = mapper ? mapper.sourceToView(rawBobPos.x, rawBobPos.y) : rawBobPos;
+  const bobRadius = mapper ? mapper.sourceLengthToView(rawRadius) : rawRadius;
 
   // 1. Pivot body (static small pin)
-  const pivot = Bodies.circle(pivotPoint.x, pivotPoint.y, object.pivot_radius ?? 5, {
+  const pivot = Bodies.circle(pivotPoint.x, pivotPoint.y, mapper ? Math.max(3, mapper.sourceLengthToView(6)) : 6, {
     isStatic: true,
-    collisionFilter: { group: -1 },
     render: {
-      fillStyle: object.pivot_fill || "#94a3b8",
-      visible: object.render_pivot !== false
+      fillStyle: "#94a3b8"
     }
   });
 
   // 2. Bob body (dynamic circle)
   const bob = Bodies.circle(bobPos.x, bobPos.y, bobRadius, {
     isStatic: false,
-    friction: object.friction ?? 0.0001,
-    frictionAir: object.friction_air ?? 0.0002,
-    restitution: object.restitution ?? 0.98,
-    slop: 0.0,
+    friction: object.friction ?? 0.002,
+    frictionAir: object.friction_air ?? 0.0008,
+    restitution: object.restitution ?? 0.95,
     render: buildRenderOptions(object, "#38bdf8")
   });
 
@@ -343,12 +334,12 @@ export function createPendulumSystem(object) {
     bodyA: pivot,
     bodyB: bob,
     length: length,
-    stiffness: object.stiffness ?? 1.0,
-    damping: object.damping ?? 0.0001,
+    stiffness: 0.99,
+    damping: object.damping ?? 0.0005,
     render: {
       visible: true,
-      strokeStyle: object.rod_color || "#94a3b8",
-      lineWidth: object.rod_width ?? 2.0
+      strokeStyle: "#94a3b8",
+      lineWidth: 2.5
     }
   });
 
