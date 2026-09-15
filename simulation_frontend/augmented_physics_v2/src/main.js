@@ -294,6 +294,8 @@ btnGenerateSim?.addEventListener('click', async () => {
       incline: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
     };
 
+    const scenarioChoice = scenarioSelect?.value || 'auto';
+
     if (!uploadedFile && PRESET_SCENES[scenarioChoice]) {
       updateProgress('Loading pre-compiled textbook scenario...', 80);
       const presetInfo = PRESET_SCENES[scenarioChoice];
@@ -308,7 +310,7 @@ btnGenerateSim?.addEventListener('click', async () => {
 
     // Run AI / CV analysis
     const domainChoice = domainSelect.value;
-    const scenarioChoiceVal = scenarioSelect?.value || 'auto';
+    const scenarioChoiceVal = scenarioChoice;
     const focalCm = parseFloat(focalInput.value) || 20.0;
     const result = await analyzeDiagram(
       finalImageUrl,
