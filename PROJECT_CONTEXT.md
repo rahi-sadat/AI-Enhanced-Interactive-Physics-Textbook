@@ -2,213 +2,398 @@
 
 > **Project Name**: AugmentedPhysics  
 > **Target**: Multimodal NCTB Physics Diagram Understanding, Physics Simulation, and Bangla Intelligent Tutoring  
+> **Repository**: [rahi-sadat/AI-Enhanced-Interactive-Physics-Textbook](https://github.com/rahi-sadat/AI-Enhanced-Interactive-Physics-Textbook)  
 > **Reference Paper**: *"Augmented Physics: Creating Interactive and Embedded Physics Simulations from Static Textbook Diagrams"* (UIST '24) — Gunturu et al.  
-> **Environment**: Windows 11, Python 3.13.5, RTX 3050 Laptop GPU (6 GB VRAM), CUDA 13.0, PyTorch 2.14+, Meta SAM 2 (SAM 2.1 Hiera Tiny).
+> **Environment**: Windows 11, Python 3.12 / 3.13, RTX 3050 Laptop GPU (6 GB VRAM), CUDA runtime, PyTorch 2.1+, Meta SAM 2 (SAM 2.1 Hiera Tiny), Vite + Vanilla JS + p5.js + Matter.js, FastAPI + Uvicorn.
 
 ---
 
-## 1. High-Level Vision & Purpose
+## 1. High-Level Vision & Architecture
 
-This project transforms static physics textbook pages (specifically NCTB Bangladesh curriculum) into an interactive, grounded learning experience:
+This project transforms static physics textbook pages (specifically the NCTB Bangladesh Secondary & Higher Secondary curriculum) into an interactive, grounded learning experience. Static printed diagrams are augmented with responsive, interactive simulations overlaid directly on the textbook illustration with sub-pixel registration.
 
 ```
-[NCTB Textbook Page / Diagram]
-             │
-             ▼
-[Multimodal Perception: SAM 2 + OCR/VLM]
- (Isolates visual objects & extracts geometry + RGBA sprites)
-             │
-             ▼
-[Canonical PhysicsScene v2 (JSON)]
- (Domain-neutral, preserves uncertainty, no guessed physics)
-             │
-             ▼
-[Scene Compiler & Domain Adapters]
- (Matter.js 2D Rigid-body / Optics / Circuits / GSAP Animation)
-             │
-             ▼
-[Embedded Simulation Stage (Layered HTML/CSS)]
- (Layer 1: Textbook Diagram | Layer 2: Transparent Matter.js Canvas)
-             │
-             ▼
-[Bangla Intelligent Pedagogical Tutor]
- (Grounded in textbook text, diagram geometry, and live simulation state)
+                  NCTB Textbook Page / Scanned Diagram
+                                   │
+                                   ▼
+             ┌───────────────────────────────────────────┐
+             │ Multimodal Perception & Diagram Analyzer  │
+             │   - SAM 2.1 (Object & Sprite Extraction)  │
+             │   - FastAPI Heuristic & CV Classifier     │
+             │   - Multi-Evidence Parameter Provenance   │
+             │   - Sub-Pixel Feature Refinement (Lines)  │
+             └─────────────────────┬─────────────────────┘
+                                   │
+                                   ▼
+             ┌───────────────────────────────────────────┐
+             │         Canonical PhysicsScene JSON       │
+             │   Authoritative in Native Source Pixels   │
+             │  (Domain-neutral: geometry, optical axes, │
+             │   refractive indices, masses, constraints)│
+             └─────────────────────┬─────────────────────┘
+                                   │
+         ┌─────────────────────────┴─────────────────────────┐
+         ▼                                                   ▼
+┌─────────────────────────┐                         ┌─────────────────────────┐
+│   Optics Engine (p5.js) │                         │ Kinematics (Matter.js)  │
+│ - Authoritative source  │                         │ - Rigid Body Dynamics   │
+│   coordinate solver     │                         │ - Simple Pendulum       │
+│ - Thin Lens Formula     │                         │ - Curved Ramps (decomp) │
+│ - Triangular & TIR Prism│                         │ - Restoring Springs     │
+│ - Spherical Mirrors     │                         │ - Transparent Sprites   │
+│ - Snell's Law Interface │                         │ - Invisible Colliders   │
+│ - Educational HUD / Calc│                         │ - Live Parameter Tweak  │
+└────────────┬────────────┘                         └────────────┬────────────┘
+             │                                                   │
+             └─────────────────────────┬─────────────────────────┘
+                                       ▼
+             ┌───────────────────────────────────────────┐
+             │        Embedded Simulation Stage          │
+             │   Layer 1: Scanned Textbook Diagram       │
+             │   Layer 2: Transparent Simulation Canvas  │
+             │   Layer 3: Interactive Draggable Controls │
+             │   Layer 4: Real-time Physics HUD Cards    │
+             │   CoordinateMapper: 1:1 Aspect Contain    │
+             └─────────────────────┬─────────────────────┘
+                                   │
+                                   ▼
+             ┌───────────────────────────────────────────┐
+             │    Bangla Intelligent Pedagogical Tutor   │
+             │  (Grounded in curriculum, diagram text,   │
+             │   and live simulation state) [Roadmap]    │
+             └───────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Core Concepts in Plain Language
+## 2. Core Concepts & Design Principles
 
 | Concept | Plain-Language Explanation | Role in AugmentedPhysics |
 | :--- | :--- | :--- |
-| **Model Architecture** | The blueprint or neural network design (e.g. SAM 2 Hiera architecture). Like an empty brain design before studying. | Defines how the image encoder, prompt encoder, and mask decoder communicate. |
-| **Checkpoint (`.pt`)** | The saved numerical weights resulting from training on millions of images. The "learned experience/brain". | `sam2.1_hiera_tiny.pt` provides the pre-trained weights so SAM 2 knows what object boundaries look like. |
-| **PyTorch & CUDA** | PyTorch is the mathematical engine running the neural net; CUDA connects PyTorch directly to NVIDIA GPU hardware cores. | Enables fast, real-time matrix operations on the local RTX 3050 (6 GB) instead of running slow on CPU. |
-| **Segmentation Mask** | A binary/per-pixel map ($H \times W$) where $1 = \text{object}$, $0 = \text{background}$. | Isolates the exact pixels of the ball, block, slope, or ground from the textbook background. |
-| **Prompt (Points / Boxes)** | Visual cues provided to SAM: positive point (label=1, "include this") or negative point (label=0, "exclude this"). | Allows human or AI to point at a diagram element to extract it without manual lassoing. |
-| **Segmentation vs Tracking** | Segmentation isolates an object in a **single static image**. Tracking follows the same object across **multiple video frames**. | Current work is **image segmentation**. Video tracking is for dynamic live-camera/animation later. |
-| **Multi-Mask Output** | When a prompt is ambiguous, SAM produces 3 candidate masks with confidence scores. | We re-rank these using stability, prompt consistency, and connectedness to select the true whole object. |
-| **Physics Body (Polygon / Circle)** | The invisible mathematical representation ($x, y$ vertices or radius) that calculates collisions, gravity, and velocities. | In real life, physics is invisible. Matter.js calculates momentum and contact along these shapes. |
-| **Sprite (Visual Cutout)** | The transparent RGBA image crop extracted from the original diagram using the SAM mask. | Textured onto moving Matter.js bodies so the real textbook object moves and rolls naturally. |
-| **Embedded Canvas** | A transparent Matter.js canvas positioned directly over the textbook image. | Allows the simulation to happen directly "inside" the textbook page instead of on a detached gray canvas. |
-| **PhysicsScene JSON** | Structured representation storing geometry, author roles, and physics parameters. | The contract separating computer vision from physics simulation engines. |
+| **Separation of Perception & Physics** | Visual perception extracts only what is visible; it never hallucinates unstated physics values. | Canonical JSON preserves visual coordinates; solvers apply physics laws based on explicit parameters or textbook standards. |
+| **Authoritative Source Coordinates** | All optical geometry and physical parameters are defined and solved in native source image pixels (`source_px`). | Prevents coordinate drift, eliminates hardcoded $800 \times 600$ viewport assumptions, and guarantees sub-pixel registration regardless of display screen size. |
+| **CoordinateMapper Aspect-Preserving Contain** | Single unified bidirectional transform matching CSS `object-fit: contain`. | Computes $s = \min(W_v / W_s, H_v / H_s)$ and offsets $(x_0, y_0)$. Automatically handles letterboxing and pillarboxing for images of any resolution (e.g., $393 \times 328$ or $1536 \times 1024$). |
+| **Modular Domain Solvers** | Avoids a single monolithic ray tracer or physics engine. Different physics phenomena use dedicated, mathematically rigorous solvers. | NCTB thin lens equation ($1/f = 1/v - 1/u$), prism minimum deviation ($\delta$), spherical mirror caustics, and Matter.js constraint dynamics each have tailored solvers. |
+| **Embedded Layered Canvas** | The simulation renders on a transparent canvas layered directly on top of the original textbook image. | Keeps the learner immersed in the textbook layout instead of sending them to a detached blank canvas. |
+| **Sub-Pixel Diagram Calibration** | Optical parameters (such as medium index $n_2$) are calibrated directly against the diagram's physical drawing. | Calibrating $n_2 = 1.83$ for the NCTB interface refraction diagram ensures the interactive ray aligns dead-center over the printed black arrow. |
+| **Transparent RGBA Sprites** | Objects (e.g. ball, pendulum bob, candle flame) are segmented using SAM 2 and mapped onto physics bodies. | Textbook illustrations visually move and respond to real-time drag and physics constraints. |
+| **Pedagogical HUD** | Real-time calculation overlays showing formulas, values, and dynamic state changes. | Calculates image distance $v$, magnification $m$, critical angle $\theta_c$, deviation $\delta$, and pendulum period $T = 2\pi\sqrt{L/g}$. |
+| **Diagram Upload Studio** | Ingestion pipeline for any textbook diagram (lens, prism, mirror, pendulum, ramp). | Accepts uploaded photos/scans, classifies archetype via backend CV/heuristics, supports manual override, and boots live simulation instantly. |
 
 ---
 
-## 3. Milestone Progress to Date
-
-### ✅ Milestone 1: Local SAM 2 Setup & First Single-Object Segmentation
-- **Environment Established**: Resolved Windows multi-Python conflict (Python 2.7 -> Python 3.13.5). Created isolated virtual environment `.venv`.
-- **GPU Acceleration**: Verified RTX 3050 (6 GB VRAM) with CUDA runtime through PyTorch (`torch.cuda.is_available() == True`).
-- **SAM 2 Installed**: Cloned Meta `sam2`, downloaded `sam2.1_hiera_tiny.pt`, resolved Hydra configuration path (`configs/sam2.1/sam2.1_hiera_t.yaml`).
-- **Pipeline Execution**: Encoded test image with SAM 2 image predictor, fed a single positive point prompt, generated candidate masks, selected top mask, and visualized overlay.
-
-### ✅ Milestone 2: Multi-Object Segmentation & Candidate Mask Re-ranking
-- Tested on multiple objects (e.g., three separate balls in one image).
-- **Key Discovery**: The candidate mask with the highest raw SAM predicted-IoU score is often an internal sub-part rather than the whole object. Motivated multi-signal re-ranking (prompt consistency, contour stability, connectedness, overlap penalty).
-
-### ✅ Milestone 3: Robust Interactive Scene Authoring Pipeline
-- Built modular CV pipeline under `backend/`:
-  - `backend/core/`: Shared CV utilities (`geometry_utils.py`, `mask_quality.py`, `scene_builder.py`, `sprite_utils.py`).
-  - `backend/kinematics/`: Mechanics authoring GUI (`build_kinematics_scene.py`) exporting Matter.js scenes.
-  - `backend/optics/`: Optics authoring GUI (`build_optics_scene.py`) supporting thin lenses, prisms, and mirrors for Optics2D.
-
-
-### ✅ Milestone 4: Embedded Diagram Simulation, Sprites & Complex Kinematics
-- **Transparent RGBA Sprite Extraction**: Implemented `sprite_utils.py`. Dynamic objects are automatically cut out from the source diagram as transparent PNGs (`/sprites/element_001.png`).
-- **Embedded Composite Stage**:
-  - 2-layer stage:
-    - Layer 1: `<img id="diagram-image">` (original textbook diagram).
-    - Layer 2: Transparent Matter.js canvas overlaid with 1:1 pixel coordinate alignment.
-- **Invisible Static Collider Architecture**:
-  - For static scenery (curved ramps, ground, walls), the textbook illustration is visible underneath. Matter.js sets `render.visible = false` on static colliders so no synthetic shapes obscure the diagram.
-- **Concave Polygon Decomposition & Sub-Pixel Alignment**:
-  - Integrated `poly-decomp` and `Common.setDecomp(decomp)` in Matter.js.
-  - Resolved Matter.js `Bodies.fromVertices` decomposed centroid shift: after decomposition, the composite body bounds are aligned to the exact input vertices with sub-pixel precision (`< 1e-14` error), ensuring balls roll exactly on the visible surface without sinking inside the ramp.
-- **Dynamic Spring System**:
-  - Built a 1D restoring spring constraint with movable plunger plate in `physicsBodyFactory.js` and `simulation.js`, perfectly aligned with diagram coordinates (`y = 367.29 px`). When the ball rolls down the curve, it collides with the plunger, compresses the spring, and rebounds.
-
-### ✅ Milestone 5: Domain Engine Splitting & Modern Architecture (`augmented_physics_v2`)
-- **Authoritative Source-Pixel Coordinate System**:
-  - Implemented `CoordinateMapper` (`src/core/coordinateMapper.js`) mapping native source diagram pixels directly to viewport CSS and physical device pixels via standard CSS `object-fit: contain` letterboxing with bidirectional inversion.
-- **Dedicated Analytical RK4 Integrator for Simple Pendulums**:
-  - Replaced imprecise spring/constraint approximations with `PendulumSimulation` (`src/mechanics/pendulumSimulation.js`), integrating full nonlinear equations $\ddot{\theta} + \frac{g}{L}\sin\theta + \beta\dot{\theta} = 0$ at 240 Hz with energy drift $< 0.05\%$.
-- **Analytical Projectile Kinematics Engine**:
-  - Built `ProjectileSimulation` (`src/mechanics/projectileSimulation.js`) with exact closed-form trajectories ($x(t)$, $y(t)$, apex, landing velocity) and interactive trace overlay.
-- **Geometric Optics 2D Precision Ray Tracer**:
-  - Built comprehensive ray optics suite (`src/optics/`):
-    - Thin lens formula ($1/f = 1/u + 1/v$) with real/virtual image states and principal rays.
-    - Spherical mirror solver (concave/convex, left/right bidirectional).
-    - Snell's Law refractor with critical angle $\theta_c$ calculation and Total Internal Reflection (TIR).
-    - Prisms & refractive polygon tracing with angle of deviation $\delta$ and dispersion.
-- **Domain-Aware Diagram Routing**:
-  - Updated `diagramAnalyzer.js` and `server.py` to prevent domain cross-talk: kinematics/Newton diagrams consistently route to mechanics solvers without defaulting to optics lenses.
-
----
-
-## 4. Architecture & Pipeline Breakdown
-
-```mermaid
-flowchart TD
-    A[Input Image / Diagram] --> B[SAM 2 Image Encoder]
-    B --> C[Image Embeddings in VRAM]
-    D[User / AI Prompt Points & Labels] --> E[SAM 2 Mask Decoder]
-    C --> E
-    E --> F[Candidate Masks + Raw Scores]
-    F --> G[Mask Quality Evaluator mask_quality.py]
-    G --> H[Human Confirmation / Refinement UI]
-    H --> I[Accepted Mask]
-    I --> J[Geometry Extractor geometry_utils.py]
-    I --> K[Sprite Extractor sprite_utils.py]
-    J --> L[Scene Builder scene_builder.py]
-    K --> L
-    L --> M[physics_scene_full.json Canonical v2]
-    L --> N[physics_scene.json Multi-Domain Compat]
-    N --> O[SceneRouter / DiagramAnalyzer]
-    O -->|Mechanics: Rigid/Ramp/Spring| P1[Matter.js + SI Unit Adapter]
-    O -->|Mechanics: Pendulum| P2[Analytical RK4 Solver 240Hz]
-    O -->|Mechanics: Projectile| P3[Closed-Form Kinematics]
-    O -->|Optics: Lens/Mirror/Prism| P4[Optics2D Ray Tracer]
-    P1 & P2 & P3 & P4 --> Q[OverlayStage + CoordinateMapper]
-    Q --> R[Layer 1: Diagram Image | Layer 2: Transparent Precision Canvas]
-```
-
-### Perception vs Physics Separation (Critical Rule)
-The canonical `physics_scene_full.json` strictly records **what is visually perceived or confirmed by the author**:
-- Geometry (centroids, vertices, radii, angles) in source pixels
-- Masks and coordinates
-- Author role (`dynamic`, `static`, `unknown`)
-- Semantic labels and sprite dimensions
-
-It **never** invents physical facts:
-- `mass_kg`: `null` (unless explicitly provided by text/OCR)
-- `initial_velocity`: `null`
-- `friction`, `restitution`: `null`
-- `gravity`: `null`
-
-Defaults (like `mass_kg = 1.0` or `gravity = 9.81 m/s²`) are translated only at runtime via `MatterUnitAdapter`.
-
----
-
-## 5. Frontend Architecture & Codebase Structure
+## 3. Directory & Codebase Structure
 
 ```
-simulation_frontend/augmented_physics_v2/
-├── package.json               # vite, matter-js, p5, poly-decomp
-├── index.html                 # Embedded stage + domain switcher + telemetry HUDs
-├── public/
-│   ├── scenes/
-│   │   ├── kinematics/        # physics_scene.json, with_spring.png, sprites/
-│   │   └── optics/            # thin_lens_scene.json, mirror_scene.json, prism_scene.json
-│   └── physics_scene.json     # Root compatibility scene
-├── src/
-│   ├── main.js                # App entrypoint, scene loading, domain bootstrap
-│   ├── core/
-│   │   ├── coordinateMapper.js# Sub-pixel source-to-viewport coordinate mapping
-│   │   ├── diagramAnalyzer.js # In-browser & FastAPI CV scene classification
-│   │   ├── matterUnitAdapter.js# SI units (m/s², m/s, kg) to Matter.js scale translation
-│   │   ├── overlayStage.js    # 2-layer stage management with transparent overlay
-│   │   ├── sceneLoader.js     # JSON scene fetcher with cache-busting
-│   │   └── sceneRouter.js     # Routes scenes to mechanics or optics controllers
-│   ├── mechanics/
-│   │   ├── mechanicsController.js # Engine lifecycle, UI bindings, AbortController
-│   │   ├── physicsBodyFactory.js  # Matter.js bodies, polygon sub-pixel bounds alignment, springs
-│   │   ├── pendulumSimulation.js  # High-order RK4 numerical integrator with energy conservation
-│   │   ├── projectileSimulation.js# Closed-form kinematics with flight analytics
-│   │   └── simulation.js          # Matter.js contact physics, runner & piston spring constraints
-│   ├── optics/
-│   │   ├── opticsController.js    # Optics UI bindings, preset loaders
-│   │   ├── opticsSimulation.js    # P5.js ray tracing canvas renderer
-│   │   ├── opticalBench.js        # Optical axis and bench state
-│   │   ├── lensEquation.js        # Analytical Gaussian lens equations
-│   │   ├── rayTracer.js           # Snell ray refraction & reflection engine
-│   │   ├── elements/              # ThinLens, ThickLens, SphericalMirror, Prism, Slab
-│   │   └── scenes/                # Optics preset configurations
-│   └── style.css                  # Dark-mode glassmorphic interface styles
-└── test/
-    ├── test_coordinateMapper.js   # Letterbox & round-trip numerical tests
-    ├── test_pendulum_physics.js   # Period verification & energy conservation tests
-    ├── test_optics_engines.js     # 70 automated physics tests across lenses, mirrors & prisms
-    └── test_browser_automation.js # Puppeteer end-to-end browser verification
+d:\AugmentedPhysics\
+├── backend/                                  # Python CV, SAM 2, and FastAPI Server
+│   ├── server.py                             # FastAPI server (:8000) for diagram upload & CV analysis
+│   ├── test_optics_precision.py              # Automated test suite for backend optics & provenance
+│   ├── core/                                 # Computer vision shared modules
+│   │   ├── geometry_utils.py                 # Contour approximation, bounding boxes, polygon vertices
+│   │   ├── mask_quality.py                   # Multi-mask re-ranking & IoU scoring
+│   │   ├── scene_builder.py                  # Canonical PhysicsScene generator
+│   │   └── sprite_utils.py                   # RGBA transparent cutout extractor
+│   ├── kinematics/                           # Mechanics authoring scripts
+│   │   └── build_kinematics_scene.py         # Mechanics annotation tool
+│   └── optics/                               # Optics authoring & perception modules
+│       ├── build_optics_scene.py             # Optics annotation tool
+│       ├── optics_geometry.py                # Lens, arrow, prism, mirror, and axis geometry extraction
+│       ├── optics_scene_builder.py           # Canonical 3.0-optics scene builder with provenance
+│       └── optics_text.py                    # Multi-evidence focal length & axis distance inference
+│
+├── simulation_frontend/
+│   ├── augmented_physics_v2/                 # Unified Modern Multi-Domain Web App
+│   │   ├── package.json                      # Vite, p5.js, Matter.js, poly-decomp
+│   │   ├── vite.config.js                    # Vite configuration with API proxy to localhost:8000
+│   │   ├── index.html                        # App shell: Studio Navigation, Canvas Stage, Controls, HUD
+│   │   ├── test/                             # Automated test suite (Node.js)
+│   │   │   ├── test_coordinate_mapper.js     # 21 tests: letterbox, pillarbox, inversion, length scaling
+│   │   │   └── test_optics_engines.js        # 65 tests: thin lens, prism, mirror, Snell interface & TIR
+│   │   ├── public/
+│   │   │   ├── uploads/                      # Uploaded & standard textbook diagrams
+│   │   │   │   ├── diagram_7dcbe9c0.png      # NCTB interface refraction diagram (393 x 328 px)
+│   │   │   │   ├── diagram_0ae6ee8e.png      # Water refraction diagram (1536 x 1024 px)
+│   │   │   │   ├── diagram_cff33623.png      # Spherical mirror diagram (553 x 469 px)
+│   │   │   │   └── diagram_ceceeb1a.jpg      # Thin lens diagram (1024 x 768 px)
+│   │   │   └── scenes/
+│   │   │       ├── optics/                   # Canonical optics textbook scenario JSONs
+│   │   │       │   ├── thin_lens_scene.json
+│   │   │       │   ├── concave_lens_scene.json
+│   │   │       │   ├── prism_scene.json
+│   │   │       │   ├── glass_slab_scene.json
+│   │   │       │   ├── tir_prism_scene.json
+│   │   │       │   ├── mirror_scene.json
+│   │   │       │   └── interface_refraction_scene.json
+│   │   │       └── kinematics/               # Kinematics scenario JSONs
+│   │   │           ├── physics_scene.json
+│   │   │           └── with_spring.png
+│   │   └── src/
+│   │       ├── main.js                       # App controller: domain switcher, presets, upload studio
+│   │       ├── style.css                     # Glassmorphic dark theme, responsive stage layout
+│   │       ├── core/                         # Shared simulation infrastructure
+│   │       │   ├── coordinateMapper.js       # Authoritative bidirectional contain transform
+│   │       │   ├── overlayStage.js           # 2-layer diagram stage with ResizeObserver
+│   │       │   ├── diagramAnalyzer.js        # Diagram analyzer: backend AI + browser CV fallback
+│   │       │   ├── sceneLoader.js            # JSON scene fetcher & cache validator
+│   │       │   └── sceneRouter.js            # Domain router (Mechanics vs. Optics)
+│   │       ├── kinematics/                   # Kinematics Simulation Engine
+│   │       │   ├── kinematicsRenderer.js     # Matter.js world, runner, and render lifecycle
+│   │       │   ├── kinematicsBodyFactory.js  # Bodies, constraints, decomposed ramps, sprites
+│   │       │   └── kinematicsControls.js     # Gravity, velocity, reset, and playback controls
+│   │       └── optics/                       # Modular Ray Optics Framework
+│   │           ├── opticsController.js       # Optics coordinator: model <-> engines <-> view <-> HUD
+│   │           ├── opticsSceneAdapter.js     # Adapts PhysicsScene v2/v3 into optics model in source_px
+│   │           ├── engines/                  # Pure mathematical optics solvers
+│   │           │   ├── rayGeometry.js        # rayToBounds, boundaryNormal, vector math
+│   │           │   ├── thinLensEngine.js     # Gaussian lens solver with ray bounds
+│   │           │   ├── prismEngine.js        # Triangular & slab prism Snell & TIR solver
+│   │           │   ├── mirrorEngine.js       # Spherical concave/convex & plane mirror solver
+│   │           │   └── snellInterfaceEngine.js# Planar interface refraction & TIR solver
+│   │           └── view/                     # View rendering & presentation
+│   │               ├── p5OpticsView.js       # p5.js transparent canvas with source transform stack
+│   │               ├── opticsRenderer.js     # Drawing primitives: rays, arrows, normal, angle arcs
+│   │               ├── opticsTheme.js        # Visual tokens: ray colors, glow shaders, angle arcs
+│   │               ├── opticsSprites.js      # Dynamic candle & optical object sprites
+│   │               └── opticsHUD.js          # Dynamic educational HUD cards with live formulas
+│   │
+│   └── physics simulation/                   # Teammate v1 Kinematics Prototype
+│       ├── index.html                        # Initial composite canvas prototype
+│       └── src/                              # Early spring & ramp testbed
+│
+├── uploads/                                  # Backend static uploads directory (mounted at /uploads)
+├── PROJECT_CONTEXT.md                        # Complete project knowledge base (this file)
+└── walkthrough.md                            # Detailed architectural & verification walkthrough
 ```
 
 ---
 
-## 6. Project Roadmap Ladder
+## 4. Completed Milestones & Implementation Details
+
+### ✅ Milestone 1: Local SAM 2 Setup & GPU Acceleration
+- Resolved Windows multi-Python conflict (isolated `.venv` with Python 3.12+).
+- Verified RTX 3050 Laptop GPU (6 GB VRAM) CUDA acceleration via PyTorch (`torch.cuda.is_available() == True`).
+- Cloned Meta SAM 2, downloaded `sam2.1_hiera_tiny.pt`, and integrated Hydra configurations.
+- Implemented single-point prompt mask generation and bounding box extraction.
+
+### ✅ Milestone 2: Multi-Object Mask Re-ranking
+- Developed `mask_quality.py` to address SAM 2 ambiguity on textbook diagrams.
+- Raw predicted IoU often selected sub-parts (e.g. ball highlight or ring) rather than whole objects.
+- Added multi-signal scoring: prompt containment, boundary stability, contour connectedness, and overlap penalties to consistently choose whole objects.
+
+### ✅ Milestone 3: CV Authoring Pipeline & Scene Builder
+- Created `backend/core/` shared CV tools:
+  - `geometry_utils.py`: Converts binary masks into normalized polygon vertices, circles, and bounding boxes.
+  - `sprite_utils.py`: Extracts transparent RGBA cutouts (`.png`) from original diagrams using feathering.
+  - `scene_builder.py`: Generates the domain-neutral canonical `PhysicsScene` JSON contract.
+- Built interactive desktop annotation GUIs: `build_kinematics_scene.py` and `build_optics_scene.py`.
+
+### ✅ Milestone 4: Embedded Diagram Simulation & Complex Kinematics
+- **Embedded Composite Stage**: 2-layer stage with exact 1:1 pixel coordinate alignment between textbook diagram and canvas.
+- **Invisible Static Colliders**: Static background ramps and grounds are rendered with `render.visible = false` in Matter.js, allowing the textbook art to remain crisp without obstruction.
+- **Concave Decomposition**: Integrated `poly-decomp` with `Common.setDecomp(decomp)` in Matter.js to decompose concave ramp curves into convex hulls, eliminating collision snagging.
+- **Dynamic 1D Spring Plunger**: Built restoring spring constraint in Matter.js where a rolling ball compresses a plunger plate and rebounds realistically.
+
+### ✅ Milestone 5: Modular Ray Optics Engine & Comprehensive Testing
+Built a full modular 2D ray optics framework tailored specifically to secondary textbook curricula:
+1. **Thin Lens Engine (`thinLensEngine.js`)**:
+   - Computes principal rays: parallel ray passing through focus, central ray passing undeflected through optical center, focal ray emerging parallel.
+   - Calculates virtual ray back-extensions (dashed rays) when object is inside focal distance ($u < f$).
+   - Computes real-time image position $v = \frac{u \cdot f}{u - f}$ and magnification $m = -\frac{v}{u}$.
+2. **Prism Engine (`prismEngine.js`)**:
+   - Handles triangular prisms ($A = 60^\circ$) with Snell's law at first and second faces.
+   - Accurately checks critical angle $\theta_c = \arcsin(n_2 / n_1)$ and triggers Total Internal Reflection (TIR).
+   - Computes net deviation angle $\delta = i_1 + r_2 - A$.
+3. **Spherical Mirror Engine (`mirrorEngine.js`)**:
+   - Supports concave and convex mirrors with focal point $F = R/2$ and center of curvature $C$.
+   - Traces parallel-to-focal rays, center-of-curvature normal return rays, and apex reflection rays.
+4. **Snell Interface Engine (`snellInterfaceEngine.js`)**:
+   - Planar boundary refraction and reflection across media (e.g., air $n=1.00$ to water $n=1.33$ or glass $n=1.50/1.83$).
+   - Calculates critical angle and full internal reflection.
+5. **Rigorous Unit Test Suite**:
+   - 65 unit tests in `test/test_optics_engines.js` covering real images, virtual images, diverging lenses, prisms at varying incidence, and mirror reflections (100% pass rate).
+
+### ✅ Milestone 6: Optics Visual Experience & Educational HUD
+- **p5.js Embedded Canvas**: High-performance, anti-aliased ray rendering with luminous glow effects and interactive draggability.
+- **Draggable Candle Object**: Dynamic candle sprite with live flame that scales, flips upside-down for inverted real images, and enlarges for upright virtual images.
+- **Pedagogical HUD**: Live floating glassmorphism card displaying:
+  - Active focal length ($f$), object distance ($u$), image distance ($v$).
+  - Image nature: *Real & Inverted* vs. *Virtual & Upright*.
+  - Magnification magnitude ($|m|$) with step-by-step formula breakdown.
+  - Refractive index, incident angle ($\theta_1$), refracted angle ($\theta_2$), and deviation ($\delta$).
+
+### ✅ Milestone 7: Studio Architecture, Kinematics Pendulum & Diagram Ingestion
+- **Modern Unified Frontend (`augmented_physics_v2`)**:
+  - Integrated Optics Studio and Kinematics Studio into a sleek, responsive dark-mode tabbed interface.
+  - Implemented **Simple Pendulum Simulation** using Matter.js constraint physics with draggable bob, realistic period $T = 2\pi\sqrt{L/g}$, gravity adjustments, and angular oscillations.
+- **Diagram Upload Studio (`uploadModal.js` / `main.js`)**:
+  - Drag-and-drop modal supporting camera photos, scans, and diagram exports.
+  - Client-side live preview and scenario preset selector (`convex_lens`, `concave_lens`, `prism`, `curved_mirror`, `interface_refraction`, `simple_pendulum`, `inclined_plane`).
+  - Pre-packaged textbook scenario shortcuts:
+    - `diagram_7dcbe9c0` (NCTB interface refraction with angle labels)
+    - `diagram_0ae6ee8e` (Water refraction diagram)
+    - `diagram_cff33623` (Spherical mirror diagram)
+    - `diagram_ceceeb1a` (Thin lens diagram)
+    - `test1` (Simple pendulum diagram)
+    - `test` (Projectile diagram)
+- **FastAPI Perception Backend (`backend/server.py`)**:
+  - Runs on port 8000 with CORS and Vite proxy (`/api` -> `http://localhost:8000`).
+  - Mounted `/uploads` static file path serving diagrams with HTTP 200.
+  - Endpoints:
+    - `GET /api/health`: Service health and capability check.
+    - `POST /api/upload-diagram`: Ingests uploaded image files and returns server asset URL.
+    - `POST /api/analyze-diagram`: Deep multimodal perception and parameter extraction.
+
+### ✅ Milestone 8: Git Repository Synchronization
+- Configured remote: `https://github.com/rahi-sadat/AI-Enhanced-Interactive-Physics-Textbook.git`.
+- Cleaned and organized codebase into logical conventional commits.
+
+### ✅ Milestone 9: Authoritative Optics Precision Architecture & CoordinateMapper
+- **Authoritative Source-Space Geometry Contract**:
+  - Completely decoupled simulation coordinate math from canvas dimensions. All geometry (lens center, principal axis, mirror pole, prism vertices, interface boundary, light source) is specified and solved authoritatively in **native source image pixels (`source_px`)**.
+  - Bounded ray tracing: `rayGeometry.js` provides `rayToBounds(origin, direction, bounds)` so rays terminate at source image boundaries `{ minX: 0, minY: 0, maxX: srcW, maxY: srcH }`.
+- **Pure Source Transform Stack in p5.js**:
+  - In `p5OpticsView.js`, drawing is enclosed in an aspect-preserving contain transform:
+    ```javascript
+    p.push();
+    p.translate(this.mapper.offsetX, this.mapper.offsetY);
+    p.scale(this.mapper.scale);
+    this._renderCurrentScene(p);
+    p.pop();
+    ```
+  - `ResizeObserver` monitors viewport resize and recomputes `CoordinateMapper` offsets and scale dynamically without tearing or distortion.
+  - Inverted pointer mapping: Mouse events are mapped from viewport coordinates to source coordinates (`mapper.viewToSource(p.mouseX, p.mouseY)`). Drag hit radii are dynamically scaled by `1 / mapper.scale`.
+- **Multi-Evidence Parameter Provenance**:
+  - Added `backend/optics/optics_text.py` with `project_distance_on_axis` and `infer_focal_length_px` to compute median focal distances and multi-evidence confidence scores.
+  - Updated `backend/optics/optics_scene_builder.py` and `backend/server.py` to output canonical `3.0-optics` scenes with explicit parameter provenance (`observed`, `derived`, `assumed`).
+
+### ✅ Milestone 10: Sub-Pixel Alignment & Zero-Deviation Overlays
+Fixed four critical user-reported simulation bugs and alignment issues:
+1. **Spherical Mirror Rendering (Empty Canvas Bug)**:
+   - Fixed `ReferenceError: isConcave is not defined` and undeclared `cx` in `opticsRenderer.js` that crashed mirror rendering. Added rear-silvering hatching lines and full support for concave, convex, and plane mirrors.
+2. **Refraction Angle Text Legibility**:
+   - Added high-contrast dark badges with rounded borders (`p.rect(...)`) in `drawAngleArc` so angle labels are crystal clear and never obscured by rays.
+   - Explicitly formatted labels as `θ₁ = 41°` and `θ₂ = 21°` (preventing `21°` from visually reading as `2°` due to line overlap).
+3. **Uploaded Diagram Background Visibility**:
+   - Mounted `/uploads` directory via `StaticFiles` in FastAPI (`server.py`).
+   - Fixed `OverlayStage.setBackground` cache-busting query parameter appending (`?t=...`) that was corrupting browser `blob:` URLs when users uploaded images.
+   - Omitted solid rectangular background fills in `p5OpticsView` whenever a textbook diagram image is present, allowing the diagram to show through with 100% clarity.
+4. **Interface Refraction Double-Scaling Bug & Outgoing Ray Exact Alignment**:
+   - **Root Cause**: `interface_refraction_scene.json` had pre-scaled $800 \times 600$ viewport coordinates ($y=291, x=432$) instead of native source dimensions ($393 \times 328\text{ px}$). When `CoordinateMapper` applied contain scaling ($1.829\times$), the simulation overlay was scaled twice, pushing the boundary to $y=532$ and the normal off-screen to $x=831$.
+   - **Sub-Pixel Image Calibration**: Analytically measured `diagram_7dcbe9c0.png`:
+     - Boundary line: native $y = \mathbf{159.0\text{ px}}$
+     - Normal line: native $x = \mathbf{214.0\text{ px}}$
+     - Ray source: native $(x = \mathbf{94.0}, y = \mathbf{20.0}\text{ px})$, incident angle $\theta_1 = 40.8^\circ \approx 41^\circ$
+     - Printed refracted ray: passes through $(214, 159)$ and $(268, 300)$, angle $\theta_2 = \mathbf{20.95^\circ} \approx \mathbf{21^\circ}$.
+   - **Snell's Law Alignment**:
+     $$n_2 = \frac{n_1 \sin(\theta_1)}{\sin(\theta_2)} = \frac{1.0 \times \sin(40.8^\circ)}{\sin(20.95^\circ)} = \mathbf{1.83}$$
+     Setting $n_2 = 1.83$ causes the interactive blue ray to overlay **dead-center directly on top of the textbook's printed black arrow** with 0-pixel offset.
+   - Added preset `NCTB Diagram (1.83)` with full two-way slider and dropdown synchronization.
+
+---
+
+## 5. Running the Application Locally
+
+### Frontend Development Server (Vite)
+```powershell
+cd d:\AugmentedPhysics\simulation_frontend\augmented_physics_v2
+npm run dev
+# Running on http://localhost:5173
+```
+
+### Backend Perception Server (FastAPI)
+```powershell
+cd d:\AugmentedPhysics
+python -m uvicorn backend.server:app --host 127.0.0.1 --port 8000 --reload
+# Running on http://127.0.0.1:8000
+```
+
+### Running Automated Test Suites
+```powershell
+cd d:\AugmentedPhysics\simulation_frontend\augmented_physics_v2
+# Run optics physics engine unit tests (65 tests)
+node test/test_optics_engines.js
+
+# Run CoordinateMapper unit tests (21 tests)
+node test/test_coordinate_mapper.js
+
+# Run frontend production build validation
+npm run build
+```
+
+```powershell
+cd d:\AugmentedPhysics
+# Run backend optics precision & provenance tests
+python backend/test_optics_precision.py
+```
+
+---
+
+## 6. Mathematical Formulations in Solvers
+
+### Thin Lens (Gaussian Formulation)
+$$\frac{1}{f} = \frac{1}{v} - \frac{1}{u} \implies v = \frac{u \cdot f}{u - f}$$
+$$m = -\frac{v}{u}$$
+- $f > 0$: Convex (converging) lens
+- $f < 0$: Concave (diverging) lens
+- $u > 0$: Real object to the left of the lens
+- $v > 0$: Real image formed on the opposite side (inverted)
+- $v < 0$: Virtual image formed on the same side (upright)
+
+### Snell's Law & Refraction at Interface
+$$n_1 \sin(\theta_1) = n_2 \sin(\theta_2) \implies \theta_2 = \arcsin\left(\frac{n_1}{n_2} \sin(\theta_1)\right)$$
+$$\theta_c = \arcsin\left(\frac{n_2}{n_1}\right) \quad (\text{for } n_1 > n_2)$$
+- When $\theta_1 > \theta_c$ (denser $\to$ rarer), Total Internal Reflection (TIR) occurs with reflection angle $\theta_r = \theta_1$.
+- NCTB Diagram Medium 2 calibration: $n_2 = \frac{1.0 \cdot \sin(40.8^\circ)}{\sin(20.95^\circ)} = 1.83$.
+
+### Prism Refraction
+$$\delta = (i_1 - r_1) + (i_2 - r_2) = i_1 + i_2 - A$$
+At minimum deviation ($\delta_m$): $i_1 = i_2$ and $r_1 = r_2 = A/2$, yielding:
+$$n = \frac{\sin\left(\frac{A + \delta_m}{2}\right)}{\sin\left(\frac{A}{2}\right)}$$
+
+### Spherical & Plane Mirrors
+$$\frac{1}{f} = \frac{1}{u} + \frac{1}{v}, \quad f = \frac{R}{2}$$
+$$m = -\frac{v}{u}$$
+- Concave: $f > 0$, real/inverted image for $u > f$, virtual/upright for $u < f$.
+- Convex: $f < 0$, virtual, upright, diminished image for all real object positions.
+- Plane: $f = \infty$, $v = -u$, $m = +1.0$.
+
+### CoordinateMapper Transformation
+For source image resolution $(W_s, H_s)$ and container viewport $(W_v, H_v)$:
+$$s = \min\left(\frac{W_v}{W_s}, \frac{H_v}{H_s}\right)$$
+$$x_0 = \frac{W_v - W_s \cdot s}{2}, \quad y_0 = \frac{H_v - H_s \cdot s}{2}$$
+$$x_{\text{view}} = x_{\text{source}} \cdot s + x_0, \quad y_{\text{view}} = y_{\text{source}} \cdot s + y_0$$
+$$x_{\text{source}} = \frac{x_{\text{view}} - x_0}{s}, \quad y_{\text{source}} = \frac{y_{\text{view}} - y_0}{s}$$
+
+### Simple Pendulum Dynamics
+$$T = 2\pi \sqrt{\frac{L}{g}}$$
+$$\frac{d^2\theta}{dt^2} + \frac{g}{L}\sin(\theta) = 0$$
+
+---
+
+## 7. Next Roadmap Milestones
 
 ```mermaid
 graph LR
-    P0[Phase 0: Env & SAM 2 Setup ✅] --> P1[Phase 1: Robust CV Scene Builder ✅]
-    P1 --> P2[Phase 2: Verified Matter.js Integration ✅]
-    P2 --> P3[Phase 3: Sprites & Embedded Diagram Stage ✅]
-    P3 --> P4[Phase 4: Multi-Domain Precision Engines ✅]
-    P4 --> P5[Phase 5: Automated Diagram Extraction & Inpainting ✅]
-    P5 --> P6[Phase 6: NCTB Full Page & Bangla AI Tutor 🔄]
+    M1[M1-M4: SAM 2 & Embedded Kinematics ✅] --> M5[M5-M6: Ray Optics & Studio HUD ✅]
+    M5 --> M7[M7: FastAPI & Diagram Ingestion ✅]
+    M7 --> M9[M9-M10: Optics Precision & Alignment ✅]
+    M9 --> M11[Phase 11: Multimodal VLM OCR Parameter Extractor 🔄]
+    M11 --> M12[Phase 12: Circuits & Wave Optics Adapters]
+    M12 --> M13[Phase 13: NCTB Full-Page Parser & Bangla AI Tutor]
 ```
 
-- **Phase 4 (Completed)**: Sub-pixel CoordinateMapper, analytical RK4 pendulum simulation, closed-form projectile solver, complete Optics2D ray tracer (lenses, spherical mirrors, prisms, TIR), and Matter.js concave polygon boundary alignment.
-- **Phase 5 (Completed)**: Background inpainting for static diagrams, sub-pixel bob and string detection via PCA & TLS, and domain-aware diagram analyzer.
-- **Phase 6 (Active Target - NCTB Full Page & Bangla Pedagogical Tutor)**:
-  - Multimodal OCR/VLM pipeline (Gemini / GPT-4V) for automated diagram and problem prompt parameter extraction.
-  - Multi-diagram full-page PDF layout parsing.
-  - Intelligent pedagogical tutor speaking conversational Bengali grounded in live simulation state and textbook theory.
+### 🔄 Phase 11: Multimodal VLM (Gemini / GPT-4V) Parameter Extraction
+- Ingest diagram captions and surrounding textbook paragraphs.
+- Extract physical quantities with units (e.g. $f = +15\text{ cm}$, $u = 30\text{ cm}$, $m = 2.5\text{ kg}$, $k = 150\text{ N/m}$, $n_2 = 1.83$).
+- Automatically populate the canonical `PhysicsScene` values without manual user tuning.
+
+### 🔮 Phase 12: Domain Expansions (Circuits & Wave Optics)
+- **DC Circuit Simulation**: Resistors, batteries, switches, Ohm's law, and Kirchhoff's loop solvers.
+- **Wave Interference & Diffraction**: Double slit interference and diffraction grating visualization.
+
+### 🔮 Phase 13: NCTB Full-Page Parser & Bangla AI Tutor
+- Multi-diagram full page PDF layout analysis.
+- Bilingual (Bangla + English) interactive tutoring agent that responds to student queries:
+  - *"ফোকাস দূরত্বের ভেতরে বস্তু রাখলে প্রতিবিম্ব কেমন হবে?"* ("What happens to the image when the object is placed inside the focal length?")
+  - Explains concepts step-by-step with real-time synchronized highlights on the live simulation.

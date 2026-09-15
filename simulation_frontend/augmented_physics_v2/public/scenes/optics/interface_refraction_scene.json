@@ -8,6 +8,11 @@
   "visual": {
     "background_url": "/uploads/diagram_7dcbe9c0.png"
   },
+  "source": {
+    "image": "/uploads/diagram_7dcbe9c0.png",
+    "image_width_px": 393,
+    "image_height_px": 328
+  },
   "elements": [
     {
       "id": "element_boundary",
@@ -15,10 +20,10 @@
       "author_role": "fixed",
       "optics": {
         "model": "interface_boundary",
-        "y": 300.0,
+        "y": 159.0,
         "orientation": "horizontal",
         "medium1": { "name": "Air (Rarer)", "n": 1.0, "label": "n1" },
-        "medium2": { "name": "Glass / Denser", "n": 1.5, "label": "n2" }
+        "medium2": { "name": "Dense Medium", "n": 1.83, "label": "n2" }
       }
     },
     {
@@ -27,7 +32,7 @@
       "author_role": "fixed",
       "optics": {
         "model": "normal",
-        "x": 408.0
+        "x": 214.0
       }
     },
     {
@@ -36,16 +41,18 @@
       "author_role": "dynamic",
       "optics": {
         "model": "ray_source",
-        "position": { "x": 165.0, "y": 95.0 },
-        "target": { "x": 408.0, "y": 300.0 }
+        "position": { "x": 94.0, "y": 20.0 },
+        "target": { "x": 214.0, "y": 159.0 }
       }
     }
   ],
   "annotations": [
-    { "label": "i", "position": { "x": 380, "y": 250 } },
-    { "label": "r", "position": { "x": 435, "y": 350 } }
+    { "label": "θ₁", "position": { "x": 195, "y": 125 } },
+    { "label": "θ₂", "position": { "x": 225, "y": 195 } }
   ],
   "render": {
+    "source_width_px": 393,
+    "source_height_px": 328,
     "canvas_width_px": 800,
     "canvas_height_px": 600,
     "source_to_canvas_scale": 1.0
