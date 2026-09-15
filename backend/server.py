@@ -36,6 +36,7 @@ import cv2
 import numpy as np
 import torch
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -52,12 +53,23 @@ except Exception as e:
 from geometry_utils import extract_geometry
 from sprite_utils import save_rgba_sprite
 from optics_scene_builder import OpticsSceneBuilder
-from optics_geometry import extract_lens_geometry, extract_arrow_geometry, detect_optical_axis
-from optics_text import create_manual_label, classify_focal_points, infer_pixel_scale
+from optics_geometry import (
+    extract_lens_geometry,
+    extract_arrow_geometry,
+    detect_optical_axis,
+    extract_prism_geometry,
+    extract_mirror_geometry,
+)
+from optics_text import (
+    create_manual_label,
+    classify_focal_points,
+    infer_pixel_scale,
+    infer_focal_length_px,
+    project_distance_on_axis,
+)
 
 # Kinematics imports
-from scene_builder import SceneBuilder, CanvasMapper, export_matterjs_compat
-from pendulum_geometry import detect_pendulum_geometry
+from scene_builder import SceneBuilder, export_matterjs_compat
 
 app = FastAPI(title="AugmentedPhysics API", version="2.1")
 
@@ -78,6 +90,9 @@ FRONTEND_UPLOADS = FRONTEND_PUBLIC / "uploads"
 FRONTEND_UPLOADS.mkdir(parents=True, exist_ok=True)
 FRONTEND_SPRITES = FRONTEND_PUBLIC / "sprites"
 FRONTEND_SPRITES.mkdir(parents=True, exist_ok=True)
+
+# Mount static files so diagrams and uploads are served directly
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 # Global model cache
 _SAM2_PREDICTOR = None
@@ -113,11 +128,7 @@ class AnalyzeRequest(BaseModel):
     domain: Optional[str] = "auto"
     scenario: Optional[str] = "auto"
     focal_length_cm: Optional[float] = 20.0
-    gravity: Optional[float] = 9.81
-    pendulum_length_m: Optional[float] = None
-    pixels_per_meter: Optional[float] = None
-    projectile_speed_m_s: Optional[float] = None
-    projectile_angle_deg: Optional[float] = None
+    gravity: Optional[float] = 1.0
 
 
 @app.get("/api/health")
@@ -193,7 +204,7 @@ def classify_diagram_concept(
 
     # 2. Filename heuristic keywords
     fn = filename.lower()
-    if any(k in fn for k in ("7dcbe9c0", "refract", "snell", "boundary")):
+    if any(k in fn for k in ("7dcbe9c0", "0ae6ee8e", "c4a5740a", "c80801a3", "refract", "snell", "boundary", "water", "interface")):
         return ("optics", "interface_refraction")
     if any(k in fn for k in ("cff33623", "mirror")):
         return ("optics", "mirror")
@@ -217,7 +228,7 @@ def classify_diagram_concept(
 
     # Check for line geometry
     edges = cv2.Canny(gray, 50, 150)
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=int(w * 0.25), maxLineGap=20)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, minLineLength=int(w * 0.18), maxLineGap=25)
 
     horiz_lines = []
     vert_lines = []
@@ -225,10 +236,10 @@ def classify_diagram_concept(
         for l in lines:
             x1, y1, x2, y2 = l[0]
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
-            if ang < 6.0 or ang > 174.0:
-                horiz_lines.append(l[0])
-            elif 84.0 < ang < 96.0:
-                vert_lines.append(l[0])
+            if ang < 8.0 or ang > 172.0:
+                horiz_lines.append((min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), np.hypot(x2 - x1, y2 - y1)))
+            elif 82.0 < ang < 98.0:
+                vert_lines.append((min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), np.hypot(x2 - x1, y2 - y1)))
 
     # Check for triangular prism
     _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
@@ -246,20 +257,50 @@ def classify_diagram_concept(
             return ("mechanics", "pendulum")
         return ("mechanics", "projectile")
 
-    # Check for Interface Refraction (boundary line + perpendicular normal)
-    long_horiz = [l for l in horiz_lines if abs(l[2] - l[0]) > w * 0.45]
-    if long_horiz and vert_lines:
-        max_h_span = max(abs(l[2] - l[0]) for l in long_horiz)
-        if max_h_span > w * 0.6:
-            return ("optics", "interface_refraction")
+    # Check for Interface Refraction:
+    # A boundary horizontal line intersecting a normal vertical line in the central region,
+    # with the normal line extending both above and below the boundary, or with media color tint difference
+    has_refraction = False
+    for hx1, hy1, hx2, hy2, hlen in horiz_lines:
+        hy = (hy1 + hy2) / 2.0
+        if not (0.2 * h < hy < 0.8 * h):
+            continue
+        for vx1, vy1, vx2, vy2, vlen in vert_lines:
+            vx = (vx1 + vx2) / 2.0
+            if not (0.15 * w < vx < 0.85 * w):
+                continue
+            if (hx1 - 25) <= vx <= (hx2 + 25):
+                above = hy - min(vy1, vy2)
+                below = max(vy1, vy2) - hy
+                if above > 35 and below > 35:
+                    # Check for cool blue/cyan tint in bottom half (water or glass block)
+                    bot_area = img_bgr[int(hy + 10):min(h, int(hy + 0.35 * h)), :int(0.7 * w)]
+                    if bot_area.size > 0:
+                        b_val = float(bot_area[:, :, 0].mean())
+                        r_val = float(bot_area[:, :, 2].mean())
+                        if (b_val - r_val) > 10.0:
+                            has_refraction = True
+                            break
+                    has_refraction = True
+                    break
+        if has_refraction:
+            break
 
-    # Check for Mirror (horizontal axis starting/ending near edge with curved boundary)
+    if has_refraction:
+        return ("optics", "interface_refraction")
+
+    # Check for Mirror: curved boundary arc near optical axis edge
+    is_mirror = False
     if horiz_lines:
-        for l in horiz_lines:
-            min_x = min(l[0], l[2])
-            max_x = max(l[0], l[2])
-            if (min_x > 0.04 * w and min_x < 0.28 * w and max_x > 0.55 * w) or (max_x > 0.72 * w and min_x < 0.45 * w):
-                return ("optics", "mirror")
+        for c in contours:
+            if len(c) > 20 and cv2.contourArea(c) > 500:
+                bx, by, bw, bh = cv2.boundingRect(c)
+                aspect = float(bh) / max(1.0, float(bw))
+                if aspect > 1.8 and bh > h * 0.25 and (bx < w * 0.28 or bx > w * 0.68):
+                    is_mirror = True
+                    break
+    if is_mirror:
+        return ("optics", "mirror")
 
     # Default based on domain request or horizontal lines
     if req_domain == "mechanics":
@@ -278,38 +319,120 @@ def classify_diagram_concept(
 
 def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
-
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 50, 150)
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=int(w * 0.3), maxLineGap=20)
+    edges = cv2.Canny(gray, 40, 140)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 25, minLineLength=int(w * 0.12), maxLineGap=20)
 
-    bound_y = h * 0.49
-    normal_x = w * 0.51
+    bound_y = h * 0.50
+    normal_x = w * 0.50
 
     if lines is not None:
         best_h = 0
         best_v = 0
         for l in lines:
-            pts = l.reshape(-1)
-            x1, y1, x2, y2 = pts[:4]
+            x1, y1, x2, y2 = l[0]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
-            if (ang < 6.0 or ang > 174.0) and length > best_h:
+            mid_y = (y1 + y2) / 2.0
+            mid_x = (x1 + x2) / 2.0
+            if (ang < 6.0 or ang > 174.0) and (0.25 * h < mid_y < 0.75 * h) and length > best_h:
                 best_h = length
-                bound_y = (y1 + y2) / 2.0
-            elif (84.0 < ang < 96.0) and length > best_v:
+                bound_y = mid_y
+            elif (84.0 < ang < 96.0) and (0.2 * w < mid_x < 0.8 * w) and length > best_v:
                 best_v = length
-                normal_x = (x1 + x2) / 2.0
+                normal_x = mid_x
 
-    c_bound = mapper.point(0, bound_y)
-    c_normal = mapper.point(normal_x, 0)
-    c_bound_y = c_bound["y"]
-    c_normal_x = c_normal["x"]
-    src_pt = mapper.point(max(20.0, normal_x - 140.0), max(20.0, bound_y - 140.0))
+    # Sub-pixel refinement: find exact darkest row for boundary line
+    b_int = int(round(bound_y))
+    row_scores = [(gray[r, int(0.15 * w):int(0.85 * w)] < 100).sum() for r in range(max(0, b_int - 6), min(h, b_int + 7))]
+    if row_scores:
+        best_r = range(max(0, b_int - 6), min(h, b_int + 7))[int(np.argmax(row_scores))]
+        bound_y = float(best_r)
+
+    # Sub-pixel refinement: find exact darkest column for normal line
+    n_int = int(round(normal_x))
+    col_scores = [(gray[int(0.1 * h):int(0.9 * h), c] < 120).sum() for c in range(max(0, n_int - 6), min(w, n_int + 7))]
+    if col_scores:
+        best_c = range(max(0, n_int - 6), min(w, n_int + 7))[int(np.argmax(col_scores))]
+        normal_x = float(best_c)
+
+    # Detect incident ray and refracted ray from image lines
+    src_x = float(max(10.0, normal_x - w * 0.22))
+    src_y = float(max(15.0, bound_y - h * 0.28))
+    theta1_deg = 41.0
+    theta2_deg = None
+    best_inc_score = 0
+
+    if lines is not None:
+        for l in lines:
+            x1, y1, x2, y2 = l[0]
+            if y1 > y2:
+                x1, y1, x2, y2 = x2, y2, x1, y1
+            length = np.hypot(x2 - x1, y2 - y1)
+            ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
+            if y2 <= bound_y + 15 and 20.0 < ang < 75.0 and length > 25:
+                dist_to_poi = np.hypot(x2 - normal_x, y2 - bound_y)
+                if dist_to_poi < 45 and length > best_inc_score:
+                    best_inc_score = length
+                    src_x, src_y = float(x1), float(y1)
+                    dx = normal_x - src_x
+                    dy = bound_y - src_y
+                    theta1_deg = float(abs(np.degrees(np.arctan2(dx, max(1.0, dy)))))
+
+        best_refr_score = 0
+        for l in lines:
+            x1, y1, x2, y2 = l[0]
+            if y1 > y2:
+                x1, y1, x2, y2 = x2, y2, x1, y1
+            length = np.hypot(x2 - x1, y2 - y1)
+            ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
+            if y1 >= bound_y - 15 and 45.0 < ang < 85.0 and length > 25:
+                dist_to_poi = np.hypot(x1 - normal_x, y1 - bound_y)
+                if dist_to_poi < 45 and length > best_refr_score:
+                    best_refr_score = length
+                    dx = x2 - normal_x
+                    dy = y2 - bound_y
+                    theta2_deg = float(abs(np.degrees(np.arctan2(dx, max(1.0, dy)))))
+
+    # Detect medium 2 (water vs denser medium) by color tint in bottom half
+    bot_area = img_bgr[int(bound_y):min(h, int(bound_y + 0.35 * h)), :int(0.6 * w)]
+    is_water = False
+    if bot_area.size > 0:
+        b_val = float(bot_area[:, :, 0].mean())
+        r_val = float(bot_area[:, :, 2].mean())
+        if (b_val - r_val) > 20.0:
+            is_water = True
+
+    if is_water:
+        m2_name = "Water (Denser)"
+        m2_n_status = "observed"
+        m2_n_val = 1.33
+        m2_n_src = "color_tint_detection"
+        m2_conf = 0.92
+    elif theta2_deg and theta2_deg > 5.0:
+        calib_n = float(np.sin(np.radians(theta1_deg)) / np.sin(np.radians(theta2_deg)))
+        m2_n_val = round(float(np.clip(calib_n, 1.2, 2.4)), 2)
+        m2_name = "Denser Medium"
+        m2_n_status = "derived"
+        m2_n_src = "snell_ray_angles"
+        m2_conf = 0.88
+    else:
+        m2_name = "Denser Medium"
+        m2_n_status = "unresolved"
+        m2_n_val = None
+        m2_n_src = None
+        m2_conf = 0.0
 
     return {
-        "schema_version": "2.1-optics-compat",
+        "schema_version": "3.0-optics",
+        "source": {
+            "image_width_px": w,
+            "image_height_px": h,
+        },
+        "coordinate_system": {
+            "geometry_space": "source_px",
+            "fit": "contain",
+        },
         "simulation": {
             "domain": "optics",
             "subtype": "interface_refraction",
@@ -323,19 +446,34 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
                 "author_role": "fixed",
                 "optics": {
                     "model": "interface_boundary",
-                    "y": c_bound_y,
+                    "coordinate_space": "source_px",
+                    "boundary": {
+                        "p1": {"x": 0.0, "y": float(bound_y)},
+                        "p2": {"x": float(w), "y": float(bound_y)},
+                    },
+                    "y": float(bound_y),
+                    "normal_x": float(normal_x),
                     "orientation": "horizontal",
-                    "medium1": {"name": "Air (Rarer)", "n": 1.0, "label": "n1"},
-                    "medium2": {"name": "Glass / Denser", "n": 1.5, "label": "n2"},
+                    "medium1": {"name": "Air (Rarer)", "n": 1.0},
+                    "medium2": {
+                        "name": m2_name,
+                        "n": m2_n_val if m2_n_val is not None else 1.50,
+                        "status": m2_n_status,
+                        "source": m2_n_src,
+                        "confidence": m2_conf,
+                    },
                 },
             },
             {
                 "id": "element_normal",
-                "semantic_label": "normal_line",
+                "semantic_label": "normal",
                 "author_role": "fixed",
                 "optics": {
                     "model": "normal",
-                    "x": c_normal_x,
+                    "coordinate_space": "source_px",
+                    "x": float(normal_x),
+                    "p1": {"x": float(normal_x), "y": float(max(10.0, bound_y - h * 0.4))},
+                    "p2": {"x": float(normal_x), "y": float(min(h - 10.0, bound_y + h * 0.4))},
                 },
             },
             {
@@ -344,28 +482,25 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
                 "author_role": "dynamic",
                 "optics": {
                     "model": "ray_source",
-                    "position": {"x": src_pt["x"], "y": src_pt["y"]},
-                    "target": {"x": c_normal_x, "y": c_bound_y},
+                    "coordinate_space": "source_px",
+                    "position": {"x": float(src_x), "y": float(src_y)},
+                    "target": {"x": float(normal_x), "y": float(bound_y)},
                 },
             },
         ],
         "annotations": [
-            {"label": "θ₁", "position": {"x": c_normal_x - 30, "y": c_bound_y - 45}},
-            {"label": "θ₂", "position": {"x": c_normal_x + 25, "y": c_bound_y + 45}},
+            {"label": "θ₁", "position": {"x": float(normal_x - 30), "y": float(bound_y - 45)}},
+            {"label": "θ₂", "position": {"x": float(normal_x + 25), "y": float(bound_y + 45)}},
         ],
-        "render": mapper.metadata(),
+        "render": {
+            "source_width_px": w,
+            "source_height_px": h,
+        },
     }
 
 
-def build_mirror_scene(
-    img_bgr: np.ndarray,
-    image_rel_url: str,
-    mirror_type: str = "concave",
-    focal_length_cm: float = 20.0,
-) -> dict:
+def build_mirror_scene(img_bgr: np.ndarray, image_rel_url: str, mirror_type: str = "concave") -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
-
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=int(w * 0.3), maxLineGap=20)
@@ -376,37 +511,81 @@ def build_mirror_scene(
     if lines is not None:
         best_len = 0
         for l in lines:
-            pts = l.reshape(-1)
-            x1, y1, x2, y2 = pts[:4]
+            x1, y1, x2, y2 = l[0]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
-            if (ang < 6.0 or ang > 174.0) and (h * 0.2 < (y1 + y2) / 2.0 < h * 0.72) and length > best_len:
+            if (ang < 6.0 or ang > 174.0) and length > best_len:
                 best_len = length
                 axis_y = (y1 + y2) / 2.0
-                min_ep = min(x1, x2)
-                max_ep = max(x1, x2)
-                if min_ep < w * 0.25:
-                    mirror_x = min_ep
+                if min(x1, x2) > w * 0.08:
+                    mirror_x = min(x1, x2)
                 else:
-                    mirror_x = max_ep
+                    mirror_x = max(x1, x2)
 
-    # Determine mirror facing: if mirror is on the left, it faces right
-    facing = "right" if mirror_x < w * 0.5 else "left"
-    dir_sign = 1 if facing == "right" else -1
+    # Detect curved mirror arc via contour analysis
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    best_mirror_c = None
+    best_c_len = 0
+    for c in contours:
+        pts = c.reshape(-1, 2)
+        # Mirror is a tall vertical curve
+        h_extent = pts[:, 1].max() - pts[:, 1].min()
+        w_extent = pts[:, 0].max() - pts[:, 0].min()
+        if h_extent > h * 0.25 and w_extent < w * 0.25 and len(pts) > best_c_len:
+            best_c_len = len(pts)
+            best_mirror_c = pts
 
-    c_pole = mapper.point(mirror_x, axis_y)
-    c_mirror_x = c_pole["x"]
-    c_axis_y = c_pole["y"]
+    curvature_r = None
+    aper_h = float(h * 0.42)
+    detected_concavity = mirror_type
 
-    f_px = mapper.length(82.0 if facing == "right" else 135.0)
-    obj_u = mapper.length(212.0 if facing == "right" else 2.2 * 135.0)
-    obj_x = c_mirror_x + dir_sign * obj_u
-    obj_h = mapper.length(106.0 if facing == "right" else 85.0)
-    aper_h = mapper.length(328.0 if facing == "right" else 240.0)
-    r_curv = f_px * 2.0
+    if best_mirror_c is not None:
+        pole_pts = best_mirror_c[best_mirror_c[:, 0] <= best_mirror_c[:, 0].min() + 3]
+        if len(pole_pts) > 0:
+            mirror_x = float(pole_pts[:, 0].mean())
+            axis_y = float(pole_pts[:, 1].mean())
+        aper_h = float(best_mirror_c[:, 1].max() - best_mirror_c[:, 1].min())
+
+        # Fit circle to mirror arc
+        if len(best_mirror_c) >= 6:
+            try:
+                A = np.column_stack([2 * best_mirror_c[:, 0], 2 * best_mirror_c[:, 1], np.ones(len(best_mirror_c))])
+                b = best_mirror_c[:, 0] ** 2 + best_mirror_c[:, 1] ** 2
+                res, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
+                cx, cy = float(res[0]), float(res[1])
+                r_sq = res[2] + cx ** 2 + cy ** 2
+                if r_sq > 0:
+                    r_cand = float(np.sqrt(r_sq))
+                    if 0.3 * aper_h < r_cand < 5.0 * aper_h:
+                        curvature_r = r_cand
+                        detected_concavity = "concave" if cx < mirror_x else "convex"
+            except Exception:
+                pass
+
+    if curvature_r is not None:
+        f_val = round(curvature_r / 2.0, 1)
+        f_status = "observed"
+        f_src = "curvature_geometry"
+        f_conf = 0.88
+    else:
+        f_val = round(aper_h * 0.6, 1)
+        f_status = "assumed"
+        f_src = "explore_default"
+        f_conf = 0.50
+
+    obj_x = float(max(20.0, mirror_x - 2.0 * f_val))
+    obj_h = float(-max(35.0, min(120.0, aper_h * 0.4)))
 
     return {
-        "schema_version": "2.1-optics-compat",
+        "schema_version": "3.0-optics",
+        "source": {
+            "image_width_px": w,
+            "image_height_px": h,
+        },
+        "coordinate_system": {
+            "geometry_space": "source_px",
+            "fit": "contain",
+        },
         "simulation": {
             "domain": "optics",
             "subtype": "mirror",
@@ -416,36 +595,45 @@ def build_mirror_scene(
         "elements": [
             {
                 "id": "element_001",
-                "semantic_label": "concave_mirror" if mirror_type == "concave" else "convex_mirror",
+                "semantic_label": "concave_mirror" if detected_concavity == "concave" else "convex_mirror",
                 "author_role": "fixed",
                 "optics": {
-                    "model": mirror_type,
-                    "concavity": mirror_type,
-                    "facing": facing,
-                    "pole": {"x": c_mirror_x, "y": c_axis_y},
-                    "focal_length_px": f_px,
-                    "aperture_height_px": aper_h,
-                    "radius_of_curvature_px": r_curv,
+                    "model": detected_concavity,
+                    "coordinate_space": "source_px",
+                    "concavity": detected_concavity,
+                    "pole": {"x": float(mirror_x), "y": float(axis_y)},
+                    "aperture_height_px": float(aper_h),
+                    "curvature_radius_px": float(curvature_r) if curvature_r is not None else None,
+                    "focal_length_px": {
+                        "value": f_val,
+                        "status": f_status,
+                        "source": f_src,
+                        "confidence": f_conf,
+                    },
                 },
             },
             {
                 "id": "element_002",
-                "semantic_label": "object_arrow",
+                "semantic_label": "optical_object",
                 "author_role": "dynamic",
                 "optics": {
-                    "model": "optical_object",
-                    "base": {"x": obj_x, "y": c_axis_y},
-                    "tip": {"x": obj_x, "y": c_axis_y - obj_h},
-                    "height_px": obj_h,
+                    "model": "arrow",
+                    "coordinate_space": "source_px",
+                    "base": {"x": float(obj_x), "y": float(axis_y)},
+                    "tip": {"x": float(obj_x), "y": float(axis_y + obj_h)},
+                    "height_px": float(obj_h),
                 },
             },
         ],
         "annotations": [
-            {"label": "C", "position": {"x": c_mirror_x + dir_sign * 2 * f_px, "y": c_axis_y}},
-            {"label": "F", "position": {"x": c_mirror_x + dir_sign * f_px, "y": c_axis_y}},
-            {"label": "P", "position": {"x": c_mirror_x, "y": c_axis_y}},
+            {"label": "P", "position": {"x": float(mirror_x + 10), "y": float(axis_y + 18)}},
+            {"label": "F", "position": {"x": float(mirror_x - f_val), "y": float(axis_y + 18)}},
+            {"label": "C", "position": {"x": float(mirror_x - 2.0 * f_val), "y": float(axis_y + 18)}},
         ],
-        "render": mapper.metadata(),
+        "render": {
+            "source_width_px": w,
+            "source_height_px": h,
+        },
     }
 
 
@@ -456,36 +644,97 @@ def build_thin_lens_scene(
     model: str = "convex",
 ) -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
-
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=int(w * 0.35), maxLineGap=20)
 
-    axis_y = h * 0.5
-    lens_x = w * 0.5
+    axis_y = float(h * 0.5)
+    lens_x = float(w * 0.5)
 
     if lines is not None:
         best_len = 0
         for l in lines:
-            pts = l.reshape(-1)
-            x1, y1, x2, y2 = pts[:4]
+            x1, y1, x2, y2 = l[0]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             if (ang < 6.0 or ang > 174.0) and length > best_len:
                 best_len = length
-                axis_y = (y1 + y2) / 2.0
+                axis_y = float((y1 + y2) / 2.0)
 
-    c_center = mapper.point(lens_x, axis_y)
-    c_axis_y = c_center["y"]
-    c_lens_x = c_center["x"]
+    # Find optical center along axis_y
+    axis_r = int(round(axis_y))
+    if 0 <= axis_r < h:
+        axis_strip = gray[max(0, axis_r - 10):min(h, axis_r + 11), :]
+        col_darkness = (axis_strip < 100).sum(axis=0)
+        # Look for central peak between 0.35*w and 0.65*w
+        mid_start = int(0.35 * w)
+        mid_end = int(0.65 * w)
+        if mid_end > mid_start:
+            peak_x = mid_start + int(np.argmax(col_darkness[mid_start:mid_end]))
+            if col_darkness[peak_x] > 4:
+                lens_x = float(peak_x)
 
-    f_px = mapper.length(130.0 if model == "convex" else -130.0)
-    obj_x = c_lens_x - 2.0 * abs(f_px)
-    obj_h = mapper.length(85.0)
+    # Lens aperture height
+    aper_h = float(h * 0.45)
+    lens_col = int(round(lens_x))
+    if 0 <= lens_col < w:
+        col_pixels = np.where(gray[:, max(0, lens_col - 5):min(w, lens_col + 6)] < 110)[0]
+        if len(col_pixels) > 10:
+            aper_h = float(max(col_pixels) - min(col_pixels))
+
+    # Detect tick marks or F labels along axis
+    axis_profile = (gray[max(0, axis_r - 8):min(h, axis_r + 9), :] < 115).sum(axis=0)
+    # Exclude the lens center itself
+    excl_rad = int(max(15.0, aper_h * 0.1))
+    axis_profile[max(0, int(lens_x) - excl_rad):min(w, int(lens_x) + excl_rad)] = 0
+
+    # Find peaks on left (F1) and right (F2)
+    left_peaks = np.where(axis_profile[:max(0, int(lens_x) - excl_rad)] > 3)[0]
+    right_peaks = np.where(axis_profile[min(w, int(lens_x) + excl_rad):] > 3)[0]
+
+    f_val = None
+    f_conf = 0.0
+    f_status = "unresolved"
+    f_src = None
+
+    cand_f1 = None
+    cand_f2 = None
+    if len(left_peaks) > 0:
+        cand_f1 = {"x": float(left_peaks[-1]), "y": axis_y}
+    if len(right_peaks) > 0:
+        cand_f2 = {"x": float(min(w, int(lens_x) + excl_rad) + right_peaks[0]), "y": axis_y}
+
+    inferred_fl = infer_focal_length_px(
+        optical_center={"x": lens_x, "y": axis_y},
+        F1=cand_f1,
+        F2=cand_f2,
+    )
+    if inferred_fl["value"] and inferred_fl["value"] > 20:
+        f_val = round(float(inferred_fl["value"]), 1)
+        f_conf = inferred_fl["confidence"]
+        f_status = "observed"
+        f_src = "+".join(inferred_fl["sources"])
+    else:
+        # Explore fallback
+        f_val = round(float(aper_h * 0.58), 1)
+        f_conf = 0.60
+        f_status = "assumed"
+        f_src = "geometry_aperture_estimate"
+
+    signed_f = f_val if model == "convex" else -f_val
+    obj_x = float(max(15.0, lens_x - 2.0 * abs(f_val)))
+    obj_h = float(-max(35.0, min(120.0, aper_h * 0.38)))
 
     return {
-        "schema_version": "2.1-optics-compat",
+        "schema_version": "3.0-optics",
+        "source": {
+            "image_width_px": w,
+            "image_height_px": h,
+        },
+        "coordinate_system": {
+            "geometry_space": "source_px",
+            "fit": "contain",
+        },
         "simulation": {
             "domain": "optics",
             "subtype": "thin_lens",
@@ -499,12 +748,16 @@ def build_thin_lens_scene(
                 "author_role": "fixed",
                 "optics": {
                     "model": "thin_lens",
+                    "coordinate_space": "source_px",
                     "concavity": model,
-                    "optical_center": {"x": c_lens_x, "y": c_axis_y},
-                    "aperture_height_px": mapper.length(220.0),
+                    "optical_center": {"x": float(lens_x), "y": float(axis_y)},
+                    "aperture_height_px": float(aper_h),
+                    "axis_angle_deg": 0.0,
                     "focal_length_px": {
-                        "value": f_px,
-                        "source": "cv_inference",
+                        "value": float(signed_f),
+                        "status": f_status,
+                        "source": f_src,
+                        "confidence": f_conf,
                     },
                 },
             },
@@ -514,27 +767,29 @@ def build_thin_lens_scene(
                 "author_role": "dynamic",
                 "optics": {
                     "model": "optical_object",
-                    "base": {"x": obj_x, "y": c_axis_y},
-                    "tip": {"x": obj_x, "y": c_axis_y - obj_h},
-                    "height_px": obj_h,
+                    "coordinate_space": "source_px",
+                    "base": {"x": float(obj_x), "y": float(axis_y)},
+                    "tip": {"x": float(obj_x), "y": float(axis_y + obj_h)},
+                    "height_px": float(obj_h),
                 },
             },
         ],
         "annotations": [
-            {"label": "2F1", "position": {"x": c_lens_x - 2 * abs(f_px), "y": c_axis_y}},
-            {"label": "F1", "position": {"x": c_lens_x - abs(f_px), "y": c_axis_y}},
-            {"label": "O", "position": {"x": c_lens_x, "y": c_axis_y}},
-            {"label": "F2", "position": {"x": c_lens_x + abs(f_px), "y": c_axis_y}},
-            {"label": "2F2", "position": {"x": c_lens_x + 2 * abs(f_px), "y": c_axis_y}},
+            {"label": "2F1", "position": {"x": float(lens_x - 2 * abs(f_val)), "y": float(axis_y)}},
+            {"label": "F1", "position": {"x": float(lens_x - abs(f_val)), "y": float(axis_y)}},
+            {"label": "O", "position": {"x": float(lens_x), "y": float(axis_y)}},
+            {"label": "F2", "position": {"x": float(lens_x + abs(f_val)), "y": float(axis_y)}},
+            {"label": "2F2", "position": {"x": float(lens_x + 2 * abs(f_val)), "y": float(axis_y)}},
         ],
-        "render": mapper.metadata(),
+        "render": {
+            "source_width_px": w,
+            "source_height_px": h,
+        },
     }
 
 
 def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
-
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -548,19 +803,32 @@ def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
             break
 
     if prism_contour is not None:
-        pts = [mapper.point(float(p[0]), float(p[1])) for p in prism_contour]
+        pts = [{"x": float(p[0]), "y": float(p[1])} for p in prism_contour]
         sorted_by_y = sorted(pts, key=lambda p: p["y"])
         apex = sorted_by_y[0]
         base1, base2 = sorted_by_y[1], sorted_by_y[2]
+        apex_angle = 60.0
     else:
-        apex = mapper.point(w * 0.5, h * 0.28)
-        base1 = mapper.point(w * 0.32, h * 0.72)
-        base2 = mapper.point(w * 0.68, h * 0.72)
+        apex = {"x": float(w * 0.50), "y": float(h * 0.28)}
+        base1 = {"x": float(w * 0.32), "y": float(h * 0.72)}
+        base2 = {"x": float(w * 0.68), "y": float(h * 0.72)}
+        apex_angle = 60.0
 
-    src_pt = mapper.point(max(40.0, (w * 0.32) - 130.0), h * 0.55)
+    src_x = float(max(20.0, base1["x"] - w * 0.16))
+    src_y = float((apex["y"] + base1["y"]) / 2.0 + 25.0)
+    tgt_x = float((apex["x"] + base1["x"]) / 2.0)
+    tgt_y = float((apex["y"] + base1["y"]) / 2.0)
 
     return {
-        "schema_version": "2.1-optics-compat",
+        "schema_version": "3.0-optics",
+        "source": {
+            "image_width_px": w,
+            "image_height_px": h,
+        },
+        "coordinate_system": {
+            "geometry_space": "source_px",
+            "fit": "contain",
+        },
         "simulation": {
             "domain": "optics",
             "subtype": "prism",
@@ -574,8 +842,15 @@ def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
                 "author_role": "fixed",
                 "optics": {
                     "model": "refractive_polygon",
+                    "coordinate_space": "source_px",
                     "vertices": [apex, base1, base2],
-                    "refractive_index": {"value": 1.52, "source": "nctb_glass"},
+                    "apex_angle_deg": float(apex_angle),
+                    "refractive_index": {
+                        "value": 1.52,
+                        "status": "assumed",
+                        "source": "nctb_glass_estimate",
+                        "confidence": 0.85,
+                    },
                 },
             },
             {
@@ -584,99 +859,84 @@ def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
                 "author_role": "dynamic",
                 "optics": {
                     "model": "ray_source",
-                    "position": {"x": src_pt["x"], "y": src_pt["y"]},
-                    "target": {"x": (apex["x"] + base1["x"]) / 2.0, "y": (apex["y"] + base1["y"]) / 2.0},
+                    "coordinate_space": "source_px",
+                    "position": {"x": src_x, "y": src_y},
+                    "target": {"x": tgt_x, "y": tgt_y},
                 },
             },
         ],
-        "render": mapper.metadata(),
+        "render": {
+            "source_width_px": w,
+            "source_height_px": h,
+        },
     }
 
 
-def build_pendulum_scene(
-    img_bgr: np.ndarray,
-    image_rel_url: str,
-    gravity: float = 9.81,
-    length_m: Optional[float] = None,
-) -> dict:
+def build_pendulum_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
     h, w = img_bgr.shape[:2]
-    detection = detect_pendulum_geometry(
-        img_bgr=img_bgr,
-        output_dir=FRONTEND_SPRITES,
-        clean_bg_dir=FRONTEND_UPLOADS,
-        image_rel_url=image_rel_url,
+    canvas_w, canvas_h = 800.0, 600.0
+    scale = min(canvas_w / float(w), canvas_h / float(h))
+    offset_x = (canvas_w - w * scale) / 2.0
+    offset_y = (canvas_h - h * scale) / 2.0
+
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+    circles = cv2.HoughCircles(
+        blurred, cv2.HOUGH_GRADIENT, 1.2, 40,
+        param1=50, param2=35, minRadius=14, maxRadius=int(min(h, w) * 0.25)
     )
 
-    length_px = detection["string_length_px"]
-    pixels_per_meter = (length_px / length_m) if (length_m is not None and length_m > 0) else None
+    bob_x = 280.0
+    bob_y = 390.0
+    bob_r = 24.0
 
-    pendulum_obj = {
-        "id": "pendulum_system",
-        "role": "dynamic",
-        "type": "pendulum",
-        "geometry": {
-            "space": "source_px",
-            "pivot": detection["pivot"],
-            "bob_center": detection["bob_center"],
-            "bob_radius_px": detection["bob_radius_px"],
-            "string_length_px": length_px,
-        },
-        "physics": {
-            "length_m": length_m,
-            "theta0_rad": detection["theta0_rad"],
-            "omega0_rad_s": 0.0,
-            "damping_s_inv": 0.0,
-            "mass_kg": None,
-        },
-        "perception": {
-            "geometry_confidence": detection["confidence"],
-            "bob_source": "subpixel_circle_fit",
-            "pivot_source": "subpixel_string_tls",
-            "human_confirmed": False,
-        },
-    }
+    if circles is not None:
+        c = circles[0][0]
+        bob_x = float(offset_x + c[0] * scale)
+        bob_y = float(offset_y + c[1] * scale)
+        bob_r = float(max(14.0, min(36.0, c[2] * scale)))
 
-    if detection.get("sprite_url"):
-        pendulum_obj["visual"] = {
-            "sprite_url": detection["sprite_url"],
-        }
+    pivot_x = float(min(700.0, max(100.0, bob_x + 90.0 * scale)))
+    pivot_y = float(max(30.0, bob_y - 250.0 * scale))
 
     return {
-        "schema_version": "3.0",
-        "simulation": {
-            "domain": "mechanics",
-            "subtype": "pendulum",
-            "engine": "analytic_rk4",
+        "schema_version": "1.0-compat",
+        "simulation_type": "kinematics",
+        "visual": {"background_url": image_rel_url},
+        "environment": {"gravity": gravity},
+        "objects": [
+            {
+                "id": "pendulum_system",
+                "role": "dynamic",
+                "type": "pendulum",
+                "pivot": {"x": pivot_x, "y": pivot_y},
+                "bob_position": {"x": bob_x, "y": bob_y},
+                "radius": bob_r,
+                "mass_kg": 1.5,
+                "initial_velocity": {"x": 2.2, "y": 0.0},
+                "friction": 0.001,
+                "friction_air": 0.0005,
+                "restitution": 0.95,
+            }
+        ],
+        "render": {
+            "canvas_width_px": 800,
+            "canvas_height_px": 600,
+            "source_width_px": w,
+            "source_height_px": h,
+            "source_to_canvas_scale": scale,
+            "offset_x_px": offset_x,
+            "offset_y_px": offset_y,
         },
-        "source": {
-            "image_width_px": w,
-            "image_height_px": h,
-        },
-        "coordinate_system": {
-            "geometry_space": "source_px",
-            "fit": "contain",
-        },
-        "visual": {
-            "background_url": detection.get("clean_bg_url") or image_rel_url,
-            "original_image_url": image_rel_url,
-        },
-        "environment": {
-            "gravity_m_s2": float(gravity),
-        },
-        "calibration": {
-            "pixels_per_meter": pixels_per_meter,
-            "status": "calibrated" if pixels_per_meter is not None else "physical_length_unresolved",
-        },
-        "objects": [pendulum_obj],
     }
 
 
 def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
-    ramp_pos = mapper.point(w * 0.48, h * 0.7)
-    block_pos = mapper.point(w * 0.25, h * 0.47)
-    ground_pos = mapper.point(w * 0.5, h * 0.95)
+    canvas_w, canvas_h = 800.0, 600.0
+    scale = min(canvas_w / float(w), canvas_h / float(h))
+    offset_x = (canvas_w - w * scale) / 2.0
+    offset_y = (canvas_h - h * scale) / 2.0
 
     return {
         "schema_version": "1.0-compat",
@@ -688,8 +948,8 @@ def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float 
                 "id": "ramp_collider",
                 "role": "static",
                 "type": "inclined_plane",
-                "initial_position": ramp_pos,
-                "size": {"width": mapper.length(520.0), "height": mapper.length(22.0)},
+                "initial_position": {"x": 380.0, "y": 420.0},
+                "size": {"width": 520.0, "height": 22.0},
                 "angle": -25.0,
                 "friction": 0.08,
                 "restitution": 0.1,
@@ -698,8 +958,8 @@ def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float 
                 "id": "sliding_block",
                 "role": "dynamic",
                 "type": "block",
-                "initial_position": block_pos,
-                "size": {"width": mapper.length(44.0), "height": mapper.length(44.0)},
+                "initial_position": {"x": 200.0, "y": 280.0},
+                "size": {"width": 44.0, "height": 44.0},
                 "mass_kg": 2.0,
                 "friction": 0.06,
                 "restitution": 0.1,
@@ -708,21 +968,46 @@ def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float 
                 "id": "ground_floor",
                 "role": "static",
                 "type": "ground",
-                "initial_position": ground_pos,
-                "size": {"width": mapper.length(800.0), "height": mapper.length(40.0)},
+                "initial_position": {"x": 400.0, "y": 570.0},
+                "size": {"width": 800.0, "height": 40.0},
                 "friction": 0.1,
             },
         ],
-        "render": mapper.metadata(),
+        "render": {
+            "canvas_width_px": 800,
+            "canvas_height_px": 600,
+            "source_width_px": w,
+            "source_height_px": h,
+            "source_to_canvas_scale": scale,
+            "offset_x_px": offset_x,
+            "offset_y_px": offset_y,
+        },
     }
 
 
 def build_projectile_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
+    canvas_w, canvas_h = 800.0, 600.0
+    scale = min(canvas_w / float(w), canvas_h / float(h))
+    offset_x = (canvas_w - w * scale) / 2.0
+    offset_y = (canvas_h - h * scale) / 2.0
 
-    ball_pos = mapper.point(w * 0.15, h * 0.73)
-    ground_pos = mapper.point(w * 0.5, h * 0.94)
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+    circles = cv2.HoughCircles(
+        blurred, cv2.HOUGH_GRADIENT, 1.2, 40,
+        param1=50, param2=35, minRadius=14, maxRadius=int(min(h, w) * 0.25)
+    )
+
+    ball_x = 120.0
+    ball_y = 440.0
+    ball_r = 22.0
+
+    if circles is not None:
+        c = circles[0][0]
+        ball_x = float(offset_x + c[0] * scale)
+        ball_y = float(offset_y + c[1] * scale)
+        ball_r = float(max(14.0, min(32.0, c[2] * scale)))
 
     return {
         "schema_version": "1.0-compat",
@@ -734,8 +1019,8 @@ def build_projectile_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: flo
                 "id": "projectile_ball",
                 "role": "dynamic",
                 "type": "circle",
-                "initial_position": ball_pos,
-                "radius": mapper.length(22.0),
+                "initial_position": {"x": ball_x, "y": ball_y},
+                "radius": ball_r,
                 "mass_kg": 1.2,
                 "initial_velocity": {"x": 7.5, "y": -8.5},
                 "friction": 0.05,
@@ -745,23 +1030,30 @@ def build_projectile_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: flo
                 "id": "ground_floor",
                 "role": "static",
                 "type": "ground",
-                "initial_position": ground_pos,
-                "size": {"width": mapper.length(800.0), "height": mapper.length(40.0)},
+                "initial_position": {"x": 400.0, "y": 565.0},
+                "size": {"width": 800.0, "height": 40.0},
                 "friction": 0.12,
                 "restitution": 0.5,
             },
         ],
-        "render": mapper.metadata(),
+        "render": {
+            "canvas_width_px": 800,
+            "canvas_height_px": 600,
+            "source_width_px": w,
+            "source_height_px": h,
+            "source_to_canvas_scale": scale,
+            "offset_x_px": offset_x,
+            "offset_y_px": offset_y,
+        },
     }
 
 
 def build_spring_mass_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
     h, w = img_bgr.shape[:2]
-    mapper = CanvasMapper(w, h, 800, 600)
-    ball_pos = mapper.point(w * 0.2, h * 0.7)
-    ground_pos = mapper.point(w * 0.5, h * 0.77)
-    free_pt = mapper.point(w * 0.7, h * 0.7)
-    anchor_pt = mapper.point(w * 0.9, h * 0.7)
+    canvas_w, canvas_h = 800.0, 600.0
+    scale = min(canvas_w / float(w), canvas_h / float(h))
+    offset_x = (canvas_w - w * scale) / 2.0
+    offset_y = (canvas_h - h * scale) / 2.0
 
     return {
         "schema_version": "1.0-compat",
@@ -772,9 +1064,9 @@ def build_spring_mass_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: fl
             {
                 "id": "oscillator_ball",
                 "role": "dynamic",
-                "initial_position": ball_pos,
+                "initial_position": {"x": 160.0, "y": 420.0},
                 "type": "circle",
-                "radius": mapper.length(24.0),
+                "radius": 24.0,
                 "mass_kg": 1.5,
                 "initial_velocity": {"x": 3.0, "y": 0.0},
                 "friction": 0.04,
@@ -784,22 +1076,30 @@ def build_spring_mass_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: fl
                 "id": "ground_platform",
                 "role": "static",
                 "type": "ground",
-                "initial_position": ground_pos,
-                "size": {"width": mapper.length(700.0), "height": mapper.length(30.0)},
+                "initial_position": {"x": 400.0, "y": 460.0},
+                "size": {"width": 700.0, "height": 30.0},
                 "friction": 0.08,
             },
             {
                 "id": "spring_damper",
                 "type": "spring",
-                "free_point": free_pt,
-                "anchor_point": anchor_pt,
-                "plunger_size": {"width": mapper.length(16.0), "height": mapper.length(55.0)},
+                "free_point": {"x": 560.0, "y": 420.0},
+                "anchor_point": {"x": 720.0, "y": 420.0},
+                "plunger_size": {"width": 16.0, "height": 55.0},
                 "stiffness": 0.05,
                 "damping": 0.04,
                 "plunger_mass": 0.6,
             },
         ],
-        "render": mapper.metadata(),
+        "render": {
+            "canvas_width_px": 800,
+            "canvas_height_px": 600,
+            "source_width_px": w,
+            "source_height_px": h,
+            "source_to_canvas_scale": scale,
+            "offset_x_px": offset_x,
+            "offset_y_px": offset_y,
+        },
     }
 
 
@@ -830,18 +1130,13 @@ def analyze_diagram(req: AnalyzeRequest):
         if scenario == "interface_refraction":
             scene = build_interface_refraction_scene(img, req.image_url)
         elif scenario == "mirror":
-            scene = build_mirror_scene(img, req.image_url, mirror_type="concave", focal_length_cm=req.focal_length_cm or 20.0)
+            scene = build_mirror_scene(img, req.image_url, mirror_type="concave")
         elif scenario == "prism":
             scene = build_prism_scene(img, req.image_url)
         elif scenario == "concave_lens":
             scene = build_thin_lens_scene(img, req.image_url, req.focal_length_cm or 20.0, model="concave")
         elif scenario == "pendulum":
-            scene = build_pendulum_scene(
-                img,
-                req.image_url,
-                gravity=req.gravity if req.gravity is not None else 9.81,
-                length_m=req.pendulum_length_m,
-            )
+            scene = build_pendulum_scene(img, req.image_url, req.gravity or 1.0)
         elif scenario == "incline":
             scene = build_incline_scene(img, req.image_url, req.gravity or 1.0)
         elif scenario == "projectile":

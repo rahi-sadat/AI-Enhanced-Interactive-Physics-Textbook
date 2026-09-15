@@ -101,9 +101,90 @@ def create_manual_label(
 # Focal-point classification
 # ---------------------------------------------------------------------------
 
+import math
+import statistics
+
+def project_distance_on_axis(
+    point: Dict[str, float],
+    origin: Dict[str, float],
+    axis_angle_deg: float = 0.0,
+) -> float:
+    """Project displacement vector between point and origin onto the optical axis line."""
+    angle_rad = math.radians(axis_angle_deg)
+    ux = math.cos(angle_rad)
+    uy = math.sin(angle_rad)
+    dx = float(point["x"] - origin["x"])
+    dy = float(point["y"] - origin["y"])
+    return dx * ux + dy * uy
+
+
+def infer_focal_length_px(
+    optical_center: Dict[str, float],
+    F1: Optional[Dict[str, float]] = None,
+    F2: Optional[Dict[str, float]] = None,
+    TwoF1: Optional[Dict[str, float]] = None,
+    TwoF2: Optional[Dict[str, float]] = None,
+    axis_angle_deg: float = 0.0,
+) -> dict:
+    """Robust multi-evidence focal length inference from F1, F2, 2F1, and 2F2 markers."""
+    candidates = []
+
+    if F1 is not None:
+        dist = abs(project_distance_on_axis(F1, optical_center, axis_angle_deg))
+        if dist > 1.0:
+            candidates.append((dist, "F1"))
+
+    if F2 is not None:
+        dist = abs(project_distance_on_axis(F2, optical_center, axis_angle_deg))
+        if dist > 1.0:
+            candidates.append((dist, "F2"))
+
+    if TwoF1 is not None:
+        dist = abs(project_distance_on_axis(TwoF1, optical_center, axis_angle_deg)) / 2.0
+        if dist > 1.0:
+            candidates.append((dist, "2F1"))
+
+    if TwoF2 is not None:
+        dist = abs(project_distance_on_axis(TwoF2, optical_center, axis_angle_deg)) / 2.0
+        if dist > 1.0:
+            candidates.append((dist, "2F2"))
+
+    if not candidates:
+        return {
+            "value": None,
+            "status": "unresolved",
+            "confidence": 0.0,
+            "sources": [],
+            "uncertainty": None,
+        }
+
+    values = [item[0] for item in candidates]
+    focal_px = float(statistics.median(values))
+
+    if len(values) > 1:
+        deviations = [abs(v - focal_px) / max(focal_px, 1e-6) for v in values]
+        mean_error = sum(deviations) / len(deviations)
+        confidence = max(0.0, min(0.99, 1.0 - mean_error))
+        uncertainty = float(statistics.stdev(values)) if len(values) >= 2 else float(mean_error * focal_px)
+    else:
+        confidence = 0.75
+        uncertainty = float(focal_px * 0.05)
+
+    return {
+        "value": focal_px,
+        "focal_length_px": focal_px,
+        "status": "observed",
+        "confidence": round(confidence, 3),
+        "sources": [item[1] for item in candidates],
+        "uncertainty": round(uncertainty, 2),
+    }
+
+
 def classify_focal_points(
     labels: List[DetectedLabel],
     optical_center_x: float,
+    optical_center_y: float = 300.0,
+    axis_angle_deg: float = 0.0,
 ) -> FocalPointSet:
     """Assign detected / manually placed F and 2F labels to F1, F2, 2F1, 2F2.
 
@@ -112,26 +193,16 @@ def classify_focal_points(
       F2  = focal point RIGHT of the optical center
       2F1 = double focal distance LEFT
       2F2 = double focal distance RIGHT
-
-    Parameters
-    ----------
-    labels : List of DetectedLabel with text in {"F", "2F"}.
-    optical_center_x : X-coordinate of the lens / mirror center.
-
-    Returns
-    -------
-    FocalPointSet with assigned positions and inferred focal length.
     """
     result = FocalPointSet()
+    oc = {"x": optical_center_x, "y": optical_center_y}
 
     f_labels = [lb for lb in labels if lb.text.upper() == "F"]
     twof_labels = [lb for lb in labels if lb.text.upper() == "2F"]
 
-    # Sort F labels by x-position
     f_labels.sort(key=lambda lb: lb.center["x"])
     twof_labels.sort(key=lambda lb: lb.center["x"])
 
-    # Assign F1 (left) and F2 (right)
     for lb in f_labels:
         if lb.center["x"] < optical_center_x:
             if result.F1 is None:
@@ -140,7 +211,6 @@ def classify_focal_points(
             if result.F2 is None:
                 result.F2 = lb.center
 
-    # Assign 2F1 (left) and 2F2 (right)
     for lb in twof_labels:
         if lb.center["x"] < optical_center_x:
             if result.TwoF1 is None:
@@ -149,22 +219,18 @@ def classify_focal_points(
             if result.TwoF2 is None:
                 result.TwoF2 = lb.center
 
-    # Infer focal length in pixels from F positions
-    distances = []
-    if result.F1 is not None:
-        distances.append(abs(optical_center_x - result.F1["x"]))
-    if result.F2 is not None:
-        distances.append(abs(result.F2["x"] - optical_center_x))
+    inferred = infer_focal_length_px(
+        optical_center=oc,
+        F1=result.F1,
+        F2=result.F2,
+        TwoF1=result.TwoF1,
+        TwoF2=result.TwoF2,
+        axis_angle_deg=axis_angle_deg,
+    )
 
-    if distances:
-        result.focal_length_px = sum(distances) / len(distances)
-        result.focal_length_source = "F1_F2_geometry"
-        # Confidence: higher if F1 and F2 are consistent
-        if len(distances) == 2:
-            ratio = min(distances) / max(max(distances), 1e-6)
-            result.focal_length_confidence = float(min(1.0, 0.7 + 0.3 * ratio))
-        else:
-            result.focal_length_confidence = 0.75
+    result.focal_length_px = inferred["value"]
+    result.focal_length_source = "+".join(inferred["sources"]) if inferred["sources"] else None
+    result.focal_length_confidence = inferred["confidence"]
 
     return result
 

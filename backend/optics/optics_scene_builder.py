@@ -154,15 +154,27 @@ class OpticsSceneBuilder:
         )
 
         oc = optics_geometry.get("optical_center", {})
-        render_oc = self.mapper.point(oc.get("x", 0), oc.get("y", 0))
+        oc_x = float(oc.get("x", 0))
+        oc_y = float(oc.get("y", 0))
+        aper_h = float(optics_geometry.get("aperture_height_px", 0))
+        axis_ang = float(optics_geometry.get("axis_angle_deg", 0.0))
 
         element["optics"] = {
             "model": "thin_lens",
-            "optical_center": render_oc,
-            "aperture_height_px": self.mapper.length(
-                optics_geometry.get("aperture_height_px", 0)
-            ),
-            "focal_length_px": None,  # Set later via set_focal_points()
+            "coordinate_space": "source_px",
+            "optical_center": {"x": oc_x, "y": oc_y},
+            "aperture_height_px": aper_h,
+            "axis_angle_deg": axis_ang,
+            "focal_length_px": {
+                "value": None,
+                "source": None,
+                "confidence": 0.0,
+                "status": "unresolved",
+            },
+            "render": {
+                "optical_center": self.mapper.point(oc_x, oc_y),
+                "aperture_height_px": self.mapper.length(aper_h),
+            },
         }
 
         self.elements.append(element)
@@ -188,14 +200,21 @@ class OpticsSceneBuilder:
 
         base = arrow_geometry.get("base", {})
         tip = arrow_geometry.get("tip", {})
-        render_base = self.mapper.point(base.get("x", 0), base.get("y", 0))
-        render_tip = self.mapper.point(tip.get("x", 0), tip.get("y", 0))
+        bx, by = float(base.get("x", 0)), float(base.get("y", 0))
+        tx, ty = float(tip.get("x", 0)), float(tip.get("y", 0))
+        h_px = float(abs(ty - by))
 
         element["optics"] = {
             "model": "optical_object",
-            "base": render_base,
-            "tip": render_tip,
-            "height_px": abs(render_tip["y"] - render_base["y"]),
+            "coordinate_space": "source_px",
+            "base": {"x": bx, "y": by},
+            "tip": {"x": tx, "y": ty},
+            "height_px": h_px,
+            "render": {
+                "base": self.mapper.point(bx, by),
+                "tip": self.mapper.point(tx, ty),
+                "height_px": self.mapper.length(h_px),
+            },
         }
 
         self.elements.append(element)
@@ -219,17 +238,26 @@ class OpticsSceneBuilder:
             quality, mask_path, "prism", sprite_info,
         )
 
-        raw_verts = prism_geometry.get("vertices", [])
-        render_verts = self.mapper.vertices(raw_verts)
+        raw_verts = [
+            {"x": float(v.get("x", v[0] if isinstance(v, (list, tuple)) else 0)),
+             "y": float(v.get("y", v[1] if isinstance(v, (list, tuple)) else 0))}
+            for v in prism_geometry.get("vertices", [])
+        ]
+        apex_angle = float(prism_geometry.get("apex_angle_deg", 60.0))
 
         element["optics"] = {
             "model": "refractive_polygon",
-            "vertices": render_verts,
-            "apex_angle_deg": prism_geometry.get("apex_angle_deg"),
+            "coordinate_space": "source_px",
+            "vertices": raw_verts,
+            "apex_angle_deg": apex_angle,
             "refractive_index": {
-                "value": refractive_index,
+                "value": float(refractive_index) if refractive_index is not None else None,
                 "source": "author_manual" if refractive_index is not None else None,
-                "status": "resolved" if refractive_index is not None else "unresolved",
+                "status": "observed" if refractive_index is not None else "unresolved",
+                "confidence": 1.0 if refractive_index is not None else 0.0,
+            },
+            "render": {
+                "vertices": self.mapper.vertices(raw_verts),
             },
         }
 
@@ -255,19 +283,31 @@ class OpticsSceneBuilder:
         )
 
         pole = mirror_geometry.get("pole", {})
-        render_pole = self.mapper.point(pole.get("x", 0), pole.get("y", 0))
-
+        px = float(pole.get("x", 0))
+        py = float(pole.get("y", 0))
+        aper_h = float(mirror_geometry.get("aperture_height_px", 0))
         cur_r = mirror_geometry.get("curvature_radius_px")
+        cur_r_float = float(cur_r) if cur_r is not None else None
+        concavity = mirror_geometry.get("concavity", "concave")
 
         element["optics"] = {
             "model": "spherical_mirror",
-            "pole": render_pole,
-            "aperture_height_px": self.mapper.length(
-                mirror_geometry.get("aperture_height_px", 0)
-            ),
-            "curvature_radius_px": self.mapper.length(cur_r) if cur_r else None,
-            "concavity": mirror_geometry.get("concavity", "unknown"),
-            "focal_length_px": self.mapper.length(cur_r / 2.0) if cur_r else None,
+            "coordinate_space": "source_px",
+            "pole": {"x": px, "y": py},
+            "aperture_height_px": aper_h,
+            "curvature_radius_px": cur_r_float,
+            "concavity": concavity,
+            "focal_length_px": {
+                "value": float(cur_r_float / 2.0) if cur_r_float is not None else None,
+                "source": "curvature_geometry" if cur_r_float is not None else None,
+                "confidence": 0.85 if cur_r_float is not None else 0.0,
+                "status": "observed" if cur_r_float is not None else "unresolved",
+            },
+            "render": {
+                "pole": self.mapper.point(px, py),
+                "aperture_height_px": self.mapper.length(aper_h),
+                "curvature_radius_px": self.mapper.length(cur_r_float) if cur_r_float else None,
+            },
         }
 
         self.elements.append(element)
@@ -293,6 +333,7 @@ class OpticsSceneBuilder:
         preset = get_preset(semantic_label) if semantic_label else None
         element["optics"] = {
             "model": preset["physics_type"] if preset else "generic",
+            "coordinate_space": "source_px",
         }
 
         self.elements.append(element)
@@ -318,18 +359,20 @@ class OpticsSceneBuilder:
                 self.annotations.append({
                     "label": label_text,
                     "position": self.mapper.point(pos["x"], pos["y"]),
-                    "source_position": pos,
+                    "source_position": {"x": float(pos["x"]), "y": float(pos["y"])},
                 })
 
-        # Propagate focal length to lens elements
+        # Propagate focal length to lens elements (in authoritative source pixels)
         if focal_data.focal_length_px is not None:
-            render_fl = self.mapper.length(focal_data.focal_length_px)
+            f_src = float(focal_data.focal_length_px)
             for el in self.elements:
-                if el.get("optics", {}).get("model") == "thin_lens":
-                    el["optics"]["focal_length_px"] = {
-                        "value": render_fl,
+                opt = el.get("optics", {})
+                if opt.get("model") in ("thin_lens", "spherical_mirror"):
+                    opt["focal_length_px"] = {
+                        "value": f_src,
                         "source": focal_data.focal_length_source,
-                        "confidence": focal_data.focal_length_confidence,
+                        "confidence": float(focal_data.focal_length_confidence),
+                        "status": "observed",
                     }
 
     def set_physical_scale(self, scale: PixelScale) -> None:
