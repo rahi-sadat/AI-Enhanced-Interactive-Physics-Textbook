@@ -1,8 +1,12 @@
-import {
-  Bodies,
-  Body,
-  Constraint
-} from "matter-js";
+import Matter from "matter-js";
+import decomp from "poly-decomp";
+
+const { Bodies, Body, Constraint, Common } = Matter;
+
+if (typeof window !== "undefined") {
+  window.decomp = decomp;
+}
+Common.setDecomp(decomp);
 
 function buildRenderOptions(object, defaultFill = "#3b82f6") {
   const render = {
@@ -134,6 +138,23 @@ export function createPhysicsBody(object) {
       },
       true
     );
+
+    // Matter.js Bodies.fromVertices decomposes concave polygons into convex parts
+    // and places the composite body at (initial_position.x, initial_position.y), which
+    // causes an offset if initial_position differs from the decomposed centroid.
+    // We adjust the body position so the bounds match the input vertices exactly with sub-pixel precision.
+    if (body) {
+      const minInputX = Math.min(...vertices.map(v => v.x));
+      const minInputY = Math.min(...vertices.map(v => v.y));
+      const dx = body.bounds.min.x - minInputX;
+      const dy = body.bounds.min.y - minInputY;
+      if (Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4) {
+        Body.setPosition(body, {
+          x: body.position.x - dx,
+          y: body.position.y - dy
+        });
+      }
+    }
   }
 
 
@@ -287,19 +308,22 @@ export function createPendulumSystem(object) {
   const bobRadius = object.radius || 24;
 
   // 1. Pivot body (static small pin)
-  const pivot = Bodies.circle(pivotPoint.x, pivotPoint.y, 6, {
+  const pivot = Bodies.circle(pivotPoint.x, pivotPoint.y, object.pivot_radius ?? 5, {
     isStatic: true,
+    collisionFilter: { group: -1 },
     render: {
-      fillStyle: "#94a3b8"
+      fillStyle: object.pivot_fill || "#94a3b8",
+      visible: object.render_pivot !== false
     }
   });
 
   // 2. Bob body (dynamic circle)
   const bob = Bodies.circle(bobPos.x, bobPos.y, bobRadius, {
     isStatic: false,
-    friction: object.friction ?? 0.002,
-    frictionAir: object.friction_air ?? 0.0008,
-    restitution: object.restitution ?? 0.95,
+    friction: object.friction ?? 0.0001,
+    frictionAir: object.friction_air ?? 0.0002,
+    restitution: object.restitution ?? 0.98,
+    slop: 0.0,
     render: buildRenderOptions(object, "#38bdf8")
   });
 
@@ -319,12 +343,12 @@ export function createPendulumSystem(object) {
     bodyA: pivot,
     bodyB: bob,
     length: length,
-    stiffness: 0.99,
-    damping: object.damping ?? 0.0005,
+    stiffness: object.stiffness ?? 1.0,
+    damping: object.damping ?? 0.0001,
     render: {
       visible: true,
-      strokeStyle: "#94a3b8",
-      lineWidth: 2.5
+      strokeStyle: object.rod_color || "#94a3b8",
+      lineWidth: object.rod_width ?? 2.0
     }
   });
 

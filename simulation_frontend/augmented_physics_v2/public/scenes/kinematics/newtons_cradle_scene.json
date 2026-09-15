@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0-compat",
+  "simulation_type": "kinematics",
+  "simulation": {
+    "domain": "mechanics",
+    "subtype": "generic"
+  },
+  "visual": {
+    "background_url": "/scenes/kinematics/pendulum_cradle_clean.png"
+  },
+  "environment": {
+    "gravity": 1.0,
+    "gravity_m_s2": 9.81
+  },
+  "calibration": {
+    "pixels_per_meter": 100
+  },
+  "objects": [
+    {
+      "id": "cradle_pendulum_1",
+      "type": "pendulum",
+      "role": "dynamic",
+      "pivot": { "x": 290.46, "y": 73.57 },
+      "bob_position": { "x": 177.66, "y": 309.81 },
+      "radius": 32.7,
+      "length": 261.79,
+      "mass_kg": 1.0,
+      "restitution": 0.99,
+      "friction": 0.0001,
+      "friction_air": 0.0001,
+      "stiffness": 1.0,
+      "visual": {
+        "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
+        "x_scale": 1.4533,
+        "y_scale": 1.4533
+      },
+      "render": {
+        "fillStyle": "#64748b"
+      }
+    },
+    {
+      "id": "cradle_pendulum_2",
+      "type": "pendulum",
+      "role": "dynamic",
+      "pivot": { "x": 355.86, "y": 73.57 },
+      "bob_position": { "x": 355.86, "y": 340.87 },
+      "radius": 32.7,
+      "length": 267.3,
+      "mass_kg": 1.0,
+      "restitution": 0.99,
+      "friction": 0.0001,
+      "friction_air": 0.0001,
+      "stiffness": 1.0,
+      "visual": {
+        "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
+        "x_scale": 1.4533,
+        "y_scale": 1.4533
+      },
+      "render": {
+        "fillStyle": "#64748b"
+      }
+    },
+    {
+      "id": "cradle_pendulum_3",
+      "type": "pendulum",
+      "role": "dynamic",
+      "pivot": { "x": 421.26, "y": 73.57 },
+      "bob_position": { "x": 421.26, "y": 340.87 },
+      "radius": 32.7,
+      "length": 267.3,
+      "mass_kg": 1.0,
+      "restitution": 0.99,
+      "friction": 0.0001,
+      "friction_air": 0.0001,
+      "stiffness": 1.0,
+      "visual": {
+        "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
+        "x_scale": 1.4533,
+        "y_scale": 1.4533
+      },
+      "render": {
+        "fillStyle": "#64748b"
+      }
+    },
+    {
+      "id": "cradle_pendulum_4",
+      "type": "pendulum",
+      "role": "dynamic",
+      "pivot": { "x": 486.66, "y": 73.57 },
+      "bob_position": { "x": 486.66, "y": 340.87 },
+      "radius": 32.7,
+      "length": 267.3,
+      "mass_kg": 1.0,
+      "restitution": 0.99,
+      "friction": 0.0001,
+      "friction_air": 0.0001,
+      "stiffness": 1.0,
+      "visual": {
+        "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
+        "x_scale": 1.4533,
+        "y_scale": 1.4533
+      },
+      "render": {
+        "fillStyle": "#64748b"
+      }
+    },
+    {
+      "id": "cradle_pendulum_5",
+      "type": "pendulum",
+      "role": "dynamic",
+      "pivot": { "x": 552.06, "y": 73.57 },
+      "bob_position": { "x": 552.06, "y": 340.87 },
+      "radius": 32.7,
+      "length": 267.3,
+      "mass_kg": 1.0,
+      "restitution": 0.99,
+      "friction": 0.0001,
+      "friction_air": 0.0001,
+      "stiffness": 1.0,
+      "visual": {
+        "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
+        "x_scale": 1.4533,
+        "y_scale": 1.4533
+      },
+      "render": {
+        "fillStyle": "#64748b"
+      }
+    }
+  ],
+  "render": {
+    "canvas_width_px": 800,
+    "canvas_height_px": 600,
+    "source_to_canvas_scale": 1.634877,
+    "offset_x_px": 83.65,
+    "offset_y_px": 0.0,
+    "preserve_aspect_ratio": true
+  }
+}

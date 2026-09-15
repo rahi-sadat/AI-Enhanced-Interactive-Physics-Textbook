@@ -19,7 +19,7 @@
       "radius": 21.447080273343524,
       "mass_kg": 1.0,
       "initial_velocity": {
-        "x": 0.35,
+        "x": 2.0,
         "y": 0.0
       },
       "friction": 0.08,
@@ -120,7 +120,7 @@
           "y": 187.17201166180757
         }
       ],
-      "friction": 0.1,
+      "friction": 0.02,
       "restitution": 0.02,
       "render": {
         "visible": false
