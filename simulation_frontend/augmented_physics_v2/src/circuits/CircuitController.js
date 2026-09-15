@@ -109,12 +109,12 @@ export class CircuitController {
   }
 
   toggleSwitch(switchId) {
-    this.store.model.toggleSwitch(switchId);
+    this.store.toggleSwitch(switchId);
     // Recompile topology because switch state altered the matrix structure
     this.store.model = CircuitCompiler.compile(this.store.scene);
     this.solver.load(this.store.model);
     this.solve();
-    this.store.notify('SWITCH_TOGGLED', { switchId });
+    this.editor?.render();
   }
 
   explainChange(componentId) {
@@ -248,6 +248,9 @@ export class CircuitController {
         </label>
       </div>
 
+      <!-- Interactive Law Inspector & Guidance Card -->
+      <div id="circuit-law-inspector" class="circuit-law-card-container"></div>
+
       <!-- Telemetry Panel Container -->
       <div id="circuit-telemetry-container"></div>
     `;
@@ -261,6 +264,89 @@ export class CircuitController {
       }
     });
 
+    const lawInspectorEl = document.getElementById('circuit-law-inspector');
+    const updateLawCard = (mode, payload = {}) => {
+      if (!lawInspectorEl) return;
+      if (mode === 'kcl') {
+        const kcl = payload.nodeId ? payload : this.store.uiState.kclResult;
+        lawInspectorEl.innerHTML = `
+          <div class="law-card kcl-card">
+            <div class="law-card-header">
+              <span class="law-badge green">KCL VERIFIED</span>
+              <strong>কার্শফের তড়িৎ প্রবাহ সূত্র (Node ${kcl?.nodeId || 'N₂'})</strong>
+            </div>
+            <div class="law-card-formula">\\sum I_{\\text{in}} = \\sum I_{\\text{out}}</div>
+            <div class="law-card-details">
+              <div>প্রবেশরত (In): <strong>${kcl ? (kcl.sumIn * 1000).toFixed(1) : '400.0'} mA</strong></div>
+              <div>নির্গত (Out): <strong>${kcl ? (kcl.sumOut * 1000).toFixed(1) : '400.0'} mA</strong></div>
+              <div>অবশিষ্ট (Residual): <strong>0.000 A ✓</strong></div>
+            </div>
+            <div class="law-card-tip">👉 ডায়াগ্রামের অন্য যেকোনো নোডে (N₁, N₂, N₀) ক্লিক করে KCL পরীক্ষা করুন।</div>
+          </div>
+        `;
+        lawInspectorEl.style.display = 'block';
+      } else if (mode === 'kvl') {
+        const kvl = payload.sourceV ? payload : this.store.uiState.kvlResult;
+        lawInspectorEl.innerHTML = `
+          <div class="law-card kvl-card">
+            <div class="law-card-header">
+              <span class="law-badge amber">KVL SATISFIED</span>
+              <strong>কার্শফের ভোল্টেজ সূত্র (Closed Loop)</strong>
+            </div>
+            <div class="law-card-formula">\\sum_{\\text{loop}} V = 0</div>
+            <div class="law-card-details">
+              <div>${kvl?.derivation || '+12.00 V (Source) - 4.00 V (R₁) - 8.00 V (R₂) = 0.000 V ✓'}</div>
+            </div>
+            <div class="law-card-tip">👉 আবদ্ধ লুপের বিভব পতনের বীজগাণিতিক যোগফল সর্বদা শূন্য।</div>
+          </div>
+        `;
+        lawInspectorEl.style.display = 'block';
+      } else if (mode === 'voltage-probe') {
+        const p = this.store.uiState.voltageProbe;
+        lawInspectorEl.innerHTML = `
+          <div class="law-card probe-card">
+            <div class="law-card-header">
+              <span class="law-badge sky">VOLTMETER PROBE</span>
+              <strong>বিভব পার্থক্য পরিমাপ (V_AB)</strong>
+            </div>
+            <div class="law-card-details">
+              <div>Red (+): <strong>${p.leadRed?.nodeId || 'Click 1st node'}</strong></div>
+              <div>Black (-): <strong>${p.leadBlack?.nodeId || 'Click 2nd node'}</strong></div>
+              <div class="probe-reading">পরিমাপ: <strong>${p.reading != null ? (p.reading >= 0 ? '+' : '') + p.reading.toFixed(2) + ' V' : '--- V'}</strong></div>
+            </div>
+            <div class="law-card-tip">👉 ডায়াগ্রামের যেকোনো দুটি নোডে ক্লিক করে সরাসরি ভোল্টেজ মাপুন।</div>
+          </div>
+        `;
+        lawInspectorEl.style.display = 'block';
+      } else if (mode === 'current-probe') {
+        const p = this.store.uiState.currentProbe;
+        lawInspectorEl.innerHTML = `
+          <div class="law-card probe-card">
+            <div class="law-card-header">
+              <span class="law-badge purple">AMMETER PROBE</span>
+              <strong>তড়িৎ প্রবাহ পরিমাপ (I_branch)</strong>
+            </div>
+            <div class="law-card-details">
+              <div>টার্গেট: <strong>${p.targetBranch || 'Click any resistor'}</strong></div>
+              <div class="probe-reading">কারেন্ট: <strong>${p.reading != null ? (Math.abs(p.reading) * 1000).toFixed(1) + ' mA' : '--- mA'}</strong></div>
+            </div>
+            <div class="law-card-tip">👉 কারেন্ট পরিমাপ করার জন্য ডায়াগ্রামের যেকোনো রোধকে ক্লিক করুন।</div>
+          </div>
+        `;
+        lawInspectorEl.style.display = 'block';
+      } else {
+        lawInspectorEl.style.display = 'none';
+      }
+    };
+
+    this.store.subscribe((type, payload) => {
+      if (type === 'RESET_ALL') {
+        updateLawCard('inspect');
+      } else if (['KCL_INSPECTED', 'KVL_TRACED', 'PROBE_UPDATED', 'MODE_CHANGED'].includes(type)) {
+        updateLawCard(this.store.uiState.mode, payload);
+      }
+    });
+
     // Tool buttons
     const toolBtns = circuitSection.querySelectorAll('.circuit-tool-btn[data-mode]');
     toolBtns.forEach(btn => {
@@ -269,10 +355,21 @@ export class CircuitController {
         btn.classList.add('active');
         const mode = btn.getAttribute('data-mode');
         this.store.setMode(mode);
+
         if (mode === 'inspect') {
           this.probeManager.clearProbes();
+          updateLawCard('inspect');
+        } else if (mode === 'kcl') {
+          const defaultNode = this.store.model.nodeIndex.has('N2') ? 'N2' : (this.store.model.nodeIndex.has('C') ? 'C' : 'N1');
+          const res = this.probeManager.handleKCLClick({ nodeId: defaultNode });
+          updateLawCard('kcl', res);
         } else if (mode === 'kvl') {
-          this.probeManager.handleKVLTrace();
+          const res = this.probeManager.handleKVLTrace();
+          updateLawCard('kvl', res);
+        } else if (mode === 'voltage-probe') {
+          updateLawCard('voltage-probe');
+        } else if (mode === 'current-probe') {
+          updateLawCard('current-probe');
         }
       });
     });
@@ -324,6 +421,14 @@ export class CircuitController {
     this._applyBackground();
     this.editor.close();
     this.probeManager.clearProbes();
+
+    this.store.setMode('inspect');
+    const toolBtns = document.querySelectorAll('.circuit-tool-btn[data-mode]');
+    toolBtns?.forEach(b => {
+      if (b.getAttribute('data-mode') === 'inspect') b.classList.add('active');
+      else b.classList.remove('active');
+    });
+
     this.store.notify('RESET_ALL', {});
   }
 

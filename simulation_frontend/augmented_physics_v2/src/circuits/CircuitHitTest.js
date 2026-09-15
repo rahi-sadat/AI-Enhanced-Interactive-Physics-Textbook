@@ -21,12 +21,36 @@ export class CircuitHitTest {
     const srcPt = mapper.viewToSource(cssX, cssY);
     const { x, y } = srcPt;
 
-    // 1. Check Terminals first (highest precision target)
+    // 1. Check Switches FIRST (highest priority interactive control)
+    for (const sw of model.switches) {
+      const swBbox = sw.geometry?.bbox_source_px || [190, 100, 270, 140];
+      // Include terminal contacts and clickable badge rendered below lever
+      const extendedBbox = [swBbox[0] - 12, swBbox[1] - 12, swBbox[2] + 12, swBbox[3] + 32];
+      if (this._isInsideBBox(x, y, extendedBbox, 6)) {
+        return {
+          type: 'switch',
+          id: sw.id,
+          component: sw,
+          sourcePoint: srcPt
+        };
+      }
+    }
+
+    // 2. Check Terminals (highest precision probe target)
     const snapRadius = 14.0; // in source_px
     for (const [tId, term] of model.terminalById.entries()) {
       const [tx, ty] = term.source_px || [0, 0];
       const dist = Math.hypot(x - tx, y - ty);
       if (dist <= snapRadius) {
+        // If this terminal belongs to a switch, treat click as switch toggle
+        if (model.switches.some(s => s.id === term.componentId)) {
+          return {
+            type: 'switch',
+            id: term.componentId,
+            sourcePoint: { x: tx, y: ty },
+            distance: dist
+          };
+        }
         return {
           type: 'terminal',
           id: tId,
@@ -36,20 +60,6 @@ export class CircuitHitTest {
           sourcePoint: { x: tx, y: ty },
           distance: dist
         };
-      }
-    }
-
-    // 2. Check Switch handles
-    for (const sw of model.switches) {
-      if (sw.geometry?.bbox_source_px) {
-        if (this._isInsideBBox(x, y, sw.geometry.bbox_source_px, 10)) {
-          return {
-            type: 'switch',
-            id: sw.id,
-            component: sw,
-            sourcePoint: srcPt
-          };
-        }
       }
     }
 

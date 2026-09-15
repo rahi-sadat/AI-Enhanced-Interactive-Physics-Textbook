@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <pattern id="bridge-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="0.8"/>
+    </pattern>
+  </defs>
+
+  <!-- Background Paper -->
+  <rect width="800" height="500" fill="#faf9f5"/>
+  <rect width="800" height="500" fill="url(#bridge-grid)"/>
+
+  <!-- Textbook Header Annotation -->
+  <rect x="30" y="20" width="740" height="42" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="45" y="42" font-family="'Inter', system-ui, sans-serif" font-size="13" font-weight="700" fill="#334155">
+    NCTB Physics — Class IX-X: Chapter 11 (Current Electricity)
+  </text>
+  <text x="45" y="54" font-family="'Inter', system-ui, sans-serif" font-size="10.5" font-weight="500" fill="#64748b">
+    চিত্র ১১.১০: হুইটস্টোন ব্রিজ বর্তনী (Wheatstone Bridge Network: P, Q, R, S &amp; Galvanometer G)
+  </text>
+  <text x="750" y="44" text-anchor="end" font-family="'Inter', system-ui, sans-serif" font-size="11" font-weight="600" fill="#475569">
+    Fig 11.10 [Wheatstone Bridge]
+  </text>
+
+  <!-- Bridge Diamond Schematic Wires -->
+  <g stroke="#1e293b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Arm P (A to C): from (240, 220) to (400, 110) -->
+    <line x1="240" y1="220" x2="295" y2="182"/>
+    <!-- Resistor P zigzag along diagonal -->
+    <polyline points="295,182 305,175 308,185 320,165 326,177 338,155 344,167 352,145"/>
+    <line x1="352" y1="145" x2="400" y2="110"/>
+
+    <!-- Arm Q (C to B): from (400, 110) to (560, 220) -->
+    <line x1="400" y1="110" x2="448" y2="145"/>
+    <!-- Resistor Q zigzag along diagonal -->
+    <polyline points="448,145 456,167 462,155 474,177 480,165 492,185 495,175 505,182"/>
+    <line x1="505" y1="182" x2="560" y2="220"/>
+
+    <!-- Arm R (A to D): from (240, 220) to (400, 330) -->
+    <line x1="240" y1="220" x2="295" y2="258"/>
+    <!-- Resistor R zigzag along diagonal -->
+    <polyline points="295,258 305,265 308,255 320,275 326,263 338,285 344,273 352,295"/>
+    <line x1="352" y1="295" x2="400" y2="330"/>
+
+    <!-- Arm S (D to B): from (400, 330) to (560, 220) -->
+    <line x1="400" y1="330" x2="448" y2="295"/>
+    <!-- Resistor S zigzag along diagonal -->
+    <polyline points="448,295 456,273 462,285 474,263 480,275 492,255 495,265 505,258"/>
+    <line x1="505" y1="258" x2="560" y2="220"/>
+
+    <!-- Central Galvanometer Branch (C to D) -->
+    <line x1="400" y1="110" x2="400" y2="198"/>
+    <line x1="400" y1="242" x2="400" y2="330"/>
+
+    <!-- Outer Battery Loop from A(240, 220) left to (120, 220), down to (120, 420) -->
+    <polyline points="240,220 120,220 120,420 220,420"/>
+
+    <!-- Battery Symbol between x=220 and x=260 on y=420 -->
+    <line x1="220" y1="402" x2="220" y2="438" stroke="#0f172a" stroke-width="3"/>
+    <line x1="230" y1="410" x2="230" y2="430" stroke="#0f172a" stroke-width="5.5"/>
+
+    <!-- Wire from battery to switch Key K at (340, 420) -->
+    <line x1="230" y1="420" x2="340" y2="420"/>
+    <line x1="390" y1="420" x2="680" y2="420"/>
+    <polyline points="680,420 680,220 560,220"/>
+  </g>
+
+  <!-- Galvanometer Meter Housing -->
+  <circle cx="400" cy="220" r="22" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+  <text x="400" y="226" font-family="'Inter', system-ui, sans-serif" font-size="16" font-weight="700" fill="#0f172a" text-anchor="middle">G</text>
+  <!-- Needle pointer -->
+  <line x1="400" y1="220" x2="400" y2="204" stroke="#dc2626" stroke-width="2"/>
+
+  <!-- Switch Key (K) Terminals -->
+  <circle cx="340" cy="420" r="4" fill="#f8fafc" stroke="#1e293b" stroke-width="2.2"/>
+  <circle cx="390" cy="420" r="4" fill="#f8fafc" stroke="#1e293b" stroke-width="2.2"/>
+  <line x1="342" y1="420" x2="386" y2="420" stroke="#0284c7" stroke-width="2.6"/>
+
+  <!-- Diamond Junction Dots (A, B, C, D) -->
+  <circle cx="240" cy="220" r="5" fill="#1e293b"/>
+  <circle cx="560" cy="220" r="5" fill="#1e293b"/>
+  <circle cx="400" cy="110" r="5" fill="#1e293b"/>
+  <circle cx="400" cy="330" r="5" fill="#1e293b"/>
+
+  <!-- Node & Component Labels -->
+  <g font-family="'Inter', system-ui, sans-serif">
+    <!-- Node A -->
+    <text x="220" y="215" font-size="14" font-weight="700" fill="#dc2626" text-anchor="end">A</text>
+    <!-- Node B -->
+    <text x="580" y="215" font-size="14" font-weight="700" fill="#2563eb">B</text>
+    <!-- Node C -->
+    <text x="400" y="95" font-size="14" font-weight="700" fill="#7c3aed" text-anchor="middle">C</text>
+    <!-- Node D -->
+    <text x="400" y="355" font-size="14" font-weight="700" fill="#d97706" text-anchor="middle">D</text>
+
+    <!-- Resistor Labels -->
+    <!-- Arm P / R1 -->
+    <rect x="270" y="130" width="70" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="305" y="145" font-size="11.5" font-weight="700" fill="#0f172a" text-anchor="middle">P = 100 Ω</text>
+
+    <!-- Arm Q / R3 -->
+    <rect x="460" y="130" width="70" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="495" y="145" font-size="11.5" font-weight="700" fill="#0f172a" text-anchor="middle">Q = 100 Ω</text>
+
+    <!-- Arm R / R2 -->
+    <rect x="270" y="280" width="70" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="305" y="295" font-size="11.5" font-weight="700" fill="#0f172a" text-anchor="middle">R = 100 Ω</text>
+
+    <!-- Arm S / R4 -->
+    <rect x="460" y="280" width="70" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="495" y="295" font-size="11.5" font-weight="700" fill="#0f172a" text-anchor="middle">S = 100 Ω</text>
+
+    <!-- Galvanometer Label -->
+    <text x="440" y="225" font-size="11" font-weight="600" fill="#475569">G (50 Ω)</text>
+
+    <!-- Battery & Switch Labels -->
+    <text x="210" y="405" font-size="16" font-weight="700" fill="#dc2626">+</text>
+    <text x="240" y="405" font-size="16" font-weight="700" fill="#475569">−</text>
+    <text x="225" y="450" font-size="12" font-weight="700" fill="#0f172a" text-anchor="middle">E = 10 V</text>
+
+    <text x="365" y="445" font-size="11.5" font-weight="700" fill="#0f172a" text-anchor="middle">Key (K)</text>
+
+    <!-- Educational Principle Box -->
+    <rect x="180" y="465" width="440" height="28" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="400" y="483" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">
+      সাম্যাবস্থা শর্ত (Balance Condition): P / Q = R / S হলে গ্যালভানোমিটার প্রবাহ I_G = 0
+    </text>
+  </g>
+</svg>

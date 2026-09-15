@@ -6,10 +6,10 @@
     "engine": "mna"
   },
   "visual": {
-    "background_url": "/scenes/circuits/textbook_circuit_diagram.svg"
+    "background_url": "/scenes/circuits/textbook_bridge_diagram.svg"
   },
   "source": {
-    "image": "/scenes/circuits/textbook_circuit_diagram.svg",
+    "image": "/scenes/circuits/textbook_bridge_diagram.svg",
     "image_width_px": 800,
     "image_height_px": 500
   },
@@ -18,92 +18,104 @@
     "nodes": [
       { "id": "B", "reference": true, "label": "Node B (0 V Ref)" },
       { "id": "A", "reference": false, "label": "Node A (+10 V)" },
-      { "id": "C", "reference": false, "label": "Node C" },
-      { "id": "D", "reference": false, "label": "Node D" }
+      { "id": "C", "reference": false, "label": "Node C (Top Junction)" },
+      { "id": "D", "reference": false, "label": "Node D (Bottom Junction)" }
     ],
     "components": [
       {
         "id": "V1",
         "type": "voltage_source",
-        "label": "Battery (V₁)",
+        "label": "Battery (E)",
         "value": 10.0,
         "unit": "V",
         "nodes": ["A", "B"],
         "terminals": [
-          { "id": "V1.p", "node": "A", "polarity": "+", "source_px": [140.0, 230.0] },
-          { "id": "V1.n", "node": "B", "polarity": "-", "source_px": [140.0, 270.0] }
+          { "id": "V1.p", "node": "A", "polarity": "+", "source_px": [220.0, 420.0] },
+          { "id": "V1.n", "node": "B", "polarity": "-", "source_px": [230.0, 420.0] }
         ],
-        "geometry": { "bbox_source_px": [110.0, 220.0, 170.0, 280.0], "center_source_px": [140.0, 250.0] }
+        "geometry": { "bbox_source_px": [200.0, 400.0, 250.0, 440.0], "center_source_px": [225.0, 420.0] },
+        "provenance": { "text": "E = 10 V", "value": 10.0, "source": "textbook_ocr", "confidence": 0.99 }
       },
       {
         "id": "R1",
         "type": "resistor",
-        "label": "Resistor R₁",
+        "label": "Arm P (R₁)",
         "value": 100.0,
         "unit": "ohm",
         "nodes": ["A", "C"],
         "terminals": [
-          { "id": "R1.a", "node": "A", "source_px": [340.0, 120.0] },
-          { "id": "R1.b", "node": "C", "source_px": [460.0, 120.0] }
+          { "id": "R1.a", "node": "A", "source_px": [240.0, 220.0] },
+          { "id": "R1.b", "node": "C", "source_px": [400.0, 110.0] }
         ],
-        "geometry": { "bbox_source_px": [335.0, 95.0, 465.0, 145.0], "center_source_px": [400.0, 120.0] }
+        "geometry": { "bbox_source_px": [270.0, 130.0, 360.0, 190.0], "center_source_px": [320.0, 165.0] },
+        "provenance": { "text": "P = 100 Ω", "value": 100.0, "source": "textbook_ocr", "confidence": 0.985 }
       },
       {
         "id": "R2",
         "type": "resistor",
-        "label": "Resistor R₂",
+        "label": "Arm R (R₂)",
         "value": 100.0,
         "unit": "ohm",
         "nodes": ["A", "D"],
         "terminals": [
-          { "id": "R2.a", "node": "A", "source_px": [340.0, 380.0] },
-          { "id": "R2.b", "node": "D", "source_px": [460.0, 380.0] }
+          { "id": "R2.a", "node": "A", "source_px": [240.0, 220.0] },
+          { "id": "R2.b", "node": "D", "source_px": [400.0, 330.0] }
         ],
-        "geometry": { "bbox_source_px": [335.0, 355.0, 465.0, 405.0], "center_source_px": [400.0, 380.0] }
+        "geometry": { "bbox_source_px": [270.0, 250.0, 360.0, 310.0], "center_source_px": [320.0, 275.0] },
+        "provenance": { "text": "R = 100 Ω", "value": 100.0, "source": "textbook_ocr", "confidence": 0.982 }
       },
       {
         "id": "R3",
         "type": "resistor",
-        "label": "Resistor R₃",
+        "label": "Arm Q (R₃)",
         "value": 100.0,
         "unit": "ohm",
         "nodes": ["C", "B"],
         "terminals": [
-          { "id": "R3.a", "node": "C", "source_px": [540.0, 120.0] },
-          { "id": "R3.b", "node": "B", "source_px": [660.0, 120.0] }
+          { "id": "R3.a", "node": "C", "source_px": [400.0, 110.0] },
+          { "id": "R3.b", "node": "B", "source_px": [560.0, 220.0] }
         ],
-        "geometry": { "bbox_source_px": [535.0, 95.0, 665.0, 145.0], "center_source_px": [600.0, 120.0] }
+        "geometry": { "bbox_source_px": [440.0, 130.0, 530.0, 190.0], "center_source_px": [480.0, 165.0] },
+        "provenance": { "text": "Q = 100 Ω", "value": 100.0, "source": "textbook_ocr", "confidence": 0.988 }
       },
       {
         "id": "R4",
         "type": "resistor",
-        "label": "Resistor R₄",
+        "label": "Arm S (R₄)",
         "value": 100.0,
         "unit": "ohm",
         "nodes": ["D", "B"],
         "terminals": [
-          { "id": "R4.a", "node": "D", "source_px": [540.0, 380.0] },
-          { "id": "R4.b", "node": "B", "source_px": [660.0, 380.0] }
+          { "id": "R4.a", "node": "D", "source_px": [400.0, 330.0] },
+          { "id": "R4.b", "node": "B", "source_px": [560.0, 220.0] }
         ],
-        "geometry": { "bbox_source_px": [535.0, 355.0, 665.0, 405.0], "center_source_px": [600.0, 380.0] }
+        "geometry": { "bbox_source_px": [440.0, 250.0, 530.0, 310.0], "center_source_px": [480.0, 275.0] },
+        "provenance": { "text": "S = 100 Ω", "value": 100.0, "source": "textbook_ocr", "confidence": 0.984 }
       },
       {
         "id": "R5",
         "type": "resistor",
-        "label": "Galvanometer (R₅)",
+        "label": "Galvanometer (G)",
         "value": 50.0,
         "unit": "ohm",
         "nodes": ["C", "D"],
         "terminals": [
-          { "id": "R5.a", "node": "C", "source_px": [500.0, 160.0] },
-          { "id": "R5.b", "node": "D", "source_px": [500.0, 340.0] }
+          { "id": "R5.a", "node": "C", "source_px": [400.0, 110.0] },
+          { "id": "R5.b", "node": "D", "source_px": [400.0, 330.0] }
         ],
-        "geometry": { "bbox_source_px": [475.0, 180.0, 525.0, 320.0], "center_source_px": [500.0, 250.0] }
+        "geometry": { "bbox_source_px": [375.0, 195.0, 425.0, 245.0], "center_source_px": [400.0, 220.0] },
+        "provenance": { "text": "G = 50 Ω", "value": 50.0, "source": "textbook_ocr", "confidence": 0.99 }
       }
     ],
     "wires": [
-      { "id": "w_bridge_top", "node": "A", "polyline_source_px": [[140.0, 230.0], [140.0, 120.0], [340.0, 120.0]] },
-      { "id": "w_bridge_bottom", "node": "B", "polyline_source_px": [[660.0, 120.0], [700.0, 120.0], [700.0, 420.0], [140.0, 420.0], [140.0, 270.0]] }
+      { "id": "w_ac", "node": "A", "polyline_source_px": [[240.0, 220.0], [295.0, 182.0]] },
+      { "id": "w_ad", "node": "A", "polyline_source_px": [[240.0, 220.0], [295.0, 258.0]] },
+      { "id": "w_cb", "node": "B", "polyline_source_px": [[505.0, 182.0], [560.0, 220.0]] },
+      { "id": "w_db", "node": "B", "polyline_source_px": [[505.0, 258.0], [560.0, 220.0]] },
+      { "id": "w_galv_top", "node": "C", "polyline_source_px": [[400.0, 110.0], [400.0, 198.0]] },
+      { "id": "w_galv_bottom", "node": "D", "polyline_source_px": [[400.0, 242.0], [400.0, 330.0]] },
+      { "id": "w_batt_loop", "node": "A", "polyline_source_px": [[240.0, 220.0], [120.0, 220.0], [120.0, 420.0], [220.0, 420.0]] },
+      { "id": "w_batt_return", "node": "B", "polyline_source_px": [[230.0, 420.0], [340.0, 420.0], [390.0, 420.0], [680.0, 420.0], [680.0, 220.0], [560.0, 220.0]] }
     ]
   }
 }

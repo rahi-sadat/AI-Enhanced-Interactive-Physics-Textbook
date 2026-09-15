@@ -18,7 +18,7 @@ export class CircuitTelemetry {
     this.callbacks = callbacks;
 
     this.store.subscribe((type, payload) => {
-      if (['PARAMETER_CHANGED', 'SELECTION_CHANGED', 'HOVER_CHANGED', 'RESET_ALL', 'PROBE_UPDATED'].includes(type)) {
+      if (['PARAMETER_CHANGED', 'SELECTION_CHANGED', 'HOVER_CHANGED', 'RESET_ALL', 'PROBE_UPDATED', 'SWITCH_TOGGLED', 'SOLVE_COMPLETED'].includes(type)) {
         this.render();
       }
     });

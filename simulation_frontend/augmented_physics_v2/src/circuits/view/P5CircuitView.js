@@ -93,7 +93,10 @@ export class P5CircuitView {
         // 5. Component Highlights (Selection & Hover)
         this._drawComponentHighlights(p, model, ui);
 
-        // 6. Virtual Probes & Leads
+        // 6. Interactive Switches (Animated Levers & State Badges)
+        this._drawSwitches(p, model, ui);
+
+        // 7. Virtual Probes & Leads
         this._drawProbeLeads(p, ui);
 
         // 7. KCL & KVL Overlays
@@ -155,6 +158,8 @@ export class P5CircuitView {
 
   _updateAndDrawCurrentParticles(p, model, state, dt) {
     const current = state.primaryCurrent || 0.0;
+    if (current < 1e-5) return; // No current flowing when circuit is open
+
     // Logarithmic speed scaling: visualSpeed = baseSpeed * log1p(|I| / I_ref)
     const baseSpeed = 90.0; // px/sec in source coordinates
     const speed = baseSpeed * Math.log1p(current / 0.1);
@@ -189,6 +194,9 @@ export class P5CircuitView {
   }
 
   _drawCurrentArrows(p, model, state) {
+    const current = state.primaryCurrent || 0.0;
+    if (current < 1e-5) return; // No directional arrows when circuit is open
+
     p.push();
     p.fill(14, 165, 233);
     p.noStroke();
@@ -448,6 +456,67 @@ export class P5CircuitView {
     p.textAlign(p.CENTER, p.CENTER);
     p.text(label, centerView.x, centerView.y);
 
+    p.pop();
+  }
+
+  _drawSwitches(p, model, ui) {
+    p.push();
+    for (const sw of model.switches) {
+      const tA = sw.terminals?.[0]?.source_px || [200, 120];
+      const tB = sw.terminals?.[1]?.source_px || [260, 120];
+      const vA = this.mapper.sourceToView(tA[0], tA[1]);
+      const vB = this.mapper.sourceToView(tB[0], tB[1]);
+      const isOpen = sw.state === 'open';
+      const isHovered = ui.hoveredComponentId === sw.id;
+
+      // Draw terminal contact dots
+      p.stroke(15, 23, 42);
+      p.strokeWeight(2.5 * this.mapper.scale);
+      p.fill(248, 250, 252);
+      p.circle(vA.x, vA.y, 9 * this.mapper.scale);
+      p.circle(vB.x, vB.y, 9 * this.mapper.scale);
+
+      // Draw switch lever
+      if (isOpen) {
+        // Lever tilted up at ~35 degrees with gap
+        p.stroke(245, 158, 11); // Amber
+        p.strokeWeight(3.8 * this.mapper.scale);
+        const leverLen = Math.hypot(vB.x - vA.x, vB.y - vA.y) * 0.95;
+        const baseAngle = Math.atan2(vB.y - vA.y, vB.x - vA.x);
+        const angle = baseAngle - 0.58; // tilt up
+        const xEnd = vA.x + Math.cos(angle) * leverLen;
+        const yEnd = vA.y + Math.sin(angle) * leverLen;
+        p.line(vA.x, vA.y, xEnd, yEnd);
+        p.fill(245, 158, 11);
+        p.circle(xEnd, yEnd, 7 * this.mapper.scale);
+      } else {
+        // Lever closed (conductive connection)
+        p.stroke(2, 132, 199); // Sky blue
+        p.strokeWeight(4.0 * this.mapper.scale);
+        p.line(vA.x, vA.y, vB.x, vB.y);
+      }
+
+      // Live Clickable Badge below switch
+      const midX = (vA.x + vB.x) / 2;
+      const midY = (vA.y + vB.y) / 2 + 22 * this.mapper.scale;
+
+      const badgeText = isOpen ? '🔴 [OPEN - Click to Close]' : '🟢 [CLOSED - Click to Open]';
+      p.textFont('Inter, sans-serif');
+      p.textSize(10.5 * Math.max(0.8, this.mapper.scale));
+      p.textStyle(p.BOLD);
+      const badgeW = p.textWidth(badgeText) + 16;
+      const badgeH = 20;
+
+      p.fill(15, 23, 42, 235);
+      p.stroke(isOpen ? '#f59e0b' : '#10b981');
+      p.strokeWeight(isHovered ? 2.5 : 1.2);
+      p.rect(midX - badgeW / 2, midY - badgeH / 2, badgeW, badgeH, 4);
+
+      p.noStroke();
+      p.fill(isOpen ? '#fbbf24' : '#34d399');
+      p.textAlign(p.CENTER, p.CENTER);
+      p.text(badgeText, midX, midY);
+    }
     p.pop();
   }
 }

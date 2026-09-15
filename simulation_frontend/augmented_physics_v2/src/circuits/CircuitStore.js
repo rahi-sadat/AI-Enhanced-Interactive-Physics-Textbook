@@ -138,6 +138,23 @@ export class CircuitStore {
   }
 
   /**
+   * Toggle a switch state between 'open' and 'closed'.
+   */
+  toggleSwitch(switchId) {
+    const compInModel = this.model?.componentById?.get(switchId);
+    const compInScene = this.scene?.circuit?.components?.find(c => c.id === switchId);
+
+    const currentState = compInModel?.state || compInScene?.state || 'closed';
+    const newState = (currentState === 'open') ? 'closed' : 'open';
+
+    if (compInModel) compInModel.state = newState;
+    if (compInScene) compInScene.state = newState;
+
+    this.notify('SWITCH_TOGGLED', { switchId, state: newState });
+    return newState;
+  }
+
+  /**
    * Reset all student modifications back to original textbook state.
    */
   resetToTextbook() {

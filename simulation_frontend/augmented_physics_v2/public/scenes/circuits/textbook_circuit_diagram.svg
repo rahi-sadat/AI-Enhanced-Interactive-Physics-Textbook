@@ -30,8 +30,7 @@
     <polyline points="140,230 140,120 200,120"/>
 
     <!-- Switch S1 gap between 200,120 and 260,120 -->
-    <!-- Closed switch lever representation -->
-    <line x1="202" y1="120" x2="256" y2="120" stroke="#0284c7" stroke-width="2.8"/>
+    <!-- (Interactive switch lever rendered dynamically by simulation overlay) -->
 
     <!-- Wire from switch (260, 120) to R1 (340, 120) -->
     <line x1="260" y1="120" x2="340" y2="120"/>
@@ -69,7 +68,6 @@
 
     <!-- Switch S1 Label -->
     <text x="230" y="98" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="middle">Key (S₁)</text>
-    <text x="230" y="146" font-size="10.5" font-weight="600" fill="#0284c7" text-anchor="middle">[Closed]</text>
 
     <!-- Resistor R1 Label -->
     <rect x="360" y="72" width="80" height="24" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
