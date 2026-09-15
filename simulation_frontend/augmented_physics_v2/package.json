@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node test/test_optics_engines.js"
+    "test": "node test/test_coordinateMapper.js && node test/test_pendulum_physics.js && node test/test_optics_engines.js",
+    "test:coord": "node test/test_coordinateMapper.js",
+    "test:physics": "node test/test_pendulum_physics.js",
+    "test:optics": "node test/test_optics_engines.js"
   },
   "devDependencies": {
     "puppeteer-core": "^25.10.0",

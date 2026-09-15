@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const SCREENSHOT_DIR = 'C:\\Users\\rahis\\.gemini\\antigravity\\brain\\ccb358a1-1663-4a63-8809-5253ade79b9b\\scratch';
+const SCREENSHOT_DIR = 'C:\\Users\\rahis\\.gemini\\antigravity-ide\\brain\\27c9f832-932e-4bb9-96f7-f52922186ce7\\scratch';
 
 async function runBrowserTests() {
   console.log('--- Starting Automated Browser Verification ---');
@@ -43,7 +43,7 @@ async function runBrowserTests() {
     console.log('   Page loaded successfully.');
 
     // ----------------------------------------------------
-    // TEST 1: Simple Pendulum (Kinematics)
+    // TEST 1: Simple Pendulum (Kinematics RK4 Precision)
     // ----------------------------------------------------
     console.log('\n2. Testing Simple Pendulum (Kinematics) preset...');
     await page.waitForSelector('#btn-open-upload', { visible: true });
@@ -72,13 +72,20 @@ async function runBrowserTests() {
       const canvas = document.querySelector('#simulation-container canvas');
       const activeTab = document.querySelector('.domain-btn.active')?.id;
       const mechanicsVisible = document.getElementById('mechanics-controls')?.style.display !== 'none';
+      const gravityVal = document.getElementById('gravity-slider')?.value;
+      const pendControlVisible = document.getElementById('pendulum-controls-group')?.style.display !== 'none';
+      const pendLength = document.getElementById('pendulum-length-input')?.value;
 
       return {
         imageSrc: img?.src,
+        canvasClass: canvas?.className,
         canvasWidth: canvas?.width,
         canvasHeight: canvas?.height,
         activeTab,
         mechanicsVisible,
+        gravityVal,
+        pendControlVisible,
+        pendLength,
       };
     });
 
@@ -88,9 +95,24 @@ async function runBrowserTests() {
     await page.screenshot({ path: pendulumScreenshotPath, fullPage: false });
     console.log('   Saved pendulum screenshot to:', pendulumScreenshotPath);
 
+    // Test pointer drag on bob to new angle
+    const canvasRect = await page.$eval('#simulation-container canvas', el => {
+      const r = el.getBoundingClientRect();
+      return { left: r.left, top: r.top, width: r.width, height: r.height };
+    });
+    // Drag bob towards center right
+    await page.mouse.move(canvasRect.left + canvasRect.width * 0.35, canvasRect.top + canvasRect.height * 0.7);
+    await page.mouse.down();
+    await page.mouse.move(canvasRect.left + canvasRect.width * 0.55, canvasRect.top + canvasRect.height * 0.7, { steps: 5 });
+    await new Promise(r => setTimeout(r, 300));
+    const dragScreenshotPath = path.join(SCREENSHOT_DIR, 'test_pendulum_dragged.png');
+    await page.screenshot({ path: dragScreenshotPath, fullPage: false });
+    console.log('   Saved dragged pendulum screenshot to:', dragScreenshotPath);
+    await page.mouse.up();
+
     // Play simulation and capture swinging state
     await page.click('#play-button');
-    await new Promise(r => setTimeout(r, 700));
+    await new Promise(r => setTimeout(r, 800));
     const swingScreenshotPath = path.join(SCREENSHOT_DIR, 'test_pendulum_swinging.png');
     await page.screenshot({ path: swingScreenshotPath, fullPage: false });
     console.log('   Saved swinging pendulum screenshot to:', swingScreenshotPath);

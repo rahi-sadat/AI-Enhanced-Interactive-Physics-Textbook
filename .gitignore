@@ -44,6 +44,8 @@ simulation_frontend/physics simulation/*.png
 
 # Dynamic Perception Output & Sprites
 simulation_frontend/augmented_physics_v2/public/sprites/bob_*.png
+simulation_frontend/augmented_physics_v2/public/sprites/element_bob_*.png
+simulation_frontend/augmented_physics_v2/public/uploads/clean_*_*.jpg
 *_masked.jpg
 masked_*.jpg
 
