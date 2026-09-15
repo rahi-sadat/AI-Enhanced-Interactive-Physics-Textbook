@@ -1,16 +1,19 @@
 /** optics/view/p5OpticsView.js
  * Unified p5.js instance-mode transparent canvas renderer.
- * Delegates visual primitives to OpticsRenderer and handles interactive 2D dragging.
+ * Operates authoritatively in native source-image coordinates via CoordinateMapper
+ * and provides responsive scaling, dragging, and precision debug overlays.
  */
 import p5 from 'p5';
 import { THEME } from './opticsTheme.js';
 import { OpticsRenderer } from './opticsRenderer.js';
 import { opticsSprites } from './opticsSprites.js';
+import { CoordinateMapper } from '../../core/coordinateMapper.js';
 
-const CW = 800, CH = 600, DRAG_R = 25;
+const DRAG_R = 25;
 
 export class P5OpticsView {
   constructor(container, callbacks = {}) {
+    this.container = container;
     this.onDragLens = callbacks.onDragLens || (() => {});
     this.onDragPrism = callbacks.onDragPrism || (() => {});
     this.onDragMirror = callbacks.onDragMirror || (() => {});
@@ -18,16 +21,23 @@ export class P5OpticsView {
 
     this._state = null;
     this._model = null;
-    this._dragTarget = null; // 'object_pos' | 'object_tip' | 'light_source'
+    this._dragTarget = null; // 'object_pos' | 'object_tip' | 'light_source' | 'interface_source'
     this._showDebug = false;
+
+    const initialW = container?.clientWidth || 800;
+    const initialH = container?.clientHeight || 600;
+    this.mapper = new CoordinateMapper(800, 600, initialW, initialH);
 
     this._p5 = new p5(p => {
       this.renderer = new OpticsRenderer(p);
 
       p.setup = () => {
-        const cv = p.createCanvas(CW, CH);
+        const w = this.container?.clientWidth || 800;
+        const h = this.container?.clientHeight || 600;
+        const cv = p.createCanvas(w, h);
         cv.parent(container);
         cv.style('background', 'transparent');
+        this._recomputeMapper(w, h);
         p.noLoop();
         p.clear();
       };
@@ -35,16 +45,30 @@ export class P5OpticsView {
       p.draw = () => {
         p.clear();
         if (!this._state || !this._model) return;
+
+        // Render everything in pure source coordinates inside aspect-preserving transform stack
+        p.push();
+        p.translate(this.mapper.offsetX, this.mapper.offsetY);
+        p.scale(this.mapper.scale);
+
         this._renderCurrentScene(p);
+
+        if (this._showDebug) {
+          this._drawPrecisionDebug(p);
+        }
+
+        p.pop();
       };
 
       p.mousePressed = () => {
         if (!this._model) return;
+        const srcM = this.mapper.viewToSource(p.mouseX, p.mouseY);
         const sub = this._model.subtype || 'thin_lens';
+        const hitR = DRAG_R / Math.max(0.001, this.mapper.scale);
 
         if (sub === 'prism') {
           const ls = this._model.lightSource;
-          if (ls && Math.hypot(p.mouseX - ls.x, p.mouseY - ls.y) < DRAG_R * 1.5) {
+          if (ls && Math.hypot(srcM.x - ls.x, srcM.y - ls.y) < hitR * 1.5) {
             this._dragTarget = 'light_source';
             p.cursor('grabbing');
           }
@@ -53,7 +77,7 @@ export class P5OpticsView {
 
         if (sub === 'interface_refraction') {
           const ls = this._model.lightSource;
-          if (ls && Math.hypot(p.mouseX - ls.x, p.mouseY - ls.y) < DRAG_R * 1.5) {
+          if (ls && Math.hypot(srcM.x - ls.x, srcM.y - ls.y) < hitR * 1.5) {
             this._dragTarget = 'interface_source';
             p.cursor('grabbing');
           }
@@ -67,8 +91,9 @@ export class P5OpticsView {
         const minY = Math.min(this._model.axisY, tipY);
         const maxY = Math.max(this._model.axisY, tipY);
 
-        const nearTip = Math.hypot(p.mouseX - obj.x, p.mouseY - tipY) < DRAG_R;
-        const nearShaft = Math.abs(p.mouseX - obj.x) < 22 && p.mouseY >= minY - 10 && p.mouseY <= maxY + 10;
+        const nearTip = Math.hypot(srcM.x - obj.x, srcM.y - tipY) < hitR;
+        const shaftTol = 22 / Math.max(0.001, this.mapper.scale);
+        const nearShaft = Math.abs(srcM.x - obj.x) < shaftTol && srcM.y >= minY - 10 && srcM.y <= maxY + 10;
 
         if (nearTip) {
           this._dragTarget = 'object_tip';
@@ -81,11 +106,13 @@ export class P5OpticsView {
 
       p.mouseMoved = () => {
         if (!this._model || this._dragTarget) return;
+        const srcM = this.mapper.viewToSource(p.mouseX, p.mouseY);
         const sub = this._model.subtype || 'thin_lens';
+        const hitR = DRAG_R / Math.max(0.001, this.mapper.scale);
 
         if (sub === 'prism') {
           const ls = this._model.lightSource;
-          if (ls && Math.hypot(p.mouseX - ls.x, p.mouseY - ls.y) < DRAG_R * 1.5) {
+          if (ls && Math.hypot(srcM.x - ls.x, srcM.y - ls.y) < hitR * 1.5) {
             p.cursor('grab');
           } else {
             p.cursor('default');
@@ -95,7 +122,7 @@ export class P5OpticsView {
 
         if (sub === 'interface_refraction') {
           const ls = this._model.lightSource;
-          if (ls && Math.hypot(p.mouseX - ls.x, p.mouseY - ls.y) < DRAG_R * 1.5) {
+          if (ls && Math.hypot(srcM.x - ls.x, srcM.y - ls.y) < hitR * 1.5) {
             p.cursor('grab');
           } else {
             p.cursor('default');
@@ -108,8 +135,9 @@ export class P5OpticsView {
         const tipY = this._model.axisY + obj.height;
         const minY = Math.min(this._model.axisY, tipY);
         const maxY = Math.max(this._model.axisY, tipY);
-        const nearTip = Math.hypot(p.mouseX - obj.x, p.mouseY - tipY) < DRAG_R;
-        const nearShaft = Math.abs(p.mouseX - obj.x) < 22 && p.mouseY >= minY - 10 && p.mouseY <= maxY + 10;
+        const nearTip = Math.hypot(srcM.x - obj.x, srcM.y - tipY) < hitR;
+        const shaftTol = 22 / Math.max(0.001, this.mapper.scale);
+        const nearShaft = Math.abs(srcM.x - obj.x) < shaftTol && srcM.y >= minY - 10 && srcM.y <= maxY + 10;
 
         if (nearTip) {
           p.cursor('ns-resize');
@@ -122,12 +150,15 @@ export class P5OpticsView {
 
       p.mouseDragged = () => {
         if (!this._dragTarget || !this._model) return;
+        const srcM = this.mapper.viewToSource(p.mouseX, p.mouseY);
         const sub = this._model.subtype || 'thin_lens';
+        const srcW = this._model.sourceWidth || 800;
+        const srcH = this._model.sourceHeight || 600;
 
         if (sub === 'prism') {
           if (this._dragTarget === 'light_source') {
-            const newX = p.constrain(p.mouseX, 20, 240);
-            const newY = p.constrain(p.mouseY, 150, 480);
+            const newX = p.constrain(srcM.x, 20, srcW - 20);
+            const newY = p.constrain(srcM.y, 20, srcH - 20);
             this.onDragPrism(newX, newY);
           }
           return;
@@ -136,8 +167,8 @@ export class P5OpticsView {
         if (sub === 'interface_refraction') {
           if (this._dragTarget === 'interface_source') {
             const boundY = this._model.boundary?.y ?? 300;
-            const newX = p.constrain(p.mouseX, 20, CW - 20);
-            const newY = p.constrain(p.mouseY, 20, boundY - 10);
+            const newX = p.constrain(srcM.x, 20, srcW - 20);
+            const newY = p.constrain(srcM.y, 20, boundY - 10);
             this.onDragInterface(newX, newY);
           }
           return;
@@ -145,24 +176,17 @@ export class P5OpticsView {
 
         const obj = this._model.object;
         if (!obj) return;
-        let minX = 20;
-        let maxX = (sub === 'mirror' ? this._model.mirror.x : this._model.lens.x) - 10;
-        if (sub === 'mirror' && this._model.mirror.facing === 'right') {
-          minX = this._model.mirror.x + 10;
-          maxX = CW - 20;
-        }
+        const maxX = (sub === 'mirror' ? this._model.mirror.x : this._model.lens.x) - 10;
 
         if (this._dragTarget === 'object_tip') {
-          // Adjust height vertically and position horizontally
-          const newX = p.constrain(p.mouseX, minX, maxX);
-          const rawHeight = p.mouseY - this._model.axisY;
-          // Constrain height between -160 (tall upright) and -30 (short)
-          const newH = p.constrain(rawHeight, -160, -30);
+          const newX = p.constrain(srcM.x, 20, maxX);
+          const rawHeight = srcM.y - this._model.axisY;
+          const minH = -(srcH * 0.45);
+          const newH = p.constrain(rawHeight, minH, -20);
           if (sub === 'mirror') this.onDragMirror(newX, newH);
           else this.onDragLens(newX, newH);
         } else if (this._dragTarget === 'object_pos') {
-          // Adjust position horizontally
-          const newX = p.constrain(p.mouseX, minX, maxX);
+          const newX = p.constrain(srcM.x, 20, maxX);
           if (sub === 'mirror') this.onDragMirror(newX, obj.height);
           else this.onDragLens(newX, obj.height);
         }
@@ -173,21 +197,51 @@ export class P5OpticsView {
         p.cursor('default');
       };
     });
+
+    // Resize observer to track container dimensions responsively
+    if (typeof ResizeObserver !== 'undefined' && container) {
+      this._resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const cr = entry.contentRect;
+          const w = Math.round(cr.width);
+          const h = Math.round(cr.height);
+          if (w > 0 && h > 0 && this._p5) {
+            this._p5.resizeCanvas(w, h);
+            this._recomputeMapper(w, h);
+            this._p5.redraw();
+          }
+        }
+      });
+      this._resizeObserver.observe(container);
+    }
+  }
+
+  _recomputeMapper(w, h) {
+    const srcW = this._model?.sourceWidth || 800;
+    const srcH = this._model?.sourceHeight || 600;
+    const viewW = w || this.container?.clientWidth || (this._p5 ? this._p5.width : 800);
+    const viewH = h || this.container?.clientHeight || (this._p5 ? this._p5.height : 600);
+    this.mapper.update(srcW, srcH, viewW, viewH);
   }
 
   render(model, result) {
     this._model = model;
     this._state = result;
-    this._p5.redraw();
+    this._recomputeMapper();
+    this._p5?.redraw();
   }
 
   setDebug(enable) {
     this._showDebug = enable;
-    this._p5.redraw();
+    this._p5?.redraw();
   }
 
   destroy() {
-    this._p5.remove();
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+      this._resizeObserver = null;
+    }
+    this._p5?.remove();
   }
 
   _renderCurrentScene(p) {
@@ -206,18 +260,20 @@ export class P5OpticsView {
   _drawThinLensScene(p) {
     const { _state: r, _model: m } = this;
     const ren = this.renderer;
+    const srcW = m.sourceWidth || 800;
 
-    ren.drawOpticalAxis(m.axisY, CW);
+    ren.drawOpticalAxis(m.axisY, srcW);
 
     (m.focalPoints || []).forEach(fp => {
       ren.drawFocalPoint(fp.x, m.axisY, fp.label);
     });
 
     const isConcave = m.lens.focalLength < 0 || m.lens.model === 'concave';
+    const apH = m.lens.apertureHeight || THEME.lens.apertureH;
     if (isConcave) {
-      ren.drawConcaveLens(m.lens.x, m.axisY, m.lens.apertureHeight || THEME.lens.apertureH);
+      ren.drawConcaveLens(m.lens.x, m.axisY, apH);
     } else {
-      ren.drawConvexLens(m.lens.x, m.axisY, m.lens.apertureHeight || THEME.lens.apertureH);
+      ren.drawConvexLens(m.lens.x, m.axisY, apH);
     }
 
     // Draw principal rays
@@ -231,7 +287,7 @@ export class P5OpticsView {
       }
     });
 
-    const spriteImg = m.object.spriteUrl ? opticsSprites.get(p, m.object.spriteUrl) : null;
+    const spriteImg = m.object?.spriteUrl ? opticsSprites.get(p, m.object.spriteUrl) : null;
 
     // Draw formed image (sprite or neon arrow)
     if (isFinite(r.imageX) && isFinite(r.imageHeight)) {
@@ -245,21 +301,28 @@ export class P5OpticsView {
     }
 
     // Draw original object (sprite or neon arrow)
-    let drewObj = false;
-    if (spriteImg) {
-      drewObj = opticsSprites.drawObject(p, spriteImg, m.object.x, m.axisY, m.object.height);
-    }
-    if (!drewObj) {
-      ren.drawArrow(m.object.x, m.axisY, m.object.height, THEME.object, true);
-    }
+    if (m.object) {
+      let drewObj = false;
+      if (spriteImg) {
+        drewObj = opticsSprites.drawObject(p, spriteImg, m.object.x, m.axisY, m.object.height);
+      }
+      if (!drewObj) {
+        ren.drawArrow(m.object.x, m.axisY, m.object.height, THEME.object, true);
+      }
 
-    const tipY = m.axisY + m.object.height;
-    if (!this._dragTarget && Math.abs(p.mouseX - m.object.x) < 25) {
-      ren.drawDragHint(m.object.x, tipY, 20, 'drag');
+      const tipY = m.axisY + m.object.height;
+      const srcM = this.mapper.viewToSource(p.mouseX, p.mouseY);
+      const hitR = DRAG_R / Math.max(0.001, this.mapper.scale);
+      if (!this._dragTarget && Math.abs(srcM.x - m.object.x) < hitR) {
+        ren.drawDragHint(m.object.x, tipY, 20 / Math.max(0.001, this.mapper.scale), 'drag');
+      }
     }
 
     if (this._showDebug) {
-      ren.drawDebugTag(m.object.x, tipY - 8, `Obj (${Math.round(m.object.x)}, ${Math.round(tipY)})`);
+      if (m.object) {
+        const tipY = m.axisY + m.object.height;
+        ren.drawDebugTag(m.object.x, tipY - 8, `Obj (${Math.round(m.object.x)}, ${Math.round(tipY)})`);
+      }
       ren.drawDebugTag(m.lens.x, m.axisY + 22, `O (${Math.round(m.lens.x)}, ${Math.round(m.axisY)})`);
       if (isFinite(r.imageX) && isFinite(r.imageHeight)) {
         ren.drawDebugTag(r.imageX, m.axisY + r.imageHeight - 8, `Img (${Math.round(r.imageX)}, ${Math.round(m.axisY + r.imageHeight)})`);
@@ -296,7 +359,7 @@ export class P5OpticsView {
     }
 
     // Draw refracted/emergent light rays
-    (r.segments || []).forEach((seg, i) => {
+    (r.segments || []).forEach(seg => {
       let col = THEME.rays[0];
       if (seg.type === 'internal') col = THEME.rays[1];
       if (seg.type === 'emergent') col = THEME.rays[2];
@@ -319,7 +382,9 @@ export class P5OpticsView {
       p.text('Beam Source', ls.x, ls.y - 12);
       p.pop();
 
-      if (!this._dragTarget && Math.hypot(p.mouseX - ls.x, p.mouseY - ls.y) < DRAG_R * 1.5) {
+      const srcM = this.mapper.viewToSource(p.mouseX, p.mouseY);
+      const hitR = DRAG_R / Math.max(0.001, this.mapper.scale);
+      if (!this._dragTarget && Math.hypot(srcM.x - ls.x, srcM.y - ls.y) < hitR * 1.5) {
         ren.drawDragHint(ls.x, ls.y, 18, 'drag');
       }
     }
@@ -337,16 +402,18 @@ export class P5OpticsView {
   _drawMirrorScene(p) {
     const { _state: r, _model: m } = this;
     const ren = this.renderer;
+    const srcW = m.sourceWidth || 800;
 
-    ren.drawOpticalAxis(m.axisY, CW);
+    ren.drawOpticalAxis(m.axisY, srcW);
 
     (m.focalPoints || []).forEach(fp => {
       ren.drawFocalPoint(fp.x, m.axisY, fp.label);
     });
 
-    const radius = m.mirror.radiusOfCurvature || Math.abs(m.mirror.focalLength || 140) * 2 || 280;
-    const aperH = m.mirror.apertureHeight || 240;
-    ren.drawMirror(m.mirror.x, m.axisY, radius, aperH, m.mirror.model, m.mirror.facing || 'left');
+    // Curvature radius & aperture height from detected geometry, without magic constants
+    const R = m.mirror.curvatureRadius ?? (2 * Math.abs(m.mirror.focalLength || 100));
+    const apH = m.mirror.apertureHeight ?? 220;
+    ren.drawMirror(m.mirror.x, m.axisY, R, apH, m.mirror.model);
 
     // Draw mirror principal rays
     (r.rays || []).forEach((ray, i) => {
@@ -359,7 +426,7 @@ export class P5OpticsView {
       }
     });
 
-    const spriteImg = m.object.spriteUrl ? opticsSprites.get(p, m.object.spriteUrl) : null;
+    const spriteImg = m.object?.spriteUrl ? opticsSprites.get(p, m.object.spriteUrl) : null;
 
     // Draw formed image
     if (isFinite(r.imageX) && isFinite(r.imageHeight)) {
@@ -373,21 +440,28 @@ export class P5OpticsView {
     }
 
     // Draw original object
-    let drewObj = false;
-    if (spriteImg) {
-      drewObj = opticsSprites.drawObject(p, spriteImg, m.object.x, m.axisY, m.object.height);
-    }
-    if (!drewObj) {
-      ren.drawArrow(m.object.x, m.axisY, m.object.height, THEME.object, true);
-    }
+    if (m.object) {
+      let drewObj = false;
+      if (spriteImg) {
+        drewObj = opticsSprites.drawObject(p, spriteImg, m.object.x, m.axisY, m.object.height);
+      }
+      if (!drewObj) {
+        ren.drawArrow(m.object.x, m.axisY, m.object.height, THEME.object, true);
+      }
 
-    const tipY = m.axisY + m.object.height;
-    if (!this._dragTarget && Math.abs(p.mouseX - m.object.x) < 25) {
-      ren.drawDragHint(m.object.x, tipY, 20, 'drag');
+      const tipY = m.axisY + m.object.height;
+      const srcM = this.mapper.viewToSource(p.mouseX, p.mouseY);
+      const hitR = DRAG_R / Math.max(0.001, this.mapper.scale);
+      if (!this._dragTarget && Math.abs(srcM.x - m.object.x) < hitR) {
+        ren.drawDragHint(m.object.x, tipY, 20 / Math.max(0.001, this.mapper.scale), 'drag');
+      }
     }
 
     if (this._showDebug) {
-      ren.drawDebugTag(m.object.x, tipY - 8, `Obj (${Math.round(m.object.x)}, ${Math.round(tipY)})`);
+      if (m.object) {
+        const tipY = m.axisY + m.object.height;
+        ren.drawDebugTag(m.object.x, tipY - 8, `Obj (${Math.round(m.object.x)}, ${Math.round(tipY)})`);
+      }
       ren.drawDebugTag(m.mirror.x, m.axisY + 22, `P (${Math.round(m.mirror.x)}, ${Math.round(m.axisY)})`);
       if (isFinite(r.imageX) && isFinite(r.imageHeight)) {
         ren.drawDebugTag(r.imageX, m.axisY + r.imageHeight - 8, `Img (${Math.round(r.imageX)}, ${Math.round(m.axisY + r.imageHeight)})`);
@@ -401,89 +475,96 @@ export class P5OpticsView {
   _drawInterfaceRefractionScene(p) {
     const { _state: r, _model: m } = this;
     const ren = this.renderer;
+    const srcW = m.sourceWidth || 800;
+    const srcH = m.sourceHeight || 600;
 
-    const bY = m.boundary?.y ?? 300;
-    const nX = m.normal?.x ?? 400;
+    const bY = m.boundary?.y ?? (srcH * 0.5);
+    const nX = m.normal?.x ?? (srcW * 0.5);
 
-    // 1. Subtle medium background fills / tints (upper rarer, lower denser)
-    p.push();
-    p.noStroke();
-    // Medium 1 (top)
-    p.fill(30, 41, 59, 120); // subtle slate
-    p.rect(0, 0, CW, bY);
-    // Medium 2 (bottom)
-    p.fill(14, 116, 144, 90); // subtle cyan/water tint
-    p.rect(0, bY, CW, CH - bY);
+    // 1. Medium background fills / tints (only draw when there is no textbook background image)
+    if (!m.backgroundUrl) {
+      p.push();
+      p.noStroke();
+      // Medium 1 (top)
+      p.fill(30, 41, 59, 120); // subtle slate
+      p.rect(0, 0, srcW, bY);
+      // Medium 2 (bottom)
+      p.fill(14, 116, 144, 90); // subtle cyan/water tint
+      p.rect(0, bY, srcW, srcH - bY);
 
-    // Medium labels
-    p.fill('#94a3b8');
-    p.textSize(13);
-    p.textAlign(p.LEFT, p.TOP);
-    const m1Name = m.medium1?.name || 'Medium 1';
-    const m1N = m.medium1?.n != null ? Number(m.medium1.n).toFixed(2) : '1.00';
-    p.text(`${m1Name} (n₁ = ${m1N})`, 25, 20);
+      // Medium labels
+      p.fill('#94a3b8');
+      p.textSize(13);
+      p.textAlign(p.LEFT, p.TOP);
+      const m1Name = m.medium1?.name || 'Medium 1';
+      const m1N = m.medium1?.n != null ? Number(m.medium1.n).toFixed(2) : '1.00';
+      p.text(`${m1Name} (n₁ = ${m1N})`, 25, 20);
 
-    p.fill('#67e8f9');
-    p.textAlign(p.LEFT, p.BOTTOM);
-    const m2Name = m.medium2?.name || 'Medium 2';
-    const m2N = m.medium2?.n != null ? Number(m.medium2.n).toFixed(2) : '1.50';
-    p.text(`${m2Name} (n₂ = ${m2N})`, 25, CH - 20);
-    p.pop();
+      p.fill('#67e8f9');
+      p.textAlign(p.LEFT, p.BOTTOM);
+      const m2Name = m.medium2?.name || 'Medium 2';
+      const m2N = m.medium2?.n != null ? Number(m.medium2.n).toFixed(2) : '1.50';
+      p.text(`${m2Name} (n₂ = ${m2N})`, 25, srcH - 20);
+      p.pop();
+    }
 
     // 2. Boundary interface line
     p.push();
     p.stroke('#38bdf8');
     p.strokeWeight(2.5);
-    p.line(0, bY, CW, bY);
+    p.line(0, bY, srcW, bY);
     p.pop();
 
     // 3. Normal line (vertical dashed line across boundary)
-    if (r.normalLine) {
-      ren.drawNormal(r.normalLine.top, r.normalLine.bottom);
-      p.push();
-      p.fill('rgba(255,255,255,0.7)');
-      p.noStroke();
-      p.textSize(11);
-      p.textAlign(p.CENTER, p.BOTTOM);
-      p.text("Normal N-N'", nX, r.normalLine.top.y - 4);
-      p.pop();
-    }
+    const nTop = r.normalLine?.top || r.normalLine?.p1 || r.normalLine?.[0] || { x: nX, y: Math.max(20, bY - 220) };
+    const nBot = r.normalLine?.bottom || r.normalLine?.p2 || r.normalLine?.[1] || { x: nX, y: Math.min(srcH - 20, bY + 220) };
+    ren.drawNormal(nTop, nBot);
+    p.push();
+    p.fill('rgba(255,255,255,0.85)');
+    p.noStroke();
+    p.textSize(12);
+    p.textAlign(p.CENTER, p.BOTTOM);
+    p.text("Normal N-N'", nX, nTop.y - 6);
+    p.pop();
 
-    // 4. Draw Angle arcs at point of incidence
+    // 4. Resolve ray points safely
     const poi = { x: nX, y: bY };
-    if (r.incidentRay) {
-      const vInc = { x: r.incidentRay.start.x - poi.x, y: r.incidentRay.start.y - poi.y };
+    const incStart = r.incidentRay?.start || r.incidentRay?.[0] || (m.lightSource ? { x: m.lightSource.x, y: m.lightSource.y } : null);
+    const incEnd   = r.incidentRay?.end   || r.incidentRay?.[1] || poi;
+
+    const refrStart = r.refractedRay?.start || r.refractedRay?.[0] || poi;
+    const refrEnd   = r.refractedRay?.end   || r.refractedRay?.[1];
+
+    const reflStart = r.reflectedRay?.start || r.reflectedRay?.[0] || poi;
+    const reflEnd   = r.reflectedRay?.end   || r.reflectedRay?.[1];
+
+    // 5. Draw Angle arcs at point of incidence
+    if (incStart) {
+      const vInc = { x: incStart.x - poi.x, y: incStart.y - poi.y };
       const vNormTop = { x: 0, y: -1 };
-      const lbl1 = r.angles?.theta1Deg != null ? `θ₁ ${Math.round(r.angles.theta1Deg)}°` : 'θ₁';
+      const lbl1 = r.angles?.theta1Deg != null ? `θ₁ = ${Math.round(r.angles.theta1Deg)}°` : 'θ₁';
       ren.drawAngleBetweenVectors(poi, vInc, vNormTop, 36, lbl1);
     }
 
-    if (r.refractedRay) {
-      const vRefr = { x: r.refractedRay.end.x - poi.x, y: r.refractedRay.end.y - poi.y };
+    if (refrEnd && !r.isTIR) {
+      const vRefr = { x: refrEnd.x - poi.x, y: refrEnd.y - poi.y };
       const vNormBot = { x: 0, y: 1 };
-      const lbl2 = r.angles?.theta2Deg != null ? `θ₂ ${Math.round(r.angles.theta2Deg)}°` : 'θ₂';
+      const lbl2 = r.angles?.theta2Deg != null ? `θ₂ = ${Math.round(r.angles.theta2Deg)}°` : 'θ₂';
       ren.drawAngleBetweenVectors(poi, vRefr, vNormBot, 36, lbl2);
     }
 
-    // 5. Draw Light Rays with glowing neon colors
-    // Incident Ray (Bright Yellow / Amber)
-    if (r.incidentRay) {
-      ren.drawRay(r.incidentRay.start, r.incidentRay.end, '#facc15', 2.8);
+    // 6. Draw Light Rays
+    if (incStart && incEnd) {
+      ren.drawRayWithArrow(incStart, incEnd, '#facc15', 3.0);
+    }
+    if (refrStart && refrEnd && !r.isTIR) {
+      ren.drawRayWithArrow(refrStart, refrEnd, '#38bdf8', 3.0);
+    }
+    if (reflStart && reflEnd && r.isTIR) {
+      ren.drawRayWithArrow(reflStart, reflEnd, '#f87171', 3.0);
     }
 
-    // Refracted Ray (Cyan)
-    if (r.refractedRay) {
-      ren.drawRay(r.refractedRay.start, r.refractedRay.end, '#38bdf8', 2.8);
-    }
-
-    // Reflected Ray (Pink / Red)
-    if (r.reflectedRay) {
-      const col = r.isTIR ? '#f87171' : 'rgba(244, 114, 182, 0.6)';
-      const weight = r.isTIR ? 2.8 : 1.5;
-      ren.drawRay(r.reflectedRay.start, r.reflectedRay.end, col, weight);
-    }
-
-    // 6. Interactive Light Source emitter
+    // 7. Interactive Light Source emitter
     const ls = m.lightSource;
     if (ls) {
       p.push();
@@ -498,16 +579,69 @@ export class P5OpticsView {
       p.text('Ray Source (Drag)', ls.x, ls.y - 12);
       p.pop();
 
-      if (!this._dragTarget && Math.hypot(p.mouseX - ls.x, p.mouseY - ls.y) < DRAG_R * 1.5) {
-        ren.drawDragHint(ls.x, ls.y, 20, 'drag');
+      const srcM = this.mapper.viewToSource(p.mouseX, p.mouseY);
+      const hitR = DRAG_R / Math.max(0.001, this.mapper.scale);
+      if (!this._dragTarget && Math.hypot(srcM.x - ls.x, srcM.y - ls.y) < hitR * 1.5) {
+        ren.drawDragHint(ls.x, ls.y, 20 / Math.max(0.001, this.mapper.scale), 'drag');
       }
     }
 
-    // 7. Debug tags
+    // 8. Debug tags
     if (this._showDebug) {
       ren.drawDebugTag(nX, bY, `POI (${Math.round(nX)}, ${Math.round(bY)})`);
       if (ls) ren.drawDebugTag(ls.x, ls.y + 16, `Source (${Math.round(ls.x)}, ${Math.round(ls.y)})`);
     }
   }
-}
 
+  _drawPrecisionDebug(p) {
+    const { _model: m } = this;
+    const srcW = m.sourceWidth || 800;
+    const srcH = m.sourceHeight || 600;
+
+    p.push();
+    // 1. Source bounds dashed frame
+    p.noFill();
+    p.stroke('rgba(56, 189, 248, 0.45)');
+    p.strokeWeight(1.5 / Math.max(0.001, this.mapper.scale));
+    p.drawingContext.setLineDash([8, 6]);
+    p.rect(0, 0, srcW, srcH);
+    p.drawingContext.setLineDash([]);
+
+    // 2. Precision & Provenance Info Box (top-left)
+    const pad = 12;
+    p.fill('rgba(15, 23, 42, 0.85)');
+    p.stroke('rgba(56, 189, 248, 0.7)');
+    p.strokeWeight(1 / Math.max(0.001, this.mapper.scale));
+    p.rect(pad, pad, 360, 72, 6);
+
+    p.noStroke();
+    p.fill('#38bdf8');
+    p.textSize(12);
+    p.textAlign(p.LEFT, p.TOP);
+    p.text(`PRECISION OVERLAY [${m.isPrecision ? 'PRECISION MODE' : 'EXPLORE MODE'}]`, pad + 10, pad + 8);
+
+    p.fill('#e2e8f0');
+    p.textSize(10.5);
+    const conf = m.confidence != null ? `${(m.confidence * 100).toFixed(0)}%` : 'N/A';
+    p.text(`Source Res: ${srcW} × ${srcH} px | Scale: ${this.mapper.scale.toFixed(3)} | Confidence: ${conf}`, pad + 10, pad + 28);
+
+    // Provenance details
+    let provSummary = '';
+    if (m.lens?.provenance?.focalLength) {
+      const pl = m.lens.provenance.focalLength;
+      provSummary = `Focal length: ${Math.round(m.lens.focalLength)} px (${pl.status}, conf: ${Math.round((pl.confidence || 0) * 100)}%)`;
+    } else if (m.mirror?.provenance?.focalLength) {
+      const pm = m.mirror.provenance.focalLength;
+      provSummary = `Focal length: ${Math.round(m.mirror.focalLength)} px (${pm.status}, conf: ${Math.round((pm.confidence || 0) * 100)}%)`;
+    } else if (m.prism?.provenance?.refractiveIndex) {
+      const pp = m.prism.provenance.refractiveIndex;
+      provSummary = `Index n: ${m.prism.refractiveIndex.toFixed(2)} (${pp.status})`;
+    } else {
+      provSummary = `Registration: 1:1 aspect-preserved contain transform`;
+    }
+    p.fill('#94a3b8');
+    p.text(provSummary, pad + 10, pad + 48);
+
+    p.pop();
+  }
+}

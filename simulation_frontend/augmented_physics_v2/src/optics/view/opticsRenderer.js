@@ -10,7 +10,7 @@ export class OpticsRenderer {
   }
 
   /**
-   * Draws an optical ray with neon glow.
+   * Draws an optical ray with neon glow and directional arrowhead.
    */
   drawRay(start, end, color = THEME.rays[0], weight = 1.8) {
     const p = this.p;
@@ -23,6 +23,24 @@ export class OpticsRenderer {
     p.strokeWeight(weight);
     p.line(start.x, start.y, end.x, end.y);
     ctx.shadowBlur = 0;
+    p.pop();
+  }
+
+  /**
+   * Draws an optical ray with a directional arrowhead at the midpoint.
+   */
+  drawRayWithArrow(start, end, color = THEME.rays[0], weight = 2.2) {
+    this.drawRay(start, end, color, weight);
+    const p = this.p;
+    const midX = (start.x + end.x) / 2;
+    const midY = (start.y + end.y) / 2;
+    const angle = Math.atan2(end.y - start.y, end.x - start.x);
+    p.push();
+    p.translate(midX, midY);
+    p.rotate(angle);
+    p.fill(color);
+    p.noStroke();
+    p.triangle(7, 0, -7, -5, -7, 5);
     p.pop();
   }
 
@@ -130,13 +148,23 @@ export class OpticsRenderer {
 
     if (label) {
       const midAngle = (startAngle + endAngle) / 2;
-      const lx = center.x + Math.cos(midAngle) * (radius + 14);
-      const ly = center.y + Math.sin(midAngle) * (radius + 14);
-      p.fill(THEME.angleText.fill);
-      p.noStroke();
-      p.textSize(THEME.angleText.size);
+      const dist = radius + 20;
+      const lx = center.x + Math.cos(midAngle) * dist;
+      const ly = center.y + Math.sin(midAngle) * dist;
+      p.push();
+      p.textSize(12);
       p.textAlign(p.CENTER, p.CENTER);
+      const tw = p.textWidth(label) + 12;
+      const th = 18;
+      // High-contrast badge so angle labels are always crystal clear and never obscured by rays
+      p.fill('rgba(15, 23, 42, 0.90)');
+      p.stroke('rgba(251, 191, 36, 0.7)');
+      p.strokeWeight(1);
+      p.rect(lx - tw / 2, ly - th / 2, tw, th, 4);
+      p.noStroke();
+      p.fill('#fbbf24');
       p.text(label, lx, ly);
+      p.pop();
     }
     p.pop();
   }
@@ -228,7 +256,7 @@ export class OpticsRenderer {
   /**
    * Draws a spherical or plane mirror.
    */
-  drawMirror(mx, ay, radius = 280, height = 240, type = 'concave', facing = 'left') {
+  drawMirror(mx, ay, radius = 280, height = 240, type = 'concave') {
     const p = this.p;
     const ctx = p.drawingContext;
     p.push();
@@ -238,19 +266,38 @@ export class OpticsRenderer {
     p.strokeWeight(THEME.mirror.weight);
     p.noFill();
 
+    const isConcave = type === 'concave';
+
     if (type === 'plane') {
       p.line(mx, ay - height / 2, mx, ay + height / 2);
+      // Back-silvering hatching marks
+      p.stroke('rgba(255,255,255,0.3)');
+      p.strokeWeight(1);
+      const step = 14;
+      for (let y = ay - height / 2; y <= ay + height / 2; y += step) {
+        p.line(mx, y, mx + 8, y - 6);
+      }
     } else {
-      const isConcave = type === 'concave';
-      const isFacingRight = facing === 'right';
-      // For realistic optics diagram display, visual arc radius ensures paraxial curvature
-      const r = Math.max(radius, height * 1.15);
-      const cx = (isConcave !== isFacingRight) ? (mx - r) : (mx + r);
-      const angleSpan = Math.asin(Math.min(0.42, (height / 2) / r));
-      const poleAngle = cx < mx ? 0 : Math.PI;
-      const start = poleAngle - angleSpan;
-      const end = poleAngle + angleSpan;
-      p.arc(cx, ay, r * 2, r * 2, start, end);
+      // Curved arc for concave or convex
+      const safeRadius = Math.max(height / 2 + 1, Number(radius) || 280);
+      const angleSpan = Math.asin(Math.min(0.99, (height / 2) / safeRadius));
+      const cx = isConcave ? mx - safeRadius : mx + safeRadius;
+      const start = isConcave ? -angleSpan : Math.PI - angleSpan;
+      const end = isConcave ? angleSpan : Math.PI + angleSpan;
+      p.arc(cx, ay, safeRadius * 2, safeRadius * 2, start, end);
+
+      // Back-silvering hatching marks on mirror rear
+      p.stroke('rgba(255,255,255,0.25)');
+      p.strokeWeight(1);
+      const numHatches = 12;
+      for (let i = 0; i <= numHatches; i++) {
+        const a = start + (end - start) * (i / numHatches);
+        const px = cx + safeRadius * Math.cos(a);
+        const py = ay + safeRadius * Math.sin(a);
+        const hLen = 8;
+        const hDir = isConcave ? 1 : -1;
+        p.line(px, py, px + hDir * hLen * Math.cos(a + 0.4), py + hDir * hLen * Math.sin(a + 0.4));
+      }
     }
 
     ctx.shadowBlur = 0;

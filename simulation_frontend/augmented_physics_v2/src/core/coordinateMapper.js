@@ -1,146 +1,121 @@
 /**
  * core/coordinateMapper.js
- * 
- * Single authoritative coordinate transformation service.
- * Translates between native source image pixels (geometry space)
- * and responsive CSS/Device pixels matching CSS:
- *   object-fit: contain;
- *   object-position: 50% 50%;
+ * Authoritative, bidirectional coordinate transform between native source image pixels
+ * and viewport/canvas pixels, preserving aspect ratio and letterboxing.
  */
-
 export class CoordinateMapper {
-  /**
-   * @param {number} sourceWidth - Natural width of source diagram image in px
-   * @param {number} sourceHeight - Natural height of source diagram image in px
-   * @param {number} viewportWidth - CSS clientWidth of container
-   * @param {number} viewportHeight - CSS clientHeight of container
-   * @param {number} [dpr=1] - Window devicePixelRatio
-   */
-  constructor(sourceWidth, sourceHeight, viewportWidth = 800, viewportHeight = 600, dpr = 1) {
-    this.sourceWidth = Math.max(1, Number(sourceWidth) || 800);
-    this.sourceHeight = Math.max(1, Number(sourceHeight) || 600);
-    this.dpr = Number(dpr) || 1;
-    this.updateViewport(viewportWidth, viewportHeight, this.dpr);
+  constructor(sourceW = 800, sourceH = 600, viewW = 800, viewH = 600, dpr = (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1)) {
+    this.update(sourceW, sourceH, viewW, viewH, dpr);
   }
 
-  /**
-   * Updates viewport and recomputes exact contain letterboxing.
-   * @param {number} viewportWidth 
-   * @param {number} viewportHeight 
-   * @param {number} [dpr=1]
-   */
-  updateViewport(viewportWidth, viewportHeight, dpr = this.dpr) {
-    this.viewportWidth = Math.max(1, Number(viewportWidth) || 800);
-    this.viewportHeight = Math.max(1, Number(viewportHeight) || 600);
-    this.dpr = Number(dpr) || 1;
+  update(sourceW, sourceH, viewW = 800, viewH = 600, dpr = (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1)) {
+    this.sourceW = Math.max(1, Number(sourceW) || 800);
+    this.sourceH = Math.max(1, Number(sourceH) || 600);
+    this.viewW = Math.max(1, Number(viewW) || 800);
+    this.viewH = Math.max(1, Number(viewH) || 600);
+    this.dpr = Math.max(1, Number(dpr) || 1);
 
-    // Uniform scale exactly matching CSS object-fit: contain
-    this.scale = Math.min(
-      this.viewportWidth / this.sourceWidth,
-      this.viewportHeight / this.sourceHeight
-    );
+    this.scale = Math.min(this.viewW / this.sourceW, this.viewH / this.sourceH);
+    this.renderedW = this.sourceW * this.scale;
+    this.renderedH = this.sourceH * this.scale;
 
-    this.renderedWidth = this.sourceWidth * this.scale;
-    this.renderedHeight = this.sourceHeight * this.scale;
-
-    // Symmetric letterbox offsets (object-position: 50% 50%)
-    this.offsetX = (this.viewportWidth - this.renderedWidth) / 2.0;
-    this.offsetY = (this.viewportHeight - this.renderedHeight) / 2.0;
+    this.offsetX = (this.viewW - this.renderedW) / 2.0;
+    this.offsetY = (this.viewH - this.renderedH) / 2.0;
   }
 
-  /**
-   * Converts a point from source image pixels to CSS viewport pixels.
-   * @param {{x: number, y: number}} pt
-   * @returns {{x: number, y: number}}
-   */
-  sourceToView(pt) {
-    if (!pt) return { x: 0, y: 0 };
+  sourceToView(x, y) {
     return {
-      x: pt.x * this.scale + this.offsetX,
-      y: pt.y * this.scale + this.offsetY,
+      x: Number(x) * this.scale + this.offsetX,
+      y: Number(y) * this.scale + this.offsetY,
     };
   }
 
-  /**
-   * Converts a point from CSS viewport pixels back to source image pixels.
-   * @param {{x: number, y: number}} pt
-   * @returns {{x: number, y: number}}
-   */
-  viewToSource(pt) {
-    if (!pt) return { x: 0, y: 0 };
+  viewToSource(x, y) {
     return {
-      x: (pt.x - this.offsetX) / this.scale,
-      y: (pt.y - this.offsetY) / this.scale,
+      x: (Number(x) - this.offsetX) / this.scale,
+      y: (Number(y) - this.offsetY) / this.scale,
     };
   }
 
-  /**
-   * Scales a scalar distance/length from source pixels to CSS viewport pixels.
-   * @param {number} len
-   * @returns {number}
-   */
   sourceLengthToView(len) {
-    return (Number(len) || 0) * this.scale;
+    return Number(len) * this.scale;
   }
 
-  /**
-   * Scales a scalar distance/length from CSS viewport pixels to source pixels.
-   * @param {number} len
-   * @returns {number}
-   */
   viewLengthToSource(len) {
-    return (Number(len) || 0) / this.scale;
+    return Number(len) / this.scale;
   }
 
-  /**
-   * Convenience alias: converts (x, y) from source to view space.
-   * @param {number} x
-   * @param {number} y
-   * @returns {{x: number, y: number}}
-   */
-  point(x, y) {
-    return this.sourceToView({ x, y });
+  sourceVerticesToView(vertices = []) {
+    return vertices.map(v => this.sourceToView(v.x ?? v[0], v.y ?? v[1]));
   }
 
-  /**
-   * Convenience alias: converts scalar length from source to view space.
-   * @param {number} val
-   * @returns {number}
-   */
-  length(val) {
-    return this.sourceLengthToView(val);
+  viewVerticesToSource(vertices = []) {
+    return vertices.map(v => this.viewToSource(v.x ?? v[0], v.y ?? v[1]));
   }
 
-  /**
-   * Converts source pixels directly to device screen pixels (accounting for DPR).
-   * @param {{x: number, y: number}} pt
-   * @returns {{x: number, y: number}}
-   */
-  sourceToDevice(pt) {
-    const v = this.sourceToView(pt);
+  sourceBoxToView(box = {}) {
+    const x = box.x ?? box.left ?? 0;
+    const y = box.y ?? box.top ?? 0;
+    const w = box.w ?? box.width ?? 0;
+    const h = box.h ?? box.height ?? 0;
+    const p = this.sourceToView(x, y);
     return {
-      x: v.x * this.dpr,
-      y: v.y * this.dpr,
+      x: p.x,
+      y: p.y,
+      width: this.sourceLengthToView(w),
+      height: this.sourceLengthToView(h),
     };
   }
 
-  /**
-   * Returns complete mapping metadata for diagnostics and serialization.
-   */
+  viewBoxToSource(box = {}) {
+    const x = box.x ?? box.left ?? 0;
+    const y = box.y ?? box.top ?? 0;
+    const w = box.w ?? box.width ?? 0;
+    const h = box.h ?? box.height ?? 0;
+    const p = this.viewToSource(x, y);
+    return {
+      x: p.x,
+      y: p.y,
+      width: this.viewLengthToSource(w),
+      height: this.viewLengthToSource(h),
+    };
+  }
+
+  domEventToView(event, containerElement) {
+    const rect = containerElement?.getBoundingClientRect ? containerElement.getBoundingClientRect() : { left: 0, top: 0, width: this.viewW, height: this.viewH };
+    const clientX = event.clientX ?? (event.touches?.[0]?.clientX ?? 0);
+    const clientY = event.clientY ?? (event.touches?.[0]?.clientY ?? 0);
+
+    const cssScaleX = rect.width > 0 ? this.viewW / rect.width : 1;
+    const cssScaleY = rect.height > 0 ? this.viewH / rect.height : 1;
+
+    return {
+      x: (clientX - rect.left) * cssScaleX,
+      y: (clientY - rect.top) * cssScaleY,
+    };
+  }
+
+  domEventToSource(event, containerElement) {
+    const viewPt = this.domEventToView(event, containerElement);
+    return this.viewToSource(viewPt.x, viewPt.y);
+  }
+
   metadata() {
     return {
-      source_width_px: this.sourceWidth,
-      source_height_px: this.sourceHeight,
-      viewport_width_px: this.viewportWidth,
-      viewport_height_px: this.viewportHeight,
-      scale: this.scale,
+      source_width_px: this.sourceW,
+      source_height_px: this.sourceH,
+      view_width_px: this.viewW,
+      view_height_px: this.viewH,
+      uniform_scale: this.scale,
       offset_x_px: this.offsetX,
       offset_y_px: this.offsetY,
-      rendered_width_px: this.renderedWidth,
-      rendered_height_px: this.renderedHeight,
       dpr: this.dpr,
-      fit: 'contain',
-      position: 'center',
+      aspect_ratio: this.sourceW / this.sourceH,
     };
   }
+}
+
+export function getCanvasSize(scene) {
+  const r = scene?.coordinate_system?.render ?? scene?.render ?? {};
+  return { width: r.canvas_width_px ?? 800, height: r.canvas_height_px ?? 600 };
 }
