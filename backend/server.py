@@ -28,9 +28,12 @@ sys.path = [
     if p not in ("", str(_PROJECT_ROOT), str(_PROJECT_ROOT).lower(),
                  str(_PROJECT_ROOT).replace("/", "\\"), str(_PROJECT_ROOT).replace("\\", "/"))
 ]
+_CIRCUITS_DIR = _BACKEND_DIR / "circuits"
 sys.path.insert(0, str(_CORE_DIR))
 sys.path.insert(0, str(_OPTICS_DIR))
 sys.path.insert(0, str(_KINEMATICS_DIR))
+sys.path.insert(0, str(_CIRCUITS_DIR))
+sys.path.insert(0, str(_BACKEND_DIR))
 
 import cv2
 import numpy as np
@@ -70,6 +73,14 @@ from optics_text import (
 
 # Kinematics imports
 from scene_builder import SceneBuilder, export_matterjs_compat
+
+# Circuits imports
+from circuits.circuit_analyzer import CircuitAnalyzer
+from circuits.models import CircuitScene
+from circuits.solver.mna_solver import MNASolver
+from circuits.solver.equation_generator import generate_equations
+from circuits.solver.spice_adapter import SpiceAdapter
+from circuits.topology.topology_validator import validate_topology
 
 app = FastAPI(title="AugmentedPhysics API", version="2.1")
 
@@ -121,6 +132,8 @@ def get_sam2_predictor():
     except Exception as err:
         print(f"[Backend] Error building SAM 2: {err}")
         return None
+
+_CIRCUIT_ANALYZER = CircuitAnalyzer()
 
 
 class AnalyzeRequest(BaseModel):
@@ -183,6 +196,8 @@ def classify_diagram_concept(
     # 1. User manual override
     if req_scenario and req_scenario != "auto":
         sc = req_scenario.lower()
+        if sc in ("circuits", "circuit", "dc_circuit", "series_parallel", "voltage_divider", "bridge", "wheatstone", "wheatstone_bridge", "rc_transient"):
+            return ("circuits", "dc_linear" if sc in ("circuits", "circuit") else sc)
         if sc in ("interface_refraction", "snell", "boundary"):
             return ("optics", "interface_refraction")
         if sc in ("mirror", "concave_mirror", "convex_mirror"):
@@ -204,6 +219,8 @@ def classify_diagram_concept(
 
     # 2. Filename heuristic keywords
     fn = filename.lower()
+    if any(k in fn for k in ("circuit", "resistor", "wheatstone", "divider", "battery", "kirchhoff", "ohm", "circuit1", "circuit2", "circuit3", "circuit4")):
+        return ("circuits", "dc_linear")
     if any(k in fn for k in ("7dcbe9c0", "0ae6ee8e", "c4a5740a", "c80801a3", "refract", "snell", "boundary", "water", "interface")):
         return ("optics", "interface_refraction")
     if any(k in fn for k in ("cff33623", "mirror")):
@@ -234,7 +251,8 @@ def classify_diagram_concept(
     vert_lines = []
     if lines is not None:
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[0], pts[1], pts[2], pts[3]
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             if ang < 8.0 or ang > 172.0:
                 horiz_lines.append((min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), np.hypot(x2 - x1, y2 - y1)))
@@ -303,6 +321,9 @@ def classify_diagram_concept(
         return ("optics", "mirror")
 
     # Default based on domain request or horizontal lines
+    if req_domain == "circuits":
+        return ("circuits", "dc_linear")
+
     if req_domain == "mechanics":
         if circles is not None:
             return ("mechanics", "pendulum")
@@ -330,7 +351,8 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
         best_h = 0
         best_v = 0
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[0], pts[1], pts[2], pts[3]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             mid_y = (y1 + y2) / 2.0
@@ -365,7 +387,8 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
 
     if lines is not None:
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[0], pts[1], pts[2], pts[3]
             if y1 > y2:
                 x1, y1, x2, y2 = x2, y2, x1, y1
             length = np.hypot(x2 - x1, y2 - y1)
@@ -381,7 +404,8 @@ def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) ->
 
         best_refr_score = 0
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[0], pts[1], pts[2], pts[3]
             if y1 > y2:
                 x1, y1, x2, y2 = x2, y2, x1, y1
             length = np.hypot(x2 - x1, y2 - y1)
@@ -511,7 +535,8 @@ def build_mirror_scene(img_bgr: np.ndarray, image_rel_url: str, mirror_type: str
     if lines is not None:
         best_len = 0
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[0], pts[1], pts[2], pts[3]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             if (ang < 6.0 or ang > 174.0) and length > best_len:
@@ -654,7 +679,8 @@ def build_thin_lens_scene(
     if lines is not None:
         best_len = 0
         for l in lines:
-            x1, y1, x2, y2 = l[0]
+            pts = l.reshape(-1)
+            x1, y1, x2, y2 = pts[0], pts[1], pts[2], pts[3]
             length = np.hypot(x2 - x1, y2 - y1)
             ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             if (ang < 6.0 or ang > 174.0) and length > best_len:
@@ -1127,6 +1153,18 @@ def analyze_diagram(req: AnalyzeRequest):
         )
 
         # Build appropriate physics simulation scene
+        if domain == "circuits":
+            analysis = _CIRCUIT_ANALYZER.analyze(img, req.image_url)
+            return {
+                "success": True,
+                "domain": "circuits",
+                "scenario": scenario,
+                "scene": analysis["scene"],
+                "validation": analysis["validation"],
+                "electrical_state": analysis["electrical_state"],
+                "equations": analysis["equations"],
+            }
+
         if scenario == "interface_refraction":
             scene = build_interface_refraction_scene(img, req.image_url)
         elif scenario == "mirror":
@@ -1151,6 +1189,65 @@ def analyze_diagram(req: AnalyzeRequest):
             "domain": domain,
             "scenario": scenario,
             "scene": scene,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/circuit/analyze")
+def circuit_analyze(req: AnalyzeRequest):
+    try:
+        rel_path = req.image_url.lstrip("/")
+        img_path = FRONTEND_PUBLIC / rel_path
+        if not img_path.exists():
+            img_path = _PROJECT_ROOT / rel_path
+        if not img_path.exists():
+            raise HTTPException(status_code=404, detail=f"Image not found at {req.image_url}")
+        img = cv2.imread(str(img_path))
+        if img is None:
+            raise HTTPException(status_code=400, detail="Could not read image with OpenCV")
+        return _CIRCUIT_ANALYZER.analyze(img, image_url=req.image_url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/circuit/solve")
+def circuit_solve(scene_data: dict):
+    try:
+        scene = CircuitScene.from_dict(scene_data)
+        state = MNASolver(scene).solve_dc()
+        equations = generate_equations(scene, state)
+        return {
+            "success": True,
+            "electrical_state": state.to_dict(),
+            "equations": equations,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/circuit/validate")
+def circuit_validate(scene_data: dict):
+    try:
+        scene = CircuitScene.from_dict(scene_data)
+        report = validate_topology(scene)
+        return {
+            "success": True,
+            "validation": report.to_dict(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/circuit/spice")
+def circuit_spice(scene_data: dict):
+    try:
+        scene = CircuitScene.from_dict(scene_data)
+        netlist = SpiceAdapter.build_netlist(scene)
+        result = SpiceAdapter.run_simulation(netlist)
+        return {
+            "success": True,
+            "spice_result": result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
