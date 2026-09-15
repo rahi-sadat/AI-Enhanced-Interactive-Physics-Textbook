@@ -79,6 +79,10 @@ export class OverlayStage {
     this.image.style.display = 'block';
   }
 
+  setImage(url, sourceW = null, sourceH = null) {
+    this.setBackground(url, sourceW, sourceH);
+  }
+
   clearOverlay() {
     while (this.container && this.container.firstChild)
       this.container.removeChild(this.container.firstChild);

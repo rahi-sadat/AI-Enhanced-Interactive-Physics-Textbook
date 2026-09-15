@@ -8,6 +8,7 @@ import { uploadDiagramFile, analyzeDiagram } from './core/diagramAnalyzer.js';
 const SCENES = {
   mechanics: '/scenes/kinematics/physics_scene.json',
   optics:    '/scenes/optics/thin_lens_scene.json',
+  circuits:  '/scenes/circuits/series_parallel_scene.json',
 };
 
 let currentController = null;
@@ -34,11 +35,16 @@ export async function bootstrap(domain, sceneDataOrUrl = null) {
     }
 
     // Auto-detect domain from scene if not explicitly forced
+    const isCircuits = scene?.simulation?.domain === 'circuits' || scene?.simulation_type === 'circuits';
     const isOptics = scene?.simulation?.domain === 'optics' || scene?.simulation_type === 'optics';
     const isMechanics = scene?.simulation?.domain === 'mechanics' || scene?.simulation_type === 'kinematics';
-    const resolvedDomain = isOptics ? 'optics' : (isMechanics ? 'mechanics' : domain);
+    const resolvedDomain = isCircuits ? 'circuits' : (isOptics ? 'optics' : (isMechanics ? 'mechanics' : domain));
 
-    setActive(resolvedDomain === 'optics' ? 'switch-optics' : 'switch-mechanics');
+    let activeBtnId = 'switch-mechanics';
+    if (resolvedDomain === 'circuits') activeBtnId = 'switch-circuits';
+    else if (resolvedDomain === 'optics') activeBtnId = 'switch-optics';
+
+    setActive(activeBtnId);
     currentController = createSimulation(scene, currentStage);
     console.log('[Main] Loaded simulation domain:', resolvedDomain, scene);
   } catch (err) {
@@ -47,7 +53,7 @@ export async function bootstrap(domain, sceneDataOrUrl = null) {
 }
 
 function setActive(id) {
-  ['switch-mechanics', 'switch-optics'].forEach(btnId => {
+  ['switch-mechanics', 'switch-optics', 'switch-circuits'].forEach(btnId => {
     const btn = document.getElementById(btnId);
     if (btn) {
       btn.classList.toggle('active', btnId === id);
@@ -64,6 +70,11 @@ document.getElementById('switch-mechanics')?.addEventListener('click', () => {
 document.getElementById('switch-optics')?.addEventListener('click', () => {
   setActive('switch-optics');
   bootstrap('optics');
+});
+
+document.getElementById('switch-circuits')?.addEventListener('click', () => {
+  setActive('switch-circuits');
+  bootstrap('circuits');
 });
 
 // ===================================================================

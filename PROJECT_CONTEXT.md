@@ -365,6 +365,18 @@ $$x_0 = \frac{W_v - W_s \cdot s}{2}, \quad y_0 = \frac{H_v - H_s \cdot s}{2}$$
 $$x_{\text{view}} = x_{\text{source}} \cdot s + x_0, \quad y_{\text{view}} = y_{\text{source}} \cdot s + y_0$$
 $$x_{\text{source}} = \frac{x_{\text{view}} - x_0}{s}, \quad y_{\text{source}} = \frac{y_{\text{view}} - y_0}{s}$$
 
+### Circuits Modified Nodal Analysis (MNA)
+Matrix formulation on Float64Array solving $A \cdot x = z$:
+$$x = \begin{bmatrix} V_1 \\ V_2 \\ \vdots \\ V_n \\ I_{V1} \\ \vdots \\ I_{Vm} \end{bmatrix}$$
+- Resistor conductance stamp ($G = 1/R$ between nodes $i, j$):
+  $$A_{ii} += G, \quad A_{jj} += G, \quad A_{ij} -= G, \quad A_{ji} -= G$$
+- Independent Voltage Source ($V_s$ between $i(+)$ and $j(-)$ with auxiliary row $k$):
+  $$A_{k, i} = 1, \quad A_{k, j} = -1, \quad A_{i, k} = 1, \quad A_{j, k} = -1, \quad z_k = V_s$$
+- Ideal Ammeter: Stamped as a $0\text{ V}$ independent voltage source ($z_k = 0$). Unknown vector $x$ directly yields branch current without artificial meter resistance.
+- Ideal Switch: Closed state stamped as a $0\text{ V}$ constraint ($z_k = 0$); Open state omits branch ($I = 0\text{ A}$).
+- Conventional Current Particle Flow: Nonlinearly velocity-scaled particles along compiled wire polylines:
+  $$\text{visualSpeed} = v_{\text{base}} \cdot \ln\left(1 + \frac{|I|}{I_{\text{ref}}}\right)$$
+
 ### Simple Pendulum Dynamics
 $$T = 2\pi \sqrt{\frac{L}{g}}$$
 $$\frac{d^2\theta}{dt^2} + \frac{g}{L}\sin(\theta) = 0$$
@@ -378,22 +390,27 @@ graph LR
     M1[M1-M4: SAM 2 & Embedded Kinematics ✅] --> M5[M5-M6: Ray Optics & Studio HUD ✅]
     M5 --> M7[M7: FastAPI & Diagram Ingestion ✅]
     M7 --> M9[M9-M10: Optics Precision & Alignment ✅]
-    M9 --> M11[Phase 11: Multimodal VLM OCR Parameter Extractor 🔄]
-    M11 --> M12[Phase 12: Circuits & Wave Optics Adapters]
-    M12 --> M13[Phase 13: NCTB Full-Page Parser & Bangla AI Tutor]
+    M9 --> M11[M11: Augmented Circuit Laboratory ✅]
+    M11 --> M12[Phase 12: Multimodal VLM OCR Parameter Extractor 🔄]
+    M12 --> M13[Phase 13: Full-Page PDF Layout & Bangla Voice Tutor]
 ```
 
-### 🔄 Phase 11: Multimodal VLM (Gemini / GPT-4V) Parameter Extraction
-- Ingest diagram captions and surrounding textbook paragraphs.
-- Extract physical quantities with units (e.g. $f = +15\text{ cm}$, $u = 30\text{ cm}$, $m = 2.5\text{ kg}$, $k = 150\text{ N/m}$, $n_2 = 1.83$).
-- Automatically populate the canonical `PhysicsScene` values without manual user tuning.
+### ✅ Phase 11: Augmented Circuit Laboratory (Domain 3 Frontend)
+- **Topological Precision**: Governed by graph connectivity and terminal constraints without spatial scale (`pixels_per_meter` strictly prohibited).
+- **LinearSystem & CircuitSolver**: High-precision LU decomposition with partial pivoting on `Float64Array`. Stamping resistors, batteries, switches, and ammeters.
+- **CircuitCompiler**: Precomputes parametric polyline cumulative distance profiles (`getPointAtDistance(d)`) for smooth 60 FPS particle animation along bent/curved textbook wires.
+- **Transparent p5 Overlay**: Equipotential voltage conductor halos (red/emerald/blue), node voltage badges, conventional current flow arrows, and particle flow.
+- **Anchored HTML Component Popover**: Floating card positioned directly beside textbook components with logarithmic resistance slider ($1\,\Omega \to 100\,\text{k}\Omega$), linear voltage slider, live $V/I/P$ readouts, and textbook OCR provenance restoration.
+- **Interactive Instruments & Laws**: Virtual Voltmeter ($V_A - V_B$), Ammeter ($I_{\text{branch}}$), Live KCL node inspector ($\sum I = 0$), and Live KVL loop walk ($\sum V = 0$).
+- **Grounded AI Tutor Bridge**: Contextual `[Why?]` drawer explaining parameter shifts with exact mathematical derivations in authentic bilingual (Bangla + English) scientific terminology.
+- **Unit Test Suite**: 6/6 tests passing in `test_circuit_solver.js` verifying analytical agreement ($< 10^{-12}$ error).
 
-### 🔮 Phase 12: Domain Expansions (Circuits & Wave Optics)
-- **DC Circuit Simulation**: Resistors, batteries, switches, Ohm's law, and Kirchhoff's loop solvers.
-- **Wave Interference & Diffraction**: Double slit interference and diffraction grating visualization.
+### 🔄 Phase 12: Multimodal VLM (Gemini / GPT-4V) Parameter Extraction & Backend Perception
+- Backend CV wire skeletonization, crossing vs. junction dot classification, and terminal detection.
+- Multimodal OCR parameter binding with SI unit normalizer ($10\,\text{k}\Omega \to 10000\,\Omega$).
+- Authoritative backend Python MNA + `ngspice 47` cross-validation ($< 10^{-9}$ tolerance).
 
-### 🔮 Phase 13: NCTB Full-Page Parser & Bangla AI Tutor
+### 🔮 Phase 13: Full-Page NCTB Layout Parser & Bangla Voice Tutor
 - Multi-diagram full page PDF layout analysis.
-- Bilingual (Bangla + English) interactive tutoring agent that responds to student queries:
-  - *"ফোকাস দূরত্বের ভেতরে বস্তু রাখলে প্রতিবিম্ব কেমন হবে?"* ("What happens to the image when the object is placed inside the focal length?")
-  - Explains concepts step-by-step with real-time synchronized highlights on the live simulation.
+- Bilingual (Bangla + English) conversational tutoring agent with synchronized simulation object highlighting.
+
