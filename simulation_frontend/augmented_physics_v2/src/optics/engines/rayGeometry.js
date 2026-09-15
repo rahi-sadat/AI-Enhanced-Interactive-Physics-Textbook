@@ -30,14 +30,67 @@ export function refract(incident, normal, n1, n2) {
   };
 }
 
-export function rayToCanvasBoundary(origin, dir, W=800, H=600) {
-  const {x:ox,y:oy} = origin, {x:dx,y:dy} = dir;
-  let t = Infinity;
-  if (dx>0) t = Math.min(t,(W-ox)/dx);
-  if (dx<0) t = Math.min(t,(0-ox)/dx);
-  if (dy>0) t = Math.min(t,(H-oy)/dy);
-  if (dy<0) t = Math.min(t,(0-oy)/dy);
-  return {x: ox+dx*t, y: oy+dy*t};
+export function rayToBounds(origin, direction, bounds = {}) {
+  const minX = bounds.minX ?? 0;
+  const minY = bounds.minY ?? 0;
+  const maxX = bounds.maxX ?? bounds.width ?? 800;
+  const maxY = bounds.maxY ?? bounds.height ?? 600;
+
+  const dx = direction.x;
+  const dy = direction.y;
+  const candidates = [];
+
+  if (Math.abs(dx) > 1e-12) {
+    const t1 = (minX - origin.x) / dx;
+    const t2 = (maxX - origin.x) / dx;
+    if (t1 > 1e-6) candidates.push(t1);
+    if (t2 > 1e-6) candidates.push(t2);
+  }
+
+  if (Math.abs(dy) > 1e-12) {
+    const t1 = (minY - origin.y) / dy;
+    const t2 = (maxY - origin.y) / dy;
+    if (t1 > 1e-6) candidates.push(t1);
+    if (t2 > 1e-6) candidates.push(t2);
+  }
+
+  let best = Infinity;
+  for (const t of candidates) {
+    const x = origin.x + dx * t;
+    const y = origin.y + dy * t;
+    if (
+      x >= minX - 1e-4 &&
+      x <= maxX + 1e-4 &&
+      y >= minY - 1e-4 &&
+      y <= maxY + 1e-4
+    ) {
+      best = Math.min(best, t);
+    }
+  }
+
+  if (!Number.isFinite(best)) {
+    return { x: origin.x + dx * 1000, y: origin.y + dy * 1000 };
+  }
+
+  return {
+    x: origin.x + dx * best,
+    y: origin.y + dy * best,
+  };
+}
+
+export function boundaryNormal(p1, p2) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const len = Math.hypot(dx, dy);
+  if (len === 0) return { x: 0, y: 1 };
+  return {
+    x: -dy / len,
+    y: dx / len,
+  };
+}
+
+export function rayToCanvasBoundary(origin, dir, W = 800, H = 600) {
+  return rayToBounds(origin, dir, { minX: 0, minY: 0, maxX: W, maxY: H });
 }
 
 export function raySegmentIntersection(origin, dir, A, B) {

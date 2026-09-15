@@ -9,10 +9,22 @@ import {
   reflect,
   raySegmentIntersection,
   getEdgeNormal,
-  rayToCanvasBoundary
+  rayToBounds,
 } from './rayGeometry.js';
 
-export function solvePrismRefraction({ prismVertices, refractiveIndex = 1.52, rayOrigin, rayDirection }) {
+export function solvePrismRefraction({
+  prismVertices,
+  refractiveIndex = 1.52,
+  rayOrigin,
+  rayDirection,
+  bounds = {},
+}) {
+  const boundBox = {
+    minX: bounds.minX ?? 0,
+    minY: bounds.minY ?? 0,
+    maxX: bounds.maxX ?? bounds.width ?? 800,
+    maxY: bounds.maxY ?? bounds.height ?? 600,
+  };
   const nAir = 1.0;
   const nGlass = refractiveIndex;
   const I0 = normalize(rayDirection);
@@ -46,7 +58,7 @@ export function solvePrismRefraction({ prismVertices, refractiveIndex = 1.52, ra
 
   if (!hit1) {
     // Ray misses prism completely
-    const exitPt = rayToCanvasBoundary(rayOrigin, I0);
+    const exitPt = rayToBounds(rayOrigin, I0, boundBox);
     return {
       hitPrism: false,
       segments: [{ type: 'incident', start: rayOrigin, end: exitPt }],
@@ -95,7 +107,7 @@ export function solvePrismRefraction({ prismVertices, refractiveIndex = 1.52, ra
       hitPrism: true,
       segments: [
         { type: 'incident', start: rayOrigin, end: hit1 },
-        { type: 'internal', start: hit1, end: rayToCanvasBoundary(hit1, I_internal) }
+        { type: 'internal', start: hit1, end: rayToBounds(hit1, I_internal, boundBox) }
       ],
       normals: [normalViz1],
       angles: { i1: i1Deg, r1: r1Deg },
@@ -114,7 +126,7 @@ export function solvePrismRefraction({ prismVertices, refractiveIndex = 1.52, ra
   const isTir = refr2.type === 'tir';
 
   const emergentDir = refr2.direction;
-  const endPoint = rayToCanvasBoundary(hit2, emergentDir);
+  const endPoint = rayToBounds(hit2, emergentDir, boundBox);
 
   // Compute angle of deviation delta = angle between I0 and emergentDir
   const cosDelta = Math.min(1.0, Math.max(-1.0, dot(I0, emergentDir)));

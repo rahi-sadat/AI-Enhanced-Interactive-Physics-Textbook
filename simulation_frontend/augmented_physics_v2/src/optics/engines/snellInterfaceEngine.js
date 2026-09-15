@@ -8,17 +8,28 @@
  *   - Generates incident ray, refracted ray, reflected ray, normal line, and angle arcs.
  */
 
+import { rayToBounds, boundaryNormal } from './rayGeometry.js';
+
 export function traceInterfaceRefraction(config) {
+  const bounds = config.bounds ?? {};
+  const minX = bounds.minX ?? 0;
+  const minY = bounds.minY ?? 0;
+  const maxX = bounds.maxX ?? bounds.width ?? (config.canvasW ?? 800);
+  const maxY = bounds.maxY ?? bounds.height ?? (config.canvasH ?? 600);
+  const boundBox = { minX, minY, maxX, maxY };
+
   const boundaryY = config.boundaryY ?? 300;
   const normalX   = config.normalX   ?? 400;
   const n1        = Math.max(1.0, config.n1 ?? 1.0);  // e.g. 1.0 for air / rarer medium
   const n2        = Math.max(1.0, config.n2 ?? 1.52); // e.g. 1.52 for denser medium
 
-  const canvasW = config.canvasW ?? 800;
-  const canvasH = config.canvasH ?? 600;
+  // Support arbitrary 2-point boundary
+  const p1 = config.boundary?.p1 ?? { x: minX, y: boundaryY };
+  const p2 = config.boundary?.p2 ?? { x: maxX, y: boundaryY };
+  const normVec = boundaryNormal(p1, p2);
 
   // Incident point on boundary
-  const P0 = { x: normalX, y: boundaryY };
+  const P0 = config.pointOfIncidence ?? config.targetPoint ?? { x: normalX, y: boundaryY };
 
   // Calculate incident angle theta1
   let theta1Rad = 0;
@@ -80,45 +91,54 @@ export function traceInterfaceRefraction(config) {
     { x: sourceX, y: sourceY },
     P0,
   ];
+  incidentRay.start = { x: sourceX, y: sourceY };
+  incidentRay.end = P0;
+  incidentRay.points = [{ x: sourceX, y: sourceY }, P0];
 
   let refractedRay = null;
   let reflectedRay = null;
 
-  const rayExtension = Math.max(canvasW, canvasH);
-
   if (isTIR) {
     // Total Internal Reflection back into Medium 1
-    const reflectEnd = {
-      x: P0.x + signX * rayExtension * Math.sin(theta1Rad),
-      y: P0.y - rayExtension * Math.cos(theta1Rad),
-    };
+    const tirDir = { x: signX * Math.sin(theta1Rad), y: -Math.cos(theta1Rad) };
+    const reflectEnd = rayToBounds(P0, tirDir, boundBox);
     reflectedRay = [P0, reflectEnd];
+    reflectedRay.start = P0;
+    reflectedRay.end = reflectEnd;
+    reflectedRay.points = [P0, reflectEnd];
   } else {
     // Refraction into Medium 2
-    const refractEnd = {
-      x: P0.x + signX * rayExtension * Math.sin(theta2Rad),
-      y: P0.y + rayExtension * Math.cos(theta2Rad),
-    };
+    const refrDir = { x: signX * Math.sin(theta2Rad), y: Math.cos(theta2Rad) };
+    const refractEnd = rayToBounds(P0, refrDir, boundBox);
     refractedRay = [P0, refractEnd];
+    refractedRay.start = P0;
+    refractedRay.end = refractEnd;
+    refractedRay.points = [P0, refractEnd];
 
-    // Weak partial reflection in Medium 1
-    const partialReflectEnd = {
-      x: P0.x + signX * 180 * Math.sin(theta1Rad),
-      y: P0.y - 180 * Math.cos(theta1Rad),
-    };
+    // Partial reflection in Medium 1
+    const reflDir = { x: signX * Math.sin(theta1Rad), y: -Math.cos(theta1Rad) };
+    const partialReflectEnd = rayToBounds(P0, reflDir, boundBox);
     reflectedRay = [P0, partialReflectEnd];
+    reflectedRay.start = P0;
+    reflectedRay.end = partialReflectEnd;
+    reflectedRay.points = [P0, partialReflectEnd];
   }
 
   // Normal line (dashed, passes through P0)
-  const normalTop = { x: normalX, y: Math.max(20, boundaryY - 220) };
-  const normalBottom = { x: normalX, y: Math.min(canvasH - 20, boundaryY + 220) };
+  const normalTop = { x: normalX, y: Math.max(minY + 20, boundaryY - 220) };
+  const normalBottom = { x: normalX, y: Math.min(maxY - 20, boundaryY + 220) };
   const normalLine = [normalTop, normalBottom];
+  normalLine.top = normalTop;
+  normalLine.bottom = normalBottom;
+  normalLine.p1 = normalTop;
+  normalLine.p2 = normalBottom;
+  normalLine.points = [normalTop, normalBottom];
 
   // Boundary line
-  const boundaryLine = [
-    { x: 0, y: boundaryY },
-    { x: canvasW, y: boundaryY },
-  ];
+  const boundaryLine = [p1, p2];
+  boundaryLine.start = p1;
+  boundaryLine.end = p2;
+
 
   return {
     subtype: 'interface_refraction',
