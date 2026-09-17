@@ -49,13 +49,34 @@ export class P5CircuitView {
 
       p.setup = () => {
         const rect = this.host.getBoundingClientRect();
-        const canvas = p.createCanvas(rect.width || 800, rect.height || 500);
+        const w = Math.round(rect.width || this.host.clientWidth || 800);
+        const h = Math.round(rect.height || this.host.clientHeight || 500);
+        const canvas = p.createCanvas(w, h);
         canvas.style('position', 'absolute');
         canvas.style('top', '0');
         canvas.style('left', '0');
-        canvas.style('pointer-events', 'none');
+        canvas.style('pointer-events', 'auto');
+        if (this.mapper) {
+          this.mapper.update(this.mapper.sourceW, this.mapper.sourceH, w, h);
+        }
         p.clear();
         p.frameRate(60);
+      };
+
+      p.mouseClicked = () => {
+        const model = this.store?.model;
+        if (!model?.switches || !this.mapper) return;
+        const ptSrc = this.mapper.viewToSource(p.mouseX, p.mouseY);
+        for (const sw of model.switches) {
+          const tA = sw.terminals?.[0]?.source_px || [200, 120];
+          const tB = sw.terminals?.[1]?.source_px || [260, 120];
+          const midX = (tA[0] + tB[0]) / 2;
+          const midY = (tA[1] + tB[1]) / 2;
+          if (Math.hypot(ptSrc.x - midX, ptSrc.y - midY) < 60) {
+            this.store.toggleSwitch?.(sw.id);
+            break;
+          }
+        }
       };
 
       p.draw = () => {
@@ -69,6 +90,14 @@ export class P5CircuitView {
         const ui = this.store.uiState;
 
         if (!model || !this.mapper) return;
+
+        // Auto-sync canvas and mapper dimensions if container resized
+        const currentW = Math.round(this.host.clientWidth || 0);
+        const currentH = Math.round(this.host.clientHeight || 0);
+        if (currentW > 0 && currentH > 0 && (p.width !== currentW || p.height !== currentH)) {
+          p.resizeCanvas(currentW, currentH);
+          this.mapper.update(this.mapper.sourceW, this.mapper.sourceH, currentW, currentH);
+        }
 
         // 1. Equipotential Wire Halos
         if (ui.showEquipotential) {
@@ -120,8 +149,13 @@ export class P5CircuitView {
   resize() {
     if (!this.p || !this.host) return;
     const rect = this.host.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      this.p.resizeCanvas(rect.width, rect.height);
+    const w = Math.round(rect.width || this.host.clientWidth || 800);
+    const h = Math.round(rect.height || this.host.clientHeight || 500);
+    if (w > 0 && h > 0) {
+      this.p.resizeCanvas(w, h);
+      if (this.mapper) {
+        this.mapper.update(this.mapper.sourceW, this.mapper.sourceH, w, h);
+      }
     }
   }
 

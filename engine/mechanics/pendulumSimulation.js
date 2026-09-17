@@ -103,8 +103,8 @@ export class PendulumSimulation {
     this.canvas.height = Math.round(height * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const sourceW = this.scene.source?.image_width_px || this.geometry?.bob_center?.x * 2 || 800;
-    const sourceH = this.scene.source?.image_height_px || this.geometry?.bob_center?.y * 1.5 || 600;
+    const sourceW = this.scene.coordinateSystem?.width || this.scene.source?.width || this.scene.source?.image_width_px || this.geometry?.bob_center?.x * 2 || 800;
+    const sourceH = this.scene.coordinateSystem?.height || this.scene.source?.height || this.scene.source?.image_height_px || this.geometry?.bob_center?.y * 1.5 || 600;
 
     this.mapper = new CoordinateMapper(sourceW, sourceH, width, height, dpr);
     this.viewWidth = width;

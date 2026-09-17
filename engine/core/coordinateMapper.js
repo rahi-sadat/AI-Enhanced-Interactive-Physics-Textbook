@@ -24,16 +24,28 @@ export class CoordinateMapper {
   }
 
   sourceToView(x, y) {
+    let px = x;
+    let py = y;
+    if (typeof x === 'object' && x !== null) {
+      px = x.x ?? x.left ?? x[0];
+      py = x.y ?? x.top ?? x[1];
+    }
     return {
-      x: Number(x) * this.scale + this.offsetX,
-      y: Number(y) * this.scale + this.offsetY,
+      x: Number(px) * this.scale + this.offsetX,
+      y: Number(py) * this.scale + this.offsetY,
     };
   }
 
   viewToSource(x, y) {
+    let px = x;
+    let py = y;
+    if (typeof x === 'object' && x !== null) {
+      px = x.x ?? x.left ?? x[0];
+      py = x.y ?? x.top ?? x[1];
+    }
     return {
-      x: (Number(x) - this.offsetX) / this.scale,
-      y: (Number(y) - this.offsetY) / this.scale,
+      x: (Number(px) - this.offsetX) / this.scale,
+      y: (Number(py) - this.offsetY) / this.scale,
     };
   }
 

@@ -177,7 +177,7 @@ export class CircuitCompiler {
     const wireById = new Map();
 
     for (const wire of rawWires) {
-      const pts = wire.polyline_source_px || [];
+      const pts = wire.polyline_source_px || wire.points || [];
       const poly = this._compilePolyline(pts);
       const compiledWire = {
         id: wire.id,

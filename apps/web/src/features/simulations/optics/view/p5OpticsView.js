@@ -6,6 +6,7 @@
 import p5 from 'p5';
 import { THEME } from './opticsTheme.js';
 import { OpticsRenderer } from './opticsRenderer.js';
+import { opticsSprites } from './opticsSprites.js';
 import { CoordinateMapper } from '@engine/core/coordinateMapper.js';
 
 const DRAG_R = 25;
