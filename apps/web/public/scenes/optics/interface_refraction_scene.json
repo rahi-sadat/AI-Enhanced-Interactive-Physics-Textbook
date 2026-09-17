@@ -6,10 +6,10 @@
     "engine": "optics2d"
   },
   "visual": {
-    "background_url": "/uploads/diagram_7dcbe9c0.png"
+    "background_url": "/scenes/optics/nctb_refraction_diagram.png"
   },
   "source": {
-    "image": "/uploads/diagram_7dcbe9c0.png",
+    "image": "/scenes/optics/nctb_refraction_diagram.png",
     "image_width_px": 393,
     "image_height_px": 328
   },
