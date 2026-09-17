@@ -222,7 +222,7 @@ export class CircuitController {
       <!-- Scenario Selector -->
       <div class="control" style="margin-bottom: 8px;">
         <label for="circuit-scene-select">NCTB Diagram Scenario</label>
-        <select id="circuit-scene-select" class="select" style="font-weight: 600; padding: 7px 10px; background: rgba(14,165,233,0.15); border-color: rgba(56,189,248,0.4); color: #38bdf8;">
+        <select id="circuit-scene-select" class="select">
           <optgroup label="📋 Uploaded Textbook Schematics">
             <option value="circuit1">⚡ Circuit 1: DC Loop with Ammeters (circuit1.png)</option>
             <option value="circuit2">⚡ Circuit 2: Multi-Branch Network (circuit2.png)</option>

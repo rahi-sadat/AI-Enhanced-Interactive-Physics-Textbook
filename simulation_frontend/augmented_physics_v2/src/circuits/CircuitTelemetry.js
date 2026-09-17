@@ -54,11 +54,20 @@ export class CircuitTelemetry {
 
       const rowClass = `telemetry-row ${isSelected ? 'selected' : ''} ${isHovered ? 'hovered' : ''}`;
 
-      let valStr = '';
-      if (comp.type === 'voltage_source' || comp.type === 'battery') valStr = `${comp.value} V`;
-      else if (comp.type === 'resistor') valStr = `${comp.value} Ω`;
-      else if (comp.type === 'switch') valStr = comp.state.toUpperCase();
-      else valStr = `${comp.value ?? '-'}`;
+      let valStr = '-';
+      if (comp.type === 'voltage_source' || comp.type === 'battery') {
+        valStr = (comp.value !== undefined && !isNaN(comp.value)) ? `${comp.value} V` : '-';
+      } else if (comp.type === 'resistor') {
+        valStr = (comp.value !== undefined && !isNaN(comp.value)) ? `${comp.value} Ω` : '-';
+      } else if (comp.type === 'switch') {
+        valStr = comp.state ? comp.state.toUpperCase() : 'CLOSED';
+      } else if (comp.type === 'ammeter') {
+        valStr = '0 Ω (A)';
+      } else if (comp.type === 'voltmeter') {
+        valStr = '∞ Ω (V)';
+      } else if (comp.value !== undefined && !isNaN(comp.value)) {
+        valStr = `${comp.value} ${comp.unit || ''}`.trim();
+      }
 
       rowsHtml += `
         <tr class="${rowClass}" data-component-id="${cId}">

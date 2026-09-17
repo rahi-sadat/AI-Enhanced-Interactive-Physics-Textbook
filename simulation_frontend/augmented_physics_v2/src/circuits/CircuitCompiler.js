@@ -52,7 +52,7 @@ export class CircuitCompiler {
 
     // Ensure any nodes referenced by components exist in nodeIndex
     for (const comp of rawComponents) {
-      const nodes = comp.nodes || [];
+      const nodes = comp.nodes || (Array.isArray(comp.terminals) ? comp.terminals.map(t => t.node).filter(Boolean) : []);
       for (const nid of nodes) {
         if (!nodeIndex.has(nid)) {
           if (nid === refNodeId) {
@@ -80,6 +80,40 @@ export class CircuitCompiler {
 
     for (const comp of rawComponents) {
       const c = { ...comp };
+
+      // Ensure nodes array is populated from terminals if not present
+      if ((!c.nodes || c.nodes.length === 0) && Array.isArray(c.terminals)) {
+        c.nodes = c.terminals.map(t => t.node).filter(Boolean);
+      }
+
+      // Ensure value and unit are populated from parameters if not present
+      if (c.value === undefined && c.parameters) {
+        const p = c.parameters.voltage_v || c.parameters.voltage ||
+                  c.parameters.resistance_ohm || c.parameters.resistance ||
+                  c.parameters.current_a || c.parameters.current ||
+                  c.parameters.capacitance_f || c.parameters.capacitance;
+        if (p && p.value !== undefined) {
+          c.value = Number(p.value);
+          c.unit = p.unit || c.unit;
+        }
+      }
+
+      // Ensure geometry is populated
+      if (!c.geometry) {
+        c.geometry = {};
+      }
+      if (c.bbox_source_px && !c.geometry.bbox_source_px) {
+        c.geometry.bbox_source_px = c.bbox_source_px;
+      }
+      if (c.geometry.bbox_source_px && !c.geometry.center_source_px) {
+        const [x1, y1, x2, y2] = c.geometry.bbox_source_px;
+        c.geometry.center_source_px = [(x1 + x2) / 2, (y1 + y2) / 2];
+      }
+
+      if (!c.label) {
+        c.label = `${c.id} (${c.type})`;
+      }
+
       componentById.set(c.id, c);
 
       // Index terminals
