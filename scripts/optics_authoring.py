@@ -22,8 +22,12 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-_BACKEND_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(_BACKEND_DIR / "core"))
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_SAM2_DIR = _REPO_ROOT / "sam2"
+if _SAM2_DIR.exists() and str(_SAM2_DIR) not in sys.path:
+    sys.path.insert(0, str(_SAM2_DIR))
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import cv2
 import matplotlib.pyplot as plt
@@ -31,20 +35,25 @@ from matplotlib.widgets import Button
 import numpy as np
 import torch
 
-from geometry_utils import extract_geometry
-from mask_quality import CandidateChoice, choose_candidate
-from sprite_utils import save_rgba_sprite
+try:
+    from ai.perception.core.geometry_utils import extract_geometry
+    from ai.perception.core.mask_quality import CandidateChoice, choose_candidate
+    from ai.perception.core.sprite_utils import save_rgba_sprite
+except ImportError:
+    from geometry_utils import extract_geometry
+    from mask_quality import CandidateChoice, choose_candidate
+    from sprite_utils import save_rgba_sprite
 
 try:
-    from .optics_registry import OPTICS_SHORTCUTS, default_role
-    from .optics_geometry import (
+    from engine.optics.optics_registry import OPTICS_SHORTCUTS, default_role
+    from ai.perception.optics.optics_geometry import (
         extract_lens_geometry,
         extract_arrow_geometry,
         extract_prism_geometry,
         extract_mirror_geometry,
         detect_optical_axis,
     )
-    from .optics_text import (
+    from ai.document_intelligence.parsing.optics_text import (
         create_manual_label,
         classify_focal_points,
         infer_pixel_scale,

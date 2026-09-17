@@ -1,5 +1,4 @@
-/** core/overlayStage.js - 2-layer embedded diagram stage with shared CoordinateMapper. */
-import { CoordinateMapper } from './coordinateMapper.js';
+import { CoordinateMapper } from '@engine/core/coordinateMapper.js';
 
 export class OverlayStage {
   constructor(o = {}) {

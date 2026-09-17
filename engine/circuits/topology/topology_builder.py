@@ -9,12 +9,12 @@ import math
 from typing import Dict, List, Optional, Set, Tuple
 
 try:
-    from backend.core.coordinate_space import snap_radius
+    from engine.core.coordinate_space import snap_radius
 except (ImportError, ValueError):
     try:
-        from core.coordinate_space import snap_radius
+        from backend.core.coordinate_space import snap_radius
     except (ImportError, ValueError):
-        from ...core.coordinate_space import snap_radius
+        from core.coordinate_space import snap_radius
 from ..models import CircuitScene, Component, Node, Point, Terminal, Wire
 from .union_find import UnionFind
 

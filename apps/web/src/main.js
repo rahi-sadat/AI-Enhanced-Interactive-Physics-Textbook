@@ -1,9 +1,9 @@
 /** main.js - Application entrypoint with domain switcher and diagram upload studio. */
 import './style.css';
-import { loadScene }        from './core/sceneLoader.js';
-import { createSimulation } from './core/sceneRouter.js';
-import { OverlayStage }     from './core/overlayStage.js';
-import { uploadDiagramFile, analyzeDiagram } from './core/diagramAnalyzer.js';
+import { loadScene }        from '@engine/core/sceneLoader.js';
+import { createSimulation } from '@engine/core/sceneRouter.js';
+import { OverlayStage }     from './features/simulations/core/overlayStage.js';
+import { uploadDiagramFile, analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
 
 const SCENES = {
   mechanics: '/scenes/kinematics/physics_scene.json',

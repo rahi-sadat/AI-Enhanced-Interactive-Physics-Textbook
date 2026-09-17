@@ -7,7 +7,7 @@
  * - HiDPI DPR scaling
  */
 
-import { CoordinateMapper } from '../src/core/coordinateMapper.js';
+import { CoordinateMapper } from '../../engine/core/coordinateMapper.js';
 
 function assert(condition, message) {
   if (!condition) {

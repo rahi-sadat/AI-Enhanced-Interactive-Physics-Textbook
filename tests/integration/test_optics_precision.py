@@ -8,22 +8,38 @@ import math
 import sys
 import os
 
-# Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
-from backend.optics.optics_text import (
-    project_distance_on_axis,
-    infer_focal_length_px,
-    classify_focal_points,
-    FocalPointSet,
-)
-from backend.optics.optics_scene_builder import OpticsSceneBuilder
-from backend.server import (
-    build_thin_lens_scene,
-    build_mirror_scene,
-    build_prism_scene,
-    build_interface_refraction_scene,
-)
+try:
+    from ai.document_intelligence.parsing.optics_text import (
+        project_distance_on_axis,
+        infer_focal_length_px,
+        classify_focal_points,
+        FocalPointSet,
+    )
+    from ai.scene_compiler.optics_scene_builder import OpticsSceneBuilder
+    from apps.api.main import (
+        build_thin_lens_scene,
+        build_mirror_scene,
+        build_prism_scene,
+        build_interface_refraction_scene,
+    )
+except ImportError:
+    from backend.optics.optics_text import (
+        project_distance_on_axis,
+        infer_focal_length_px,
+        classify_focal_points,
+        FocalPointSet,
+    )
+    from backend.optics.optics_scene_builder import OpticsSceneBuilder
+    from backend.server import (
+        build_thin_lens_scene,
+        build_mirror_scene,
+        build_prism_scene,
+        build_interface_refraction_scene,
+    )
 
 
 def test_project_distance_on_axis():

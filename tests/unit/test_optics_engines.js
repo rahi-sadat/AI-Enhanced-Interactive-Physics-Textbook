@@ -5,11 +5,11 @@
  * 3. Prism Engine (vector refraction, deviation angle, TIR)
  * 4. Mirror Engine (concave, convex, plane)
  */
-import { solveThinLens } from '../src/optics/engines/thinLensEngine.js';
-import { solvePrismRefraction } from '../src/optics/engines/prismEngine.js';
-import { solveMirror } from '../src/optics/engines/mirrorEngine.js';
-import { solveSnellInterface, traceInterfaceRefraction } from '../src/optics/engines/snellInterfaceEngine.js';
-import { normalize, dot, reflect, refract } from '../src/optics/engines/rayGeometry.js';
+import { solveThinLens } from '../../engine/optics/thinLensEngine.js';
+import { solvePrismRefraction } from '../../engine/optics/prismEngine.js';
+import { solveMirror } from '../../engine/optics/mirrorEngine.js';
+import { solveSnellInterface, traceInterfaceRefraction } from '../../engine/optics/snellInterfaceEngine.js';
+import { normalize, dot, reflect, refract } from '../../engine/optics/rayGeometry.js';
 
 let passed = 0;
 let failed = 0;

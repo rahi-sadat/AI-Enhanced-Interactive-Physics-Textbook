@@ -10,8 +10,15 @@ import math
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from ..circuit_registry import get_component_spec
-from ..models import Component, Parameter
+try:
+    from engine.circuits.circuit_registry import get_component_spec
+except (ImportError, ValueError):
+    from ..circuit_registry import get_component_spec
+
+try:
+    from shared.schemas.circuit_models import Component, Parameter
+except (ImportError, ValueError):
+    from ..models import Component, Parameter
 from .value_parser import parse_circuit_parameter
 
 

@@ -5,8 +5,8 @@
  */
 
 import assert from 'node:assert';
-import { CircuitCompiler } from '../src/circuits/CircuitCompiler.js';
-import { CircuitSolver } from '../src/circuits/CircuitSolver.js';
+import { CircuitCompiler } from '../../engine/circuits/CircuitCompiler.js';
+import { CircuitSolver } from '../../engine/circuits/CircuitSolver.js';
 
 let passed = 0;
 let total = 0;

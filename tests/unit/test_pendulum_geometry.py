@@ -11,25 +11,40 @@ import unittest
 import cv2
 import numpy as np
 
-_BACKEND_DIR = Path(__file__).resolve().parents[1]
-_KINEMATICS_DIR = _BACKEND_DIR / "kinematics"
-sys.path.insert(0, str(_KINEMATICS_DIR))
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-from pendulum_geometry import detect_pendulum_geometry, fit_circle_subpixel, fit_line_subpixel
+try:
+    from ai.perception.kinematics.pendulum_geometry import (
+        detect_pendulum_geometry,
+        fit_circle_subpixel,
+        fit_line_subpixel,
+    )
+except ImportError:
+    from pendulum_geometry import (
+        detect_pendulum_geometry,
+        fit_circle_subpixel,
+        fit_line_subpixel,
+    )
 
 
 class TestPendulumGeometry(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.project_root = _BACKEND_DIR.parent
-        cls.image_path = (
-            cls.project_root
-            / "simulation_frontend"
-            / "augmented_physics_v2"
-            / "public"
-            / "uploads"
-            / "test1.jpg"
-        )
+        cls.project_root = _REPO_ROOT
+        cls.image_path = cls.project_root / "tests" / "fixtures" / "images" / "test1.jpg"
+        if not cls.image_path.exists():
+            cls.image_path = cls.project_root / "storage" / "uploads" / "test1.jpg"
+        if not cls.image_path.exists():
+            cls.image_path = (
+                cls.project_root
+                / "apps"
+                / "web"
+                / "public"
+                / "uploads"
+                / "test1.jpg"
+            )
         if not cls.image_path.exists():
             raise FileNotFoundError(f"Test image not found at {cls.image_path}")
         cls.img = cv2.imread(str(cls.image_path))

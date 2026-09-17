@@ -14,8 +14,8 @@ from sam2.sam2_image_predictor import SAM2ImagePredictor
 # SETTINGS
 # ============================================================
 
-# Put your multiple-ball image here.
-IMAGE_PATH = "images/multi_balls_test.jpg"
+_FIXTURE_IMAGE = Path("tests/fixtures/images/multi_balls_test.jpg")
+IMAGE_PATH = str(_FIXTURE_IMAGE if _FIXTURE_IMAGE.exists() else Path("images/multi_balls_test.jpg"))
 
 # Your existing SAM 2.1 Tiny checkpoint.
 CHECKPOINT_PATH = "checkpoints/sam2.1_hiera_tiny.pt"

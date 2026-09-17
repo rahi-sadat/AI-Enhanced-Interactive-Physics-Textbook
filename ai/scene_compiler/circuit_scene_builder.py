@@ -8,13 +8,17 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 try:
-    from backend.core.provenance import CircuitConfidence
+    from engine.core.provenance import CircuitConfidence
 except (ImportError, ValueError):
     try:
-        from core.provenance import CircuitConfidence
+        from backend.core.provenance import CircuitConfidence
     except (ImportError, ValueError):
-        from ...core.provenance import CircuitConfidence
-from ..models import CircuitScene, Component, Node, Wire
+        from core.provenance import CircuitConfidence
+
+try:
+    from shared.schemas.circuit_models import CircuitScene, Component, Node, Wire
+except (ImportError, ValueError):
+    from ..models import CircuitScene, Component, Node, Wire
 
 
 class CircuitSceneBuilder:

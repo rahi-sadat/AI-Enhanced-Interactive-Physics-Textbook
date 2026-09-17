@@ -2,7 +2,7 @@
  * test/test_coordinate_mapper.js
  * Unit tests for CoordinateMapper.
  */
-import { CoordinateMapper } from '../src/core/coordinateMapper.js';
+import { CoordinateMapper } from '../../engine/core/coordinateMapper.js';
 
 let passed = 0;
 let failed = 0;

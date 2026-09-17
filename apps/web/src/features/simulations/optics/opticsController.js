@@ -2,10 +2,10 @@
  * Connects adapters -> engines (ThinLens, Prism, Mirror) -> p5View -> HUD.
  */
 import { adaptOpticsScene } from './opticsSceneAdapter.js';
-import { solveThinLens } from './engines/thinLensEngine.js';
-import { solvePrismRefraction } from './engines/prismEngine.js';
-import { solveMirror } from './engines/mirrorEngine.js';
-import { traceInterfaceRefraction } from './engines/snellInterfaceEngine.js';
+import { solveThinLens } from '@engine/optics/thinLensEngine.js';
+import { solvePrismRefraction } from '@engine/optics/prismEngine.js';
+import { solveMirror } from '@engine/optics/mirrorEngine.js';
+import { traceInterfaceRefraction } from '@engine/optics/snellInterfaceEngine.js';
 import { P5OpticsView } from './view/p5OpticsView.js';
 import { OpticsHUD } from './view/opticsHUD.js';
 

@@ -13,8 +13,8 @@
  * - CircuitTutorBridge (grounded bilingual AI explanation drawer)
  */
 
-import { CircuitCompiler } from './CircuitCompiler.js';
-import { CircuitSolver } from './CircuitSolver.js';
+import { CircuitCompiler } from '@engine/circuits/CircuitCompiler.js';
+import { CircuitSolver } from '@engine/circuits/CircuitSolver.js';
 import { CircuitStore } from './CircuitStore.js';
 import { CircuitHitTest } from './CircuitHitTest.js';
 import { P5CircuitView } from './view/P5CircuitView.js';

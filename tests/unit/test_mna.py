@@ -5,10 +5,16 @@ Verifies analytical solutions against MNA results within strict numerical tolera
 """
 import unittest
 
-from ..models import CircuitScene, Component, Node, Parameter, Point, Terminal
-from ..solver.equation_generator import generate_equations
-from ..solver.mna_solver import MNASolver
-from ..solver.spice_adapter import SpiceAdapter
+try:
+    from shared.schemas.circuit_models import CircuitScene, Component, Node, Parameter, Point, Terminal
+    from engine.circuits.equation_generator import generate_equations
+    from engine.circuits.mna_solver import MNASolver
+    from engine.circuits.spice_adapter import SpiceAdapter
+except (ImportError, ValueError):
+    from ..models import CircuitScene, Component, Node, Parameter, Point, Terminal
+    from ..solver.equation_generator import generate_equations
+    from ..solver.mna_solver import MNASolver
+    from ..solver.spice_adapter import SpiceAdapter
 
 
 class TestMNASolver(unittest.TestCase):

@@ -18,11 +18,10 @@ from typing import Dict, List, Optional, Tuple
 import cv2
 import numpy as np
 
-# Ensure backend/core is on the path for shared imports.
-_BACKEND_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(_BACKEND_DIR / "core"))
-
-from geometry_utils import GeometryBundle, extract_geometry  # noqa: E402
+try:
+    from ai.perception.core.geometry_utils import GeometryBundle, extract_geometry
+except ImportError:
+    from geometry_utils import GeometryBundle, extract_geometry
 
 
 # ---------------------------------------------------------------------------

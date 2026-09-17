@@ -4,7 +4,7 @@
  * Synchronizes hover and selection seamlessly between the textbook diagram and the data table.
  */
 
-import { EquationGenerator } from './EquationGenerator.js';
+import { EquationGenerator } from '@engine/circuits/EquationGenerator.js';
 
 export class CircuitTelemetry {
   /**

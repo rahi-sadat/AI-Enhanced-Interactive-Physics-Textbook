@@ -11,12 +11,12 @@ import cv2
 import numpy as np
 
 try:
-    from backend.core.coordinate_space import CropTransform
+    from engine.core.coordinate_space import CropTransform
 except (ImportError, ValueError):
     try:
-        from core.coordinate_space import CropTransform
+        from backend.core.coordinate_space import CropTransform
     except (ImportError, ValueError):
-        from ...core.coordinate_space import CropTransform
+        from core.coordinate_space import CropTransform
 
 
 def detect_circuit_region(img_bgr: np.ndarray) -> Tuple[np.ndarray, CropTransform]:

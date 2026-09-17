@@ -12,7 +12,10 @@ import cv2
 import numpy as np
 from skimage.morphology import skeletonize
 
-from ..models import Point, Wire
+try:
+    from shared.schemas.circuit_models import Point, Wire
+except (ImportError, ValueError):
+    from ..models import Point, Wire
 
 
 class WireDetector:

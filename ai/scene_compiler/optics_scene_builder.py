@@ -18,17 +18,24 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-# Ensure backend/core is on the path.
-_BACKEND_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(_BACKEND_DIR / "core"))
-
-from geometry_utils import GeometryBundle                 # noqa: E402
-from scene_builder import CanvasMapper                    # noqa: E402
 try:
-    from .optics_text import FocalPointSet, PixelScale
-    from .optics_registry import get_preset
+    from ai.perception.core.geometry_utils import GeometryBundle
+except ImportError:
+    from geometry_utils import GeometryBundle
+
+try:
+    from .scene_builder import CanvasMapper
+except ImportError:
+    from scene_builder import CanvasMapper
+
+try:
+    from ai.document_intelligence.parsing.optics_text import FocalPointSet, PixelScale
 except ImportError:
     from optics_text import FocalPointSet, PixelScale
+
+try:
+    from engine.optics.optics_registry import get_preset
+except ImportError:
     from optics_registry import get_preset
 
 

@@ -21,20 +21,13 @@ import shutil
 import sys
 from pathlib import Path
 
-# Ensure backend/core and backend/optics are on sys.path
-_BACKEND_DIR = Path(__file__).resolve().parents[1]
-_CORE_DIR = _BACKEND_DIR / "core"
-_OPTICS_DIR = _BACKEND_DIR / "optics"
-_PROJECT_ROOT = _BACKEND_DIR.parent
-
-# Sanitize sys.path to avoid SAM 2 parent directory shadowing warning
-sys.path = [
-    p for p in sys.path
-    if p not in ("", str(_PROJECT_ROOT), str(_PROJECT_ROOT).lower(),
-                 str(_PROJECT_ROOT).replace("/", "\\"), str(_PROJECT_ROOT).replace("\\", "/"))
-]
-sys.path.insert(0, str(_CORE_DIR))
-sys.path.insert(0, str(_OPTICS_DIR))
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_PROJECT_ROOT = _REPO_ROOT
+_SAM2_DIR = _REPO_ROOT / "sam2"
+if _SAM2_DIR.exists() and str(_SAM2_DIR) not in sys.path:
+    sys.path.insert(0, str(_SAM2_DIR))
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import cv2
 import numpy as np
@@ -43,19 +36,26 @@ import torch
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-from geometry_utils import extract_geometry
-from sprite_utils import save_rgba_sprite
-from optics_scene_builder import OpticsSceneBuilder
-from optics_geometry import extract_lens_geometry, extract_arrow_geometry, detect_optical_axis
-from optics_text import create_manual_label, classify_focal_points, infer_pixel_scale
+try:
+    from ai.perception.core.geometry_utils import extract_geometry
+    from ai.perception.core.sprite_utils import save_rgba_sprite
+    from ai.scene_compiler.optics_scene_builder import OpticsSceneBuilder
+    from ai.perception.optics.optics_geometry import extract_lens_geometry, extract_arrow_geometry, detect_optical_axis
+    from ai.document_intelligence.parsing.optics_text import create_manual_label, classify_focal_points, infer_pixel_scale
+except ImportError:
+    from geometry_utils import extract_geometry
+    from sprite_utils import save_rgba_sprite
+    from optics_scene_builder import OpticsSceneBuilder
+    from optics_geometry import extract_lens_geometry, extract_arrow_geometry, detect_optical_axis
+    from optics_text import create_manual_label, classify_focal_points, infer_pixel_scale
 
 
 def run_pipeline(
-    image_path: Path = _PROJECT_ROOT / "images" / "nctb_lens_diagram.png",
-    checkpoint_path: Path = _PROJECT_ROOT / "checkpoints" / "sam2.1_hiera_tiny.pt",
+    image_path: Path = _REPO_ROOT / "tests" / "fixtures" / "images" / "nctb_lens_diagram.png",
+    checkpoint_path: Path = _REPO_ROOT / "checkpoints" / "sam2.1_hiera_tiny.pt",
     model_cfg: str = "configs/sam2.1/sam2.1_hiera_t.yaml",
     focal_length_cm: float = 20.0,
-    debug_dir: Path = _PROJECT_ROOT / "outputs" / "optics_pipeline_debug",
+    debug_dir: Path = _REPO_ROOT / "storage" / "outputs" / "optics_pipeline_debug",
     target_width: int = 800,
     target_height: int = 600,
 ) -> dict:
@@ -276,6 +276,8 @@ def run_pipeline(
     # 9. Sync to Frontend Repositories
     print("[8/8] Syncing to simulation frontend...")
     target_frontends = [
+        _PROJECT_ROOT / "apps" / "web",
+        _PROJECT_ROOT / "legacy" / "frontend-v1",
         _PROJECT_ROOT / "simulation_frontend" / "augmented_physics_v2",
         _PROJECT_ROOT / "simulation_frontend" / "physics simulation",
     ]

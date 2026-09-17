@@ -1,6 +1,6 @@
 # AI-Enhanced Interactive NCTB Physics Textbook (AugmentedPhysics)
 
-Transform static NCTB physics textbook diagrams into embedded, interactive 2D simulations using Meta SAM 2, automated geometry extraction, and Matter.js.
+Transform static NCTB physics textbook diagrams into embedded, interactive 2D simulations using Meta SAM 2, automated geometry extraction, Modified Nodal Analysis (MNA), and ray-tracing/rigid-body simulation engines.
 
 Based on the research paradigm:  
 > *"Augmented Physics: Creating Interactive and Embedded Physics Simulations from Static Textbook Diagrams"* (UIST '24) — Gunturu et al.
@@ -13,20 +13,20 @@ Based on the research paradigm:
 [NCTB Textbook Page / Diagram]
              │
              ▼
-[Multimodal Perception: SAM 2 + Geometry Extraction]
- (Interactive point prompting, candidate mask re-ranking, RGBA sprite cutouts)
+[ai/ Multimodal Perception: SAM 2 + CV Detectors + Document Intelligence]
+ (Interactive point prompting, candidate mask re-ranking, OCR, parameter binding)
              │
              ▼
-[Canonical PhysicsScene v2 (JSON)]
- (Domain-neutral, preserves uncertainty, separates perception from physics)
+[shared/ Canonical Schemas (JSON)]
+ (PhysicsScene v2.1 & Canonical CircuitScene v3: separates perception from simulation)
              │
              ▼
-[Scene Compiler & Adapters]
- (Matter.js 2D Rigid-body / Spring Constraints / Concave Poly-Decomposition)
+[engine/ Multi-Domain Physics Solvers]
+ (MNA Electrical Solver / Optics Ray-Tracing / Mechanics Rigid-Body Dynamics)
              │
              ▼
-[Embedded Simulation Stage (HTML/CSS Canvas)]
- (Layer 1: Original Diagram  |  Layer 2: Transparent Matter.js Canvas)
+[apps/web/ Interactive Simulation Platform]
+ (Embedded stage, dynamic HUDs, real-time telemetry, Bangla AI tutor overlay)
 ```
 
 ---
@@ -34,59 +34,43 @@ Based on the research paradigm:
 ## 📁 Repository Structure
 
 ```
-AugmentedPhysics/
-├── .gitignore                   # Ignore .venv, checkpoints, node_modules, zip archives
-├── README.md                    # Project overview and setup instructions
-├── PROJECT_CONTEXT.md           # Deep architectural knowledge base & roadmap
-├── requirements.txt             # Python backend dependencies
-│
-├── backend/                     # Python Backend & CV Perception Engines
-│   ├── core/                    # Shared CV & Scene utilities
-│   │   ├── geometry_utils.py    # Polygon hull, OBB, circles, center of mass
-│   │   ├── mask_quality.py      # Multi-candidate SAM 2 mask re-ranking logic
-│   │   ├── scene_builder.py     # Viewport coordinate mapper & JSON schema builder
-│   │   └── sprite_utils.py      # Transparent RGBA sprite cutout generation
-│   │
-│   ├── kinematics/              # Rigid-body mechanics pipeline
-│   │   ├── build_kinematics_scene.py  # Interactive GUI authoring for Matter.js scenes
-│   │   ├── test_sam.py          # Single-object segmentation test
-│   │   └── verify_multiple_objects.py # Multi-object verification script
-│   │
-│   └── optics/                  # Domain-specific optics pipeline
-│       ├── build_optics_scene.py      # Interactive GUI authoring for Optics2D scenes
-│       ├── optics_authoring.py  # Optics GUI session with F/2F annotation mode
-│       ├── optics_geometry.py   # Lens center, aperture, arrow tip/base, prism, axis
-│       ├── optics_registry.py   # Semantic presets (lens, object, prism, mirror)
-│       ├── optics_scene_builder.py    # Canonical PhysicsScene v2.1 builder
-│       ├── optics_semantics.py  # Rule-based semantic binding & VLM prompt generation
-│       └── optics_text.py       # F/2F classification & pixel-to-cm calibration
-│
-├── images/                      # Benchmark textbook diagrams & test images
-│   ├── curved_ramp_spring.png   # Curved ramp with spring reference
-│   ├── multi_balls_test.jpg     # Multi-ball segmentation test
-│   └── test.jpg                 # Single-object benchmark
-│
-├── physics_scene_full.json      # Canonical v2 schema (visual perception contract)
-├── physics_scene.json           # Simulator compatibility schema
-│
-└── simulation_frontend/         # Interactive Matter.js & Optics Web Simulation
-    └── physics simulation/
-        ├── index.html           # 2-Layer embedded textbook stage
-        ├── package.json
-        ├── public/              # Sprites, scene spec & background
-        └── src/
-            ├── main.js          # App lifecycle & dynamic object selector
-            ├── physicsBodyFactory.js  # Matter.js body creation & spring dynamics
-            ├── sceneLoader.js   # JSON scene loader
-            ├── simulation.js    # Simulation runner & transparent canvas loop
-            └── style.css        # Embedded stage styling
+AI-Enhanced-Interactive-Physics-Textbook/
+├── .github/                     # CODEOWNERS and PR templates
+├── apps/
+│   ├── api/                     # FastAPI backend (POST /api/analyze-diagram, /api/upload-diagram)
+│   └── web/                     # Modern Vite simulation frontend (multi-domain stages & telemetry)
+├── engine/                      # Pure, framework-agnostic physics solvers
+│   ├── circuits/                # Modified Nodal Analysis (MNA), SPICE adapter, equation generator
+│   ├── core/                    # Coordinate spaces, parameter resolution, provenance tracking
+│   ├── mechanics/               # Rigid-body, spring dynamics, and collision helpers
+│   └── optics/                  # Optical ray-tracing, lenses, mirrors, and prisms
+├── ai/                          # Perception and document understanding
+│   ├── document_intelligence/   # OCR heuristics and physics value parser
+│   ├── perception/              # CV detectors for circuits, optics, kinematics, and SAM 2
+│   └── scene_compiler/          # Compiles perceived elements into canonical scene models
+├── shared/                      # Canonical JSON schemas and shared dataclass models
+│   └── schemas/                 # CircuitScene v3, PhysicsScene v2.1, and contracts
+├── storage/                     # Diagram uploads, generated sprites, and cache (git-ignored)
+│   └── uploads/                 # Canonical diagram upload directory
+├── tests/                       # Automated multi-domain test suites
+│   ├── fixtures/                # Benchmark diagrams, scenes, and test images
+│   ├── integration/             # End-to-end perception and solver tests
+│   └── unit/                    # Fast isolated mathematical and physical unit tests
+├── scripts/                     # Standalone CLI tools & interactive authoring GUIs
+├── docs/                        # Complete architectural and collaborative documentation
+│   ├── ARCHITECTURE.md          # Architectural layers, contracts, and design principles
+│   ├── REPO_MAP.md              # File-by-file inventory and location map
+│   ├── MIGRATION_MAP.md         # Before-and-after path mapping
+│   ├── TEAM_WORKFLOW.md         # Developer collaboration guidelines (@rahi-sadat & @THE-FOOL-T)
+│   └── CONTRIBUTING.md          # PR standards, testing requirements, and ownership
+└── legacy/                      # Archived early prototypes (frontend-v1)
 ```
 
 ---
 
 ## 🚀 Quick Start & Installation
 
-### 1. Backend & Perception Pipeline Setup
+### 1. Backend & Perception Setup
 
 ```bash
 # Clone the repository
@@ -102,60 +86,49 @@ source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Install Meta SAM 2
-pip install -e git+https://github.com/facebookresearch/segment-anything-2.git
 ```
 
-### 2. Download SAM 2 Model Checkpoint
-
-The pre-trained weights (`sam2.1_hiera_tiny.pt`) should be placed in `checkpoints/`:
+### 2. Launch the API Server
 
 ```bash
-mkdir checkpoints
-# Download sam2.1_hiera_tiny.pt (approx. 156 MB)
-curl -L -o checkpoints/sam2.1_hiera_tiny.pt https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
+uvicorn apps.api.main:app --reload --port 8000
 ```
 
-### 3. Run the Interactive Authoring GUIs
+Interactive API documentation will be available at: `http://localhost:8000/docs`.
 
-**For Mechanics / Kinematics (Matter.js):**
-```bash
-python backend/kinematics/build_kinematics_scene.py images/with_spring.png
-```
-
-**For Optics (Thin Lens / Prism / Mirror):**
-```bash
-python backend/optics/build_optics_scene.py --image images/with_spring.png --subtype thin_lens
-```
-
-- **Left-Click**: Add positive prompt point (object).
-- **Right-Click**: Add negative prompt point (background).
-- **Press D / S**: Mark selected entity as **Dynamic** or **Static**.
-- **Press F (in Optics)**: Toggle F / 2F annotation mode to place focal markers on the axis.
-- **Press Enter**: Accept candidate mask & extract geometry + RGBA sprite.
-- **Click '▶ SIMULATE'**: Automatically syncs assets to the frontend and launches the simulation.
-
-### 4. Frontend Simulation Setup
+### 3. Launch the Web Simulation Platform
 
 ```bash
-cd "simulation_frontend/physics simulation"
+cd apps/web
 npm install
 npm run dev
 ```
 
-Open the local server URL (e.g., `http://localhost:5173`) in your browser to interact with the simulation.
+Open `http://localhost:5173` to explore interactive mechanics, circuits, and optics simulations.
 
 ---
 
-## 📜 Canonical Visual Schema
+## 🧪 Testing & Verification
 
-Perception and physics are strictly separated:
-- `physics_scene_full.json` strictly preserves what is visually perceived or confirmed by the author (geometry, contours, bounds, centroids, author roles). It does **not** invent physical constants (e.g. mass, friction, gravity remain `null` until confirmed by text/OCR).
-- `physics_scene.json` is generated for simulator engines (Matter.js), with sensible fallbacks and explicit provenance flags.
+### Automated Frontend Tests
+```bash
+cd apps/web
+npm test
+```
+*Runs optics engine verification, coordinate mappers, pendulum physics, and circuit solvers (97+ tests).*
+
+### Automated Python Tests
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+*Runs MNA matrix math, Union-Find circuit topology, SI prefix parsing, sub-pixel pendulum geometry, and full-pipeline diagram analysis.*
 
 ---
 
-## 👥 Contributors & Milestones
-- **Backend & CV Pipeline**: SAM 2 segmentation, candidate mask re-ranking, geometry extraction, transparent sprite generation, canonical schema exporter.
-- **Simulation Frontend**: Matter.js embedded transparent canvas, concave polygon decomposition (`poly-decomp`), spring dynamics, and controls.
+## 👥 Team & Ownership
+
+This project is collaboratively developed with strict domain boundaries to prevent code collisions:
+- **`@rahi-sadat`**: Backend CV perception, SAM 2 segmentation, canonical schemas, MNA electrical solver, and API integration.
+- **`@THE-FOOL-T`**: Frontend simulation engines, interactive stages, telemetry overlays, UI components, and educational interactions.
+
+For detailed branch policies, commit standards, and PR workflows, see [docs/TEAM_WORKFLOW.md](docs/TEAM_WORKFLOW.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

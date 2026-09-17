@@ -9,7 +9,7 @@
  * - Closed-form projectile trajectory precision
  */
 
-import { MatterUnitAdapter } from '../src/core/matterUnitAdapter.js';
+import { MatterUnitAdapter } from '../../engine/core/matterUnitAdapter.js';
 
 function assert(condition, message) {
   if (!condition) {

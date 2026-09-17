@@ -6,7 +6,7 @@ import decomp from 'poly-decomp';
 import { Common } from 'matter-js';
 Common.setDecomp(decomp);
 
-import { Simulation } from './simulation.js';
+import { Simulation } from '@engine/mechanics/simulation.js';
 
 export class MechanicsController {
   constructor(scene, overlayStage) {

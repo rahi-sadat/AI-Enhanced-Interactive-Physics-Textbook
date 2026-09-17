@@ -201,84 +201,93 @@ Defaults (like `mass_kg = 1.0` or `gravity = 9.81 m/s²`) are translated only at
 
 ```
 d:\AugmentedPhysics\
-├── backend/                                  # Python CV, SAM 2, and FastAPI Server
-│   ├── server.py                             # FastAPI server (:8000) for diagram upload & CV analysis
-│   ├── test_optics_precision.py              # Automated test suite for backend optics & provenance
-│   ├── core/                                 # Computer vision shared modules
-│   │   ├── geometry_utils.py                 # Contour approximation, bounding boxes, polygon vertices
-│   │   ├── mask_quality.py                   # Multi-mask re-ranking & IoU scoring
-│   │   ├── scene_builder.py                  # Canonical PhysicsScene generator
-│   │   └── sprite_utils.py                   # RGBA transparent cutout extractor
-│   ├── kinematics/                           # Mechanics authoring scripts
-│   │   └── build_kinematics_scene.py         # Mechanics annotation tool
-│   └── optics/                               # Optics authoring & perception modules
-│       ├── build_optics_scene.py             # Optics annotation tool
-│       ├── optics_geometry.py                # Lens, arrow, prism, mirror, and axis geometry extraction
-│       ├── optics_scene_builder.py           # Canonical 3.0-optics scene builder with provenance
-│       └── optics_text.py                    # Multi-evidence focal length & axis distance inference
+├── .github/                                  # CODEOWNERS and collaborative PR templates
+├── apps/
+│   ├── api/                                  # FastAPI backend server (:8000) for diagram upload & CV/MNA analysis
+│   │   ├── main.py                           # REST endpoints (/api/upload-diagram, /api/analyze-diagram, /api/health)
+│   │   └── __init__.py
+│   └── web/                                  # Modern Vite Multi-Domain Simulation Platform
+│       ├── package.json                      # Vite, p5.js, Matter.js, poly-decomp
+│       ├── vite.config.js                    # Vite config with path aliases (@engine, @ai, @shared, @features)
+│       ├── index.html                        # App shell: Studio Navigation, Canvas Stage, Controls, HUD
+│       ├── public/
+│       │   ├── uploads/                      # Uploaded & standard textbook diagrams
+│       │   └── scenes/                       # Canonical optics and mechanics scenario JSONs
+│       └── src/
+│           ├── main.js                       # App controller: domain switcher, presets, upload studio
+│           ├── style.css                     # Glassmorphic dark theme, responsive stage layout
+│           └── features/
+│               └── simulations/              # Modular simulation feature controllers & views
+│                   ├── circuits/             # CircuitController.js, CircuitTelemetry.js
+│                   ├── core/                 # overlayStage.js (2-layer stage with ResizeObserver)
+│                   ├── mechanics/            # mechanicsController.js, pendulumSimulation.js, projectileSimulation.js
+│                   └── optics/               # opticsController.js, opticsSceneAdapter.js, view/
 │
-├── simulation_frontend/
-│   ├── augmented_physics_v2/                 # Unified Modern Multi-Domain Web App
-│   │   ├── package.json                      # Vite, p5.js, Matter.js, poly-decomp
-│   │   ├── vite.config.js                    # Vite configuration with API proxy to localhost:8000
-│   │   ├── index.html                        # App shell: Studio Navigation, Canvas Stage, Controls, HUD
-│   │   ├── test/                             # Automated test suite (Node.js)
-│   │   │   ├── test_coordinate_mapper.js     # 21 tests: letterbox, pillarbox, inversion, length scaling
-│   │   │   └── test_optics_engines.js        # 65 tests: thin lens, prism, mirror, Snell interface & TIR
-│   │   ├── public/
-│   │   │   ├── uploads/                      # Uploaded & standard textbook diagrams
-│   │   │   │   ├── diagram_7dcbe9c0.png      # NCTB interface refraction diagram (393 x 328 px)
-│   │   │   │   ├── diagram_0ae6ee8e.png      # Water refraction diagram (1536 x 1024 px)
-│   │   │   │   ├── diagram_cff33623.png      # Spherical mirror diagram (553 x 469 px)
-│   │   │   │   └── diagram_ceceeb1a.jpg      # Thin lens diagram (1024 x 768 px)
-│   │   │   └── scenes/
-│   │   │       ├── optics/                   # Canonical optics textbook scenario JSONs
-│   │   │       │   ├── thin_lens_scene.json
-│   │   │       │   ├── concave_lens_scene.json
-│   │   │       │   ├── prism_scene.json
-│   │   │       │   ├── glass_slab_scene.json
-│   │   │       │   ├── tir_prism_scene.json
-│   │   │       │   ├── mirror_scene.json
-│   │   │       │   └── interface_refraction_scene.json
-│   │   │       └── kinematics/               # Kinematics scenario JSONs
-│   │   │           ├── physics_scene.json
-│   │   │           └── with_spring.png
-│   │   └── src/
-│   │       ├── main.js                       # App controller: domain switcher, presets, upload studio
-│   │       ├── style.css                     # Glassmorphic dark theme, responsive stage layout
-│   │       ├── core/                         # Shared simulation infrastructure
-│   │       │   ├── coordinateMapper.js       # Authoritative bidirectional contain transform
-│   │       │   ├── overlayStage.js           # 2-layer diagram stage with ResizeObserver
-│   │       │   ├── diagramAnalyzer.js        # Diagram analyzer: backend AI + browser CV fallback
-│   │       │   ├── sceneLoader.js            # JSON scene fetcher & cache validator
-│   │       │   └── sceneRouter.js            # Domain router (Mechanics vs. Optics)
-│   │       ├── kinematics/                   # Kinematics Simulation Engine
-│   │       │   ├── kinematicsRenderer.js     # Matter.js world, runner, and render lifecycle
-│   │       │   ├── kinematicsBodyFactory.js  # Bodies, constraints, decomposed ramps, sprites
-│   │       │   └── kinematicsControls.js     # Gravity, velocity, reset, and playback controls
-│   │       └── optics/                       # Modular Ray Optics Framework
-│   │           ├── opticsController.js       # Optics coordinator: model <-> engines <-> view <-> HUD
-│   │           ├── opticsSceneAdapter.js     # Adapts PhysicsScene v2/v3 into optics model in source_px
-│   │           ├── engines/                  # Pure mathematical optics solvers
-│   │           │   ├── rayGeometry.js        # rayToBounds, boundaryNormal, vector math
-│   │           │   ├── thinLensEngine.js     # Gaussian lens solver with ray bounds
-│   │           │   ├── prismEngine.js        # Triangular & slab prism Snell & TIR solver
-│   │           │   ├── mirrorEngine.js       # Spherical concave/convex & plane mirror solver
-│   │           │   └── snellInterfaceEngine.js# Planar interface refraction & TIR solver
-│   │           └── view/                     # View rendering & presentation
-│   │               ├── p5OpticsView.js       # p5.js transparent canvas with source transform stack
-│   │               ├── opticsRenderer.js     # Drawing primitives: rays, arrows, normal, angle arcs
-│   │               ├── opticsTheme.js        # Visual tokens: ray colors, glow shaders, angle arcs
-│   │               ├── opticsSprites.js      # Dynamic candle & optical object sprites
-│   │               └── opticsHUD.js          # Dynamic educational HUD cards with live formulas
-│   │
-│   └── physics simulation/                   # Teammate v1 Kinematics Prototype
-│       ├── index.html                        # Initial composite canvas prototype
-│       └── src/                              # Early spring & ramp testbed
+├── engine/                                   # Pure, framework-agnostic physics engines & solvers
+│   ├── circuits/                             # Modified Nodal Analysis (MNA), equation generator, SPICE adapter
+│   │   ├── mna_solver.py                     # DC matrix solver, node voltages, branch currents, KCL balance
+│   │   ├── equation_generator.py             # Step-by-step symbolic and numerical proofs (Bengali explanations)
+│   │   ├── spice_adapter.py                  # Sandboxed SPICE netlist exporter
+│   │   ├── transient_solver.py               # Analytical RC time-domain charging/discharging
+│   │   └── topology/                         # Union-Find electrical node clustering & validator
+│   ├── core/                                 # Shared simulation primitives
+│   │   ├── coordinate_space.py               # Native source_px crop & affine transforms
+│   │   ├── coordinateMapper.js               # JavaScript bidirectional contain transform
+│   │   ├── parameter_resolver.py             # SI prefix parser and formatter (case-sensitive)
+│   │   ├── provenance.py                     # Diagnostic confidence & attribution tracking
+│   │   └── sceneRouter.js                    # Domain router (Mechanics, Optics, Circuits)
+│   ├── mechanics/                            # Mechanics collision & constraint models
+│   │   ├── physicsBodyFactory.js             # Matter.js body creation & spring dynamics
+│   │   ├── simulation.js                     # Simulation runner & transparent canvas loop
+│   │   └── sceneLoader.js                    # JSON scene loader
+│   └── optics/                               # Geometric ray optics solvers
+│       ├── optics_registry.py                # Semantic presets (lens, object, prism, mirror)
+│       ├── thinLensEngine.js                 # Gaussian lens solver ($1/f = 1/v - 1/u$)
+│       ├── prismEngine.js                    # Triangular & slab prism Snell & TIR solver
+│       ├── mirrorEngine.js                   # Spherical concave/convex & plane mirror solver
+│       ├── snellInterfaceEngine.js           # Planar interface refraction & TIR solver
+│       └── rayGeometry.js                    # Vector geometry, ray bounding intersections
 │
-├── uploads/                                  # Backend static uploads directory (mounted at /uploads)
-├── PROJECT_CONTEXT.md                        # Complete project knowledge base (this file)
-└── walkthrough.md                            # Detailed architectural & verification walkthrough
+├── ai/                                       # Multimodal perception & document intelligence
+│   ├── document_intelligence/                # OCR & text parameter extraction
+│   │   ├── ocr/                              # Heuristic and adapter OCR (circuit_ocr.py)
+│   │   └── parsing/                          # parameter_binder.py, value_parser.py, optics_text.py, optics_semantics.py
+│   ├── perception/                           # Computer vision feature detectors
+│   │   ├── circuits/                         # component_detector, wire_detector, junction_detector, circuit_analyzer
+│   │   ├── core/                             # geometry_utils.py, mask_quality.py, sprite_utils.py
+│   │   ├── kinematics/                       # Sub-pixel pendulum geometry detection & circle fitting
+│   │   └── optics/                           # optics_geometry.py (lens center, aperture, optical axis)
+│   └── scene_compiler/                       # Compiles detected features into canonical scene schemas
+│       ├── circuit_scene_builder.py          # Canonical CircuitScene v3 builder
+│       ├── optics_scene_builder.py           # Canonical PhysicsScene v2.1 optics builder
+│       └── scene_builder.py                  # Generic CanvasMapper and scene compiler
+│
+├── shared/                                   # Domain schemas and cross-tier data contracts
+│   └── schemas/                              # circuit_models.py (CircuitScene v3), physics_scene*.json
+│
+├── storage/                                  # Persistent uploads, outputs, and cache (git-ignored)
+│   └── uploads/                              # Diagram uploads (circuit1-4.png, test1.jpg, etc.)
+│
+├── tests/                                    # Multi-domain automated test suites
+│   ├── fixtures/                             # Benchmark images, diagrams, and ground-truth scenes
+│   ├── integration/                          # test_circuit_images.py, test_optics_precision.py
+│   └── unit/                                 # Fast unit tests (Python MNA & JS optics/coordinate mapper)
+│
+├── scripts/                                  # Offline CLI authoring tools & pipeline runners
+│   ├── build_kinematics_scene.py             # Desktop interactive kinematics annotator
+│   ├── optics_authoring.py                   # Desktop interactive optics annotator
+│   └── run_optics_pipeline.py                # End-to-end NCTB lens diagram perception pipeline
+│
+├── docs/                                     # Central documentation & collaboration standards
+│   ├── ARCHITECTURE.md                       # Architectural design principles and contracts
+│   ├── REPO_MAP.md                           # File-by-file repository inventory
+│   ├── MIGRATION_MAP.md                      # Pre/post architecture migration paths
+│   ├── TEAM_WORKFLOW.md                      # Developer collaboration policies & branch workflow
+│   ├── CONTRIBUTING.md                       # PR guidelines and coding standards
+│   └── MIGRATION_REPORT.md                   # Full audit and non-regression verification report
+│
+└── legacy/                                   # Historical early prototypes
+    └── frontend-v1/                          # Original physics simulation prototype
 ```
 
 ---

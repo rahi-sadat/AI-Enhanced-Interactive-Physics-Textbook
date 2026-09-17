@@ -8,15 +8,20 @@ from pathlib import Path
 
 import cv2
 
-from ..circuit_analyzer import CircuitAnalyzer
+try:
+    from ai.perception.circuits.circuit_analyzer import CircuitAnalyzer
+except (ImportError, ValueError):
+    from ..circuit_analyzer import CircuitAnalyzer
 
 
 class TestUploadedCircuitImages(unittest.TestCase):
 
     def setUp(self):
         self.analyzer = CircuitAnalyzer()
-        self.project_root = Path(__file__).resolve().parents[3]
-        self.uploads_dir = self.project_root / "uploads"
+        self.project_root = Path(__file__).resolve().parents[2]
+        self.uploads_dir = self.project_root / "storage" / "uploads"
+        if not self.uploads_dir.exists():
+            self.uploads_dir = self.project_root / "apps" / "web" / "public" / "uploads"
 
     def test_uploaded_circuit_images(self):
         for fn in ["circuit1.png", "circuit2.png", "circuit3.png", "circuit4.png"]:

@@ -17,7 +17,10 @@ from typing import Any, List, Optional, Tuple
 import cv2
 import numpy as np
 
-from ..models import Point, Wire
+try:
+    from shared.schemas.circuit_models import Point, Wire
+except (ImportError, ValueError):
+    from ..models import Point, Wire
 
 
 class JunctionType(str, Enum):

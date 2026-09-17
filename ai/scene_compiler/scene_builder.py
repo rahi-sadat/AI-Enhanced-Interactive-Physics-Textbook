@@ -5,7 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
 
-from geometry_utils import GeometryBundle
+try:
+    from ai.perception.core.geometry_utils import GeometryBundle
+except ImportError:
+    from geometry_utils import GeometryBundle
 
 
 @dataclass

@@ -4,10 +4,16 @@ Unit tests for topology building, Union-Find clustering, and diagnostic validati
 """
 import unittest
 
-from ..models import CircuitScene, Component, Node, Parameter, Point, Terminal, Wire
-from ..topology.topology_builder import build_topology
-from ..topology.topology_validator import DiagnosticSeverity, validate_topology
-from ..topology.union_find import UnionFind
+try:
+    from shared.schemas.circuit_models import CircuitScene, Component, Node, Parameter, Point, Terminal, Wire
+    from engine.circuits.topology.topology_builder import build_topology
+    from engine.circuits.topology.topology_validator import DiagnosticSeverity, validate_topology
+    from engine.circuits.topology.union_find import UnionFind
+except (ImportError, ValueError):
+    from ..models import CircuitScene, Component, Node, Parameter, Point, Terminal, Wire
+    from ..topology.topology_builder import build_topology
+    from ..topology.topology_validator import DiagnosticSeverity, validate_topology
+    from ..topology.union_find import UnionFind
 
 
 class TestTopology(unittest.TestCase):

@@ -12,7 +12,10 @@ from typing import List, Optional, Tuple
 import cv2
 import numpy as np
 
-from ..models import Component, Point, Terminal
+try:
+    from shared.schemas.circuit_models import Component, Point, Terminal
+except (ImportError, ValueError):
+    from ..models import Component, Point, Terminal
 
 
 class TerminalDetector:

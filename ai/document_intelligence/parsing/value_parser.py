@@ -8,13 +8,17 @@ from __future__ import annotations
 from typing import Optional
 
 try:
-    from backend.core.parameter_resolver import parse_si
+    from engine.core.parameter_resolver import parse_si
 except (ImportError, ValueError):
     try:
-        from core.parameter_resolver import parse_si
+        from backend.core.parameter_resolver import parse_si
     except (ImportError, ValueError):
-        from ...core.parameter_resolver import parse_si
-from ..models import Parameter
+        from core.parameter_resolver import parse_si
+
+try:
+    from shared.schemas.circuit_models import Parameter
+except (ImportError, ValueError):
+    from ..models import Parameter
 
 
 def parse_circuit_parameter(text: str, expected_family: Optional[str] = None) -> Optional[Parameter]:

@@ -9,9 +9,12 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import List, Tuple
 
-# Add backend/core to sys.path so shared utilities resolve cleanly.
-_BACKEND_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(_BACKEND_DIR / "core"))
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_SAM2_DIR = _REPO_ROOT / "sam2"
+if _SAM2_DIR.exists() and str(_SAM2_DIR) not in sys.path:
+    sys.path.insert(0, str(_SAM2_DIR))
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 import cv2
 import matplotlib.pyplot as plt
@@ -25,17 +28,25 @@ import webbrowser
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-from geometry_utils import extract_geometry
-from mask_quality import CandidateChoice, choose_candidate
-from scene_builder import SceneBuilder, export_matterjs_compat
-from sprite_utils import save_rgba_sprite
+try:
+    from ai.perception.core.geometry_utils import extract_geometry
+    from ai.perception.core.mask_quality import CandidateChoice, choose_candidate
+    from ai.scene_compiler.scene_builder import SceneBuilder, export_matterjs_compat
+    from ai.perception.core.sprite_utils import save_rgba_sprite
+except ImportError:
+    from geometry_utils import extract_geometry
+    from mask_quality import CandidateChoice, choose_candidate
+    from scene_builder import SceneBuilder, export_matterjs_compat
+    from sprite_utils import save_rgba_sprite
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_IMAGE = PROJECT_ROOT / "images" / "multi_balls_test.jpg"
-DEFAULT_FULL_JSON = PROJECT_ROOT / "physics_scene_full.json"
-DEFAULT_MATTER_JSON = PROJECT_ROOT / "physics_scene.json"
-DEFAULT_DEBUG_DIR = PROJECT_ROOT / "outputs" / "scene_pipeline_debug"
+PROJECT_ROOT = _REPO_ROOT
+DEFAULT_IMAGE = PROJECT_ROOT / "tests" / "fixtures" / "images" / "multi_balls_test.jpg"
+if not DEFAULT_IMAGE.exists():
+    DEFAULT_IMAGE = PROJECT_ROOT / "images" / "multi_balls_test.jpg"
+DEFAULT_FULL_JSON = PROJECT_ROOT / "shared" / "schemas" / "physics_scene_full.json"
+DEFAULT_MATTER_JSON = PROJECT_ROOT / "shared" / "schemas" / "physics_scene.json"
+DEFAULT_DEBUG_DIR = PROJECT_ROOT / "storage" / "outputs" / "scene_pipeline_debug"
 
 CHECKPOINT_CONFIGS = {
     "sam2.1_hiera_tiny.pt": "configs/sam2.1/sam2.1_hiera_t.yaml",

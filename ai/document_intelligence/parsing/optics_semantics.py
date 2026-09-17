@@ -12,11 +12,17 @@ import json
 from typing import Dict, List, Optional
 
 try:
-    from .optics_registry import OPTICS_REGISTRY, get_preset
+    from engine.optics.optics_registry import OPTICS_REGISTRY, get_preset
+except ImportError:
+    try:
+        from .optics_registry import OPTICS_REGISTRY, get_preset
+    except ImportError:
+        from optics_registry import OPTICS_REGISTRY, get_preset
+
+try:
     from .optics_text import DetectedLabel
 except ImportError:
-    from optics_registry import OPTICS_REGISTRY, get_preset
-    from optics_text import DetectedLabel
+    from ai.document_intelligence.parsing.optics_text import DetectedLabel
 
 
 

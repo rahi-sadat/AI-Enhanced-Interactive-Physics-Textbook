@@ -16,24 +16,15 @@ from pathlib import Path
 from typing import Optional
 
 # Setup import paths
-_BACKEND_DIR = Path(__file__).resolve().parent
-_CORE_DIR = _BACKEND_DIR / "core"
-_OPTICS_DIR = _BACKEND_DIR / "optics"
-_KINEMATICS_DIR = _BACKEND_DIR / "kinematics"
-_PROJECT_ROOT = _BACKEND_DIR.parent
+_API_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-# Sanitize sys.path for SAM 2
-sys.path = [
-    p for p in sys.path
-    if p not in ("", str(_PROJECT_ROOT), str(_PROJECT_ROOT).lower(),
-                 str(_PROJECT_ROOT).replace("/", "\\"), str(_PROJECT_ROOT).replace("\\", "/"))
-]
-_CIRCUITS_DIR = _BACKEND_DIR / "circuits"
-sys.path.insert(0, str(_CORE_DIR))
-sys.path.insert(0, str(_OPTICS_DIR))
-sys.path.insert(0, str(_KINEMATICS_DIR))
-sys.path.insert(0, str(_CIRCUITS_DIR))
-sys.path.insert(0, str(_BACKEND_DIR))
+# Ensure SAM 2 package directory and repository root are on sys.path
+_SAM2_DIR = _PROJECT_ROOT / "sam2"
+if _SAM2_DIR.exists() and str(_SAM2_DIR) not in sys.path:
+    sys.path.insert(0, str(_SAM2_DIR))
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 import cv2
 import numpy as np
@@ -53,17 +44,17 @@ except Exception as e:
     print(f"[Backend] SAM 2 import warning: {e}")
 
 # Optics imports
-from geometry_utils import extract_geometry
-from sprite_utils import save_rgba_sprite
-from optics_scene_builder import OpticsSceneBuilder
-from optics_geometry import (
+from ai.perception.core.geometry_utils import extract_geometry
+from ai.perception.core.sprite_utils import save_rgba_sprite
+from ai.scene_compiler.optics_scene_builder import OpticsSceneBuilder
+from ai.perception.optics.optics_geometry import (
     extract_lens_geometry,
     extract_arrow_geometry,
     detect_optical_axis,
     extract_prism_geometry,
     extract_mirror_geometry,
 )
-from optics_text import (
+from ai.document_intelligence.parsing.optics_text import (
     create_manual_label,
     classify_focal_points,
     infer_pixel_scale,
@@ -72,15 +63,15 @@ from optics_text import (
 )
 
 # Kinematics imports
-from scene_builder import SceneBuilder, export_matterjs_compat
+from ai.scene_compiler.scene_builder import SceneBuilder, export_matterjs_compat
 
 # Circuits imports
-from circuits.circuit_analyzer import CircuitAnalyzer
-from circuits.models import CircuitScene
-from circuits.solver.mna_solver import MNASolver
-from circuits.solver.equation_generator import generate_equations
-from circuits.solver.spice_adapter import SpiceAdapter
-from circuits.topology.topology_validator import validate_topology
+from ai.perception.circuits.circuit_analyzer import CircuitAnalyzer
+from shared.schemas.circuit_models import CircuitScene
+from engine.circuits.mna_solver import MNASolver
+from engine.circuits.equation_generator import generate_equations
+from engine.circuits.spice_adapter import SpiceAdapter
+from engine.circuits.topology.topology_validator import validate_topology
 
 app = FastAPI(title="AugmentedPhysics API", version="2.1")
 
@@ -94,9 +85,9 @@ app.add_middleware(
 )
 
 # Upload and debug directories
-UPLOADS_DIR = _PROJECT_ROOT / "uploads"
+UPLOADS_DIR = _PROJECT_ROOT / "storage" / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
-FRONTEND_PUBLIC = _PROJECT_ROOT / "simulation_frontend" / "augmented_physics_v2" / "public"
+FRONTEND_PUBLIC = _PROJECT_ROOT / "apps" / "web" / "public"
 FRONTEND_UPLOADS = FRONTEND_PUBLIC / "uploads"
 FRONTEND_UPLOADS.mkdir(parents=True, exist_ok=True)
 FRONTEND_SPRITES = FRONTEND_PUBLIC / "sprites"

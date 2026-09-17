@@ -9,12 +9,12 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 try:
-    from backend.core.parameter_resolver import format_si
+    from engine.core.parameter_resolver import format_si
 except (ImportError, ValueError):
     try:
-        from core.parameter_resolver import format_si
+        from backend.core.parameter_resolver import format_si
     except (ImportError, ValueError):
-        from ...core.parameter_resolver import format_si
+        from core.parameter_resolver import format_si
 from ..models import CircuitScene
 from .mna_solver import ElectricalState
 

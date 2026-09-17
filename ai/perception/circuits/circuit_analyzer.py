@@ -11,20 +11,40 @@ from typing import Any, Dict, Optional
 import cv2
 import numpy as np
 
-from .models import CircuitScene
-from .parameters.circuit_ocr import HeuristicCircuitOCR
-from .parameters.parameter_binder import bind_parameters_to_components
-from .perception.component_detector import ComponentDetector
-from .perception.junction_detector import JunctionDetector
-from .perception.polarity_detector import PolarityDetector
-from .perception.region_detector import detect_circuit_region
-from .perception.text_detector import TextDetector
-from .perception.wire_detector import WireDetector
-from .scene.circuit_scene_builder import CircuitSceneBuilder
-from .solver.equation_generator import generate_equations
-from .solver.mna_solver import MNASolver
-from .topology.topology_builder import build_topology
-from .topology.topology_validator import validate_topology
+try:
+    from shared.schemas.circuit_models import CircuitScene
+except (ImportError, ValueError):
+    from .models import CircuitScene
+
+try:
+    from ai.document_intelligence.ocr.circuit_ocr import HeuristicCircuitOCR
+    from ai.document_intelligence.parsing.parameter_binder import bind_parameters_to_components
+except (ImportError, ValueError):
+    from .parameters.circuit_ocr import HeuristicCircuitOCR
+    from .parameters.parameter_binder import bind_parameters_to_components
+
+from .component_detector import ComponentDetector
+from .junction_detector import JunctionDetector
+from .polarity_detector import PolarityDetector
+from .region_detector import detect_circuit_region
+from .text_detector import TextDetector
+from .wire_detector import WireDetector
+
+try:
+    from ai.scene_compiler.circuit_scene_builder import CircuitSceneBuilder
+except (ImportError, ValueError):
+    from .scene.circuit_scene_builder import CircuitSceneBuilder
+
+try:
+    from engine.circuits.equation_generator import generate_equations
+    from engine.circuits.mna_solver import MNASolver
+    from engine.circuits.topology.topology_builder import build_topology
+    from engine.circuits.topology.topology_validator import validate_topology
+except (ImportError, ValueError):
+    from .solver.equation_generator import generate_equations
+    from .solver.mna_solver import MNASolver
+    from .topology.topology_builder import build_topology
+    from .topology.topology_validator import validate_topology
 
 
 class CircuitAnalyzer:

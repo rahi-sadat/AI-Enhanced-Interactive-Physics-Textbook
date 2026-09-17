@@ -4,9 +4,14 @@ Unit tests for parameter resolver and SI prefix parsing.
 """
 import unittest
 
-from ...core.parameter_resolver import format_si, parse_si
-from ..parameters.parameter_binder import TextFragment, bind_parameters_to_components
-from ..models import Component, Parameter, Point, Terminal
+try:
+    from engine.core.parameter_resolver import format_si, parse_si
+    from ai.document_intelligence.parsing.parameter_binder import TextFragment, bind_parameters_to_components
+    from shared.schemas.circuit_models import Component, Parameter, Point, Terminal
+except (ImportError, ValueError):
+    from ...core.parameter_resolver import format_si, parse_si
+    from ..parameters.parameter_binder import TextFragment, bind_parameters_to_components
+    from ..models import Component, Parameter, Point, Terminal
 
 
 class TestValueParser(unittest.TestCase):

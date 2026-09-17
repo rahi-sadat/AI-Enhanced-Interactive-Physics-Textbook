@@ -12,7 +12,10 @@ from typing import List, Tuple
 import cv2
 import numpy as np
 
-from ..parameters.parameter_binder import TextFragment
+try:
+    from ai.document_intelligence.parsing.parameter_binder import TextFragment
+except (ImportError, ValueError):
+    from ..parameters.parameter_binder import TextFragment
 
 
 class TextDetector:

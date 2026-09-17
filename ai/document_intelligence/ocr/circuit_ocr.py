@@ -10,7 +10,10 @@ from typing import List, Optional
 
 import numpy as np
 
-from .parameter_binder import TextFragment
+try:
+    from ai.document_intelligence.parsing.parameter_binder import TextFragment
+except (ImportError, ValueError):
+    from .parameter_binder import TextFragment
 
 
 class BaseCircuitOCR:

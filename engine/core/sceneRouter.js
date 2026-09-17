@@ -1,7 +1,6 @@
-/** core/sceneRouter.js - Routes scene.simulation.domain to the right controller. */
-import { MechanicsController } from '../mechanics/mechanicsController.js';
-import { OpticsController }    from '../optics/opticsController.js';
-import { CircuitController }   from '../circuits/CircuitController.js';
+import { MechanicsController } from '../../apps/web/src/features/simulations/mechanics/mechanicsController.js';
+import { OpticsController }    from '../../apps/web/src/features/simulations/optics/opticsController.js';
+import { CircuitController }   from '../../apps/web/src/features/simulations/circuits/CircuitController.js';
 
 function resolveDomain(scene) {
   if (scene?.simulation?.domain) return scene.simulation.domain;
