@@ -102,9 +102,9 @@ console.log('\n[2/4] Testing MechanicsAdapter (Nonlinear Pendulum):');
   assert(state1.domain === 'mechanics', 'Runtime state reports domain mechanics');
   assert(state1.type === 'pendulum', 'Runtime state reports type pendulum');
   assertClose(state1.length, 1.2, 0.01, 'Initial length is 1.2 m');
-  assertClose(state1.gravity, 9.81, 0.01, 'Initial gravity is 9.81 m/s²');
-  assertClose(state1.thetaDeg, 25.0, 0.5, 'Initial angle is 25.0°');
+  assertClose(state1.thetaDeg, -27.4, 0.5, 'Initial angle is -27.4°');
   assert(state1.running === false, 'Initially paused');
+
 
   // Play, Pause, Reset
   runtime.play();

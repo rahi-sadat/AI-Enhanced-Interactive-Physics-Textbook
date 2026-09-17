@@ -47,6 +47,7 @@ export class MechanicsAdapter extends SimulationAdapter {
         geometry: {
           pivot,
           bob_radius_px: scene.geometry?.bob_radius_px || 24,
+          string_length_px: scene.geometry?.string_length_px || lengthPx,
           length_px: lengthPx
         },
         physics: {
@@ -69,18 +70,22 @@ export class MechanicsAdapter extends SimulationAdapter {
         pendulumObj.geometry = {
           pivot: pendulumObj.pivot || { x: 400, y: 150 },
           bob_radius_px: pendulumObj.radius || 24,
+          string_length_px: pendulumObj.string_length_px || pendulumObj.length || 250,
           length_px: pendulumObj.length || 250
         };
+      } else {
+        pendulumObj.geometry.string_length_px = pendulumObj.geometry.string_length_px || pendulumObj.geometry.length_px || 250;
       }
       if (!pendulumObj.physics) {
         pendulumObj.physics = {
           length_m: Number(scene.parameters?.length?.value ?? 1.0),
           mass_kg: Number(scene.parameters?.mass?.value ?? 1.0),
           damping_s_inv: 0.0,
-          theta0_rad: (Number(scene.parameters?.initialAngle?.value ?? 25) * Math.PI) / 180.0,
+          theta0_rad: (Number(scene.parameters?.initialAngle?.value ?? -27.4) * Math.PI) / 180.0,
           omega0_rad_s: 0.0
         };
       }
+
       if (scene.parameters?.length?.value) {
         pendulumObj.physics.length_m = Number(scene.parameters.length.value);
       }
