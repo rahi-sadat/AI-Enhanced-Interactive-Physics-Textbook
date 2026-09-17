@@ -1,0 +1,33 @@
+# GitHub CODEOWNERS
+# Defines individuals or teams responsible for code in this repository.
+# Verified GitHub users:
+#   @rahi-sadat  (Rahi Sadat Ruhan <rahisadat7@gmail.com>)
+#   @THE-FOOL-T  (THE-FOOL-T <saherislam333@gmail.com>)
+
+# Global fallback: both active collaborators
+* @rahi-sadat @THE-FOOL-T
+
+# Critical shared core and schemas require review from both
+/engine/core/       @rahi-sadat @THE-FOOL-T
+/shared/            @rahi-sadat @THE-FOOL-T
+/apps/api/main.py   @rahi-sadat @THE-FOOL-T
+
+# Physics domain engine ownership
+/engine/mechanics/  @rahi-sadat
+/engine/optics/     @THE-FOOL-T
+/engine/circuits/   @rahi-sadat @THE-FOOL-T
+
+# AI and Perception ownership
+/ai/perception/             @rahi-sadat @THE-FOOL-T
+/ai/document_intelligence/  @rahi-sadat @THE-FOOL-T
+/ai/scene_compiler/         @rahi-sadat @THE-FOOL-T
+
+# Applications
+/apps/web/  @rahi-sadat @THE-FOOL-T
+/apps/api/  @rahi-sadat @THE-FOOL-T
+
+# Content & Demo Books
+/content/   @rahi-sadat @THE-FOOL-T
+
+# Research & Evaluation
+/research/  @rahi-sadat @THE-FOOL-T
