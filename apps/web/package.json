@@ -1,0 +1,20 @@
+{
+  "name": "augmented_physics_v2",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node ../../tests/unit/test_optics_engines.js && node ../../tests/unit/test_coordinate_mapper.js && node ../../tests/unit/test_circuit_solver.js && node ../../tests/unit/test_pendulum_physics.js"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "matter-js": "^0.20.0",
+    "p5": "^2.3.3",
+    "poly-decomp": "^0.3.0"
+  }
+}

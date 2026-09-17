@@ -38,10 +38,31 @@ desktop.ini
 .vscode/
 .idea/
 
-# Stray copied assets in frontend root (canonical copies live in public/)
-simulation_frontend/physics simulation/*.json
-simulation_frontend/physics simulation/*.png
+# Stray copied assets in legacy frontend root (canonical copies live in public/)
+legacy/frontend-v1/*.json
+legacy/frontend-v1/*.png
 
-# User uploaded runtime files
-uploads/
-**/public/uploads/
+# Runtime storage, outputs, and user uploaded files
+storage/outputs/
+storage/generated/
+storage/cache/
+storage/uploads/*
+!storage/uploads/.gitkeep
+!storage/uploads/circuit1.png
+!storage/uploads/circuit2.png
+!storage/uploads/circuit3.png
+!storage/uploads/circuit4.png
+!storage/uploads/test1.jpg
+!storage/uploads/nctb_lens_diagram.png
+!storage/uploads/ray_diagram.png
+!storage/uploads/two_resistors.png
+**/public/uploads/*
+!**/public/uploads/.gitkeep
+!**/public/uploads/circuit1.png
+!**/public/uploads/circuit2.png
+!**/public/uploads/circuit3.png
+!**/public/uploads/circuit4.png
+!**/public/uploads/test1.jpg
+!**/public/uploads/nctb_lens_diagram.png
+!**/public/uploads/ray_diagram.png
+!**/public/uploads/two_resistors.png

@@ -1,0 +1,383 @@
+{
+  "schema_version": "3.0",
+  "simulation": {
+    "domain": "circuits",
+    "subtype": "kirchhoff",
+    "engine": "mna"
+  },
+  "geometry": {
+    "source_width": 784,
+    "source_height": 462
+  },
+  "visual": {
+    "background_url": "/uploads/circuit2.png"
+  },
+  "circuit": {
+    "reference_node": "g",
+    "nodes": [
+      {
+        "id": "g",
+        "reference": true,
+        "label": "g (0 V Ground)"
+      },
+      {
+        "id": "a",
+        "reference": false,
+        "label": "a (5.0 V Node)"
+      },
+      {
+        "id": "b",
+        "reference": false,
+        "label": "b (1.0 V Junction)"
+      },
+      {
+        "id": "c",
+        "reference": false,
+        "label": "c (-2.0 V Node)"
+      }
+    ],
+    "components": [
+      {
+        "id": "V1",
+        "type": "voltage_source",
+        "label": "Source V\u2081 (5 V)",
+        "value": 5.0,
+        "unit": "V",
+        "nodes": [
+          "a",
+          "g"
+        ],
+        "terminals": [
+          {
+            "id": "V1.p",
+            "node": "a",
+            "polarity": "+",
+            "source_px": [
+              122.0,
+              205.0
+            ]
+          },
+          {
+            "id": "V1.n",
+            "node": "g",
+            "polarity": "-",
+            "source_px": [
+              122.0,
+              275.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            88.0,
+            205.0,
+            156.0,
+            275.0
+          ],
+          "center_source_px": [
+            122.0,
+            240.0
+          ]
+        },
+        "provenance": {
+          "text": "5 V",
+          "value": 5.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "R1",
+        "type": "resistor",
+        "label": "Resistor R\u2081 (2 \u03a9)",
+        "value": 2.0,
+        "unit": "\u03a9",
+        "nodes": [
+          "a",
+          "b"
+        ],
+        "terminals": [
+          {
+            "id": "R1.a",
+            "node": "a",
+            "source_px": [
+              220.0,
+              78.0
+            ]
+          },
+          {
+            "id": "R1.b",
+            "node": "b",
+            "source_px": [
+              295.0,
+              78.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            220.0,
+            60.0,
+            295.0,
+            96.0
+          ],
+          "center_source_px": [
+            257.0,
+            78.0
+          ]
+        },
+        "provenance": {
+          "text": "2 \u03a9",
+          "value": 2.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "R3",
+        "type": "resistor",
+        "label": "Resistor R\u2083 (1 \u03a9)",
+        "value": 1.0,
+        "unit": "\u03a9",
+        "nodes": [
+          "b",
+          "g"
+        ],
+        "terminals": [
+          {
+            "id": "R3.a",
+            "node": "b",
+            "source_px": [
+              388.0,
+              205.0
+            ]
+          },
+          {
+            "id": "R3.b",
+            "node": "g",
+            "source_px": [
+              388.0,
+              275.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            370.0,
+            205.0,
+            406.0,
+            275.0
+          ],
+          "center_source_px": [
+            388.0,
+            240.0
+          ]
+        },
+        "provenance": {
+          "text": "1 \u03a9",
+          "value": 1.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "R2",
+        "type": "resistor",
+        "label": "Resistor R\u2082 (3 \u03a9)",
+        "value": 3.0,
+        "unit": "\u03a9",
+        "nodes": [
+          "b",
+          "c"
+        ],
+        "terminals": [
+          {
+            "id": "R2.a",
+            "node": "b",
+            "source_px": [
+              485.0,
+              78.0
+            ]
+          },
+          {
+            "id": "R2.b",
+            "node": "c",
+            "source_px": [
+              565.0,
+              78.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            485.0,
+            60.0,
+            565.0,
+            96.0
+          ],
+          "center_source_px": [
+            525.0,
+            78.0
+          ]
+        },
+        "provenance": {
+          "text": "3 \u03a9",
+          "value": 3.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "V2",
+        "type": "voltage_source",
+        "label": "Source V\u2082 (2 V)",
+        "value": -2.0,
+        "unit": "V",
+        "nodes": [
+          "c",
+          "g"
+        ],
+        "terminals": [
+          {
+            "id": "V2.p",
+            "node": "g",
+            "polarity": "+",
+            "source_px": [
+              656.0,
+              275.0
+            ]
+          },
+          {
+            "id": "V2.n",
+            "node": "c",
+            "polarity": "-",
+            "source_px": [
+              656.0,
+              205.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            622.0,
+            205.0,
+            690.0,
+            275.0
+          ],
+          "center_source_px": [
+            656.0,
+            240.0
+          ]
+        },
+        "provenance": {
+          "text": "2 V",
+          "value": 2.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_a",
+        "node": "a",
+        "polyline_source_px": [
+          [
+            122.0,
+            205.0
+          ],
+          [
+            122.0,
+            78.0
+          ],
+          [
+            220.0,
+            78.0
+          ]
+        ]
+      },
+      {
+        "id": "wire_b",
+        "node": "b",
+        "polyline_source_px": [
+          [
+            295.0,
+            78.0
+          ],
+          [
+            388.0,
+            78.0
+          ],
+          [
+            485.0,
+            78.0
+          ],
+          [
+            388.0,
+            78.0
+          ],
+          [
+            388.0,
+            205.0
+          ]
+        ]
+      },
+      {
+        "id": "wire_c",
+        "node": "c",
+        "polyline_source_px": [
+          [
+            565.0,
+            78.0
+          ],
+          [
+            656.0,
+            78.0
+          ],
+          [
+            656.0,
+            205.0
+          ]
+        ]
+      },
+      {
+        "id": "wire_g",
+        "node": "g",
+        "polyline_source_px": [
+          [
+            122.0,
+            275.0
+          ],
+          [
+            122.0,
+            392.0
+          ],
+          [
+            388.0,
+            392.0
+          ],
+          [
+            656.0,
+            392.0
+          ],
+          [
+            388.0,
+            392.0
+          ],
+          [
+            388.0,
+            275.0
+          ],
+          [
+            656.0,
+            392.0
+          ],
+          [
+            656.0,
+            275.0
+          ]
+        ]
+      }
+    ]
+  }
+}

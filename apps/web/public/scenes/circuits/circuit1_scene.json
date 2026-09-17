@@ -1,0 +1,378 @@
+{
+  "schema_version": "3.0",
+  "simulation": {
+    "domain": "circuits",
+    "subtype": "series_parallel",
+    "engine": "mna"
+  },
+  "geometry": {
+    "source_width": 484,
+    "source_height": 399
+  },
+  "visual": {
+    "background_url": "/uploads/circuit1.png"
+  },
+  "circuit": {
+    "reference_node": "N0",
+    "nodes": [
+      {
+        "id": "N0",
+        "reference": true,
+        "label": "N\u2080 (0 V Ground)"
+      },
+      {
+        "id": "N1",
+        "reference": false,
+        "label": "N\u2081 (24 V Rail)"
+      },
+      {
+        "id": "N2",
+        "reference": false,
+        "label": "N\u2082 (Midpoint Junction)"
+      }
+    ],
+    "components": [
+      {
+        "id": "V1",
+        "type": "voltage_source",
+        "label": "Battery (24 V)",
+        "value": 24.0,
+        "unit": "V",
+        "nodes": [
+          "N1",
+          "N0"
+        ],
+        "terminals": [
+          {
+            "id": "V1.p",
+            "node": "N1",
+            "polarity": "+",
+            "source_px": [
+              81.0,
+              260.0
+            ]
+          },
+          {
+            "id": "V1.n",
+            "node": "N0",
+            "polarity": "-",
+            "source_px": [
+              81.0,
+              305.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            60.0,
+            250.0,
+            102.0,
+            315.0
+          ],
+          "center_source_px": [
+            81.0,
+            282.0
+          ]
+        },
+        "provenance": {
+          "text": "24 V",
+          "value": 24.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "R1",
+        "type": "resistor",
+        "label": "Resistor R\u2081 (100 \u03a9)",
+        "value": 100.0,
+        "unit": "\u03a9",
+        "nodes": [
+          "N1",
+          "N2"
+        ],
+        "terminals": [
+          {
+            "id": "R1.a",
+            "node": "N1",
+            "source_px": [
+              257.0,
+              115.0
+            ]
+          },
+          {
+            "id": "R1.b",
+            "node": "N2",
+            "source_px": [
+              257.0,
+              215.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            235.0,
+            140.0,
+            280.0,
+            190.0
+          ],
+          "center_source_px": [
+            257.0,
+            165.0
+          ]
+        },
+        "provenance": {
+          "text": "100 \u03a9",
+          "value": 100.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "R2",
+        "type": "resistor",
+        "label": "Resistor R\u2082 (250 \u03a9)",
+        "value": 250.0,
+        "unit": "\u03a9",
+        "nodes": [
+          "N1",
+          "N2"
+        ],
+        "terminals": [
+          {
+            "id": "R2.a",
+            "node": "N1",
+            "source_px": [
+              402.0,
+              115.0
+            ]
+          },
+          {
+            "id": "R2.b",
+            "node": "N2",
+            "source_px": [
+              402.0,
+              215.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            380.0,
+            140.0,
+            425.0,
+            190.0
+          ],
+          "center_source_px": [
+            402.0,
+            165.0
+          ]
+        },
+        "provenance": {
+          "text": "250 \u03a9",
+          "value": 250.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "R3",
+        "type": "resistor",
+        "label": "Resistor R\u2083 (350 \u03a9)",
+        "value": 350.0,
+        "unit": "\u03a9",
+        "nodes": [
+          "N2",
+          "N0"
+        ],
+        "terminals": [
+          {
+            "id": "R3.a",
+            "node": "N2",
+            "source_px": [
+              257.0,
+              260.0
+            ]
+          },
+          {
+            "id": "R3.b",
+            "node": "N0",
+            "source_px": [
+              257.0,
+              360.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            235.0,
+            285.0,
+            280.0,
+            335.0
+          ],
+          "center_source_px": [
+            257.0,
+            310.0
+          ]
+        },
+        "provenance": {
+          "text": "350 \u03a9",
+          "value": 350.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      },
+      {
+        "id": "R4",
+        "type": "resistor",
+        "label": "Resistor R\u2084 (200 \u03a9)",
+        "value": 200.0,
+        "unit": "\u03a9",
+        "nodes": [
+          "N2",
+          "N0"
+        ],
+        "terminals": [
+          {
+            "id": "R4.a",
+            "node": "N2",
+            "source_px": [
+              402.0,
+              260.0
+            ]
+          },
+          {
+            "id": "R4.b",
+            "node": "N0",
+            "source_px": [
+              402.0,
+              360.0
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            380.0,
+            285.0,
+            425.0,
+            335.0
+          ],
+          "center_source_px": [
+            402.0,
+            310.0
+          ]
+        },
+        "provenance": {
+          "text": "200 \u03a9",
+          "value": 200.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_top",
+        "node": "N1",
+        "polyline_source_px": [
+          [
+            81.0,
+            260.0
+          ],
+          [
+            81.0,
+            83.0
+          ],
+          [
+            330.0,
+            83.0
+          ],
+          [
+            330.0,
+            115.0
+          ],
+          [
+            257.0,
+            115.0
+          ],
+          [
+            402.0,
+            115.0
+          ]
+        ]
+      },
+      {
+        "id": "wire_mid",
+        "node": "N2",
+        "polyline_source_px": [
+          [
+            257.0,
+            215.0
+          ],
+          [
+            330.0,
+            215.0
+          ],
+          [
+            402.0,
+            215.0
+          ],
+          [
+            330.0,
+            215.0
+          ],
+          [
+            330.0,
+            247.0
+          ],
+          [
+            257.0,
+            247.0
+          ],
+          [
+            330.0,
+            247.0
+          ],
+          [
+            402.0,
+            247.0
+          ]
+        ]
+      },
+      {
+        "id": "wire_bot",
+        "node": "N0",
+        "polyline_source_px": [
+          [
+            257.0,
+            348.0
+          ],
+          [
+            330.0,
+            348.0
+          ],
+          [
+            402.0,
+            348.0
+          ],
+          [
+            330.0,
+            348.0
+          ],
+          [
+            330.0,
+            379.0
+          ],
+          [
+            81.0,
+            379.0
+          ],
+          [
+            81.0,
+            305.0
+          ]
+        ]
+      }
+    ]
+  }
+}

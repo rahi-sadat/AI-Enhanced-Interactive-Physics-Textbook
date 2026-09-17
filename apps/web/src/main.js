@@ -1,0 +1,342 @@
+/** main.js - Application entrypoint with domain switcher and diagram upload studio. */
+import './style.css';
+import { loadScene }        from '@engine/core/sceneLoader.js';
+import { createSimulation } from '@engine/core/sceneRouter.js';
+import { OverlayStage }     from './features/simulations/core/overlayStage.js';
+import { uploadDiagramFile, analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
+
+const SCENES = {
+  mechanics: '/scenes/kinematics/physics_scene.json',
+  optics:    '/scenes/optics/thin_lens_scene.json',
+  circuits:  '/scenes/circuits/circuit1_scene.json',
+};
+
+export function showDomainControls(domain) {
+  const mc = document.getElementById('mechanics-controls');
+  const oc = document.getElementById('optics-controls');
+  const cc = document.getElementById('circuit-controls');
+  if (mc) mc.style.display = (domain === 'mechanics') ? 'flex' : 'none';
+  if (oc) oc.style.display = (domain === 'optics') ? 'flex' : 'none';
+  if (cc) cc.style.display = (domain === 'circuits') ? 'block' : 'none';
+}
+
+let currentController = null;
+let currentStage = null;
+let uploadedFile = null;
+let uploadedImageUrl = null;
+
+export async function bootstrap(domain, sceneDataOrUrl = null) {
+  try {
+    currentController?.destroy?.();
+    currentController = null;
+
+    currentStage = new OverlayStage();
+    currentStage.clearOverlay();
+
+    let scene;
+    if (sceneDataOrUrl && typeof sceneDataOrUrl === 'object') {
+      scene = sceneDataOrUrl;
+    } else {
+      const url = typeof sceneDataOrUrl === 'string'
+        ? sceneDataOrUrl
+        : (SCENES[domain] || SCENES.mechanics);
+      scene = await loadScene(url);
+    }
+
+    // Auto-detect domain from scene if not explicitly forced
+    const isCircuits = scene?.simulation?.domain === 'circuits' || scene?.simulation_type === 'circuits';
+    const isOptics = scene?.simulation?.domain === 'optics' || scene?.simulation_type === 'optics';
+    const isMechanics = scene?.simulation?.domain === 'mechanics' || scene?.simulation_type === 'kinematics';
+    const resolvedDomain = isCircuits ? 'circuits' : (isOptics ? 'optics' : (isMechanics ? 'mechanics' : domain));
+
+    let activeBtnId = 'switch-mechanics';
+    if (resolvedDomain === 'circuits') activeBtnId = 'switch-circuits';
+    else if (resolvedDomain === 'optics') activeBtnId = 'switch-optics';
+
+    setActive(activeBtnId);
+    showDomainControls(resolvedDomain);
+    currentController = createSimulation(scene, currentStage);
+    console.log('[Main] Loaded simulation domain:', resolvedDomain, scene);
+  } catch (err) {
+    console.error('[Main] Failed to load domain:', domain, err);
+  }
+}
+
+function setActive(id) {
+  ['switch-mechanics', 'switch-optics', 'switch-circuits'].forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.classList.toggle('active', btnId === id);
+      btn.setAttribute('aria-selected', String(btnId === id));
+    }
+  });
+}
+
+document.getElementById('switch-mechanics')?.addEventListener('click', () => {
+  setActive('switch-mechanics');
+  bootstrap('mechanics');
+});
+
+document.getElementById('switch-optics')?.addEventListener('click', () => {
+  setActive('switch-optics');
+  bootstrap('optics');
+});
+
+document.getElementById('switch-circuits')?.addEventListener('click', () => {
+  setActive('switch-circuits');
+  bootstrap('circuits');
+});
+
+// ===================================================================
+// DIAGRAM UPLOAD STUDIO & SIMULATION GENERATOR CONTROLLER
+// ===================================================================
+
+const modal = document.getElementById('upload-modal');
+const btnOpenUpload = document.getElementById('btn-open-upload');
+const btnCloseModal = document.getElementById('btn-close-modal');
+const btnCancelModal = document.getElementById('btn-cancel-modal');
+const btnGenerateSim = document.getElementById('btn-generate-sim');
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const dropzonePrompt = document.getElementById('dropzone-prompt');
+const dropzonePreview = document.getElementById('dropzone-preview');
+const previewImage = document.getElementById('preview-image');
+const previewFilename = document.getElementById('preview-filename');
+const previewDims = document.getElementById('preview-dims');
+const btnChangeImage = document.getElementById('btn-change-image');
+
+const domainSelect = document.getElementById('upload-domain-select');
+const opticsOpts = document.getElementById('upload-optics-opts');
+const focalInput = document.getElementById('upload-focal-cm');
+
+const progressArea = document.getElementById('upload-progress-area');
+const progressFill = document.getElementById('upload-progress-fill');
+const progressStatus = document.getElementById('upload-progress-status');
+
+function openModal() {
+  modal.style.display = 'flex';
+  resetUploadState();
+}
+
+function closeModal() {
+  modal.style.display = 'none';
+  resetUploadState();
+}
+
+function resetUploadState() {
+  uploadedFile = null;
+  uploadedImageUrl = null;
+  dropzonePrompt.style.display = 'block';
+  dropzonePreview.style.display = 'none';
+  btnGenerateSim.disabled = true;
+  progressArea.style.display = 'none';
+  progressFill.style.width = '0%';
+}
+
+function setPreview(name, url, w, h) {
+  previewFilename.textContent = name;
+  previewDims.textContent = `${w} × ${h} px`;
+  previewImage.src = url;
+  dropzonePrompt.style.display = 'none';
+  dropzonePreview.style.display = 'flex';
+  btnGenerateSim.disabled = false;
+  uploadedImageUrl = url;
+}
+
+btnOpenUpload?.addEventListener('click', openModal);
+btnCloseModal?.addEventListener('click', closeModal);
+btnCancelModal?.addEventListener('click', closeModal);
+
+modal?.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
+
+// Dropzone click & drag
+dropzone?.addEventListener('click', (e) => {
+  if (e.target === btnChangeImage) {
+    fileInput.click();
+    return;
+  }
+  if (!uploadedImageUrl) {
+    fileInput.click();
+  }
+});
+
+dropzone?.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+
+dropzone?.addEventListener('dragleave', () => {
+  dropzone.classList.remove('dragover');
+});
+
+dropzone?.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files?.length > 0) {
+    handleFile(e.dataTransfer.files[0]);
+  }
+});
+
+fileInput?.addEventListener('change', () => {
+  if (fileInput.files?.length > 0) {
+    handleFile(fileInput.files[0]);
+  }
+});
+
+async function handleFile(file) {
+  uploadedFile = file;
+  const localUrl = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    setPreview(file.name, localUrl, img.naturalWidth, img.naturalHeight);
+  };
+  img.src = localUrl;
+}
+
+// Preset Pills Handler
+const scenarioSelect = document.getElementById('upload-scenario-select');
+
+document.querySelectorAll('.preset-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    const preset = pill.dataset.preset;
+    if (preset === 'circuit1') {
+      setPreview('circuit1.png', '/uploads/circuit1.png', 484, 399);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit1';
+    } else if (preset === 'circuit2') {
+      setPreview('circuit2.png', '/uploads/circuit2.png', 784, 462);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit2';
+    } else if (preset === 'circuit3') {
+      setPreview('circuit3.png', '/uploads/circuit3.png', 448, 385);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit3';
+    } else if (preset === 'circuit4') {
+      setPreview('circuit4.png', '/uploads/circuit4.png', 924, 488);
+      domainSelect.value = 'circuits';
+      if (scenarioSelect) scenarioSelect.value = 'circuit4';
+    } else if (preset === 'snell_water') {
+      setPreview('diagram_0ae6ee8e.png', '/uploads/diagram_0ae6ee8e.png', 1536, 1024);
+      domainSelect.value = 'optics';
+      if (scenarioSelect) scenarioSelect.value = 'interface_refraction';
+    } else if (preset === 'snell') {
+      setPreview('diagram_7dcbe9c0.png', '/uploads/diagram_7dcbe9c0.png', 393, 328);
+      domainSelect.value = 'optics';
+      if (scenarioSelect) scenarioSelect.value = 'interface_refraction';
+    } else if (preset === 'mirror_cff') {
+      setPreview('diagram_cff33623.png', '/uploads/diagram_cff33623.png', 553, 469);
+      domainSelect.value = 'optics';
+      if (scenarioSelect) scenarioSelect.value = 'mirror';
+    } else if (preset === 'lens_cece') {
+      setPreview('diagram_ceceeb1a.jpg', '/uploads/diagram_ceceeb1a.jpg', 1024, 768);
+      domainSelect.value = 'optics';
+      if (scenarioSelect) scenarioSelect.value = 'thin_lens';
+    } else if (preset === 'newtons_cradle') {
+      setPreview('pendulum.png', '/uploads/pendulum.png', 800, 600);
+      domainSelect.value = 'mechanics';
+      if (scenarioSelect) scenarioSelect.value = 'newtons_cradle';
+    } else if (preset === 'projectile_test') {
+      setPreview('test.jpg', '/uploads/test.jpg', 700, 467);
+      domainSelect.value = 'mechanics';
+      if (scenarioSelect) scenarioSelect.value = 'projectile';
+    } else if (preset === 'prism') {
+      setPreview('prism_diagram.png', '/scenes/optics/prism_scene.json', 800, 600);
+      domainSelect.value = 'optics';
+      if (scenarioSelect) scenarioSelect.value = 'prism';
+    } else if (preset === 'spring') {
+      setPreview('with_spring.png', '/scenes/kinematics/with_spring.png', 800, 600);
+      domainSelect.value = 'mechanics';
+      if (scenarioSelect) scenarioSelect.value = 'incline';
+    }
+  });
+});
+
+domainSelect?.addEventListener('change', () => {
+  opticsOpts.style.display = domainSelect.value === 'optics' ? 'flex' : 'none';
+});
+
+// GENERATE SIMULATION BUTTON
+btnGenerateSim?.addEventListener('click', async () => {
+  if (!uploadedImageUrl) return;
+
+  btnGenerateSim.disabled = true;
+  progressArea.style.display = 'flex';
+
+  const updateProgress = (text, percent) => {
+    progressStatus.textContent = text;
+    progressFill.style.width = `${percent}%`;
+  };
+
+  try {
+    let finalImageUrl = uploadedImageUrl;
+
+    // If actual file was uploaded, upload it to the backend
+    if (uploadedFile) {
+      updateProgress('Uploading diagram to backend...', 20);
+      const upRes = await uploadDiagramFile(uploadedFile);
+      if (upRes.success && upRes.image_url) {
+        finalImageUrl = upRes.image_url;
+      }
+    }
+
+    // Check if selecting a pre-compiled textbook scene without custom file upload
+    const PRESET_SCENES = {
+      circuit1: { domain: 'circuits', url: '/scenes/circuits/circuit1_scene.json' },
+      circuit2: { domain: 'circuits', url: '/scenes/circuits/circuit2_scene.json' },
+      circuit3: { domain: 'circuits', url: '/scenes/circuits/circuit3_scene.json' },
+      circuit4: { domain: 'circuits', url: '/scenes/circuits/circuit4_scene.json' },
+      bridge: { domain: 'circuits', url: '/scenes/circuits/bridge_scene.json' },
+      series_parallel: { domain: 'circuits', url: '/scenes/circuits/series_parallel_scene.json' },
+      newtons_cradle: { domain: 'mechanics', url: '/scenes/kinematics/newtons_cradle_scene.json' },
+      incline: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
+    };
+
+    const scenarioChoice = scenarioSelect?.value || 'auto';
+
+    if (!uploadedFile && PRESET_SCENES[scenarioChoice]) {
+      updateProgress('Loading pre-compiled textbook scenario...', 80);
+      const presetInfo = PRESET_SCENES[scenarioChoice];
+      const pRes = await fetch(presetInfo.url);
+      const pScene = await pRes.json();
+      setTimeout(() => {
+        closeModal();
+        bootstrap(presetInfo.domain, pScene);
+      }, 300);
+      return;
+    }
+
+    // Run AI / CV analysis
+    const domainChoice = domainSelect.value;
+    const scenarioChoiceVal = scenarioChoice;
+    const focalCm = parseFloat(focalInput.value) || 20.0;
+    const result = await analyzeDiagram(
+      finalImageUrl,
+      domainChoice,
+      {
+        scenario: scenarioChoiceVal,
+        focalLengthCm: focalCm,
+      },
+      updateProgress
+    );
+
+    setTimeout(() => {
+      closeModal();
+      if (uploadedImageUrl && result?.scene) {
+        if (!result.scene.visual) result.scene.visual = {};
+        result.scene.visual.background_url = uploadedImageUrl;
+      }
+      bootstrap(result.domain, result.scene);
+    }, 400);
+  } catch (err) {
+    console.error('[Upload] Analysis error:', err);
+    progressStatus.textContent = 'Analysis error. Falling back to default scene...';
+    setTimeout(closeModal, 1500);
+  }
+});
+
+// Boot with kinematics by default
+setActive('switch-mechanics');
+bootstrap('mechanics');
