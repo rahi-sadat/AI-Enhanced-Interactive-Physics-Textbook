@@ -50,6 +50,7 @@ export class InteractiveFigure {
 
     this._resizeObserver = null;
     this._stateUnsub = null;
+    this._sourceSize = { width: 800, height: 600 };
 
     this._renderScaffold();
 
@@ -156,6 +157,7 @@ export class InteractiveFigure {
 
     // Handle responsive resizing
     this._resizeObserver = new ResizeObserver(() => {
+      this._syncOverlayBox();
       this.runtime.resize(this.dom.overlay.clientWidth, this.dom.overlay.clientHeight);
     });
     this._resizeObserver.observe(this.dom.stage);
@@ -194,12 +196,15 @@ export class InteractiveFigure {
 
     // 2. Set Background Image (if defined in scene source or visual)
     const bgUrl = scene.source?.image || scene.visual?.background_url;
+    this._sourceSize = this._getSceneSourceSize(scene);
     if (bgUrl) {
       this.dom.bgImage.src = bgUrl;
       this.dom.bgImage.style.display = 'block';
+      await this._waitForBackgroundImage();
     } else {
       this.dom.bgImage.style.display = 'none';
     }
+    this._syncOverlayBox();
 
     // 3. Update Curriculum / Educational Footer
     if (scene.metadata?.chapter || scene.metadata?.topic) {
@@ -228,6 +233,65 @@ export class InteractiveFigure {
     this.state = initial;
     this._updateTelemetry(initial);
     this._updateStatusPill(initial);
+  }
+
+  _getSceneSourceSize(scene) {
+    const source = scene.source || {};
+    const coordinateSystem = scene.coordinateSystem || {};
+    return {
+      width: Number(coordinateSystem.width || source.width || source.image_width_px || scene.geometry?.source_width || 800),
+      height: Number(coordinateSystem.height || source.height || source.image_height_px || scene.geometry?.source_height || 600)
+    };
+  }
+
+  async _waitForBackgroundImage() {
+    const img = this.dom.bgImage;
+    if (!img || img.complete) return;
+
+    if (typeof img.decode === 'function') {
+      try {
+        await img.decode();
+        return;
+      } catch (_) {
+        // Fall through to load/error listeners; decode can reject for SVGs in some browsers.
+      }
+    }
+
+    await new Promise((resolve) => {
+      img.addEventListener('load', resolve, { once: true });
+      img.addEventListener('error', resolve, { once: true });
+    });
+  }
+
+  _syncOverlayBox() {
+    const stage = this.dom.stage;
+    const overlay = this.dom.overlay;
+    if (!stage || !overlay) return;
+
+    const stageW = stage.clientWidth || 0;
+    const stageH = stage.clientHeight || 0;
+    const hasBackground = this.dom.bgImage?.style.display !== 'none';
+    const sourceW = this.dom.bgImage?.naturalWidth || this._sourceSize.width || 800;
+    const sourceH = this.dom.bgImage?.naturalHeight || this._sourceSize.height || 600;
+
+    if (!hasBackground || stageW <= 0 || stageH <= 0 || sourceW <= 0 || sourceH <= 0) {
+      overlay.style.inset = '0';
+      overlay.style.left = '';
+      overlay.style.top = '';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      return;
+    }
+
+    const scale = Math.min(stageW / sourceW, stageH / sourceH);
+    const renderedW = sourceW * scale;
+    const renderedH = sourceH * scale;
+
+    overlay.style.inset = 'auto';
+    overlay.style.left = `${(stageW - renderedW) / 2}px`;
+    overlay.style.top = `${(stageH - renderedH) / 2}px`;
+    overlay.style.width = `${renderedW}px`;
+    overlay.style.height = `${renderedH}px`;
   }
 
   _renderParameters(parameters) {

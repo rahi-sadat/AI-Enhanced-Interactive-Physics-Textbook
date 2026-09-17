@@ -46,6 +46,15 @@ export class CircuitAdapter extends SimulationAdapter {
     try {
       const { CircuitStore } = await import('../../apps/web/src/features/simulations/circuits/CircuitStore.js');
       this.store = new CircuitStore(scene, this.model, this.electricalState);
+      this.store.subscribe((type) => {
+        if (type === 'SWITCH_TOGGLED') {
+          this.model = CircuitCompiler.compile(this.scene);
+          this.solver.load(this.model);
+          this.store.model = this.model;
+          this.solve();
+          this.notifyStateChange(this.getState());
+        }
+      });
     } catch (err) {
       console.warn('[CircuitAdapter] CircuitStore loaded in fallback mode:', err);
     }

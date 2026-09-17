@@ -178,35 +178,36 @@ console.log('\n[4/4] Testing CircuitAdapter (DC Series Loop with MNA):');
 {
   const scene = loadTestScene('circuit_figure.json');
   assert(scene.domain === 'circuits', 'Scene domain is circuits');
-  assert(scene.parameters.V1.value === 24.0, 'V1 is 24 V');
+  assert(scene.parameters.V1.value === 12.0, 'V1 is 12 V');
   assert(scene.parameters.R1.value === 10.0, 'R1 is 10 Ω');
   assert(scene.parameters.R2.value === 20.0, 'R2 is 20 Ω');
 
   const runtime = new PhysicsRuntime();
   await runtime.load(scene);
 
-  // V1 = 24 V, R1 = 10 Ω, R2 = 20 Ω -> R_total = 30 Ω
-  // I = 24 / 30 = 0.8 A = 800 mA
-  // V(N1) = 24 V, V(N2) = 16 V, V(N0) = 0 V
-  // P_total = 24 * 0.8 = 19.2 W
+  // V1 = 12 V, S1 closed, R1 = 10 ohm, R2 = 20 ohm -> R_total = 30 ohm
+  // I = 12 / 30 = 0.4 A = 400 mA
+  // V(N1) = V(N1b) = 12 V, V(N2) = 8 V, V(N0) = 0 V
+  // P_total = 12 * 0.4 = 4.8 W
   const state1 = runtime.getState();
   assert(state1.domain === 'circuits', 'Runtime state reports domain circuits');
-  assertClose(state1.nodeVoltages.N1, 24.0, 0.1, 'Node N1 voltage is 24.0 V');
-  assertClose(state1.nodeVoltages.N2, 16.0, 0.1, 'Node N2 voltage is 16.0 V');
+  assertClose(state1.nodeVoltages.N1, 12.0, 0.1, 'Node N1 voltage is 12.0 V');
+  assertClose(state1.nodeVoltages.N1b, 12.0, 0.1, 'Node N1b voltage is 12.0 V');
+  assertClose(state1.nodeVoltages.N2, 8.0, 0.1, 'Node N2 voltage is 8.0 V');
   assertClose(state1.nodeVoltages.N0, 0.0, 0.01, 'Node N0 (ground) is 0.0 V');
-  assertClose(state1.branchCurrents['R1.branch'], 800.0, 1.0, 'Branch current through R1 is 800 mA');
-  assertClose(state1.totalPower, 19.2, 0.2, 'Total DC power is 19.2 W');
+  assertClose(state1.branchCurrents['R1.branch'], 400.0, 1.0, 'Branch current through R1 is 400 mA');
+  assertClose(state1.totalPower, 4.8, 0.2, 'Total DC power is 4.8 W');
 
   // Change R1 from 10 Ω to 20 Ω:
   // R_total = 20 + 20 = 40 Ω
-  // I = 24 / 40 = 0.6 A = 600 mA
-  // V(N2) = 0.6 * 20 = 12.0 V
-  // P_total = 24 * 0.6 = 14.4 W
+  // I = 12 / 40 = 0.3 A = 300 mA
+  // V(N2) = 0.3 * 20 = 6.0 V
+  // P_total = 12 * 0.3 = 3.6 W
   runtime.setParameter('R1', 20.0);
   const state2 = runtime.getState();
-  assertClose(state2.nodeVoltages.N2, 12.0, 0.1, 'Updated node N2 voltage is 12.0 V');
-  assertClose(state2.branchCurrents['R1.branch'], 600.0, 1.0, 'Updated branch current is 600 mA');
-  assertClose(state2.totalPower, 14.4, 0.2, 'Updated total power is 14.4 W');
+  assertClose(state2.nodeVoltages.N2, 6.0, 0.1, 'Updated node N2 voltage is 6.0 V');
+  assertClose(state2.branchCurrents['R1.branch'], 300.0, 1.0, 'Updated branch current is 300 mA');
+  assertClose(state2.totalPower, 3.6, 0.2, 'Updated total power is 3.6 W');
 
   const r1Param = runtime.getParameter('R1');
   assert(r1Param.provenance === 'student', 'R1 provenance updated to student');

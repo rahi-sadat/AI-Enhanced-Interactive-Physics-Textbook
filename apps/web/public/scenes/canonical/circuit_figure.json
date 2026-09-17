@@ -3,60 +3,60 @@
   "id": "PHY-CIRC-001",
   "domain": "circuits",
   "type": "series_parallel",
-  "title": "DC Series-Parallel Resistor Network",
-  "description": "Exploration of Ohm's Law and Kirchhoff's Laws (KCL & KVL) in a DC closed loop using 64-bit Modified Nodal Analysis (MNA).",
+  "title": "DC Series Resistor Circuit",
+  "description": "Exploration of Ohm's Law and Kirchhoff's Laws in a DC series loop with 64-bit Modified Nodal Analysis (MNA), aligned with textbook figure 11.4.",
   "source": {
     "type": "book_figure",
     "image": "/scenes/circuits/textbook_circuit_diagram.svg",
-    "width": 484,
-    "height": 399,
+    "width": 800,
+    "height": 500,
     "book": "NCTB Physics Class 9-10",
     "page": 272
   },
   "coordinateSystem": {
-    "width": 484,
-    "height": 399,
+    "width": 800,
+    "height": 500,
     "unit": "source-pixel",
-    "pixelsPerUnit": 1.0
+    "pixelsPerUnit": 1
   },
   "parameters": {
     "V1": {
-      "value": 24.0,
+      "value": 12,
       "unit": "V",
       "label": "Voltage Source (V₁)",
-      "min": 1.0,
-      "max": 48.0,
-      "step": 1.0,
+      "min": 1,
+      "max": 24,
+      "step": 1,
       "provenance": "observed",
       "source": "diagram_label",
       "confidence": 0.99
     },
     "R1": {
-      "value": 10.0,
+      "value": 10,
       "unit": "Ω",
       "label": "Resistor R₁",
-      "min": 1.0,
-      "max": 100.0,
-      "step": 1.0,
+      "min": 1,
+      "max": 100,
+      "step": 1,
       "provenance": "observed",
       "source": "diagram_label",
       "confidence": 0.99
     },
     "R2": {
-      "value": 20.0,
+      "value": 20,
       "unit": "Ω",
       "label": "Resistor R₂",
-      "min": 1.0,
-      "max": 100.0,
-      "step": 1.0,
+      "min": 1,
+      "max": 100,
+      "step": 1,
       "provenance": "observed",
       "source": "diagram_label",
       "confidence": 0.99
     }
   },
   "geometry": {
-    "source_width": 484,
-    "source_height": 399
+    "source_width": 800,
+    "source_height": 500
   },
   "visual": {
     "background_url": "/scenes/circuits/textbook_circuit_diagram.svg"
@@ -64,57 +64,191 @@
   "circuit": {
     "reference_node": "N0",
     "nodes": [
-      { "id": "N0", "reference": true, "label": "N₀ (0 V Ground)" },
-      { "id": "N1", "reference": false, "label": "N₁ (24 V Rail)" },
-      { "id": "N2", "reference": false, "label": "N₂ (Midpoint Junction)" }
+      {
+        "id": "N0",
+        "reference": true,
+        "label": "N0 (0 V Ground)"
+      },
+      {
+        "id": "N1",
+        "reference": false,
+        "label": "N1 (12 V Rail)"
+      },
+      {
+        "id": "N1b",
+        "reference": false,
+        "label": "N1_sw (Post-Switch Rail)"
+      },
+      {
+        "id": "N2",
+        "reference": false,
+        "label": "N2 (Midpoint Junction)"
+      }
     ],
     "components": [
       {
         "id": "V1",
         "type": "voltage_source",
-        "label": "Battery (24 V)",
-        "value": 24.0,
+        "label": "Battery (12 V)",
+        "value": 12,
         "unit": "V",
-        "nodes": ["N1", "N0"],
+        "nodes": [
+          "N1",
+          "N0"
+        ],
         "terminals": [
-          { "id": "V1.p", "node": "N1", "polarity": "+", "source_px": [81.0, 260.0] },
-          { "id": "V1.n", "node": "N0", "polarity": "-", "source_px": [81.0, 305.0] }
+          {
+            "id": "V1.p",
+            "node": "N1",
+            "polarity": "+",
+            "source_px": [
+              140,
+              230
+            ]
+          },
+          {
+            "id": "V1.n",
+            "node": "N0",
+            "polarity": "-",
+            "source_px": [
+              140,
+              270
+            ]
+          }
         ],
         "geometry": {
-          "bbox_source_px": [60.0, 250.0, 102.0, 315.0],
-          "center_source_px": [81.0, 282.0]
+          "bbox_source_px": [
+            116,
+            225,
+            164,
+            275
+          ],
+          "center_source_px": [
+            140,
+            250
+          ]
+        }
+      },
+      {
+        "id": "S1",
+        "type": "switch",
+        "label": "Key (S1)",
+        "state": "closed",
+        "nodes": [
+          "N1",
+          "N1b"
+        ],
+        "terminals": [
+          {
+            "id": "S1.a",
+            "node": "N1",
+            "source_px": [
+              200,
+              120
+            ]
+          },
+          {
+            "id": "S1.b",
+            "node": "N1b",
+            "source_px": [
+              260,
+              120
+            ]
+          }
+        ],
+        "geometry": {
+          "bbox_source_px": [
+            195,
+            100,
+            265,
+            140
+          ],
+          "center_source_px": [
+            230,
+            120
+          ]
         }
       },
       {
         "id": "R1",
         "type": "resistor",
         "label": "Resistor R₁ (10 Ω)",
-        "value": 10.0,
+        "value": 10,
         "unit": "Ω",
-        "nodes": ["N1", "N2"],
+        "nodes": [
+          "N1b",
+          "N2"
+        ],
         "terminals": [
-          { "id": "R1.1", "node": "N1", "source_px": [170.0, 80.0] },
-          { "id": "R1.2", "node": "N2", "source_px": [270.0, 80.0] }
+          {
+            "id": "R1.1",
+            "node": "N1b",
+            "source_px": [
+              340,
+              120
+            ]
+          },
+          {
+            "id": "R1.2",
+            "node": "N2",
+            "source_px": [
+              460,
+              120
+            ]
+          }
         ],
         "geometry": {
-          "bbox_source_px": [165.0, 65.0, 275.0, 95.0],
-          "center_source_px": [220.0, 80.0]
+          "bbox_source_px": [
+            340,
+            100,
+            460,
+            140
+          ],
+          "center_source_px": [
+            400,
+            120
+          ]
         }
       },
       {
         "id": "R2",
         "type": "resistor",
         "label": "Resistor R₂ (20 Ω)",
-        "value": 20.0,
+        "value": 20,
         "unit": "Ω",
-        "nodes": ["N2", "N0"],
+        "nodes": [
+          "N2",
+          "N0"
+        ],
         "terminals": [
-          { "id": "R2.1", "node": "N2", "source_px": [270.0, 110.0] },
-          { "id": "R2.2", "node": "N0", "source_px": [270.0, 260.0] }
+          {
+            "id": "R2.1",
+            "node": "N2",
+            "source_px": [
+              660,
+              210
+            ]
+          },
+          {
+            "id": "R2.2",
+            "node": "N0",
+            "source_px": [
+              660,
+              290
+            ]
+          }
         ],
         "geometry": {
-          "bbox_source_px": [255.0, 105.0, 285.0, 265.0],
-          "center_source_px": [270.0, 185.0]
+          "bbox_source_px": [
+            640,
+            210,
+            680,
+            290
+          ],
+          "center_source_px": [
+            660,
+            250
+          ]
         }
       }
     ],
@@ -123,27 +257,72 @@
         "id": "W1",
         "node": "N1",
         "points": [
-          [81.0, 260.0],
-          [81.0, 80.0],
-          [170.0, 80.0]
+          [
+            140,
+            230
+          ],
+          [
+            140,
+            120
+          ],
+          [
+            200,
+            120
+          ]
         ]
       },
       {
         "id": "W2",
-        "node": "N2",
+        "node": "N1b",
         "points": [
-          [270.0, 80.0],
-          [270.0, 110.0]
+          [
+            260,
+            120
+          ],
+          [
+            340,
+            120
+          ]
         ]
       },
       {
         "id": "W3",
+        "node": "N2",
+        "points": [
+          [
+            460,
+            120
+          ],
+          [
+            660,
+            120
+          ],
+          [
+            660,
+            210
+          ]
+        ]
+      },
+      {
+        "id": "W4",
         "node": "N0",
         "points": [
-          [270.0, 260.0],
-          [270.0, 360.0],
-          [81.0, 360.0],
-          [81.0, 305.0]
+          [
+            660,
+            290
+          ],
+          [
+            660,
+            380
+          ],
+          [
+            140,
+            380
+          ],
+          [
+            140,
+            270
+          ]
         ]
       }
     ]
@@ -151,6 +330,7 @@
   "metadata": {
     "curriculum": "NCTB",
     "chapter": "Chapter 11: Current Electricity",
-    "topic": "Resistors in Series and Parallel Networks"
+    "topic": "Resistors in Series and Parallel Networks",
+    "figure": "Fig 11.4"
   }
 }
