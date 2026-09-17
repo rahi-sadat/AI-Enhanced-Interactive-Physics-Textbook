@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "id": "PHY-OPT-001",
+  "domain": "optics",
+  "type": "thin_lens",
+  "title": "Thin Convex Lens Ray Tracing",
+  "description": "Exploration of focal length f, object position u, and real/virtual image formation using the Gaussian lens equation 1/f = 1/u + 1/v.",
+  "source": {
+    "type": "book_figure",
+    "image": "/scenes/optics/nctb_lens_diagram.png",
+    "width": 800,
+    "height": 600,
+    "book": "NCTB Physics Class 9-10",
+    "page": 218
+  },
+  "coordinateSystem": {
+    "width": 800,
+    "height": 600,
+    "unit": "source-pixel",
+    "pixelsPerUnit": 1.0
+  },
+  "parameters": {
+    "focalLength": {
+      "value": 130.0,
+      "unit": "px",
+      "label": "Focal Length (f)",
+      "min": 60.0,
+      "max": 250.0,
+      "step": 5.0,
+      "provenance": "observed",
+      "source": "textbook_exercise",
+      "confidence": 0.97
+    },
+    "objectDistance": {
+      "value": 260.0,
+      "unit": "px",
+      "label": "Object Distance (u)",
+      "min": 70.0,
+      "max": 380.0,
+      "step": 5.0,
+      "provenance": "observed",
+      "source": "diagram_measurement",
+      "confidence": 0.92
+    },
+    "objectHeight": {
+      "value": -80.0,
+      "unit": "px",
+      "label": "Object Height (h)",
+      "min": -150.0,
+      "max": -20.0,
+      "step": 5.0,
+      "provenance": "observed",
+      "source": "diagram_measurement",
+      "confidence": 0.90
+    }
+  },
+  "geometry": {
+    "lensX": 400,
+    "axisY": 300,
+    "sourceWidth": 800,
+    "sourceHeight": 600
+  },
+  "visual": {
+    "background_url": "/scenes/optics/nctb_lens_diagram.png"
+  },
+  "metadata": {
+    "curriculum": "NCTB",
+    "chapter": "Chapter 6: Refraction of Light",
+    "topic": "Image formation by spherical lenses"
+  }
+}

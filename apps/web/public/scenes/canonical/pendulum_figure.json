@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "1.0",
+  "id": "PHY-MECH-001",
+  "domain": "mechanics",
+  "type": "pendulum",
+  "title": "Nonlinear Simple Pendulum",
+  "description": "Exploration of gravitational acceleration g, string length L, and angular displacement theta using fixed-step RK4 integration.",
+  "source": {
+    "type": "book_figure",
+    "image": "/scenes/kinematics/pendulum_cradle_clean.png",
+    "width": 387,
+    "height": 367,
+    "book": "NCTB Physics Class 9-10",
+    "page": 134
+  },
+  "coordinateSystem": {
+    "width": 387,
+    "height": 367,
+    "unit": "source-pixel",
+    "pixelsPerUnit": 1.0
+  },
+  "parameters": {
+    "length": {
+      "value": 1.2,
+      "unit": "m",
+      "label": "Length (L)",
+      "min": 0.3,
+      "max": 3.0,
+      "step": 0.05,
+      "provenance": "observed",
+      "source": "surrounding_text",
+      "confidence": 0.98
+    },
+    "gravity": {
+      "value": 9.81,
+      "unit": "m/s²",
+      "label": "Gravity (g)",
+      "min": 1.62,
+      "max": 24.79,
+      "step": 0.1,
+      "provenance": "assumed",
+      "source": "earth_standard",
+      "confidence": 1.0
+    },
+    "initialAngle": {
+      "value": 25.0,
+      "unit": "°",
+      "label": "Initial Angle (θ₀)",
+      "min": -60.0,
+      "max": 60.0,
+      "step": 1.0,
+      "provenance": "observed",
+      "source": "diagram_measurement",
+      "confidence": 0.94
+    },
+    "mass": {
+      "value": 1.0,
+      "unit": "kg",
+      "label": "Bob Mass (m)",
+      "min": 0.1,
+      "max": 5.0,
+      "step": 0.1,
+      "provenance": "assumed",
+      "source": "standard_default",
+      "confidence": 1.0
+    }
+  },
+  "geometry": {
+    "pivot": { "x": 193.5, "y": 60.0 },
+    "length_px": 230.0,
+    "bob_radius_px": 22.0
+  },
+  "objects": [
+    {
+      "id": "cradle_pendulum_1",
+      "type": "pendulum",
+      "role": "dynamic",
+      "geometry": {
+        "pivot": { "x": 193.5, "y": 60.0 },
+        "bob_radius_px": 22.0,
+        "length_px": 230.0
+      },
+      "physics": {
+        "length_m": 1.2,
+        "mass_kg": 1.0,
+        "damping_s_inv": 0.0,
+        "theta0_rad": 0.436332,
+        "omega0_rad_s": 0.0
+      }
+    }
+  ],
+  "visual": {
+    "background_url": "/scenes/kinematics/pendulum_cradle_clean.png"
+  },
+  "metadata": {
+    "curriculum": "NCTB",
+    "chapter": "Chapter 4: Work, Power and Energy",
+    "topic": "Conservation of Mechanical Energy in Simple Harmonic Motion"
+  }
+}

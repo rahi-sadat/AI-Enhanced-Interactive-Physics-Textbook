@@ -4,6 +4,7 @@ import { loadScene }        from '@engine/core/sceneLoader.js';
 import { createSimulation } from '@engine/core/sceneRouter.js';
 import { OverlayStage }     from './features/simulations/core/overlayStage.js';
 import { uploadDiagramFile, analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
+import { InteractiveFigure } from './components/InteractiveFigure.js';
 
 const SCENES = {
   mechanics: '/scenes/kinematics/physics_scene.json',
@@ -340,3 +341,64 @@ btnGenerateSim?.addEventListener('click', async () => {
 // Boot with kinematics by default
 setActive('switch-mechanics');
 bootstrap('mechanics');
+
+// ===================================================================
+// PLATFORM SPINE DEMO: INTERACTIVE FIGURE RUNTIME
+// ===================================================================
+const figureHost = document.getElementById('interactive-figure-container');
+let activeFigure = null;
+
+if (figureHost) {
+  activeFigure = new InteractiveFigure(figureHost);
+  activeFigure.load('/scenes/canonical/pendulum_figure.json');
+}
+
+const btnModeRuntime = document.getElementById('view-mode-runtime');
+const btnModeStudio = document.getElementById('view-mode-studio');
+const runtimeFigSelector = document.getElementById('runtime-figure-selector');
+const studioLayout = document.getElementById('legacy-studio-layout');
+
+function setPlatformMode(mode) {
+  const isRuntime = mode === 'runtime';
+  if (btnModeRuntime) {
+    btnModeRuntime.classList.toggle('active', isRuntime);
+    btnModeRuntime.style.background = isRuntime ? 'rgba(56, 189, 248, 0.18)' : 'transparent';
+    btnModeRuntime.style.borderColor = isRuntime ? 'rgba(56, 189, 248, 0.5)' : 'rgba(148, 163, 184, 0.2)';
+    btnModeRuntime.style.color = isRuntime ? '#38bdf8' : '#94a3b8';
+  }
+  if (btnModeStudio) {
+    btnModeStudio.classList.toggle('active', !isRuntime);
+    btnModeStudio.style.background = !isRuntime ? 'rgba(56, 189, 248, 0.18)' : 'transparent';
+    btnModeStudio.style.borderColor = !isRuntime ? 'rgba(56, 189, 248, 0.5)' : 'rgba(148, 163, 184, 0.2)';
+    btnModeStudio.style.color = !isRuntime ? '#38bdf8' : '#94a3b8';
+  }
+  if (figureHost) figureHost.style.display = isRuntime ? 'block' : 'none';
+  if (runtimeFigSelector) runtimeFigSelector.style.display = isRuntime ? 'flex' : 'none';
+  if (studioLayout) studioLayout.style.display = !isRuntime ? 'flex' : 'none';
+}
+
+btnModeRuntime?.addEventListener('click', () => setPlatformMode('runtime'));
+btnModeStudio?.addEventListener('click', () => setPlatformMode('studio'));
+
+// Canonical Verification Figure Switcher
+const figPills = [
+  { id: 'fig-btn-pendulum', url: '/scenes/canonical/pendulum_figure.json' },
+  { id: 'fig-btn-lens',     url: '/scenes/canonical/lens_figure.json' },
+  { id: 'fig-btn-circuit',  url: '/scenes/canonical/circuit_figure.json' }
+];
+
+figPills.forEach(({ id, url }) => {
+  const btn = document.getElementById(id);
+  btn?.addEventListener('click', () => {
+    figPills.forEach(p => {
+      const b = document.getElementById(p.id);
+      if (b) {
+        b.style.background = (p.id === id) ? '#0284c7' : 'rgba(30, 41, 59, 0.8)';
+        b.style.borderColor = (p.id === id) ? '#38bdf8' : 'rgba(148, 163, 184, 0.3)';
+        b.style.color = (p.id === id) ? '#ffffff' : '#e2e8f0';
+      }
+    });
+    activeFigure?.load(url);
+  });
+});
+
