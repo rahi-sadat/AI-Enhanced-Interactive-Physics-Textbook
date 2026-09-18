@@ -45,8 +45,24 @@ export class OverlayStage {
     const vw = viewW ?? (this.stage?.clientWidth || 800);
     const vh = viewH ?? (this.stage?.clientHeight || 600);
     this.mapper.update(this.currentSourceW, this.currentSourceH, vw, vh);
+
+    const rect = this.mapper.renderedImageRect;
+    if (this.image) {
+      this.image.style.left = `${rect.left}px`;
+      this.image.style.top = `${rect.top}px`;
+      this.image.style.width = `${rect.width}px`;
+      this.image.style.height = `${rect.height}px`;
+    }
+    if (this.container) {
+      this.container.style.left = `${rect.left}px`;
+      this.container.style.top = `${rect.top}px`;
+      this.container.style.width = `${rect.width}px`;
+      this.container.style.height = `${rect.height}px`;
+    }
+
+    const context = this.mapper.getRenderContext();
     this.listeners.forEach(cb => {
-      try { cb(this.mapper); } catch (e) { console.error('[OverlayStage] listener error:', e); }
+      try { cb(this.mapper, context); } catch (e) { console.error('[OverlayStage] listener error:', e); }
     });
   }
 

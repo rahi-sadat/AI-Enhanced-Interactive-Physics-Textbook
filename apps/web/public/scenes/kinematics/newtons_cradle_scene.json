@@ -20,10 +20,16 @@
       "id": "cradle_pendulum_1",
       "type": "pendulum",
       "role": "dynamic",
-      "pivot": { "x": 290.46, "y": 73.57 },
-      "bob_position": { "x": 177.66, "y": 309.81 },
-      "radius": 32.7,
-      "length": 261.79,
+      "pivot": {
+        "x": 126.5,
+        "y": 45.0
+      },
+      "bob_position": {
+        "x": 57.5,
+        "y": 189.5
+      },
+      "radius": 20.0,
+      "length": 160.13,
       "mass_kg": 1.0,
       "restitution": 0.99,
       "friction": 0.0001,
@@ -31,8 +37,8 @@
       "stiffness": 1.0,
       "visual": {
         "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
-        "x_scale": 1.4533,
-        "y_scale": 1.4533
+        "x_scale": 0.8889,
+        "y_scale": 0.8889
       },
       "render": {
         "fillStyle": "#64748b"
@@ -42,10 +48,16 @@
       "id": "cradle_pendulum_2",
       "type": "pendulum",
       "role": "dynamic",
-      "pivot": { "x": 355.86, "y": 73.57 },
-      "bob_position": { "x": 355.86, "y": 340.87 },
-      "radius": 32.7,
-      "length": 267.3,
+      "pivot": {
+        "x": 166.5,
+        "y": 45.0
+      },
+      "bob_position": {
+        "x": 166.5,
+        "y": 208.5
+      },
+      "radius": 20.0,
+      "length": 163.5,
       "mass_kg": 1.0,
       "restitution": 0.99,
       "friction": 0.0001,
@@ -53,8 +65,8 @@
       "stiffness": 1.0,
       "visual": {
         "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
-        "x_scale": 1.4533,
-        "y_scale": 1.4533
+        "x_scale": 0.8889,
+        "y_scale": 0.8889
       },
       "render": {
         "fillStyle": "#64748b"
@@ -64,10 +76,16 @@
       "id": "cradle_pendulum_3",
       "type": "pendulum",
       "role": "dynamic",
-      "pivot": { "x": 421.26, "y": 73.57 },
-      "bob_position": { "x": 421.26, "y": 340.87 },
-      "radius": 32.7,
-      "length": 267.3,
+      "pivot": {
+        "x": 206.5,
+        "y": 45.0
+      },
+      "bob_position": {
+        "x": 206.5,
+        "y": 208.5
+      },
+      "radius": 20.0,
+      "length": 163.5,
       "mass_kg": 1.0,
       "restitution": 0.99,
       "friction": 0.0001,
@@ -75,8 +93,8 @@
       "stiffness": 1.0,
       "visual": {
         "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
-        "x_scale": 1.4533,
-        "y_scale": 1.4533
+        "x_scale": 0.8889,
+        "y_scale": 0.8889
       },
       "render": {
         "fillStyle": "#64748b"
@@ -86,10 +104,16 @@
       "id": "cradle_pendulum_4",
       "type": "pendulum",
       "role": "dynamic",
-      "pivot": { "x": 486.66, "y": 73.57 },
-      "bob_position": { "x": 486.66, "y": 340.87 },
-      "radius": 32.7,
-      "length": 267.3,
+      "pivot": {
+        "x": 246.51,
+        "y": 45.0
+      },
+      "bob_position": {
+        "x": 246.51,
+        "y": 208.5
+      },
+      "radius": 20.0,
+      "length": 163.5,
       "mass_kg": 1.0,
       "restitution": 0.99,
       "friction": 0.0001,
@@ -97,8 +121,8 @@
       "stiffness": 1.0,
       "visual": {
         "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
-        "x_scale": 1.4533,
-        "y_scale": 1.4533
+        "x_scale": 0.8889,
+        "y_scale": 0.8889
       },
       "render": {
         "fillStyle": "#64748b"
@@ -108,10 +132,16 @@
       "id": "cradle_pendulum_5",
       "type": "pendulum",
       "role": "dynamic",
-      "pivot": { "x": 552.06, "y": 73.57 },
-      "bob_position": { "x": 552.06, "y": 340.87 },
-      "radius": 32.7,
-      "length": 267.3,
+      "pivot": {
+        "x": 286.51,
+        "y": 45.0
+      },
+      "bob_position": {
+        "x": 286.51,
+        "y": 208.5
+      },
+      "radius": 20.0,
+      "length": 163.5,
       "mass_kg": 1.0,
       "restitution": 0.99,
       "friction": 0.0001,
@@ -119,8 +149,8 @@
       "stiffness": 1.0,
       "visual": {
         "sprite_url": "/scenes/kinematics/sprites/cradle_bob.png",
-        "x_scale": 1.4533,
-        "y_scale": 1.4533
+        "x_scale": 0.8889,
+        "y_scale": 0.8889
       },
       "render": {
         "fillStyle": "#64748b"
@@ -128,11 +158,22 @@
     }
   ],
   "render": {
-    "canvas_width_px": 800,
-    "canvas_height_px": 600,
-    "source_to_canvas_scale": 1.634877,
-    "offset_x_px": 83.65,
+    "canvas_width_px": 387,
+    "canvas_height_px": 367,
+    "source_width_px": 387,
+    "source_height_px": 367,
+    "source_to_canvas_scale": 1.0,
+    "offset_x_px": 0.0,
     "offset_y_px": 0.0,
     "preserve_aspect_ratio": true
+  },
+  "geometry": {
+    "source_width": 387,
+    "source_height": 367
+  },
+  "coordinate_system": {
+    "width": 387,
+    "height": 367,
+    "unit": "source-pixel"
   }
 }

@@ -117,6 +117,18 @@ export class Simulation {
     this.scene = scene;
     this.mapper = mapper;
 
+    // Adapt Matter.js canvas and viewport bounds to scene native resolution
+    const sw = Number(scene.geometry?.source_width || scene.coordinate_system?.width || scene.render?.source_width_px || scene.source?.width || 800);
+    const sh = Number(scene.geometry?.source_height || scene.coordinate_system?.height || scene.render?.source_height_px || scene.source?.height || 600);
+
+    if (this.render && this.render.canvas) {
+      this.render.options.width = sw;
+      this.render.options.height = sh;
+      this.render.canvas.width = sw;
+      this.render.canvas.height = sh;
+      this.render.bounds.max.x = sw;
+      this.render.bounds.max.y = sh;
+    }
 
     // Clear previous objects
 

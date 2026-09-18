@@ -231,6 +231,16 @@ export class P5OpticsView {
     this._p5?.redraw();
   }
 
+  resize(width = null, height = null, renderContext = null) {
+    const w = Math.round(width || this.container?.clientWidth || 800);
+    const h = Math.round(height || this.container?.clientHeight || 600);
+    if (w > 0 && h > 0 && this._p5) {
+      this._p5.resizeCanvas(w, h);
+      this._recomputeMapper(w, h);
+      this._p5.redraw();
+    }
+  }
+
   setDebug(enable) {
     this._showDebug = enable;
     this._p5?.redraw();

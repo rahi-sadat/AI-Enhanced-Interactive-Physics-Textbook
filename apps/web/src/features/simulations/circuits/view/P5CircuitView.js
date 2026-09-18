@@ -146,18 +146,21 @@ export class P5CircuitView {
     this.p5Instance = new p5(sketch, this.host);
   }
 
-  resize() {
+  resize(width = null, height = null, renderContext = null) {
     if (!this.p || !this.host) return;
-    const rect = this.host.getBoundingClientRect();
-    const w = Math.round(rect.width || this.host.clientWidth || 800);
-    const h = Math.round(rect.height || this.host.clientHeight || 500);
+    const w = Math.round(width || this.host.clientWidth || 800);
+    const h = Math.round(height || this.host.clientHeight || 500);
     if (w > 0 && h > 0) {
       this.p.resizeCanvas(w, h);
       if (this.mapper) {
-        this.mapper.update(this.mapper.sourceW, this.mapper.sourceH, w, h);
+        const sw = renderContext?.sourceWidth || this.mapper.sourceW || 800;
+        const sh = renderContext?.sourceHeight || this.mapper.sourceH || 500;
+        this.mapper.update(sw, sh, w, h);
       }
+      this.p.redraw?.();
     }
   }
+
 
   destroy() {
     if (this.p5Instance) {

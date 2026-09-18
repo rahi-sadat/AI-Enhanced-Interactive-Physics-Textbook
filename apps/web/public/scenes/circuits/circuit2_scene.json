@@ -6,8 +6,8 @@
     "engine": "mna"
   },
   "geometry": {
-    "source_width": 784,
-    "source_height": 462
+    "source_width": 878,
+    "source_height": 593
   },
   "visual": {
     "background_url": "/uploads/circuit2.png"
@@ -40,7 +40,7 @@
       {
         "id": "V1",
         "type": "voltage_source",
-        "label": "Source V\u2081 (5 V)",
+        "label": "Source V₁ (5 V)",
         "value": 5.0,
         "unit": "V",
         "nodes": [
@@ -53,8 +53,8 @@
             "node": "a",
             "polarity": "+",
             "source_px": [
-              122.0,
-              205.0
+              138.0,
+              260.0
             ]
           },
           {
@@ -62,21 +62,21 @@
             "node": "g",
             "polarity": "-",
             "source_px": [
-              122.0,
-              275.0
+              138.0,
+              340.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            88.0,
-            205.0,
-            156.0,
-            275.0
+            98.0,
+            260.0,
+            178.0,
+            340.0
           ],
           "center_source_px": [
-            122.0,
-            240.0
+            138.0,
+            300.0
           ]
         },
         "provenance": {
@@ -89,9 +89,9 @@
       {
         "id": "R1",
         "type": "resistor",
-        "label": "Resistor R\u2081 (2 \u03a9)",
+        "label": "Resistor R₁ (2 Ω)",
         "value": 2.0,
-        "unit": "\u03a9",
+        "unit": "Ω",
         "nodes": [
           "a",
           "b"
@@ -101,33 +101,33 @@
             "id": "R1.a",
             "node": "a",
             "source_px": [
-              220.0,
-              78.0
+              256.0,
+              99.0
             ]
           },
           {
             "id": "R1.b",
             "node": "b",
             "source_px": [
-              295.0,
-              78.0
+              322.0,
+              99.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            220.0,
-            60.0,
-            295.0,
-            96.0
+            256.0,
+            75.0,
+            322.0,
+            123.0
           ],
           "center_source_px": [
-            257.0,
-            78.0
+            289.0,
+            99.0
           ]
         },
         "provenance": {
-          "text": "2 \u03a9",
+          "text": "2 Ω",
           "value": 2.0,
           "source": "textbook_ocr",
           "confidence": 1.0
@@ -136,9 +136,9 @@
       {
         "id": "R3",
         "type": "resistor",
-        "label": "Resistor R\u2083 (1 \u03a9)",
+        "label": "Resistor R₃ (1 Ω)",
         "value": 1.0,
-        "unit": "\u03a9",
+        "unit": "Ω",
         "nodes": [
           "b",
           "g"
@@ -148,33 +148,33 @@
             "id": "R3.a",
             "node": "b",
             "source_px": [
-              388.0,
-              205.0
+              436.0,
+              235.0
             ]
           },
           {
             "id": "R3.b",
             "node": "g",
             "source_px": [
-              388.0,
-              275.0
+              436.0,
+              354.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            370.0,
-            205.0,
-            406.0,
-            275.0
+            416.0,
+            235.0,
+            456.0,
+            354.0
           ],
           "center_source_px": [
-            388.0,
-            240.0
+            436.0,
+            295.0
           ]
         },
         "provenance": {
-          "text": "1 \u03a9",
+          "text": "1 Ω",
           "value": 1.0,
           "source": "textbook_ocr",
           "confidence": 1.0
@@ -183,9 +183,9 @@
       {
         "id": "R2",
         "type": "resistor",
-        "label": "Resistor R\u2082 (3 \u03a9)",
+        "label": "Resistor R₂ (3 Ω)",
         "value": 3.0,
-        "unit": "\u03a9",
+        "unit": "Ω",
         "nodes": [
           "b",
           "c"
@@ -195,33 +195,33 @@
             "id": "R2.a",
             "node": "b",
             "source_px": [
-              485.0,
-              78.0
+              554.0,
+              99.0
             ]
           },
           {
             "id": "R2.b",
             "node": "c",
             "source_px": [
-              565.0,
-              78.0
+              620.0,
+              99.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            485.0,
-            60.0,
-            565.0,
-            96.0
+            554.0,
+            75.0,
+            620.0,
+            123.0
           ],
           "center_source_px": [
-            525.0,
-            78.0
+            587.0,
+            99.0
           ]
         },
         "provenance": {
-          "text": "3 \u03a9",
+          "text": "3 Ω",
           "value": 3.0,
           "source": "textbook_ocr",
           "confidence": 1.0
@@ -230,7 +230,7 @@
       {
         "id": "V2",
         "type": "voltage_source",
-        "label": "Source V\u2082 (2 V)",
+        "label": "Source V₂ (2 V)",
         "value": -2.0,
         "unit": "V",
         "nodes": [
@@ -243,8 +243,8 @@
             "node": "g",
             "polarity": "+",
             "source_px": [
-              656.0,
-              275.0
+              734.0,
+              340.0
             ]
           },
           {
@@ -252,21 +252,21 @@
             "node": "c",
             "polarity": "-",
             "source_px": [
-              656.0,
-              205.0
+              734.0,
+              260.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            622.0,
-            205.0,
-            690.0,
-            275.0
+            694.0,
+            260.0,
+            774.0,
+            340.0
           ],
           "center_source_px": [
-            656.0,
-            240.0
+            734.0,
+            300.0
           ]
         },
         "provenance": {
@@ -283,16 +283,16 @@
         "node": "a",
         "polyline_source_px": [
           [
-            122.0,
-            205.0
+            138.0,
+            260.0
           ],
           [
-            122.0,
-            78.0
+            138.0,
+            99.0
           ],
           [
-            220.0,
-            78.0
+            256.0,
+            99.0
           ]
         ]
       },
@@ -301,24 +301,24 @@
         "node": "b",
         "polyline_source_px": [
           [
-            295.0,
-            78.0
+            322.0,
+            99.0
           ],
           [
-            388.0,
-            78.0
+            436.0,
+            99.0
           ],
           [
-            485.0,
-            78.0
+            554.0,
+            99.0
           ],
           [
-            388.0,
-            78.0
+            436.0,
+            99.0
           ],
           [
-            388.0,
-            205.0
+            436.0,
+            235.0
           ]
         ]
       },
@@ -327,16 +327,16 @@
         "node": "c",
         "polyline_source_px": [
           [
-            565.0,
-            78.0
+            620.0,
+            99.0
           ],
           [
-            656.0,
-            78.0
+            734.0,
+            99.0
           ],
           [
-            656.0,
-            205.0
+            734.0,
+            260.0
           ]
         ]
       },
@@ -345,36 +345,32 @@
         "node": "g",
         "polyline_source_px": [
           [
-            122.0,
-            275.0
+            138.0,
+            340.0
           ],
           [
-            122.0,
-            392.0
+            138.0,
+            502.0
           ],
           [
-            388.0,
-            392.0
+            436.0,
+            502.0
           ],
           [
-            656.0,
-            392.0
+            436.0,
+            354.0
           ],
           [
-            388.0,
-            392.0
+            436.0,
+            502.0
           ],
           [
-            388.0,
-            275.0
+            734.0,
+            502.0
           ],
           [
-            656.0,
-            392.0
-          ],
-          [
-            656.0,
-            275.0
+            734.0,
+            340.0
           ]
         ]
       }

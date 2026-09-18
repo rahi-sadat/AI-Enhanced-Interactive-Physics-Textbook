@@ -198,8 +198,9 @@ export class MechanicsAdapter extends SimulationAdapter {
     };
   }
 
-  resize(width, height) {
-    this.sim?.resize();
+  resize(width, height, renderContext = null) {
+    this.sim?.resize(width, height, renderContext);
+    this.sim?.render();
   }
 
   destroy() {

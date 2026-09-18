@@ -112,25 +112,30 @@ html, body { height: 100%; background: var(--bg-app); color: var(--text);
 
 /* DIAGRAM STAGE */
 .diagram-stage {
-  position: relative; width: 860px; height: 620px; flex-shrink: 0;
+  position: relative; width: 860px; max-width: 100%; height: 620px; flex-shrink: 0;
   border-radius: var(--r-md); overflow: hidden;
   border: 1px solid var(--border);
   box-shadow: 0 0 24px rgba(59,130,246,0.18), 0 8px 32px rgba(0,0,0,0.5);
   background: #080d18;
 }
 .diagram-image {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: contain; z-index: 1;
+  position: absolute;
+  z-index: 1;
   pointer-events: none; /* let drag events reach p5 canvas below */
   /* Hide broken-image icon when no src is set */
   color: transparent;
 }
 .diagram-image:not([src]), .diagram-image[src=''] { display: none !important; }
 .simulation-overlay {
-  position: absolute; inset: 0; width: 100%; height: 100%;
+  position: absolute;
   z-index: 2; pointer-events: auto;
 }
-.simulation-overlay canvas { background: transparent !important; display: block; }
+.simulation-overlay canvas {
+  background: transparent !important;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
 
 /* SIDE PANEL */
 .side-panel {

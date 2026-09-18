@@ -9,6 +9,7 @@
 
 import './interactiveFigure.css';
 import { PhysicsRuntime } from '@engine/core/PhysicsRuntime.js';
+import { FigureViewport } from './FigureViewport.js';
 
 export class InteractiveFigure {
   /**
@@ -29,6 +30,7 @@ export class InteractiveFigure {
     this.scene = null;
     this.currentDomain = 'mechanics';
     this.state = null;
+    this.viewport = null;
 
     this.dom = {
       root: null,
@@ -37,18 +39,18 @@ export class InteractiveFigure {
       domainBadge: null,
       title: null,
       statusPill: null,
-      stage: null,
-      bgImage: null,
-      overlay: null,
+      body: null,
+      viewportHost: null,
       sidebar: null,
       btnPlayPause: null,
       btnReset: null,
+      btnToggleSidebar: null,
+      btnToggleAnchors: null,
       paramsList: null,
       telemetryGrid: null,
       footer: null
     };
 
-    this._resizeObserver = null;
     this._stateUnsub = null;
     this._sourceSize = { width: 800, height: 600 };
 
@@ -74,17 +76,20 @@ export class InteractiveFigure {
           <h3 class="if-title" data-el="title">Interactive Simulation</h3>
         </div>
         <div class="if-header-right">
+          <button class="if-btn if-btn-secondary" data-el="btnToggleAnchors" title="Toggle sub-pixel alignment reticles" style="padding:4px 10px; font-size:0.76rem;">
+            🎯 Anchors (0px)
+          </button>
+          <button class="if-btn if-btn-secondary" data-el="btnToggleSidebar" title="Simulate drawer/sidebar width changes" style="padding:4px 10px; font-size:0.76rem;">
+            ⇄ Sidebar
+          </button>
           <span class="if-status-pill paused" data-el="statusPill">PAUSED</span>
         </div>
       </header>
 
       <!-- Body -->
-      <div class="if-body">
-        <!-- Stage Viewport -->
-        <div class="if-stage-viewport" data-el="stage">
-          <img class="if-background-img" data-el="bgImage" alt="Diagram reference" style="display:none;" />
-          <div class="if-simulation-overlay" data-el="overlay"></div>
-        </div>
+      <div class="if-body" data-el="body">
+        <!-- Layout-Invariant Figure Viewport Host -->
+        <div class="if-viewport-host" data-el="viewportHost"></div>
 
         <!-- Sidebar -->
         <aside class="if-sidebar" data-el="sidebar">
@@ -118,7 +123,7 @@ export class InteractiveFigure {
       <!-- Footer -->
       <footer class="if-footer" data-el="footer">
         <span class="if-curriculum-tag" data-el="curriculumTag">Platform Content Spine v1</span>
-        <span class="if-engine-tag" data-el="engineTag">Coordinate-Aligned Runtime</span>
+        <span class="if-engine-tag" data-el="engineTag">Layout-Invariant FigureViewport</span>
       </footer>
     `;
 
@@ -130,16 +135,24 @@ export class InteractiveFigure {
     this.dom.domainBadge = root.querySelector('[data-el="domainBadge"]');
     this.dom.title = root.querySelector('[data-el="title"]');
     this.dom.statusPill = root.querySelector('[data-el="statusPill"]');
-    this.dom.stage = root.querySelector('[data-el="stage"]');
-    this.dom.bgImage = root.querySelector('[data-el="bgImage"]');
-    this.dom.overlay = root.querySelector('[data-el="overlay"]');
+    this.dom.body = root.querySelector('[data-el="body"]');
+    this.dom.viewportHost = root.querySelector('[data-el="viewportHost"]');
     this.dom.sidebar = root.querySelector('[data-el="sidebar"]');
     this.dom.btnPlayPause = root.querySelector('[data-el="btnPlayPause"]');
     this.dom.btnReset = root.querySelector('[data-el="btnReset"]');
+    this.dom.btnToggleSidebar = root.querySelector('[data-el="btnToggleSidebar"]');
+    this.dom.btnToggleAnchors = root.querySelector('[data-el="btnToggleAnchors"]');
     this.dom.paramsList = root.querySelector('[data-el="paramsList"]');
     this.dom.telemetryGrid = root.querySelector('[data-el="telemetryGrid"]');
     this.dom.curriculumTag = root.querySelector('[data-el="curriculumTag"]');
     this.dom.engineTag = root.querySelector('[data-el="engineTag"]');
+
+    // Instantiate authoritative FigureViewport
+    this.viewport = new FigureViewport(this.dom.viewportHost, {
+      onLayoutChange: (context) => {
+        this.runtime.resize(context.displayWidth, context.displayHeight, context);
+      }
+    });
 
     // Bind playback controls
     this.dom.btnPlayPause.addEventListener('click', () => {
@@ -155,12 +168,23 @@ export class InteractiveFigure {
       this.reset();
     });
 
-    // Handle responsive resizing
-    this._resizeObserver = new ResizeObserver(() => {
-      this._syncOverlayBox();
-      this.runtime.resize(this.dom.overlay.clientWidth, this.dom.overlay.clientHeight);
+    // Bind sidebar collapse toggle for live responsiveness testing
+    this.dom.btnToggleSidebar?.addEventListener('click', () => {
+      this.toggleSidebar();
     });
-    this._resizeObserver.observe(this.dom.stage);
+
+    // Bind calibration anchor inspector
+    this.dom.btnToggleAnchors?.addEventListener('click', () => {
+      const active = !this.viewport.showInspectAnchors;
+      this.viewport.setInspectAnchors(active);
+      this.dom.btnToggleAnchors.classList.toggle('if-btn-primary', active);
+      this.dom.btnToggleAnchors.classList.toggle('if-btn-secondary', !active);
+    });
+  }
+
+  toggleSidebar() {
+    this.dom.body.classList.toggle('sidebar-collapsed');
+    // FigureViewport's ResizeObserver detects container width change instantly
   }
 
   /**
@@ -170,7 +194,8 @@ export class InteractiveFigure {
   async load(sceneOrUrl) {
     let scene = sceneOrUrl;
     if (typeof sceneOrUrl === 'string') {
-      const res = await fetch(sceneOrUrl);
+      const cacheBustUrl = sceneOrUrl.includes('?') ? `${sceneOrUrl}&t=${Date.now()}` : `${sceneOrUrl}?t=${Date.now()}`;
+      const res = await fetch(cacheBustUrl);
       if (!res.ok) {
         throw new Error(`[InteractiveFigure] Failed to fetch scene from ${sceneOrUrl}`);
       }
@@ -194,33 +219,33 @@ export class InteractiveFigure {
       this.dom.domainBadge.innerHTML = '⚡ Circuits';
     }
 
-    // 2. Set Background Image (if defined in scene source or visual)
+    // 2. Set Background Image and Dimensions via FigureViewport
     const bgUrl = scene.source?.image || scene.visual?.background_url;
     this._sourceSize = this._getSceneSourceSize(scene);
-    if (bgUrl) {
-      this.dom.bgImage.src = bgUrl;
-      this.dom.bgImage.style.display = 'block';
-      await this._waitForBackgroundImage();
-    } else {
-      this.dom.bgImage.style.display = 'none';
-    }
-    this._syncOverlayBox();
+    await this.viewport.setBackground(bgUrl, this._sourceSize.width, this._sourceSize.height);
 
-    // 3. Update Curriculum / Educational Footer
+    // 3. Configure calibration alignment anchors for inspection
+    this._setupSceneCalibrationAnchors(scene);
+
+    // 4. Update Curriculum / Educational Footer
     if (scene.metadata?.chapter || scene.metadata?.topic) {
       this.dom.curriculumTag.textContent = `${scene.metadata.chapter || ''} • ${scene.metadata.topic || ''}`;
     } else {
       this.dom.curriculumTag.textContent = `Canonical Scene v1 (${domain})`;
     }
 
-    // 4. Render Dynamic Parameters with Provenance Badges
+    // 5. Render Dynamic Parameters with Provenance Badges
     this._renderParameters(scene.parameters || {});
 
-    // 5. Clear previous overlay and initialize PhysicsRuntime
-    this.dom.overlay.innerHTML = '';
-    await this.runtime.load(scene, this.dom.overlay);
+    // 6. Clear previous overlay canvas and mount into FigureViewport overlay container
+    const overlayContainer = this.viewport.getOverlayContainer();
+    overlayContainer.innerHTML = '';
+    await this.runtime.load(scene, overlayContainer, {
+      viewport: this.viewport,
+      renderContext: this.viewport.getRenderContext()
+    });
 
-    // 6. Subscribe to real-time telemetry updates
+    // 7. Subscribe to real-time telemetry updates
     this._stateUnsub?.();
     this._stateUnsub = this.runtime.onStateChange((state) => {
       this.state = state;
@@ -235,6 +260,33 @@ export class InteractiveFigure {
     this._updateStatusPill(initial);
   }
 
+  _setupSceneCalibrationAnchors(scene) {
+    const domain = this.currentDomain;
+    const anchors = [];
+
+    if (domain === 'mechanics') {
+      const pObj = scene.objects?.find(o => o.type === 'pendulum') || scene;
+      const pivot = pObj.geometry?.pivot || scene.geometry?.pivot || { x: 468.0, y: 99.7 };
+      const bob = scene.geometry?.bob_center || { x: 246.58, y: 527.56 };
+      anchors.push({ id: 'pivot', label: 'Pivot', x: pivot.x, y: pivot.y, color: '#38bdf8' });
+      anchors.push({ id: 'bob', label: 'Bob Initial', x: bob.x, y: bob.y, color: '#f59e0b' });
+    } else if (domain === 'optics') {
+      const lx = scene.geometry?.lensX || 400;
+      const ay = scene.geometry?.axisY || 300;
+      const f = Number(scene.parameters?.focalLength?.value ?? 130);
+      anchors.push({ id: 'lens_center', label: 'Optical Center O', x: lx, y: ay, color: '#38bdf8' });
+      anchors.push({ id: 'f1', label: 'F₁ Focus', x: lx - f, y: ay, color: '#34d399' });
+      anchors.push({ id: 'f2', label: 'F₂ Focus', x: lx + f, y: ay, color: '#34d399' });
+    } else if (domain === 'circuits') {
+      anchors.push({ id: 'v1', label: 'Battery V₁', x: 140, y: 250, color: '#ef4444' });
+      anchors.push({ id: 's1', label: 'Key S₁', x: 230, y: 120, color: '#f59e0b' });
+      anchors.push({ id: 'r1', label: 'Resistor R₁', x: 400, y: 120, color: '#38bdf8' });
+      anchors.push({ id: 'r2', label: 'Resistor R₂', x: 660, y: 250, color: '#38bdf8' });
+    }
+
+    this.viewport.setCalibrationAnchors(anchors);
+  }
+
   _getSceneSourceSize(scene) {
     const source = scene.source || {};
     const coordinateSystem = scene.coordinateSystem || {};
@@ -244,55 +296,6 @@ export class InteractiveFigure {
     };
   }
 
-  async _waitForBackgroundImage() {
-    const img = this.dom.bgImage;
-    if (!img || img.complete) return;
-
-    if (typeof img.decode === 'function') {
-      try {
-        await img.decode();
-        return;
-      } catch (_) {
-        // Fall through to load/error listeners; decode can reject for SVGs in some browsers.
-      }
-    }
-
-    await new Promise((resolve) => {
-      img.addEventListener('load', resolve, { once: true });
-      img.addEventListener('error', resolve, { once: true });
-    });
-  }
-
-  _syncOverlayBox() {
-    const stage = this.dom.stage;
-    const overlay = this.dom.overlay;
-    if (!stage || !overlay) return;
-
-    const stageW = stage.clientWidth || 0;
-    const stageH = stage.clientHeight || 0;
-    const hasBackground = this.dom.bgImage?.style.display !== 'none';
-    const sourceW = this.dom.bgImage?.naturalWidth || this._sourceSize.width || 800;
-    const sourceH = this.dom.bgImage?.naturalHeight || this._sourceSize.height || 600;
-
-    if (!hasBackground || stageW <= 0 || stageH <= 0 || sourceW <= 0 || sourceH <= 0) {
-      overlay.style.inset = '0';
-      overlay.style.left = '';
-      overlay.style.top = '';
-      overlay.style.width = '100%';
-      overlay.style.height = '100%';
-      return;
-    }
-
-    const scale = Math.min(stageW / sourceW, stageH / sourceH);
-    const renderedW = sourceW * scale;
-    const renderedH = sourceH * scale;
-
-    overlay.style.inset = 'auto';
-    overlay.style.left = `${(stageW - renderedW) / 2}px`;
-    overlay.style.top = `${(stageH - renderedH) / 2}px`;
-    overlay.style.width = `${renderedW}px`;
-    overlay.style.height = `${renderedH}px`;
-  }
 
   _renderParameters(parameters) {
     this.dom.paramsList.innerHTML = '';
@@ -447,8 +450,8 @@ export class InteractiveFigure {
   }
 
   destroy() {
-    this._resizeObserver?.disconnect();
     this._stateUnsub?.();
+    this.viewport?.destroy();
     this.runtime.destroy();
     this.host.innerHTML = '';
   }
