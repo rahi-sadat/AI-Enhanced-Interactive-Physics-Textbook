@@ -6,8 +6,8 @@
     "engine": "mna"
   },
   "geometry": {
-    "source_width": 924,
-    "source_height": 488
+    "source_width": 1272,
+    "source_height": 581
   },
   "visual": {
     "background_url": "/uploads/circuit4.png"
@@ -18,22 +18,22 @@
       {
         "id": "N0",
         "reference": true,
-        "label": "N\u2080 (0 V Ground)"
+        "label": "N₀ (0 V Ground)"
       },
       {
         "id": "N1",
         "reference": false,
-        "label": "N\u2081 (10.0 V Source)"
+        "label": "N₁ (10.0 V Source)"
       },
       {
         "id": "N2",
         "reference": false,
-        "label": "N\u2082 (Mid Junction)"
+        "label": "N₂ (Mid Junction)"
       },
       {
         "id": "N3",
         "reference": false,
-        "label": "N\u2083 (Internal Sub-Node)"
+        "label": "N₃ (Internal Sub-Node)"
       }
     ],
     "components": [
@@ -53,8 +53,8 @@
             "node": "N1",
             "polarity": "+",
             "source_px": [
-              205.0,
-              240.0
+              281.0,
+              305.0
             ]
           },
           {
@@ -62,30 +62,36 @@
             "node": "N0",
             "polarity": "-",
             "source_px": [
-              205.0,
-              280.0
+              281.0,
+              337.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            170.0,
-            240.0,
-            240.0,
-            280.0
+            230.0,
+            305.0,
+            330.0,
+            337.0
           ],
           "center_source_px": [
-            205.0,
-            260.0
+            281.0,
+            321.0
           ]
+        },
+        "provenance": {
+          "text": "10 V",
+          "value": 10.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
         }
       },
       {
         "id": "C1",
         "type": "resistor",
-        "label": "Branch 1 (20 \u03a9)",
+        "label": "Resistor R₁ (20 Ω)",
         "value": 20.0,
-        "unit": "\u03a9",
+        "unit": "Ω",
         "nodes": [
           "N1",
           "N2"
@@ -95,38 +101,44 @@
             "id": "C1.a",
             "node": "N1",
             "source_px": [
-              450.0,
-              110.0
+              646.0,
+              133.0
             ]
           },
           {
             "id": "C1.b",
             "node": "N2",
             "source_px": [
-              510.0,
-              110.0
+              672.0,
+              133.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            450.0,
-            90.0,
-            510.0,
-            130.0
+            646.0,
+            104.0,
+            672.0,
+            161.0
           ],
           "center_source_px": [
-            480.0,
-            110.0
+            659.0,
+            133.0
           ]
+        },
+        "provenance": {
+          "text": "20 Ω",
+          "value": 20.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
         }
       },
       {
         "id": "C2",
         "type": "resistor",
-        "label": "Branch 2 (60 \u03a9)",
+        "label": "Resistor R₂ (60 Ω)",
         "value": 60.0,
-        "unit": "\u03a9",
+        "unit": "Ω",
         "nodes": [
           "N2",
           "N3"
@@ -136,38 +148,44 @@
             "id": "C2.a",
             "node": "N2",
             "source_px": [
-              580.0,
-              150.0
+              800.0,
+              207.0
             ]
           },
           {
             "id": "C2.b",
             "node": "N3",
             "source_px": [
-              580.0,
-              210.0
+              800.0,
+              233.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            560.0,
-            150.0,
-            600.0,
-            210.0
+            770.0,
+            207.0,
+            825.0,
+            233.0
           ],
           "center_source_px": [
-            580.0,
-            180.0
+            800.0,
+            220.0
           ]
+        },
+        "provenance": {
+          "text": "60 Ω",
+          "value": 60.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
         }
       },
       {
         "id": "C3",
         "type": "resistor",
-        "label": "Branch 3 (40 \u03a9)",
+        "label": "Resistor R₃ (40 Ω)",
         "value": 40.0,
-        "unit": "\u03a9",
+        "unit": "Ω",
         "nodes": [
           "N3",
           "N0"
@@ -177,38 +195,44 @@
             "id": "C3.a",
             "node": "N3",
             "source_px": [
-              580.0,
-              280.0
+              800.0,
+              381.0
             ]
           },
           {
             "id": "C3.b",
             "node": "N0",
             "source_px": [
-              580.0,
-              340.0
+              800.0,
+              406.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            560.0,
-            280.0,
-            600.0,
-            340.0
+            766.0,
+            381.0,
+            821.0,
+            406.0
           ],
           "center_source_px": [
-            580.0,
-            310.0
+            800.0,
+            394.0
           ]
+        },
+        "provenance": {
+          "text": "40 Ω",
+          "value": 40.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
         }
       },
       {
         "id": "C4",
         "type": "resistor",
-        "label": "Branch 4 (100 \u03a9)",
+        "label": "Resistor R₄ (100 Ω)",
         "value": 100.0,
-        "unit": "\u03a9",
+        "unit": "Ω",
         "nodes": [
           "N2",
           "N0"
@@ -218,30 +242,36 @@
             "id": "C4.a",
             "node": "N2",
             "source_px": [
-              660.0,
-              190.0
+              910.0,
+              250.0
             ]
           },
           {
             "id": "C4.b",
             "node": "N0",
             "source_px": [
-              660.0,
-              250.0
+              910.0,
+              276.0
             ]
           }
         ],
         "geometry": {
           "bbox_source_px": [
-            640.0,
-            190.0,
-            680.0,
-            250.0
+            881.0,
+            250.0,
+            937.0,
+            276.0
           ],
           "center_source_px": [
-            660.0,
-            220.0
+            910.0,
+            263.0
           ]
+        },
+        "provenance": {
+          "text": "100 Ω",
+          "value": 100.0,
+          "source": "textbook_ocr",
+          "confidence": 1.0
         }
       }
     ],
@@ -251,16 +281,16 @@
         "node": "N1",
         "polyline_source_px": [
           [
-            205.0,
-            240.0
+            281.0,
+            305.0
           ],
           [
-            205.0,
-            110.0
+            281.0,
+            133.0
           ],
           [
-            450.0,
-            110.0
+            646.0,
+            133.0
           ]
         ]
       },
@@ -269,24 +299,32 @@
         "node": "N2",
         "polyline_source_px": [
           [
-            510.0,
-            110.0
+            672.0,
+            133.0
           ],
           [
-            580.0,
-            110.0
+            800.0,
+            133.0
           ],
           [
-            660.0,
-            110.0
+            910.0,
+            133.0
           ],
           [
-            580.0,
-            150.0
+            910.0,
+            250.0
           ],
           [
-            660.0,
-            190.0
+            910.0,
+            133.0
+          ],
+          [
+            800.0,
+            133.0
+          ],
+          [
+            800.0,
+            207.0
           ]
         ]
       },
@@ -295,12 +333,12 @@
         "node": "N3",
         "polyline_source_px": [
           [
-            580.0,
-            210.0
+            800.0,
+            233.0
           ],
           [
-            580.0,
-            280.0
+            800.0,
+            381.0
           ]
         ]
       },
@@ -309,28 +347,32 @@
         "node": "N0",
         "polyline_source_px": [
           [
-            205.0,
-            280.0
+            281.0,
+            337.0
           ],
           [
-            205.0,
-            395.0
+            281.0,
+            478.0
           ],
           [
-            580.0,
-            395.0
+            800.0,
+            478.0
           ],
           [
-            660.0,
-            395.0
+            800.0,
+            406.0
           ],
           [
-            580.0,
-            340.0
+            800.0,
+            478.0
           ],
           [
-            660.0,
-            250.0
+            910.0,
+            478.0
+          ],
+          [
+            910.0,
+            276.0
           ]
         ]
       }

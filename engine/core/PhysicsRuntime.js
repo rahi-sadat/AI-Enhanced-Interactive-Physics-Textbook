@@ -245,9 +245,10 @@ export class PhysicsRuntime {
    * Signals dimension resize to adapter.
    * @param {number} [width]
    * @param {number} [height]
+   * @param {object} [renderContext]
    */
-  resize(width, height) {
-    this.adapter?.resize(width, height);
+  resize(width, height, renderContext = null) {
+    this.adapter?.resize(width, height, renderContext);
   }
 
   /**

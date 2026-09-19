@@ -14,8 +14,8 @@ export class MechanicsController {
     this.overlayStage = overlayStage;
     this.abort = new AbortController();
 
-    const srcW = scene.render?.source_width_px ?? scene.coordinate_system?.render?.source_width_px ?? 800;
-    const srcH = scene.render?.source_height_px ?? scene.coordinate_system?.render?.source_height_px ?? 600;
+    const srcW = scene.geometry?.source_width ?? scene.coordinate_system?.width ?? scene.render?.source_width_px ?? scene.coordinate_system?.render?.source_width_px ?? 800;
+    const srcH = scene.geometry?.source_height ?? scene.coordinate_system?.height ?? scene.render?.source_height_px ?? scene.coordinate_system?.render?.source_height_px ?? 600;
     overlayStage.setBackground(scene?.visual?.background_url ?? null, srcW, srcH);
 
     this.sim = new Simulation(overlayStage.getContainer());
@@ -80,7 +80,7 @@ export class MechanicsController {
         const url = e.target.value === 'newtons_cradle'
           ? '/scenes/kinematics/newtons_cradle_scene.json'
           : '/scenes/kinematics/physics_scene.json';
-        const res = await fetch(url);
+        const res = await fetch(url + '?t=' + Date.now());
         const data = await res.json();
         this.loadNewScene(data);
       }, { signal });
@@ -103,8 +103,8 @@ export class MechanicsController {
     this.abort = new AbortController();
 
     this.scene = newScene;
-    const srcW = newScene.render?.source_width_px ?? newScene.coordinate_system?.render?.source_width_px ?? 800;
-    const srcH = newScene.render?.source_height_px ?? newScene.coordinate_system?.render?.source_height_px ?? 600;
+    const srcW = newScene.geometry?.source_width ?? newScene.coordinate_system?.width ?? newScene.render?.source_width_px ?? newScene.coordinate_system?.render?.source_width_px ?? 800;
+    const srcH = newScene.geometry?.source_height ?? newScene.coordinate_system?.height ?? newScene.render?.source_height_px ?? newScene.coordinate_system?.render?.source_height_px ?? 600;
     this.overlayStage.setBackground(newScene?.visual?.background_url ?? null, srcW, srcH);
     this.sim.loadScene(newScene);
     this._bindControls(newScene);

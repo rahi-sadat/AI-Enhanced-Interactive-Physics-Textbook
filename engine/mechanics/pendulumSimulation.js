@@ -94,22 +94,23 @@ export class PendulumSimulation {
     this.render(this.theta, this.omega);
   }
 
-  resize() {
-    const width = this.container.clientWidth || 800;
-    const height = this.container.clientHeight || 600;
-    const dpr = window.devicePixelRatio || 1;
+  resize(w = null, h = null, renderContext = null) {
+    const width = Math.round(w || this.container.clientWidth || 800);
+    const height = Math.round(h || this.container.clientHeight || 600);
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
 
     this.canvas.width = Math.round(width * dpr);
     this.canvas.height = Math.round(height * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const sourceW = this.scene.coordinateSystem?.width || this.scene.source?.width || this.scene.source?.image_width_px || this.geometry?.bob_center?.x * 2 || 800;
-    const sourceH = this.scene.coordinateSystem?.height || this.scene.source?.height || this.scene.source?.image_height_px || this.geometry?.bob_center?.y * 1.5 || 600;
+    const sourceW = renderContext?.sourceWidth || this.scene.coordinateSystem?.width || this.scene.source?.width || this.scene.source?.image_width_px || this.geometry?.bob_center?.x * 2 || 800;
+    const sourceH = renderContext?.sourceHeight || this.scene.coordinateSystem?.height || this.scene.source?.height || this.scene.source?.image_height_px || this.geometry?.bob_center?.y * 1.5 || 600;
 
     this.mapper = new CoordinateMapper(sourceW, sourceH, width, height, dpr);
     this.viewWidth = width;
     this.viewHeight = height;
   }
+
 
   /**
    * Evaluates angular acceleration: d²θ/dt² = -(g/L)*sin(θ) - γ*ω

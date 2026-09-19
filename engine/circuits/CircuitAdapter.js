@@ -180,8 +180,8 @@ export class CircuitAdapter extends SimulationAdapter {
   }
 
 
-  resize(width, height) {
-    this.view?.resize?.();
+  resize(width, height, renderContext = null) {
+    this.view?.resize?.(width, height, renderContext);
   }
 
   destroy() {

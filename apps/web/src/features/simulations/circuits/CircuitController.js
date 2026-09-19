@@ -405,7 +405,7 @@ export class CircuitController {
         };
         const path = SCENE_MAP[scenario] || '/scenes/circuits/circuit1_scene.json';
 
-        const res = await fetch(path);
+        const res = await fetch(path + '?t=' + Date.now());
         const newScene = await res.json();
         this.loadNewScene(newScene);
       });

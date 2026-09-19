@@ -208,15 +208,15 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       domainSelect.value = 'circuits';
       if (scenarioSelect) scenarioSelect.value = 'circuit1';
     } else if (preset === 'circuit2') {
-      setPreview('circuit2.png', '/uploads/circuit2.png', 784, 462);
+      setPreview('circuit2.png', '/uploads/circuit2.png', 878, 593);
       domainSelect.value = 'circuits';
       if (scenarioSelect) scenarioSelect.value = 'circuit2';
     } else if (preset === 'circuit3') {
-      setPreview('circuit3.png', '/uploads/circuit3.png', 448, 385);
+      setPreview('circuit3.png', '/uploads/circuit3.png', 529, 273);
       domainSelect.value = 'circuits';
       if (scenarioSelect) scenarioSelect.value = 'circuit3';
     } else if (preset === 'circuit4') {
-      setPreview('circuit4.png', '/uploads/circuit4.png', 924, 488);
+      setPreview('circuit4.png', '/uploads/circuit4.png', 1272, 581);
       domainSelect.value = 'circuits';
       if (scenarioSelect) scenarioSelect.value = 'circuit4';
     } else if (preset === 'snell_water') {
@@ -236,7 +236,7 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       domainSelect.value = 'optics';
       if (scenarioSelect) scenarioSelect.value = 'thin_lens';
     } else if (preset === 'newtons_cradle') {
-      setPreview('pendulum.png', '/uploads/pendulum.png', 800, 600);
+      setPreview('pendulum.png', '/uploads/pendulum.png', 387, 367);
       domainSelect.value = 'mechanics';
       if (scenarioSelect) scenarioSelect.value = 'newtons_cradle';
     } else if (preset === 'projectile_test') {
@@ -248,7 +248,7 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       domainSelect.value = 'optics';
       if (scenarioSelect) scenarioSelect.value = 'prism';
     } else if (preset === 'spring') {
-      setPreview('with_spring.png', '/scenes/kinematics/with_spring.png', 800, 600);
+      setPreview('with_spring.png', '/scenes/kinematics/with_spring.png', 855, 686);
       domainSelect.value = 'mechanics';
       if (scenarioSelect) scenarioSelect.value = 'incline';
     }
@@ -300,7 +300,7 @@ btnGenerateSim?.addEventListener('click', async () => {
     if (!uploadedFile && PRESET_SCENES[scenarioChoice]) {
       updateProgress('Loading pre-compiled textbook scenario...', 80);
       const presetInfo = PRESET_SCENES[scenarioChoice];
-      const pRes = await fetch(presetInfo.url);
+      const pRes = await fetch(presetInfo.url + '?t=' + Date.now());
       const pScene = await pRes.json();
       setTimeout(() => {
         closeModal();
