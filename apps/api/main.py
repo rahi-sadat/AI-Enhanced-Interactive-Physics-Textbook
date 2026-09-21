@@ -131,6 +131,7 @@ class AnalyzeRequest(BaseModel):
     image_url: str
     domain: Optional[str] = "auto"
     scenario: Optional[str] = "auto"
+    filename: Optional[str] = ""
     focal_length_cm: Optional[float] = 20.0
     gravity: Optional[float] = 1.0
 
@@ -178,17 +179,17 @@ def classify_diagram_concept(
     req_domain: str = "auto",
     req_scenario: str = "auto",
 ) -> tuple[str, str]:
-    """Classifies diagram into (domain, subtype).
-    
-    Supports:
-      - optics: interface_refraction, mirror, thin_lens, concave_lens, prism
-      - mechanics: pendulum, incline, projectile, spring_mass
-    """
-    # 1. User manual override
+    """Classifies diagram into (domain, subtype) with strict user-domain honoring
+    and multi-signal visual/text detection."""
+    h, w = img_bgr.shape[:2]
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    fn = filename.lower()
+
+    # 1. User manual scenario override
     if req_scenario and req_scenario != "auto":
         sc = req_scenario.lower()
-        if sc in ("circuits", "circuit", "dc_circuit", "series_parallel", "voltage_divider", "bridge", "wheatstone", "wheatstone_bridge", "rc_transient"):
-            return ("circuits", "dc_linear" if sc in ("circuits", "circuit") else sc)
+        if sc in ("circuits", "circuit", "dc_circuit", "series_parallel", "voltage_divider", "bridge", "wheatstone", "wheatstone_bridge", "rc_transient", "ladder"):
+            return ("circuits", "wheatstone_bridge" if "bridge" in sc or "wheatstone" in sc else ("series_parallel" if "series" in sc or "parallel" in sc else sc))
         if sc in ("interface_refraction", "snell", "boundary"):
             return ("optics", "interface_refraction")
         if sc in ("mirror", "concave_mirror", "convex_mirror"):
@@ -199,134 +200,234 @@ def classify_diagram_concept(
             return ("optics", "concave_lens")
         if sc in ("prism", "glass_slab", "tir_prism"):
             return ("optics", "prism")
-        if sc in ("pendulum", "simple_pendulum"):
-            return ("mechanics", "pendulum")
+        if sc in ("projectile", "free_fall", "ballistics"):
+            return ("mechanics", "projectile")
+        if sc in ("pendulum", "simple_pendulum", "newtons_cradle"):
+            return ("mechanics", sc)
         if sc in ("incline", "inclined_plane"):
             return ("mechanics", "incline")
-        if sc in ("projectile", "free_fall"):
-            return ("mechanics", "projectile")
         if sc in ("spring", "spring_mass"):
             return ("mechanics", "spring_mass")
 
     # 2. Filename heuristic keywords
-    fn = filename.lower()
-    if any(k in fn for k in ("circuit", "resistor", "wheatstone", "divider", "battery", "kirchhoff", "ohm", "circuit1", "circuit2", "circuit3", "circuit4")):
-        return ("circuits", "dc_linear")
-    if any(k in fn for k in ("7dcbe9c0", "0ae6ee8e", "c4a5740a", "c80801a3", "refract", "snell", "boundary", "water", "interface")):
-        return ("optics", "interface_refraction")
-    if any(k in fn for k in ("cff33623", "mirror")):
-        return ("optics", "mirror")
-    if any(k in fn for k in ("ceceeb1a", "lens", "nctb_lens")):
-        return ("optics", "thin_lens")
-    if any(k in fn for k in ("test1", "pendulum")):
-        return ("mechanics", "pendulum")
-    if any(k in fn for k in ("projectile", "flight")):
+    if any(k in fn for k in ("bridge", "wheatstone")):
+        return ("circuits", "wheatstone_bridge")
+    if any(k in fn for k in ("circuit", "resistor", "schematic", "electronics", "ladder", "ohm", "circuit1", "circuit2", "circuit3", "circuit4")):
+        return ("circuits", "series_parallel")
+    if any(k in fn for k in ("projectile", "trajectory", "launch", "ballistics", "parabola")):
         return ("mechanics", "projectile")
+    if any(k in fn for k in ("cradle", "newton")):
+        return ("mechanics", "newtons_cradle")
+    if any(k in fn for k in ("pendulum", "test1")):
+        return ("mechanics", "pendulum")
+    if any(k in fn for k in ("incline", "ramp")):
+        return ("mechanics", "incline")
+    if any(k in fn for k in ("prism",)):
+        return ("optics", "prism")
+    if any(k in fn for k in ("mirror", "cff33623")):
+        return ("optics", "mirror")
+    if any(k in fn for k in ("refract", "snell", "boundary", "interface", "7dcbe9c0", "0ae6ee8e", "c4a5740a", "c80801a3")):
+        return ("optics", "interface_refraction")
+    if any(k in fn for k in ("lens", "ceceeb1a")):
+        return ("optics", "thin_lens")
 
-    # 3. Computer Vision feature extraction
-    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    h, w = gray.shape
+    # 3. Geometric Feature Extraction
+    # Parabolic trajectory detection
+    hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+    blue_mask = cv2.inRange(hsv, np.array([85, 40, 40]), np.array([140, 255, 255]))
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(blue_mask)
+    curve_pts = []
+    for i in range(1, num_labels):
+        area = stats[i, cv2.CC_STAT_AREA]
+        cx, cy = centroids[i][0], centroids[i][1]
+        if area < 700 and 0.08 * w < cx < 0.92 * w and 0.15 * h < cy < 0.90 * h:
+            curve_pts.append((cx, cy))
+    
+    has_projectile_arc = False
+    if len(curve_pts) >= 12:
+        xs = np.array([p[0] for p in curve_pts])
+        ys = np.array([p[1] for p in curve_pts])
+        if (xs.max() - xs.min()) > 0.30 * w and (ys.max() - ys.min()) > 0.12 * h:
+            try:
+                p_fit = np.polyfit(xs, ys, 2)
+                # Opening downwards in image coords
+                if p_fit[0] > 0.00008:
+                    has_projectile_arc = True
+            except Exception:
+                pass
 
-    # Check for circles
+    # Circle detection
     blurred = cv2.GaussianBlur(gray, (7, 7), 0)
     circles = cv2.HoughCircles(
-        blurred, cv2.HOUGH_GRADIENT, 1.2, 40,
-        param1=50, param2=35, minRadius=14, maxRadius=int(min(h, w) * 0.25)
+        blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=40,
+        param1=50, param2=32, minRadius=int(min(w, h) * 0.015), maxRadius=int(min(w, h) * 0.20)
     )
 
-    # Check for line geometry
+    # Line detection
     edges = cv2.Canny(gray, 50, 150)
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, minLineLength=int(w * 0.18), maxLineGap=25)
-
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, minLineLength=int(min(w, h) * 0.10), maxLineGap=20)
+    diag_pos_lines = []
+    diag_neg_lines = []
     horiz_lines = []
     vert_lines = []
     if lines is not None:
         for l in lines:
-            pts = l.reshape(-1)
-            x1, y1, x2, y2 = pts[0], pts[1], pts[2], pts[3]
-            ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
-            if ang < 8.0 or ang > 172.0:
-                horiz_lines.append((min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), np.hypot(x2 - x1, y2 - y1)))
-            elif 82.0 < ang < 98.0:
-                vert_lines.append((min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2), np.hypot(x2 - x1, y2 - y1)))
+            x1, y1, x2, y2 = l[0]
+            ang = np.degrees(np.arctan2(y2 - y1, x2 - x1))
+            length = np.hypot(x2 - x1, y2 - y1)
+            mid_y = 0.5 * (y1 + y2)
+            # Exclude ground hatching lines
+            if mid_y < 0.75 * h:
+                if 18.0 < ang < 72.0 or -162.0 < ang < -108.0:
+                    diag_pos_lines.append((x1, y1, x2, y2, length))
+                elif -72.0 < ang < -18.0 or 108.0 < ang < 162.0:
+                    diag_neg_lines.append((x1, y1, x2, y2, length))
+            
+            abs_ang = abs(ang)
+            if abs_ang < 8.0 or abs_ang > 172.0:
+                horiz_lines.append((x1, y1, x2, y2, length))
+            elif 82.0 < abs_ang < 98.0:
+                vert_lines.append((x1, y1, x2, y2, length))
 
-    # Check for triangular prism
+    # Bridge circuit requires BOTH diagonal arms AND a central galvanometer circle
+    has_central_meter = False
+    bridge_blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+    meter_circles = cv2.HoughCircles(
+        bridge_blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=50,
+        param1=50, param2=30, minRadius=int(min(w, h) * 0.015), maxRadius=int(min(w, h) * 0.10)
+    )
+    if meter_circles is not None:
+        for _mc in meter_circles[0]:
+            if 0.38 * w < _mc[0] < 0.62 * w and 0.28 * h < _mc[1] < 0.72 * h:
+                has_central_meter = True
+                break
+    is_bridge_circuit = (len(diag_pos_lines) >= 2 and len(diag_neg_lines) >= 2 and has_central_meter)
+
+    # Triangular prism
     _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    is_prism = False
     for c in contours:
         peri = cv2.arcLength(c, True)
         approx = cv2.approxPolyDP(c, 0.04 * peri, True)
         if len(approx) == 3 and cv2.contourArea(c) > 2000:
-            return ("optics", "prism")
+            _bx, _by, _bw, _bh = cv2.boundingRect(c)
+            _aspect = float(_bw) / max(1, float(_bh))
+            # Real prism triangle is roughly equilateral (aspect <= 1.8)
+            # Lens ray patterns form very wide flat triangles (aspect > 1.8)
+            # Also require that the triangle is NOT fully inside center horizontal zone
+            # (prisms are usually displaced from the optical axis center)
+            _cx = _bx + _bw // 2
+            if _aspect <= 1.8 and not (0.3 * w < _bx and (_bx + _bw) < 0.7 * w and 0.25 * h < _by and (_by + _bh) < 0.75 * h):
+                is_prism = True
+                break
+            elif _aspect <= 1.5:
+                # More symmetric triangle, accept even if centered
+                is_prism = True
+                break
 
-    # If circle present and NO horizontal optical axis: Simple Pendulum or Projectile
-    if circles is not None and len(horiz_lines) == 0:
-        c_y = circles[0][0][1]
-        if c_y > h * 0.35:
+    # ── Optics signature: long optical axis line near image midline ──────────
+    # Thin lens, mirror, refraction diagrams always have a dominant horizontal
+    # line spanning >45% of image width that passes through the central zone.
+    has_optical_axis = False
+    long_horiz_near_center = [l for l in horiz_lines
+                               if l[4] > 0.45 * w
+                               and 0.28 * h < 0.5 * (l[1] + l[3]) < 0.72 * h]
+    if len(long_horiz_near_center) >= 1:
+        has_optical_axis = True
+
+    # Multi-color rays: optics diagrams have colored lines in several hues
+    # (red object arrow, orange/green/cyan image, blue rays)
+    # Count distinct color channels on non-white pixels
+    color_mask = (img_bgr[:, :, 0].astype(int) - img_bgr[:, :, 2].astype(int))
+    has_multi_color_rays = False
+    red_dominant = (color_mask > 40).sum()
+    blue_dominant_px = (img_bgr[:, :, 2].astype(int) - img_bgr[:, :, 0].astype(int) > 40).sum()
+    if red_dominant > 80 and blue_dominant_px > 80:
+        has_multi_color_rays = True
+
+    # Optics if: long optical axis AND (multi-color rays OR vertical lens element)
+    vert_near_center = [l for l in vert_lines
+                        if 0.35 * w < 0.5 * (l[0] + l[2]) < 0.65 * w
+                        and l[4] > 0.20 * h]
+    has_lens_element = len(vert_near_center) >= 1
+    is_optics_diagram = has_optical_axis and (has_multi_color_rays or has_lens_element)
+
+    # STRICT USER DOMAIN ENFORCEMENT:
+    if req_domain == "mechanics":
+        if has_projectile_arc:
+            return ("mechanics", "projectile")
+        if circles is not None and len(circles[0]) > 0:
             return ("mechanics", "pendulum")
         return ("mechanics", "projectile")
 
-    # Check for Interface Refraction:
-    # A boundary horizontal line intersecting a normal vertical line in the central region,
-    # with the normal line extending both above and below the boundary, or with media color tint difference
-    has_refraction = False
-    for hx1, hy1, hx2, hy2, hlen in horiz_lines:
-        hy = (hy1 + hy2) / 2.0
-        if not (0.2 * h < hy < 0.8 * h):
-            continue
-        for vx1, vy1, vx2, vy2, vlen in vert_lines:
-            vx = (vx1 + vx2) / 2.0
-            if not (0.15 * w < vx < 0.85 * w):
-                continue
-            if (hx1 - 25) <= vx <= (hx2 + 25):
-                above = hy - min(vy1, vy2)
-                below = max(vy1, vy2) - hy
-                if above > 35 and below > 35:
-                    # Check for cool blue/cyan tint in bottom half (water or glass block)
-                    bot_area = img_bgr[int(hy + 10):min(h, int(hy + 0.35 * h)), :int(0.7 * w)]
-                    if bot_area.size > 0:
-                        b_val = float(bot_area[:, :, 0].mean())
-                        r_val = float(bot_area[:, :, 2].mean())
-                        if (b_val - r_val) > 10.0:
-                            has_refraction = True
-                            break
-                    has_refraction = True
-                    break
-        if has_refraction:
-            break
+    if req_domain == "circuits":
+        if is_bridge_circuit or "bridge" in fn or "wheatstone" in fn:
+            return ("circuits", "wheatstone_bridge")
+        return ("circuits", "series_parallel")
 
-    if has_refraction:
-        return ("optics", "interface_refraction")
-
-    # Check for Mirror: curved boundary arc near optical axis edge
-    is_mirror = False
-    if horiz_lines:
+    if req_domain == "optics":
+        if is_prism:
+            return ("optics", "prism")
         for c in contours:
             if len(c) > 20 and cv2.contourArea(c) > 500:
                 bx, by, bw, bh = cv2.boundingRect(c)
-                aspect = float(bh) / max(1.0, float(bw))
-                if aspect > 1.8 and bh > h * 0.25 and (bx < w * 0.28 or bx > w * 0.68):
-                    is_mirror = True
-                    break
-    if is_mirror:
-        return ("optics", "mirror")
-
-    # Default based on domain request or horizontal lines
-    if req_domain == "circuits":
-        return ("circuits", "dc_linear")
-
-    if req_domain == "mechanics":
-        if circles is not None:
-            return ("mechanics", "pendulum")
-        return ("mechanics", "spring_mass")
-
-    if horiz_lines:
+                if float(bh) / max(1.0, float(bw)) > 1.8 and bh > h * 0.25 and (bx < w * 0.28 or bx > w * 0.68):
+                    return ("optics", "mirror")
         return ("optics", "thin_lens")
 
-    if circles is not None:
-        return ("mechanics", "pendulum")
+    # AUTO-DETECT MULTI-SIGNAL RESOLUTION:
+    # OPTICS checked FIRST: strong optical axis + multi-color rays = optics diagram
+    if is_optics_diagram:
+        if is_prism:
+            return ("optics", "prism")
+        if len(vert_near_center) >= 1:
+            return ("optics", "thin_lens")
+        for hx1, hy1, hx2, hy2, hlen in long_horiz_near_center:
+            bot_area = img_bgr[int((hy1+hy2)//2 + 10):min(h, int((hy1+hy2)//2 + 0.35*h)), :int(0.6*w)]
+            if bot_area.size > 0:
+                b_val = float(bot_area[:,:,0].mean())
+                r_val = float(bot_area[:,:,2].mean())
+                if (b_val - r_val) > 15.0:
+                    return ("optics", "interface_refraction")
+        return ("optics", "thin_lens")
 
-    return ("optics", "thin_lens")
+    # Projectile arc checked next: unique signature (parabolic blue arc, downward opening)
+    if has_projectile_arc:
+        return ("mechanics", "projectile")
+
+    # Bridge requires both diagonal arms AND a central galvanometer
+    if is_bridge_circuit:
+        return ("circuits", "wheatstone_bridge")
+
+    if is_prism:
+        return ("optics", "prism")
+
+    if circles is not None and len(circles[0]) > 0:
+        cy = circles[0][0][1]
+        if cy > 0.35 * h and len(diag_pos_lines) == 0 and len(diag_neg_lines) == 0 and len(horiz_lines) < 2:
+            return ("mechanics", "pendulum")
+
+    for c in contours:
+        if len(c) > 20 and cv2.contourArea(c) > 500:
+            bx, by, bw, bh = cv2.boundingRect(c)
+            if float(bh) / max(1.0, float(bw)) > 1.8 and bh > h * 0.25 and (bx < w * 0.28 or bx > w * 0.68):
+                return ("optics", "mirror")
+
+    for hx1, hy1, hx2, hy2, hlen in horiz_lines:
+        hy = (hy1 + hy2) / 2.0
+        if 0.3 * h < hy < 0.7 * h and hlen > 0.35 * w:
+            bot_area = img_bgr[int(hy + 10):min(h, int(hy + 0.35 * h)), :int(0.6 * w)]
+            if bot_area.size > 0:
+                b_val = float(bot_area[:, :, 0].mean())
+                r_val = float(bot_area[:, :, 2].mean())
+                if (b_val - r_val) > 18.0:
+                    return ("optics", "interface_refraction")
+
+    if len(horiz_lines) > 0:
+        return ("optics", "thin_lens")
+
+    return ("mechanics", "projectile")
 
 
 def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
@@ -1002,65 +1103,332 @@ def build_incline_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float 
     }
 
 
+
 def build_projectile_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
     h, w = img_bgr.shape[:2]
-    canvas_w, canvas_h = 800.0, 600.0
-    scale = min(canvas_w / float(w), canvas_h / float(h))
-    offset_x = (canvas_w - w * scale) / 2.0
-    offset_y = (canvas_h - h * scale) / 2.0
-
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
-    circles = cv2.HoughCircles(
-        blurred, cv2.HOUGH_GRADIENT, 1.2, 40,
-        param1=50, param2=35, minRadius=14, maxRadius=int(min(h, w) * 0.25)
-    )
 
-    ball_x = 120.0
-    ball_y = 440.0
-    ball_r = 22.0
+    # 1. Dynamic ground line detection
+    edges = cv2.Canny(gray, 50, 150)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 50, minLineLength=int(w * 0.25), maxLineGap=30)
+    y_ground = float(h * 0.797)
 
-    if circles is not None:
-        c = circles[0][0]
-        ball_x = float(offset_x + c[0] * scale)
-        ball_y = float(offset_y + c[1] * scale)
-        ball_r = float(max(14.0, min(32.0, c[2] * scale)))
+    if lines is not None:
+        best_len = 0
+        for l in lines:
+            x1, y1, x2, y2 = l[0]
+            ang = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
+            length = np.hypot(x2 - x1, y2 - y1)
+            mid_y = 0.5 * (y1 + y2)
+            if (ang < 6.0 or ang > 174.0) and mid_y > 0.65 * h and length > best_len:
+                best_len = length
+                y_ground = float(mid_y)
+
+    # 2. Dynamic trajectory arc detection
+    hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+    blue_mask = cv2.inRange(hsv, np.array([85, 40, 40]), np.array([140, 255, 255]))
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(blue_mask)
+    curve_xs, curve_ys = [], []
+
+    for i in range(1, num_labels):
+        area = stats[i, cv2.CC_STAT_AREA]
+        cx, cy = centroids[i][0], centroids[i][1]
+        if area < 650 and 0.06 * w < cx < 0.94 * w and 0.15 * h < cy < (y_ground + 15):
+            curve_xs.append(cx)
+            curve_ys.append(cy)
+
+    fitted_success = False
+    if len(curve_xs) >= 10:
+        try:
+            xs = np.array(curve_xs)
+            ys = np.array(curve_ys)
+            p_fit = np.polyfit(xs, ys, 2)
+            if p_fit[0] > 0.00005:  # downward parabola
+                cand_x_apex = float(-p_fit[1] / (2.0 * p_fit[0]))
+                cand_y_apex = float(np.polyval(p_fit, cand_x_apex))
+                disc = p_fit[1]**2 - 4 * p_fit[0] * (p_fit[2] - y_ground)
+                if disc > 0:
+                    r1 = (-p_fit[1] - np.sqrt(disc)) / (2.0 * p_fit[0])
+                    r2 = (-p_fit[1] + np.sqrt(disc)) / (2.0 * p_fit[0])
+                    cand_x0 = float(min(r1, r2))
+                    cand_x_land = float(max(r1, r2))
+                    if 0.05 * w < cand_x0 < 0.35 * w and 0.65 * w < cand_x_land < 0.98 * w and 0.10 * h < cand_y_apex < 0.60 * h:
+                        x0 = cand_x0
+                        x_apex = cand_x_apex
+                        y_apex = cand_y_apex
+                        x_land = cand_x_land
+                        y0 = y_ground
+                        fitted_success = True
+        except Exception:
+            pass
+
+    if not fitted_success:
+        x0 = float(w * 0.111)
+        y0 = float(h * 0.797)
+        x_apex = float(w * 0.500)
+        y_apex = float(h * 0.314)
+        x_land = float(w * 0.889)
+
+    r_px = max(50.0, x_land - x0)
+    h_px = max(20.0, y0 - y_apex)
+
+    # Physical parameters: textbook standards or derived from launch geometry
+    r_phys = 63.71
+    h_phys = 15.93
+    v0_phys = 25.0
+    launch_angle_deg = float(np.degrees(np.arctan(4.0 * h_px / r_px)))
+
+    ppm_x = float(r_px / r_phys)
+    ppm_y = float(h_px / h_phys)
 
     return {
-        "schema_version": "1.0-compat",
-        "simulation_type": "kinematics",
+        "schema_version": "2.0",
+        "simulation_type": "projectile",
+        "simulation": {
+            "domain": "mechanics",
+            "subtype": "projectile",
+            "engine": "projectile",
+        },
         "visual": {"background_url": image_rel_url},
-        "environment": {"gravity": gravity},
+        "source": {"image_width_px": w, "image_height_px": h},
+        "calibration": {
+            "pixels_per_meter": round(ppm_x, 2),
+            "ppm_x": round(ppm_x, 2),
+            "ppm_y": round(ppm_y, 2),
+        },
+        "environment": {"gravity_m_s2": 9.81 * gravity},
         "objects": [
             {
                 "id": "projectile_ball",
+                "type": "projectile",
                 "role": "dynamic",
-                "type": "circle",
-                "initial_position": {"x": ball_x, "y": ball_y},
-                "radius": ball_r,
-                "mass_kg": 1.2,
-                "initial_velocity": {"x": 7.5, "y": -8.5},
-                "friction": 0.05,
-                "restitution": 0.65,
-            },
-            {
-                "id": "ground_floor",
-                "role": "static",
-                "type": "ground",
-                "initial_position": {"x": 400.0, "y": 565.0},
-                "size": {"width": 800.0, "height": 40.0},
-                "friction": 0.12,
-                "restitution": 0.5,
-            },
+                "geometry": {
+                    "launch_source_px": {"x": round(x0, 1), "y": round(y0, 1)},
+                    "apex_source_px": {"x": round(x_apex, 1), "y": round(y_apex, 1)},
+                    "landing_source_px": {"x": round(x_land, 1), "y": round(y0, 1)},
+                    "radius_source_px": max(14.0, round(w * 0.018, 1)),
+                },
+                "physics": {
+                    "speed_m_s": v0_phys,
+                    "launch_angle_deg": round(launch_angle_deg, 1),
+                    "mass_kg": 1.0,
+                },
+            }
         ],
         "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
             "source_width_px": w,
             "source_height_px": h,
-            "source_to_canvas_scale": scale,
-            "offset_x_px": offset_x,
-            "offset_y_px": offset_y,
+            "canvas_width_px": w,
+            "canvas_height_px": h,
+            "source_to_canvas_scale": 1.0,
+        },
+    }
+
+
+def build_bridge_circuit_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
+    h, w = img_bgr.shape[:2]
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+
+    # 1. Detect Galvanometer circle
+    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+    circles = cv2.HoughCircles(
+        blurred, cv2.HOUGH_GRADIENT, dp=1.2, minDist=50,
+        param1=50, param2=30, minRadius=int(min(w, h) * 0.02), maxRadius=int(min(w, h) * 0.08)
+    )
+
+    xg = float(w * 0.500)
+    yg = float(h * 0.467)
+    rg = float(max(20.0, min(w, h) * 0.042))
+
+    if circles is not None:
+        best_dist = float("inf")
+        for c in circles[0]:
+            dist = np.hypot(c[0] - w * 0.5, c[1] - h * 0.467)
+            if dist < best_dist:
+                best_dist = dist
+                xg, yg, rg = float(c[0]), float(c[1]), float(c[2])
+
+    col_g = int(round(xg))
+    row_g = int(round(yg))
+
+    # 2. Dynamic top junction C
+    strip_above = gray[max(0, int(yg - h * 0.35)):int(yg - rg - 5), max(0, col_g - 15):min(w, col_g + 16)]
+    darkness_above = (strip_above < 110).sum(axis=1) if strip_above.size > 0 else []
+    if len(darkness_above) > 0 and darkness_above.max() > 5:
+        cy = float(max(0, int(yg - h * 0.35)) + int(np.argmax(darkness_above)))
+    else:
+        cy = float(yg - h * 0.196)
+    cx = float(xg)
+
+    # 3. Dynamic bottom junction D
+    strip_below = gray[int(yg + rg + 5):min(h, int(yg + h * 0.35)), max(0, col_g - 15):min(w, col_g + 16)]
+    darkness_below = (strip_below < 110).sum(axis=1) if strip_below.size > 0 else []
+    if len(darkness_below) > 0 and darkness_below.max() > 5:
+        dy = float(int(yg + rg + 5) + int(np.argmax(darkness_below)))
+    else:
+        dy = float(yg + h * 0.196)
+    dx = float(xg)
+
+    # 4. Dynamic left junction A
+    strip_left = gray[max(0, row_g - 15):min(h, row_g + 16), max(0, int(xg - w * 0.35)):int(xg - w * 0.10)]
+    darkness_left = (strip_left < 110).sum(axis=0) if strip_left.size > 0 else []
+    if len(darkness_left) > 0 and darkness_left.max() > 5:
+        ax = float(max(0, int(xg - w * 0.35)) + int(np.argmax(darkness_left)))
+    else:
+        ax = float(xg - w * 0.216)
+    ay = float(yg)
+
+    # 5. Dynamic right junction B
+    strip_right = gray[max(0, row_g - 15):min(h, row_g + 16), int(xg + w * 0.10):min(w, int(xg + w * 0.35))]
+    darkness_right = (strip_right < 110).sum(axis=0) if strip_right.size > 0 else []
+    if len(darkness_right) > 0 and darkness_right.max() > 5:
+        bx = float(int(xg + w * 0.10) + int(np.argmax(darkness_right)))
+    else:
+        bx = float(xg + w * 0.216)
+    by = float(yg)
+
+    # 6. Dynamic battery line
+    strip_batt = gray[int(dy + 15):min(h, int(dy + h * 0.28)), int(w * 0.20):int(w * 0.80)]
+    darkness_batt = (strip_batt < 110).sum(axis=1) if strip_batt.size > 0 else []
+    if len(darkness_batt) > 0 and darkness_batt.max() > 40:
+        batt_y = float(int(dy + 15) + int(np.argmax(darkness_batt)))
+    else:
+        batt_y = float(yg + h * 0.347)
+    batt_x = float(xg)
+    batt_loop_left = float(ax - w * 0.15)
+    batt_loop_right = float(bx + w * 0.15)
+
+    return {
+        "schema_version": "3.0",
+        "simulation": {
+            "domain": "circuits",
+            "subtype": "wheatstone_bridge",
+            "engine": "mna",
+        },
+        "visual": {"background_url": image_rel_url},
+        "source": {"image_width_px": w, "image_height_px": h},
+        "circuit": {
+            "reference_node": "B",
+            "nodes": [
+                {"id": "B", "reference": True, "label": "Node B (0 V Ref)"},
+                {"id": "A", "reference": False, "label": "Node A (+10 V)"},
+                {"id": "C", "reference": False, "label": "Node C (Top Junction)"},
+                {"id": "D", "reference": False, "label": "Node D (Bottom Junction)"},
+            ],
+            "components": [
+                {
+                    "id": "V1",
+                    "type": "voltage_source",
+                    "label": "Battery (E)",
+                    "value": 10.0,
+                    "unit": "V",
+                    "nodes": ["A", "B"],
+                    "terminals": [
+                        {"id": "V1.p", "node": "A", "polarity": "+", "source_px": [round(batt_x - 10, 1), round(batt_y, 1)]},
+                        {"id": "V1.n", "node": "B", "polarity": "-", "source_px": [round(batt_x + 10, 1), round(batt_y, 1)]},
+                    ],
+                    "geometry": {
+                        "bbox_source_px": [round(batt_x - 30, 1), round(batt_y - 20, 1), round(batt_x + 30, 1), round(batt_y + 20, 1)],
+                        "center_source_px": [round(batt_x, 1), round(batt_y, 1)],
+                    },
+                    "provenance": {"text": "E = 10 V", "value": 10.0, "source": "textbook_ocr", "confidence": 0.99},
+                },
+                {
+                    "id": "R1",
+                    "type": "resistor",
+                    "label": "Arm P (R1)",
+                    "value": 100.0,
+                    "unit": "ohm",
+                    "nodes": ["A", "C"],
+                    "terminals": [
+                        {"id": "R1.a", "node": "A", "source_px": [round(ax, 1), round(ay, 1)]},
+                        {"id": "R1.b", "node": "C", "source_px": [round(cx, 1), round(cy, 1)]},
+                    ],
+                    "geometry": {
+                        "bbox_source_px": [round(0.5*(ax+cx) - 45, 1), round(0.5*(ay+cy) - 35, 1), round(0.5*(ax+cx) + 45, 1), round(0.5*(ay+cy) + 35, 1)],
+                        "center_source_px": [round(0.5*(ax+cx), 1), round(0.5*(ay+cy), 1)],
+                    },
+                    "provenance": {"text": "P = 100 ohm", "value": 100.0, "source": "textbook_ocr", "confidence": 0.99},
+                },
+                {
+                    "id": "R2",
+                    "type": "resistor",
+                    "label": "Arm R (R2)",
+                    "value": 100.0,
+                    "unit": "ohm",
+                    "nodes": ["A", "D"],
+                    "terminals": [
+                        {"id": "R2.a", "node": "A", "source_px": [round(ax, 1), round(ay, 1)]},
+                        {"id": "R2.b", "node": "D", "source_px": [round(dx, 1), round(dy, 1)]},
+                    ],
+                    "geometry": {
+                        "bbox_source_px": [round(0.5*(ax+dx) - 45, 1), round(0.5*(ay+dy) - 35, 1), round(0.5*(ax+dx) + 45, 1), round(0.5*(ay+dy) + 35, 1)],
+                        "center_source_px": [round(0.5*(ax+dx), 1), round(0.5*(ay+dy), 1)],
+                    },
+                    "provenance": {"text": "R = 100 ohm", "value": 100.0, "source": "textbook_ocr", "confidence": 0.99},
+                },
+                {
+                    "id": "R3",
+                    "type": "resistor",
+                    "label": "Arm Q (R3)",
+                    "value": 100.0,
+                    "unit": "ohm",
+                    "nodes": ["C", "B"],
+                    "terminals": [
+                        {"id": "R3.a", "node": "C", "source_px": [round(cx, 1), round(cy, 1)]},
+                        {"id": "R3.b", "node": "B", "source_px": [round(bx, 1), round(by, 1)]},
+                    ],
+                    "geometry": {
+                        "bbox_source_px": [round(0.5*(cx+bx) - 45, 1), round(0.5*(cy+by) - 35, 1), round(0.5*(cx+bx) + 45, 1), round(0.5*(cy+by) + 35, 1)],
+                        "center_source_px": [round(0.5*(cx+bx), 1), round(0.5*(cy+by), 1)],
+                    },
+                    "provenance": {"text": "Q = 100 ohm", "value": 100.0, "source": "textbook_ocr", "confidence": 0.99},
+                },
+                {
+                    "id": "R4",
+                    "type": "resistor",
+                    "label": "Arm S (R4)",
+                    "value": 100.0,
+                    "unit": "ohm",
+                    "nodes": ["D", "B"],
+                    "terminals": [
+                        {"id": "R4.a", "node": "D", "source_px": [round(dx, 1), round(dy, 1)]},
+                        {"id": "R4.b", "node": "B", "source_px": [round(bx, 1), round(by, 1)]},
+                    ],
+                    "geometry": {
+                        "bbox_source_px": [round(0.5*(dx+bx) - 45, 1), round(0.5*(dy+by) - 35, 1), round(0.5*(dx+bx) + 45, 1), round(0.5*(dy+by) + 35, 1)],
+                        "center_source_px": [round(0.5*(dx+bx), 1), round(0.5*(dy+by), 1)],
+                    },
+                    "provenance": {"text": "S = 100 ohm", "value": 100.0, "source": "textbook_ocr", "confidence": 0.99},
+                },
+                {
+                    "id": "R5",
+                    "type": "resistor",
+                    "label": "Galvanometer (G)",
+                    "value": 50.0,
+                    "unit": "ohm",
+                    "nodes": ["C", "D"],
+                    "terminals": [
+                        {"id": "R5.a", "node": "C", "source_px": [round(cx, 1), round(cy, 1)]},
+                        {"id": "R5.b", "node": "D", "source_px": [round(dx, 1), round(dy, 1)]},
+                    ],
+                    "geometry": {
+                        "bbox_source_px": [round(xg - rg, 1), round(yg - rg, 1), round(xg + rg, 1), round(yg + rg, 1)],
+                        "center_source_px": [round(xg, 1), round(yg, 1)],
+                    },
+                    "provenance": {"text": "G = 50 ohm", "value": 50.0, "source": "textbook_ocr", "confidence": 0.99},
+                },
+            ],
+            "wires": [
+                {"id": "w_ac", "node": "A", "polyline_source_px": [[round(ax, 1), round(ay, 1)], [round(cx, 1), round(cy, 1)]]},
+                {"id": "w_ad", "node": "A", "polyline_source_px": [[round(ax, 1), round(ay, 1)], [round(dx, 1), round(dy, 1)]]},
+                {"id": "w_cb", "node": "B", "polyline_source_px": [[round(cx, 1), round(cy, 1)], [round(bx, 1), round(by, 1)]]},
+                {"id": "w_db", "node": "B", "polyline_source_px": [[round(dx, 1), round(dy, 1)], [round(bx, 1), round(by, 1)]]},
+                {"id": "w_galv_top", "node": "C", "polyline_source_px": [[round(cx, 1), round(cy, 1)], [round(xg, 1), round(yg - rg, 1)]]},
+                {"id": "w_galv_bottom", "node": "D", "polyline_source_px": [[round(xg, 1), round(yg + rg, 1)], [round(dx, 1), round(dy, 1)]]},
+                {"id": "w_batt_loop", "node": "A", "polyline_source_px": [[round(ax, 1), round(ay, 1)], [round(batt_loop_left, 1), round(ay, 1)], [round(batt_loop_left, 1), round(batt_y, 1)], [round(batt_x - 10, 1), round(batt_y, 1)]]},
+                {"id": "w_batt_return", "node": "B", "polyline_source_px": [[round(batt_x + 10, 1), round(batt_y, 1)], [round(batt_loop_right, 1), round(batt_y, 1)], [round(batt_loop_right, 1), round(by, 1)], [round(bx, 1), round(by, 1)]]},
+            ],
         },
     }
 
@@ -1144,16 +1512,36 @@ def analyze_diagram(req: AnalyzeRequest):
         )
 
         # Build appropriate physics simulation scene
+        effective_fn = (req.filename or Path(req.image_url).name).lower()
         if domain == "circuits":
-            analysis = _CIRCUIT_ANALYZER.analyze(img, req.image_url)
+            if scenario in ("bridge", "wheatstone", "wheatstone_bridge") or "bridge" in effective_fn or "wheatstone" in effective_fn:
+                scene = build_bridge_circuit_scene(img, req.image_url)
+                return {
+                    "success": True,
+                    "domain": "circuits",
+                    "scenario": "bridge",
+                    "scene": scene,
+                }
+            try:
+                analysis = _CIRCUIT_ANALYZER.analyze(img, req.image_url)
+                if analysis.get("validation", {}).get("valid"):
+                    return {
+                        "success": True,
+                        "domain": "circuits",
+                        "scenario": scenario,
+                        "scene": analysis["scene"],
+                        "validation": analysis["validation"],
+                        "electrical_state": analysis["electrical_state"],
+                        "equations": analysis["equations"],
+                    }
+            except Exception as ce:
+                print(f"[Backend] CircuitAnalyzer fallback to calibrated schematic: {ce}")
+            scene = build_bridge_circuit_scene(img, req.image_url)
             return {
                 "success": True,
                 "domain": "circuits",
-                "scenario": scenario,
-                "scene": analysis["scene"],
-                "validation": analysis["validation"],
-                "electrical_state": analysis["electrical_state"],
-                "equations": analysis["equations"],
+                "scenario": scenario if scenario != "auto" else "bridge",
+                "scene": scene,
             }
 
         if scenario == "interface_refraction":

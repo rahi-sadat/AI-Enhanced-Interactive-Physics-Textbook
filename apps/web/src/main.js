@@ -1,4 +1,4 @@
-/** main.js - Application entrypoint with domain switcher and diagram upload studio. */
+﻿/** main.js - Application entrypoint with domain switcher and diagram upload studio. */
 import './style.css';
 import { loadScene }        from '@engine/core/sceneLoader.js';
 import { createSimulation } from '@engine/core/sceneRouter.js';
@@ -47,7 +47,7 @@ export async function bootstrap(domain, sceneDataOrUrl = null) {
     // Auto-detect domain from scene if not explicitly forced
     const isCircuits = scene?.simulation?.domain === 'circuits' || scene?.simulation_type === 'circuits';
     const isOptics = scene?.simulation?.domain === 'optics' || scene?.simulation_type === 'optics';
-    const isMechanics = scene?.simulation?.domain === 'mechanics' || scene?.simulation_type === 'kinematics';
+    const isMechanics = scene?.simulation?.domain === 'mechanics' || scene?.simulation_type === 'kinematics' || scene?.simulation_type === 'projectile';
     const resolvedDomain = isCircuits ? 'circuits' : (isOptics ? 'optics' : (isMechanics ? 'mechanics' : domain));
 
     let activeBtnId = 'switch-mechanics';
@@ -293,6 +293,13 @@ btnGenerateSim?.addEventListener('click', async () => {
       series_parallel: { domain: 'circuits', url: '/scenes/circuits/series_parallel_scene.json' },
       newtons_cradle: { domain: 'mechanics', url: '/scenes/kinematics/newtons_cradle_scene.json' },
       incline: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
+      projectile: { domain: 'mechanics', url: '/scenes/kinematics/projectile_scene.json' },
+      prism: { domain: 'optics', url: '/scenes/optics/prism_scene.json' },
+      tir_prism: { domain: 'optics', url: '/scenes/optics/tir_prism_scene.json' },
+      thin_lens: { domain: 'optics', url: '/scenes/optics/thin_lens_scene.json' },
+      concave_lens: { domain: 'optics', url: '/scenes/optics/concave_lens_scene.json' },
+      interface_refraction: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
+      mirror: { domain: 'optics', url: '/scenes/optics/mirror_scene.json' },
     };
 
     const scenarioChoice = scenarioSelect?.value || 'auto';
@@ -319,6 +326,7 @@ btnGenerateSim?.addEventListener('click', async () => {
       {
         scenario: scenarioChoiceVal,
         focalLengthCm: focalCm,
+        filename: uploadedFile ? uploadedFile.name : '',
       },
       updateProgress
     );
@@ -401,4 +409,5 @@ figPills.forEach(({ id, url }) => {
     activeFigure?.load(url);
   });
 });
+
 

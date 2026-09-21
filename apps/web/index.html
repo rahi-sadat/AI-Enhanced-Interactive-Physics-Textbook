@@ -1,367 +1,1113 @@
-<!doctype html>
+﻿<!doctype html>
+
+
 <html lang="en">
+
+
   <head>
+
+
     <meta charset="UTF-8" />
+
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
     <title>AugmentedPhysics v2 &mdash; Interactive NCTB Textbook Simulator</title>
+
+
     <meta name="description" content="AI-enhanced interactive physics simulations on NCTB textbook diagrams." />
+
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+
   </head>
+
+
   <body>
+
+
     <div class="app">
 
+
+
+
+
       <!-- HEADER -->
+
+
       <header class="header">
+
+
         <div class="header-content">
+
+
           <div class="header-brand">
+
+
             <span class="brand-icon">&#9883;</span>
+
+
             <div>
+
+
               <h1>AugmentedPhysics</h1>
+
+
               <p class="header-sub">AI-Enhanced Interactive NCTB Textbook &mdash; v2</p>
+
+
             </div>
+
+
           </div>
+
+
+
+
 
           <div class="header-actions">
+
+
             <nav class="domain-switcher" role="tablist" aria-label="Simulation domain">
+
+
               <button id="switch-mechanics" class="domain-btn active" role="tab" aria-selected="true">
+
+
                 &#128099; Kinematics
+
+
               </button>
+
+
               <button id="switch-optics" class="domain-btn" role="tab" aria-selected="false">
+
+
                 &#128269; Geometric Optics
+
+
               </button>
+
+
               <button id="switch-circuits" class="domain-btn" role="tab" aria-selected="false">
+
+
                 &#9889; Circuits
+
+
               </button>
+
+
             </nav>
+
+
             <button id="btn-open-upload" class="upload-trigger-btn" title="Upload any physics diagram to generate an interactive simulation">
+
+
               <span class="upload-icon">&#128247;</span> Upload Diagram
+
+
             </button>
+
+
           </div>
+
+
         </div>
+
+
       </header>
 
+
+
+
+
       <!-- INTERACTIVE PLATFORM MODE SWITCHER & CANONICAL FIGURE SELECTOR -->
+
+
       <nav class="platform-mode-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 24px; background: rgba(15, 23, 42, 0.98); border-bottom: 1px solid rgba(148, 163, 184, 0.18); flex-wrap: wrap; gap: 12px;">
+
+
         <div style="display: flex; align-items: center; gap: 10px;">
+
+
           <span style="font-size: 0.78rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.06em;">Platform Mode:</span>
+
+
           <button id="view-mode-runtime" class="mode-tab-btn active" style="padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.5); background: rgba(56, 189, 248, 0.18); color: #38bdf8; font-weight: 600; font-size: 0.84rem; cursor: pointer; transition: all 0.2s;">
-            ⚡ Common Interactive Runtime &lt;InteractiveFigure&gt;
+
+
+            &#9881;&#65039; Common Interactive Runtime &lt;InteractiveFigure&gt;
           </button>
+
+
           <button id="view-mode-studio" class="mode-tab-btn" style="padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.2); background: transparent; color: #94a3b8; font-weight: 600; font-size: 0.84rem; cursor: pointer; transition: all 0.2s;">
-            🛠 Legacy Studio / Canvas
+
+
+            &#128295; Legacy Studio / Canvas
+
+
           </button>
+
+
         </div>
+
+
+
+
 
         <div id="runtime-figure-selector" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+
+
           <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 500;">Canonical Verification Figures:</span>
+
+
           <button id="fig-btn-pendulum" class="fig-pill-btn active" data-scene="/scenes/canonical/pendulum_figure.json" style="padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid #38bdf8; background: #0284c7; color: white;">
-            ⚖️ 1. Pendulum (Mechanics)
+
+
+            &#9878;&#65039; 1. Pendulum (Mechanics)
+
+
           </button>
+
+
           <button id="fig-btn-lens" class="fig-pill-btn" data-scene="/scenes/canonical/lens_figure.json" style="padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.8); color: #e2e8f0;">
-            🔍 2. Convex Lens (Optics)
+
+
+            &#128269; 2. Convex Lens (Optics)
+
+
           </button>
+
+
           <button id="fig-btn-circuit" class="fig-pill-btn" data-scene="/scenes/canonical/circuit_figure.json" style="padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.8); color: #e2e8f0;">
-            ⚡ 3. DC Loop (Circuits)
+
+
+            &#9889; 3. DC Loop (Circuits)
+
+
           </button>
+
+
         </div>
+
+
       </nav>
 
+
+
+
+
       <!-- RUNTIME DEMO VIEW CONTAINER (Mounted with <InteractiveFigure>) -->
+
+
       <section id="interactive-figure-container" style="padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+
+
       </section>
 
+
+
+
+
       <!-- MAIN STAGE (STUDIO) -->
+
+
       <main id="legacy-studio-layout" class="main-layout" style="display: none;">
 
 
+
+
+
+
+
+
         <!-- 2-layer stage: textbook image + transparent canvas overlay -->
+
+
         <div id="diagram-stage" class="diagram-stage">
+
+
           <img id="diagram-image" class="diagram-image" alt="Physics textbook diagram" />
+
+
           <div id="simulation-container" class="simulation-overlay"></div>
+
+
         </div>
+
+
+
+
 
         <!-- Side Panel -->
+
+
         <aside class="side-panel">
 
+
+
+
+
           <!-- MECHANICS CONTROLS -->
+
+
           <section id="mechanics-controls" class="controls-section">
-            <h2 class="section-title">👣 Mechanics Controls</h2>
+
+
+            <h2 class="section-title">&#9881;&#65039; MECHANICS CONTROLS</h2>
+
+
+
+
 
             <!-- NCTB Kinematics Diagram Scenario Selector -->
+
+
             <div class="control" style="margin-bottom: 8px;">
+
+
               <label for="mechanics-scene-select">NCTB Diagram Scenario</label>
+
+
               <select id="mechanics-scene-select" class="select">
-                <option value="with_spring">⛰️ ইনক্লাইন তল ও স্প্রিং (Ramp with Ball &amp; Spring)</option>
-                <option value="newtons_cradle">⚖️ নিউটনের দোলক ৫টি বব (Newton's Cradle: 5 Bobs Pendulum)</option>
+
+
+                <option value="with_spring">&#128208; Ramp with Ball &amp; Spring (Inclined Plane)</option>
+
+
+                <option value="newtons_cradle">&#9878;&#65039; Newton's Cradle (5 Bobs Pendulum)</option>
+
+
+                <option value="projectile">&#9917; 2D Projectile Motion (Kinematics)</option>
+
+
               </select>
+
+
             </div>
+
+
+
+
 
             <div class="button-group">
+
+
               <button id="play-button"  class="btn btn-primary">&#9654; Play</button>
+
+
               <button id="pause-button" class="btn btn-secondary">&#9208; Pause</button>
+
+
               <button id="reset-button" class="btn btn-secondary">&#8634; Reset</button>
+
+
             </div>
+
+
             <label class="toggle-label">
+
+
               <input type="checkbox" id="toggle-colliders" /> Show Colliders (Debug)
+
+
             </label>
+
+
             <div class="control">
+
+
               <label for="gravity-slider">Gravity: <span id="gravity-value" class="val-badge">1.0</span></label>
+
+
               <input id="gravity-slider" class="slider" type="range" min="0" max="2" step="0.1" value="1" />
+
+
             </div>
+
+
             <div class="control">
+
+
               <label for="speed-slider">Speed: <span id="speed-value" class="val-badge">1x</span></label>
+
+
               <input id="speed-slider" class="slider" type="range" min="0.1" max="2" step="0.1" value="1" />
+
+
             </div>
+
+
             <div class="control">
+
+
               <label for="target-object-select">Target object</label>
+
+
               <select id="target-object-select" class="select"></select>
+
+
             </div>
-            <div class="control">
-              <label for="velocity-slider">Initial X velocity: <span id="velocity-value" class="val-badge">0 m/s</span></label>
-              <input id="velocity-slider" class="slider" type="range" min="-10" max="10" step="1" value="0" />
-              <button id="apply-velocity-button" class="btn btn-accent">Apply</button>
+
+
+            <!-- Projectile Launch Speed (projectile mode only) -->
+            <div class="control" id="projectile-controls-group">
+              <label for="velocity-slider">&#9917; Launch Speed: <span id="velocity-value" class="val-badge">25 m/s</span></label>
+              <input id="velocity-slider" class="slider" type="range" min="5" max="60" step="1" value="25" />
+              <label for="angle-slider" style="margin-top:6px;display:block;">&#128200; Launch Angle: <span id="angle-value" class="val-badge">45&deg;</span></label>
+              <input id="angle-slider" class="slider" type="range" min="10" max="80" step="1" value="45" />
+              <button id="apply-velocity-button" class="btn btn-accent" style="margin-top:8px;">&#9654; Launch</button>
             </div>
+
+            <!-- Rigid Body Velocity (non-projectile mode) -->
+            <div class="control" id="rigidbody-controls-group">
+              <label for="rb-velocity-slider">Initial X velocity: <span id="rb-velocity-value" class="val-badge">0 m/s</span></label>
+              <input id="rb-velocity-slider" class="slider" type="range" min="-10" max="10" step="1" value="0" />
+              <button id="apply-rb-velocity-button" class="btn btn-accent" style="margin-top:4px;">Apply</button>
+            </div>
+
+
           </section>
+
+
+
+
 
           <!-- OPTICS CONTROLS -->
+
+
           <section id="optics-controls" class="controls-section" style="display:none">
-            <h2 class="section-title">Optics Controls</h2>
+
+
+            <h2 class="section-title">&#128269; OPTICS CONTROLS</h2>
+
+
+
+
 
             <!-- NCTB Diagram Scenario Selector -->
+
+
             <div class="control" style="margin-bottom: 6px;">
+
+
               <label for="optics-scene-select">NCTB Diagram Scenario</label>
+
+
               <select id="optics-scene-select" class="select">
+
+
                 <option value="thin_lens">&#128269; Convex Lens (Converging)</option>
+
+
                 <option value="concave_lens">&#128269; Concave Lens (Diverging)</option>
+
+
                 <option value="interface_refraction">&#127754; Interface Refraction (Snell's Law Rarer &rarr; Denser)</option>
+
+
                 <option value="prism">&#9651; Triangular Prism (Dispersion)</option>
+
+
                 <option value="glass_slab">&#9645; Rectangular Glass Slab (Lateral Shift)</option>
+
+
                 <option value="tir_prism">&#9699; 45&deg;-90&deg;-45&deg; TIR Prism (Periscope)</option>
+
+
                 <option value="mirror">&#129694; Spherical / Plane Mirror</option>
+
+
               </select>
+
+
             </div>
+
+
+
+
 
             <!-- Concept switcher subtabs -->
+
+
             <div class="optics-subtabs" role="tablist" aria-label="Optics concept">
+
+
               <button id="optics-tab-lens" class="optics-subtab active" data-concept="thin_lens">
+
+
                 &#128269; Thin Lens
+
+
               </button>
+
+
               <button id="optics-tab-interface" class="optics-subtab" data-concept="interface_refraction">
+
+
                 &#127754; Refraction
+
+
               </button>
+
+
               <button id="optics-tab-prism" class="optics-subtab" data-concept="prism">
+
+
                 &#9651; Prism
+
+
               </button>
+
+
               <button id="optics-tab-mirror" class="optics-subtab" data-concept="mirror">
+
+
                 &#129694; Mirror
+
+
               </button>
+
+
             </div>
+
+
+
+
 
             <!-- Sprite toggle -->
+
+
             <div id="sprite-toggle-group" class="control sprite-control">
+
+
               <label class="toggle-label">
+
+
                 <input type="checkbox" id="toggle-candle-sprite" /> Use Candle Sprite &#128367;&#65039;
+
+
               </label>
+
+
             </div>
+
+
+
+
 
             <!-- Interface Refraction Controls -->
+
+
             <div id="interface-controls-group" class="control" style="display:none; flex-direction: column; gap: 8px;">
+
+
               <div>
+
+
                 <label for="interface-preset-select">Media Pair Preset</label>
+
+
                 <select id="interface-preset-select" class="select" style="font-weight: 500;">
+
+
                   <option value="nctb_diagram">NCTB Diagram (1.83)</option>
+
+
                   <option value="air_water">Air (1.00) &rarr; Water (1.33)</option>
+
+
                   <option value="air_glass">Air (1.00) &rarr; Crown Glass (1.52)</option>
+
+
                   <option value="air_diamond">Air (1.00) &rarr; Diamond (2.42)</option>
+
+
                   <option value="water_air">Water (1.33) &rarr; Air (1.00) [TIR]</option>
+
+
                   <option value="glass_air">Glass (1.52) &rarr; Air (1.00) [TIR]</option>
+
+
                   <option value="custom">Custom (Use Sliders)</option>
+
+
                 </select>
+
+
               </div>
+
+
               <div class="control">
-                <label for="interface-n1-slider">Medium 1 (n₁): <span id="interface-n1-val" class="val-badge">1.00</span></label>
+
+
+                <label for="interface-n1-slider">Medium 1 (n<sub>1</sub>): <span id="interface-n1-val" class="val-badge">1.00</span></label>
+
+
                 <input id="interface-n1-slider" class="slider" type="range" min="1.00" max="2.42" step="0.01" value="1.00" />
+
+
               </div>
+
+
               <div class="control">
-                <label for="interface-n2-slider">Medium 2 (n₂): <span id="interface-n2-val" class="val-badge">1.33</span></label>
+
+
+                <label for="interface-n2-slider">Medium 2 (n<sub>2</sub>): <span id="interface-n2-val" class="val-badge">1.33</span></label>
+
+
                 <input id="interface-n2-slider" class="slider" type="range" min="1.00" max="2.42" step="0.01" value="1.33" />
+
+
               </div>
+
+
               <div class="control">
-                <label for="interface-theta-slider">Incident Angle &theta;₁: <span id="interface-theta-val" class="val-badge">45&deg;</span></label>
+
+
+                <label for="interface-theta-slider">Incident Angle &theta;<sub>1</sub>: <span id="interface-theta-val" class="val-badge">45&deg;</span></label>
+
+
                 <input id="interface-theta-slider" class="slider" type="range" min="0" max="85" step="1" value="45" />
+
+
               </div>
+
+
             </div>
+
+
+
+
 
             <!-- Focal slider group -->
+
+
             <div id="focal-slider-group" class="control">
+
+
               <label for="focal-length-slider">
+
+
                 Focal length f: <span id="focal-length-value" class="val-badge">130 px</span>
+
+
               </label>
+
+
               <input id="focal-length-slider" class="slider" type="range" min="60" max="250" step="5" value="130" />
+
+
             </div>
+
+
+
+
 
             <!-- Prism refractive index slider group -->
+
+
             <div id="prism-n-slider-group" class="control" style="display:none">
+
+
               <label for="prism-n-slider">
+
+
                 Refractive index n: <span id="prism-n-value" class="val-badge">1.52</span>
+
+
               </label>
+
+
               <input id="prism-n-slider" class="slider" type="range" min="1.10" max="2.42" step="0.01" value="1.52" />
+
+
             </div>
+
+
+
+
 
             <!-- Mirror type group -->
+
+
             <div id="mirror-type-group" class="control" style="display:none">
+
+
               <label for="mirror-type-select">Mirror Type</label>
+
+
               <select id="mirror-type-select" class="select">
+
+
                 <option value="concave">Concave Mirror (Converging)</option>
+
+
                 <option value="convex">Convex Mirror (Diverging)</option>
+
+
                 <option value="plane">Plane Mirror</option>
+
+
               </select>
+
+
             </div>
+
+
+
+
 
             <!-- Optics debug toggle -->
+
+
             <label class="toggle-label" style="margin-top: 2px;">
+
+
               <input type="checkbox" id="toggle-optics-debug" /> Show Coordinates &amp; Rays (Debug)
+
+
             </label>
 
+
+
+
+
             <p id="lens-hint" class="optics-hint">
+
+
               Drag the <span class="hint-green">green object</span> left/right to change distance <em>u</em>, or vertically at the tip to change height.
+
+
             </p>
+
+
             <p id="interface-hint" class="optics-hint" style="display:none">
+
+
               Drag the <span class="hint-amber">yellow ray source</span> or adjust the sliders to explore Snell's Law and Total Internal Reflection.
+
+
             </p>
+
+
             <p id="prism-hint" class="optics-hint" style="display:none">
+
+
               Drag the <span class="hint-amber">Beam Source</span> to change incident angle and observe refraction / Total Internal Reflection (TIR).
+
+
             </p>
+
+
             <p id="mirror-hint" class="optics-hint" style="display:none">
+
+
               Drag the <span class="hint-green">green object</span> to change position <em>u</em> and height, or toggle between concave and convex mirrors.
+
+
             </p>
+
+
+
+
 
             <!-- Live HUD card -->
+
+
             <div id="optics-hud" class="optics-hud">
+
+
               <div class="hud-title">Convex Lens</div>
+
+
               <p class="hud-loading">Loading&hellip;</p>
+
+
             </div>
+
+
           </section>
 
+
+
+
+
           <!-- CIRCUITS CONTROLS -->
+
+
           <section id="circuit-controls" class="controls-section" style="display:none"></section>
 
+
+
+
+
         </aside>
+
+
       </main>
+
+
     <!-- DIAGRAM UPLOAD & SIMULATION GENERATOR MODAL -->
+
+
     <div id="upload-modal" class="modal-backdrop" style="display: none;">
+
+
       <div class="modal-card">
+
+
         <div class="modal-header">
+
+
           <div class="modal-title-group">
+
+
             <h2 class="modal-title">&#128247; Upload Physics Diagram</h2>
+
+
             <p class="modal-subtitle">Upload any Kinematics or Optics textbook diagram to generate an interactive simulation</p>
+
+
           </div>
+
+
           <button id="btn-close-modal" class="modal-close-btn" aria-label="Close modal">&times;</button>
+
+
         </div>
+
+
+
+
 
         <div class="modal-body">
+
+
           <!-- Dropzone Area -->
+
+
           <div id="dropzone" class="dropzone">
+
+
             <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp" style="display: none;" />
+
+
             <div id="dropzone-prompt" class="dropzone-prompt">
+
+
               <div class="dropzone-icon">&#128229;</div>
+
+
               <p class="dropzone-text"><strong>Drag &amp; drop textbook diagram here</strong>, or <span class="dropzone-browse">browse files</span></p>
+
+
               <p class="dropzone-sub">Supports PNG, JPG, WebP (Kinematics slopes/balls or Optics lenses/prisms/mirrors)</p>
+
+
             </div>
+
+
             <div id="dropzone-preview" class="dropzone-preview" style="display: none;">
+
+
               <img id="preview-image" src="" alt="Uploaded diagram preview" />
+
+
               <div class="preview-meta">
+
+
                 <span id="preview-filename">filename.png</span> &bull; <span id="preview-dims">800&times;600</span>
+
+
                 <button id="btn-change-image" class="btn-text">Change Image</button>
+
+
               </div>
+
+
             </div>
+
+
           </div>
+
+
+
+
 
           <!-- Quick Presets -->
-          <div class="presets-section">
+
+
+                    <div class="presets-section">
+
+
             <span class="presets-label">Quick Textbook Diagram Presets:</span>
+
+
             <div class="presets-grid">
+
+
               <!-- Circuits -->
-              <button class="preset-pill circuit-pill" data-preset="circuit1">⚡ Circuit 1 (DC Loop)</button>
-              <button class="preset-pill circuit-pill" data-preset="circuit2">⚡ Circuit 2 (Multi-Branch)</button>
-              <button class="preset-pill circuit-pill" data-preset="circuit3">⚡ Circuit 3 (Series Loop)</button>
-              <button class="preset-pill circuit-pill" data-preset="circuit4">⚡ Circuit 4 (Resistor Ladder)</button>
+
+
+              <button class="preset-pill circuit-pill" data-preset="circuit1">&#9889; Circuit 1 (DC Loop)</button>
+
+
+              <button class="preset-pill circuit-pill" data-preset="circuit2">&#9889; Circuit 2 (Multi-Branch)</button>
+
+
+              <button class="preset-pill circuit-pill" data-preset="circuit3">&#9889; Circuit 3 (Series Loop)</button>
+
+
+              <button class="preset-pill circuit-pill" data-preset="circuit4">&#9889; Circuit 4 (Resistor Ladder)</button>
+
+
               <!-- Optics -->
+
+
               <button class="preset-pill" data-preset="snell_water">&#127754; Air &rarr; Water (Snell)</button>
+
+
               <button class="preset-pill" data-preset="snell">&#127754; Boundary Refraction (NCTB)</button>
+
+
               <button class="preset-pill" data-preset="mirror_cff">&#129694; Concave Mirror (NCTB)</button>
+
+
               <button class="preset-pill" data-preset="lens_cece">&#128269; Thin Lens (NCTB)</button>
+
+
               <button class="preset-pill" data-preset="prism">&#9651; Triangular Prism</button>
+
+
               <!-- Kinematics -->
-              <button class="preset-pill" data-preset="newtons_cradle">⚖️ Newton's Cradle (5 Bobs: pendulum.png)</button>
-              <button class="preset-pill" data-preset="spring">⛰️ Ball &amp; Spring on Ramp (with_spring.png)</button>
+
+
+              <button class="preset-pill" data-preset="newtons_cradle">&#9878;&#65039; Newton's Cradle (5 Bobs: pendulum.png)</button>
+
+
+              <button class="preset-pill" data-preset="spring">&#128208; Ball &amp; Spring on Ramp (with_spring.png)</button>
+
+
               <button class="preset-pill" data-preset="projectile_test">&#9917; Flight Projectile (Kinematics)</button>
+
+
             </div>
+
+
           </div>
+
+
+
+
 
           <!-- Domain & Configuration Options -->
+
+
           <div class="modal-controls-grid">
+
+
             <div class="control-col">
+
+
               <label for="upload-scenario-select">Target Concept / Scenario</label>
-              <select id="upload-scenario-select" class="select">
+
+
+                            <select id="upload-scenario-select" class="select">
+
+
                 <option value="auto">&#10024; Auto-Detect (AI Scanner)</option>
-                <optgroup label="⚡ Electric Circuits">
-                  <option value="circuit1">⚡ Circuit 1: DC Loop with Ammeters</option>
-                  <option value="circuit2">⚡ Circuit 2: Multi-Branch Network</option>
-                  <option value="circuit3">⚡ Circuit 3: Series Measurement Loop</option>
-                  <option value="circuit4">⚡ Circuit 4: Ladder Resistor Network</option>
-                  <option value="series_parallel">⚡ Series-Parallel DC Circuit</option>
-                  <option value="bridge">⚖️ Wheatstone Bridge Network</option>
+
+
+                <optgroup label="&#9889; Electric Circuits">
+
+
+                  <option value="circuit1">&#9889; Circuit 1: DC Loop with Ammeters</option>
+
+
+                  <option value="circuit2">&#9889; Circuit 2: Multi-Branch Network</option>
+
+
+                  <option value="circuit3">&#9889; Circuit 3: Series Measurement Loop</option>
+
+
+                  <option value="circuit4">&#9889; Circuit 4: Ladder Resistor Network</option>
+
+
+                  <option value="series_parallel">&#9889; Series-Parallel DC Circuit</option>
+
+
+                  <option value="bridge">&#9889; Wheatstone Bridge Network</option>
+
+
                 </optgroup>
-                <optgroup label="🔍 Geometric Optics">
+
+
+                <optgroup label="&#128269; Geometric Optics">
+
+
                   <option value="interface_refraction">&#127754; Interface Refraction (Snell's Law)</option>
+
+
                   <option value="thin_lens">&#128269; Thin Lens (Convex Converging)</option>
+
+
                   <option value="concave_lens">&#128269; Thin Lens (Concave Diverging)</option>
+
+
                   <option value="mirror">&#129694; Spherical Mirror (Concave / Convex)</option>
+
+
                   <option value="prism">&#9651; Triangular Prism (Dispersion)</option>
+
+
                 </optgroup>
-                <optgroup label="👣 Kinematics &amp; Dynamics">
-                  <option value="incline">⛰️ Inclined Plane &amp; Ramp with Spring</option>
-                  <option value="newtons_cradle">⚖️ Newton's Cradle (5 Bobs Pendulum)</option>
+
+
+                <optgroup label="&#9881;&#65039; Kinematics &amp; Dynamics">
+
+
+                  <option value="projectile">&#9917; 2D Projectile Motion (Kinematics)</option>
+
+
+                  <option value="incline">&#128208; Inclined Plane &amp; Ramp with Spring</option>
+
+
+                  <option value="newtons_cradle">&#9878;&#65039; Newton's Cradle (5 Bobs Pendulum)</option>
+
+
                   <option value="pendulum">&#9878;&#65039; Simple Pendulum</option>
-                  <option value="projectile">&#9917; Free Fall &amp; Projectile</option>
+
+
                 </optgroup>
+
+
               </select>
+
+
             </div>
+
+
             <div class="control-col">
+
+
               <label for="upload-domain-select">Physics Domain</label>
+
+
               <select id="upload-domain-select" class="select">
+
+
                 <option value="auto">&#10024; Auto-Detect</option>
+
+
                 <option value="circuits">&#9889; Circuits &amp; Electronics</option>
+
+
                 <option value="optics">&#128269; Geometric Optics</option>
+
+
                 <option value="mechanics">&#128099; Kinematics &amp; Dynamics</option>
+
+
               </select>
+
+
             </div>
+
+
             <div id="upload-optics-opts" class="control-col">
+
+
               <label for="upload-focal-cm">Textbook Focal Length (cm)</label>
+
+
               <input id="upload-focal-cm" type="number" class="text-input" value="20.0" min="5" max="100" step="1" />
+
+
             </div>
+
+
           </div>
+
+
+
+
 
           <!-- Progress Bar Area -->
+
+
           <div id="upload-progress-area" class="progress-area" style="display: none;">
+
+
             <div class="progress-bar-bg">
+
+
               <div id="upload-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+
+
             </div>
+
+
             <p id="upload-progress-status" class="progress-status">Initializing AI analysis...</p>
+
+
           </div>
+
+
         </div>
+
+
+
+
 
         <div class="modal-footer">
+
+
           <button id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+
+
           <button id="btn-generate-sim" class="btn btn-primary" disabled>
+
+
             &#9889; Generate Interactive Simulation
+
+
           </button>
+
+
         </div>
+
+
       </div>
+
+
     </div>
 
+
+
+
+
     <script type="module" src="/src/main.js"></script>
+
+
   </body>
+
+
 </html>
+
+
+
+
+
+
+
+
+
+
+

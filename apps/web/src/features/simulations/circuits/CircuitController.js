@@ -1,4 +1,4 @@
-/**
+﻿/**
  * circuits/CircuitController.js
  * Master lifecycle coordinator for Domain 3 (Circuits).
  * Integrates:
@@ -217,33 +217,33 @@ export class CircuitController {
 
     // Populate Side Panel HTML
     circuitSection.innerHTML = `
-      <h2 class="section-title">⚡ Circuit Controls</h2>
+      <h2 class="section-title">&#9889; CIRCUIT CONTROLS</h2>
 
       <!-- Scenario Selector -->
       <div class="control" style="margin-bottom: 8px;">
         <label for="circuit-scene-select">NCTB Diagram Scenario</label>
         <select id="circuit-scene-select" class="select">
-          <optgroup label="📋 Uploaded Textbook Schematics">
-            <option value="circuit1">⚡ Circuit 1: DC Loop with Ammeters (circuit1.png)</option>
-            <option value="circuit2">⚡ Circuit 2: Multi-Branch Network (circuit2.png)</option>
-            <option value="circuit3">⚡ Circuit 3: Series Measurement Loop (circuit3.png)</option>
-            <option value="circuit4">⚡ Circuit 4: Ladder Resistor Network (circuit4.png)</option>
+          <optgroup label="&#128247; Uploaded Textbook Schematics">
+            <option value="circuit1">&#9889; Circuit 1: DC Loop with Ammeters</option>
+            <option value="circuit2">&#9889; Circuit 2: Multi-Branch Network</option>
+            <option value="circuit3">&#9889; Circuit 3: Series Measurement Loop</option>
+            <option value="circuit4">&#9889; Circuit 4: Ladder Resistor Network</option>
           </optgroup>
-          <optgroup label="📖 NCTB Standard Scenarios">
-            <option value="series_parallel">⚡ অনুক্রমিক বর্তনী (Series Circuit: 12V, 10Ω, 20Ω)</option>
-            <option value="bridge">⚖️ হুইটস্টোন ব্রিজ (Wheatstone Bridge Network)</option>
+          <optgroup label="&#128218; NCTB Standard Scenarios">
+            <option value="series_parallel">&#9889; Series Circuit (12V, 10&#8486;, 20&#8486;)</option>
+            <option value="bridge">&#9889; Wheatstone Bridge Network</option>
           </optgroup>
         </select>
       </div>
 
       <!-- Mode Toolbar -->
       <div class="circuit-toolbar" role="toolbar" aria-label="Circuit tools">
-        <button class="circuit-tool-btn active" data-mode="inspect" title="Inspect elements">↖ Inspect</button>
-        <button class="circuit-tool-btn" data-mode="voltage-probe" title="Voltage probe (click 2 nodes)">⚡ V-Probe</button>
-        <button class="circuit-tool-btn" data-mode="current-probe" title="Current probe (click branch)">🔌 I-Probe</button>
-        <button class="circuit-tool-btn" data-mode="kcl" title="Kirchhoff's Current Law (click any node)">Σ KCL</button>
-        <button class="circuit-tool-btn" data-mode="kvl" title="Kirchhoff's Voltage Law (trace loop)">⟳ KVL</button>
-        <button class="circuit-tool-btn" id="btn-circuit-reset" title="Restore original textbook values">⟲ Restore</button>
+        <button class="circuit-tool-btn active" data-mode="inspect" title="Inspect elements">&#128270; Inspect</button>
+        <button class="circuit-tool-btn" data-mode="voltage-probe" title="Voltage probe (click 2 nodes)">&#9889; V-Probe</button>
+        <button class="circuit-tool-btn" data-mode="current-probe" title="Current probe (click branch)">&#8593; I-Probe</button>
+        <button class="circuit-tool-btn" data-mode="kcl" title="Kirchhoff's Current Law (click any node)">&#931; KCL</button>
+        <button class="circuit-tool-btn" data-mode="kvl" title="Kirchhoff's Voltage Law (trace loop)">&#10226; KVL</button>
+        <button class="circuit-tool-btn" id="btn-circuit-reset" title="Restore original textbook values">&#8635; Restore</button>
       </div>
 
       <!-- Display Toggles -->
@@ -475,3 +475,4 @@ export class CircuitController {
     if (circuitSection) circuitSection.style.display = 'none';
   }
 }
+
