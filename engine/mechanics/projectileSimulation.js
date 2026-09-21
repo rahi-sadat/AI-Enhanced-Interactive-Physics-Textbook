@@ -1,4 +1,4 @@
-/**
+﻿/**
  * mechanics/projectileSimulation.js
  * 
  * High-precision analytical projectile motion solver.
@@ -24,6 +24,8 @@ export class ProjectileSimulation {
 
     // Physical calibration
     this.ppm = Number(scene.calibration?.pixels_per_meter) || 50.0;
+    this.ppmX = Number(scene.calibration?.ppm_x) || this.ppm;
+    this.ppmY = Number(scene.calibration?.ppm_y) || this.ppm;
     this.g = Number(scene.environment?.gravity_m_s2) || 9.81;
 
     // Physics parameters in SI units
@@ -308,3 +310,4 @@ export class ProjectileSimulation {
     this.canvas?.remove();
   }
 }
+

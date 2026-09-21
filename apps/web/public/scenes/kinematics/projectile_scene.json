@@ -1,0 +1,109 @@
+{
+  "id": "projectile_canonical_figure",
+  "schema_version": "1.0-compat",
+  "domain": "mechanics",
+  "type": "projectile",
+  "simulation_type": "projectile",
+  "title": "2D Trajectory & Projectile Kinematics",
+  "visual": {
+    "background_url": "/scenes/kinematics/kinematics_projectile.png"
+  },
+  "coordinateSystem": {
+    "width": 1920,
+    "height": 878,
+    "unit": "source-pixel",
+    "pixelsPerUnit": 100
+  },
+  "environment": {
+    "gravity_m_s2": 9.81,
+    "ground_y": 750
+  },
+  "geometry": {
+    "ground_y": 750,
+    "source_width": 1920,
+    "source_height": 878
+  },
+  "parameters": {
+    "initialVelocity": {
+      "value": 25,
+      "unit": "m/s",
+      "label": "Launch Speed (v₀)",
+      "min": 5,
+      "max": 50,
+      "step": 0.5,
+      "provenance": "diagram_measurement"
+    },
+    "launchAngle": {
+      "value": 45,
+      "unit": "deg",
+      "label": "Launch Angle (θ)",
+      "min": 10,
+      "max": 85,
+      "step": 1,
+      "provenance": "diagram_measurement"
+    },
+    "gravity": {
+      "value": 9.81,
+      "unit": "m/s²",
+      "label": "Gravity (g)",
+      "min": 1,
+      "max": 25,
+      "step": 0.1,
+      "provenance": "assumed"
+    },
+    "mass": {
+      "value": 2,
+      "unit": "kg",
+      "label": "Projectile Mass (m)",
+      "min": 0.1,
+      "max": 10,
+      "step": 0.1,
+      "provenance": "assumed"
+    },
+    "airResistance": {
+      "value": 0.0005,
+      "unit": "kg/m",
+      "label": "Drag Coefficient (γ)",
+      "min": 0,
+      "max": 0.01,
+      "step": 0.0001,
+      "provenance": "assumed"
+    },
+    "restitution": {
+      "value": 0.65,
+      "unit": "",
+      "label": "Ground Restitution (e)",
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "provenance": "assumed"
+    }
+  },
+  "objects": [
+    {
+      "id": "projectile_ball",
+      "name": "Cannon Projectile",
+      "type": "projectile",
+      "role": "dynamic",
+      "initial_position": {
+        "x": 220,
+        "y": 720
+      },
+      "geometry": {
+        "launch_source_px": {
+          "x": 220,
+          "y": 720
+        },
+        "radius_source_px": 22
+      },
+      "radius": 22,
+      "physics": {
+        "speed_m_s": 25,
+        "launch_angle_deg": 45,
+        "mass_kg": 2,
+        "drag_coeff": 0.0005,
+        "restitution": 0.65
+      }
+    }
+  ]
+}
