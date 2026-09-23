@@ -67,6 +67,9 @@ storage/uploads/*
 !**/public/uploads/ray_diagram.png
 !**/public/uploads/two_resistors.png
 
+# Runtime-generated sprite assets
+**/public/sprites/element_bob_*.png
+
 # Root uploads and temporary frontend directories
 uploads/
 simulation_frontend/

@@ -5,8 +5,14 @@
  *   2. Instant in-browser Canvas Computer Vision fallback
  */
 
+export function isDemoFallbackEnabled() {
+  return (typeof process !== 'undefined' && process.env?.VITE_ENABLE_DEMO_FALLBACK === 'true') ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ENABLE_DEMO_FALLBACK === 'true');
+}
+
 /**
  * Uploads an image file to the backend.
+ * In strict mode, upload failure throws an error unless VITE_ENABLE_DEMO_FALLBACK is enabled.
  * @param {File} file
  * @returns {Promise<{success: boolean, image_url: string, width: number, height: number}>}
  */
@@ -22,36 +28,39 @@ export async function uploadDiagramFile(file) {
     if (res.ok) {
       return await res.json();
     }
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody.detail || `Upload failed with HTTP ${res.status}`);
   } catch (e) {
-    console.warn('[Analyzer] Backend upload endpoint unavailable, using local Object URL:', e);
+    if (isDemoFallbackEnabled()) {
+      console.warn('[Analyzer] Backend upload endpoint unavailable, using local Object URL (demo fallback enabled):', e);
+      const localUrl = URL.createObjectURL(file);
+      const dims = await getImageDimensions(localUrl);
+      return {
+        success: true,
+        image_url: localUrl,
+        width: dims.width,
+        height: dims.height,
+        isLocal: true,
+      };
+    }
+    throw new Error(`Upload failed: Backend upload endpoint unavailable (${e.message})`);
   }
-
-  // Fallback: create local object URL
-  const localUrl = URL.createObjectURL(file);
-  const dims = await getImageDimensions(localUrl);
-  return {
-    success: true,
-    image_url: localUrl,
-    width: dims.width,
-    height: dims.height,
-    isLocal: true,
-  };
 }
 
 /**
- * Runs diagram analysis through backend API or in-browser CV fallback.
+ * Runs diagram analysis through backend API or optional in-browser CV demo fallback.
  * @param {string} imageUrl
  * @param {string} domain 'auto' | 'optics' | 'mechanics'
  * @param {object} options
  * @param {function} onProgress
- * @returns {Promise<{domain: string, scene: object}>}
+ * @returns {Promise<{status: string, domain?: string, scenario?: string, scene?: object, issues?: array}>}
  */
 export async function analyzeDiagram(imageUrl, domain = 'auto', options = {}, onProgress = () => {}) {
   onProgress('Connecting to AI Analysis Engine...', 15);
 
   // 1. Try FastAPI backend
   try {
-    onProgress('Scanning diagram features with SAM 2 & CV...', 35);
+    onProgress('Analyzing diagram structure...', 35);
     const res = await fetch('/api/analyze-diagram', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -59,32 +68,39 @@ export async function analyzeDiagram(imageUrl, domain = 'auto', options = {}, on
         image_url: imageUrl,
         domain: domain,
         scenario: options.scenario || 'auto',
-        focal_length_cm: options.focalLengthCm || 20.0,
-        gravity: options.gravity || 1.0,
+        focal_length_cm: options.focalLengthCm ?? null,
+        gravity: options.gravity ?? null,
       }),
     });
 
     if (res.ok) {
       onProgress('Extracting geometry & calibrating physics...', 75);
       const data = await res.json();
-      if (data.success && data.scene) {
+      if (data.status === 'ready' && data.scene) {
         onProgress('Interactive simulation ready!', 100);
-        return {
-          domain: data.domain,
-          scenario: data.scenario,
-          scene: data.scene,
-        };
+      } else if (data.status === 'needs_review') {
+        onProgress('Analysis requires review.', 100);
+      } else if (data.status === 'unsupported') {
+        onProgress('Unsupported diagram concept.', 100);
+      } else {
+        onProgress('Analysis completed with issues.', 100);
       }
+      return data;
     }
-  } catch (err) {
-    console.warn('[Analyzer] Backend analysis unavailable, switching to in-browser CV engine:', err);
-  }
 
-  // 2. In-browser Canvas Computer Vision Fallback
-  onProgress('Running in-browser computer vision analysis...', 50);
-  const cvResult = await analyzeDiagramInBrowser(imageUrl, domain, options, onProgress);
-  onProgress('Interactive simulation ready!', 100);
-  return cvResult;
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || `Backend returned HTTP ${res.status}`);
+  } catch (err) {
+    if (isDemoFallbackEnabled()) {
+      console.warn('[Analyzer] Backend analysis unavailable, switching to in-browser CV engine (demo fallback enabled):', err);
+      onProgress('Running in-browser computer vision analysis...', 50);
+      const cvResult = await analyzeDiagramInBrowser(imageUrl, domain, options, onProgress);
+      onProgress('Interactive simulation ready!', 100);
+      return cvResult;
+    }
+    console.error('[Analyzer] Analysis failed:', err);
+    throw err;
+  }
 }
 
 /**

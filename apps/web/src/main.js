@@ -309,10 +309,31 @@ btnGenerateSim?.addEventListener('click', async () => {
       return;
     }
 
+    // Helper to display analysis issues in the review modal without closing it
+    const renderAnalysisIssues = (res) => {
+      btnGenerateSim.disabled = false;
+      if (!res) {
+        progressStatus.textContent = 'Analysis returned no response.';
+        return;
+      }
+      const issues = res.issues || [];
+      if (issues.length > 0) {
+        const msgs = issues.map((i) => i.message || i.code).join(' | ');
+        progressStatus.textContent = `Review required (${res.status}): ${msgs}`;
+      } else if (res.status === 'unsupported') {
+        progressStatus.textContent = `Unsupported scenario '${res.scenario || 'unknown'}'. Scene generation withheld.`;
+      } else if (res.status === 'needs_review') {
+        progressStatus.textContent = 'Analysis requires review. No simulation could be verified from evidence.';
+      } else {
+        progressStatus.textContent = `Status: ${res.status}. Scene generation withheld.`;
+      }
+    };
+
     // Run AI / CV analysis
     const domainChoice = domainSelect.value;
     const scenarioChoiceVal = scenarioChoice;
-    const focalCm = parseFloat(focalInput.value) || 20.0;
+    const parsedFocal = Number.parseFloat(focalInput?.value);
+    const focalCm = Number.isFinite(parsedFocal) ? parsedFocal : null;
     const result = await analyzeDiagram(
       finalImageUrl,
       domainChoice,
@@ -323,18 +344,26 @@ btnGenerateSim?.addEventListener('click', async () => {
       updateProgress
     );
 
+    // Strict gate: only ready responses with verified scenes proceed to bootstrap
+    if (!result || result.status !== 'ready' || !result.scene) {
+      renderAnalysisIssues(result);
+      return;
+    }
+
     setTimeout(() => {
       closeModal();
       if (uploadedImageUrl && result?.scene) {
         if (!result.scene.visual) result.scene.visual = {};
-        result.scene.visual.background_url = uploadedImageUrl;
+        if (!result.scene.visual.background_url) {
+          result.scene.visual.background_url = uploadedImageUrl;
+        }
       }
       bootstrap(result.domain, result.scene);
     }, 400);
   } catch (err) {
     console.error('[Upload] Analysis error:', err);
-    progressStatus.textContent = 'Analysis error. Falling back to default scene...';
-    setTimeout(closeModal, 1500);
+    progressStatus.textContent = `Analysis error: ${err.message || 'Failed to process diagram.'}`;
+    btnGenerateSim.disabled = false;
   }
 });
 

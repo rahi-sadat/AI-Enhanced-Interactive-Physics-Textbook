@@ -8,6 +8,7 @@ Provides automated diagram analysis and interactive simulation synthesis:
 from __future__ import annotations
 
 import json
+import math
 import os
 import shutil
 import sys
@@ -64,6 +65,7 @@ from ai.document_intelligence.parsing.optics_text import (
 
 # Kinematics imports
 from ai.scene_compiler.scene_builder import SceneBuilder, export_matterjs_compat
+from ai.perception.kinematics.pendulum_geometry import detect_pendulum_geometry
 
 # Circuits imports
 from ai.perception.circuits.circuit_analyzer import CircuitAnalyzer
@@ -131,8 +133,60 @@ class AnalyzeRequest(BaseModel):
     image_url: str
     domain: Optional[str] = "auto"
     scenario: Optional[str] = "auto"
-    focal_length_cm: Optional[float] = 20.0
-    gravity: Optional[float] = 1.0
+    focal_length_cm: Optional[float] = None
+    gravity: Optional[float] = None
+
+
+def make_analysis_response(
+    status: str,
+    domain: Optional[str] = None,
+    scenario: Optional[str] = None,
+    scene: Optional[dict] = None,
+    mode: str = "automatic",
+    width: int = 0,
+    height: int = 0,
+    coordinate_space: str = "source_px",
+    issues: Optional[list[dict]] = None,
+    assumptions: Optional[list[dict]] = None,
+    extracted_parameters: Optional[dict] = None,
+) -> dict:
+    """Constructs a strict analysis response envelope.
+
+    Structurally enforces the non-negotiable invariant:
+      - status == 'ready' requires a non-null scene.
+      - status != 'ready' cannot contain a scene.
+    """
+    allowed_statuses = {"ready", "needs_review", "unsupported", "error"}
+    if status not in allowed_statuses:
+        raise ValueError(f"Invalid analysis status '{status}'. Must be one of {allowed_statuses}")
+
+    if status == "ready" and scene is None:
+        raise RuntimeError("Invariant violation: READY response requires non-null scene")
+    if status != "ready" and scene is not None:
+        raise RuntimeError(f"Invariant violation: Non-ready response (status='{status}') cannot contain scene")
+
+    analysis_payload = {
+        "mode": mode,
+        "source": {
+            "width": width,
+            "height": height,
+            "coordinate_space": coordinate_space,
+        },
+    }
+    if assumptions is not None:
+        analysis_payload["assumptions"] = assumptions
+    if extracted_parameters is not None:
+        analysis_payload["extracted_parameters"] = extracted_parameters
+
+    return {
+        "success": True,
+        "status": status,
+        "domain": domain,
+        "scenario": scenario,
+        "scene": scene,
+        "analysis": analysis_payload,
+        "issues": issues or [],
+    }
 
 
 @app.get("/api/health")
@@ -172,17 +226,15 @@ async def upload_diagram(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def classify_diagram_concept(
+def legacy_heuristic_classifier(
     img_bgr: np.ndarray,
     filename: str = "",
     req_domain: str = "auto",
     req_scenario: str = "auto",
 ) -> tuple[str, str]:
-    """Classifies diagram into (domain, subtype).
-    
-    Supports:
-      - optics: interface_refraction, mirror, thin_lens, concave_lens, prism
-      - mechanics: pendulum, incline, projectile, spring_mass
+    """Research baseline heuristic classifier.
+    Preserved for benchmarking against VLM semantic router.
+    NOT invoked by production /api/analyze-diagram route.
     """
     # 1. User manual override
     if req_scenario and req_scenario != "auto":
@@ -267,8 +319,6 @@ def classify_diagram_concept(
         return ("mechanics", "projectile")
 
     # Check for Interface Refraction:
-    # A boundary horizontal line intersecting a normal vertical line in the central region,
-    # with the normal line extending both above and below the boundary, or with media color tint difference
     has_refraction = False
     for hx1, hy1, hx2, hy2, hlen in horiz_lines:
         hy = (hy1 + hy2) / 2.0
@@ -282,7 +332,6 @@ def classify_diagram_concept(
                 above = hy - min(vy1, vy2)
                 below = max(vy1, vy2) - hy
                 if above > 35 and below > 35:
-                    # Check for cool blue/cyan tint in bottom half (water or glass block)
                     bot_area = img_bgr[int(hy + 10):min(h, int(hy + 0.35 * h)), :int(0.7 * w)]
                     if bot_area.size > 0:
                         b_val = float(bot_area[:, :, 0].mean())
@@ -327,6 +376,47 @@ def classify_diagram_concept(
         return ("mechanics", "pendulum")
 
     return ("optics", "thin_lens")
+
+
+def classify_diagram_concept(
+    img_bgr: np.ndarray,
+    filename: str = "",
+    req_domain: str = "auto",
+    req_scenario: str = "auto",
+) -> tuple[Optional[str], Optional[str]]:
+    """Classifies diagram into (domain, subtype).
+    
+    Explicit scenario override supplies semantic intent only.
+    Automatic classification does not use filename or arbitrary heuristics;
+    in PR-01 it returns (None, None) until the PR-02 VLM semantic router is integrated.
+    """
+    if req_scenario and req_scenario != "auto":
+        sc = req_scenario.lower()
+        if sc in ("circuits", "circuit", "circuit1", "circuit2", "circuit3", "circuit4", "dc_circuit", "series_parallel", "voltage_divider", "bridge", "wheatstone", "wheatstone_bridge", "rc_transient"):
+            return ("circuits", "dc_linear" if sc in ("circuits", "circuit") else sc)
+        if sc in ("interface_refraction", "snell", "boundary"):
+            return ("optics", "interface_refraction")
+        if sc in ("mirror", "concave_mirror", "convex_mirror"):
+            return ("optics", "mirror")
+        if sc in ("thin_lens", "convex_lens"):
+            return ("optics", "thin_lens")
+        if sc == "concave_lens":
+            return ("optics", "concave_lens")
+        if sc in ("prism", "glass_slab", "tir_prism"):
+            return ("optics", "prism")
+        if sc in ("pendulum", "simple_pendulum"):
+            return ("mechanics", "pendulum")
+        if sc in ("newtons_cradle", "cradle"):
+            return ("mechanics", "newtons_cradle")
+        if sc in ("incline", "inclined_plane"):
+            return ("mechanics", "incline")
+        if sc in ("projectile", "free_fall"):
+            return ("mechanics", "projectile")
+        if sc in ("spring", "spring_mass"):
+            return ("mechanics", "spring_mass")
+        return (None, None)
+
+    return (None, None)
 
 
 def build_interface_refraction_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
@@ -889,61 +979,58 @@ def build_prism_scene(img_bgr: np.ndarray, image_rel_url: str) -> dict:
     }
 
 
-def build_pendulum_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: float = 1.0) -> dict:
+def build_pendulum_scene(img_bgr: np.ndarray, image_rel_url: str, gravity: Optional[float] = None) -> dict:
     h, w = img_bgr.shape[:2]
-    canvas_w, canvas_h = 800.0, 600.0
-    scale = min(canvas_w / float(w), canvas_h / float(h))
-    offset_x = (canvas_w - w * scale) / 2.0
-    offset_y = (canvas_h - h * scale) / 2.0
-
-    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
-    circles = cv2.HoughCircles(
-        blurred, cv2.HOUGH_GRADIENT, 1.2, 40,
-        param1=50, param2=35, minRadius=14, maxRadius=int(min(h, w) * 0.25)
+    det = detect_pendulum_geometry(
+        img_bgr,
+        output_dir=FRONTEND_SPRITES,
+        clean_bg_dir=FRONTEND_UPLOADS,
+        image_rel_url=image_rel_url,
     )
+    bx = det["bob_center"]["x"]
+    by = det["bob_center"]["y"]
+    px = det["pivot"]["x"]
+    py = det["pivot"]["y"]
+    radius = det["bob_radius_px"]
+    length = det["string_length_px"]
 
-    bob_x = 280.0
-    bob_y = 390.0
-    bob_r = 24.0
+    gravity_m_s2 = float(gravity) if gravity is not None else 9.81
 
-    if circles is not None:
-        c = circles[0][0]
-        bob_x = float(offset_x + c[0] * scale)
-        bob_y = float(offset_y + c[1] * scale)
-        bob_r = float(max(14.0, min(36.0, c[2] * scale)))
-
-    pivot_x = float(min(700.0, max(100.0, bob_x + 90.0 * scale)))
-    pivot_y = float(max(30.0, bob_y - 250.0 * scale))
+    pendulum_obj = {
+        "id": "pendulum_system",
+        "role": "dynamic",
+        "type": "pendulum",
+        "model": "ideal_pendulum",
+        "pivot": {"x": px, "y": py},
+        "bob_position": {"x": bx, "y": by},
+        "radius": radius,
+        "length": length,
+        "string_length_px": length,
+        "mass_kg": None,
+        "initial_velocity": None,
+        "damping": 0.0,
+        "friction": 0.0,
+        "friction_air": 0.0,
+        "restitution": 1.0,
+    }
+    if det.get("sprite_url"):
+        pendulum_obj["visual"] = {"sprite_url": det["sprite_url"]}
 
     return {
         "schema_version": "1.0-compat",
         "simulation_type": "kinematics",
-        "visual": {"background_url": image_rel_url},
-        "environment": {"gravity": gravity},
-        "objects": [
-            {
-                "id": "pendulum_system",
-                "role": "dynamic",
-                "type": "pendulum",
-                "pivot": {"x": pivot_x, "y": pivot_y},
-                "bob_position": {"x": bob_x, "y": bob_y},
-                "radius": bob_r,
-                "mass_kg": 1.5,
-                "initial_velocity": {"x": 2.2, "y": 0.0},
-                "friction": 0.001,
-                "friction_air": 0.0005,
-                "restitution": 0.95,
-            }
-        ],
+        "visual": {"background_url": det.get("clean_bg_url") or image_rel_url},
+        "environment": {
+            "gravity": gravity_m_s2,
+            "gravity_m_s2": gravity_m_s2,
+        },
+        "objects": [pendulum_obj],
         "render": {
-            "canvas_width_px": 800,
-            "canvas_height_px": 600,
+            "canvas_width_px": w,
+            "canvas_height_px": h,
             "source_width_px": w,
             "source_height_px": h,
-            "source_to_canvas_scale": scale,
-            "offset_x_px": offset_x,
-            "offset_y_px": offset_y,
+            "coordinate_space": "source_px",
         },
     }
 
@@ -1135,7 +1222,10 @@ def analyze_diagram(req: AnalyzeRequest):
         if img is None:
             raise HTTPException(status_code=400, detail="Could not read image with OpenCV")
 
-        # Classify domain and concept
+        h, w = img.shape[:2]
+        is_user_override = bool(req.scenario and req.scenario != "auto")
+        mode = "user_override" if is_user_override else "automatic"
+
         domain, scenario = classify_diagram_concept(
             img,
             filename=Path(req.image_url).name,
@@ -1143,44 +1233,218 @@ def analyze_diagram(req: AnalyzeRequest):
             req_scenario=req.scenario or "auto",
         )
 
-        # Build appropriate physics simulation scene
-        if domain == "circuits":
-            analysis = _CIRCUIT_ANALYZER.analyze(img, req.image_url)
-            return {
-                "success": True,
-                "domain": "circuits",
-                "scenario": scenario,
-                "scene": analysis["scene"],
-                "validation": analysis["validation"],
-                "electrical_state": analysis["electrical_state"],
-                "equations": analysis["equations"],
+        if not is_user_override:
+            # PR-01 automatic mode: safely abstain without fabricating scenes
+            return make_analysis_response(
+                status="needs_review",
+                domain=None,
+                scenario=None,
+                scene=None,
+                mode="automatic",
+                width=w,
+                height=h,
+                issues=[
+                    {
+                        "code": "NO_CONFIDENT_SUPPORTED_CONCEPT",
+                        "message": "No supported physics concept was identified with sufficient confidence.",
+                    }
+                ],
+            )
+
+        # User override mode: user supplied semantic intent
+        if scenario is None:
+            return make_analysis_response(
+                status="unsupported",
+                domain=None,
+                scenario=req.scenario,
+                scene=None,
+                mode="user_override",
+                width=w,
+                height=h,
+                issues=[
+                    {
+                        "code": "UNSUPPORTED_SCENARIO",
+                        "message": f"Scenario '{req.scenario}' is not supported.",
+                    }
+                ],
+            )
+
+        # In PR-01, ONLY pendulum has strict evidence-based extraction
+        if scenario == "pendulum":
+            try:
+                det = detect_pendulum_geometry(
+                    img,
+                    output_dir=FRONTEND_SPRITES,
+                    clean_bg_dir=FRONTEND_UPLOADS,
+                    image_rel_url=req.image_url,
+                )
+            except ValueError as ve:
+                err_msg = str(ve)
+                code = "BOB_NOT_FOUND" if "bob" in err_msg.lower() and "string" not in err_msg.lower() else "STRING_NOT_FOUND"
+                return make_analysis_response(
+                    status="needs_review",
+                    domain="mechanics",
+                    scenario="pendulum",
+                    scene=None,
+                    mode="user_override",
+                    width=w,
+                    height=h,
+                    issues=[{"code": code, "message": err_msg}],
+                )
+            except Exception as ex:
+                return make_analysis_response(
+                    status="needs_review",
+                    domain="mechanics",
+                    scenario="pendulum",
+                    scene=None,
+                    mode="user_override",
+                    width=w,
+                    height=h,
+                    issues=[{"code": "PENDULUM_DETECTION_FAILED", "message": str(ex)}],
+                )
+
+            # Deterministic geometry sanity validation
+            bob = det.get("bob_center", {})
+            pivot = det.get("pivot", {})
+            radius = float(det.get("bob_radius_px", 0.0))
+            length = float(det.get("string_length_px", 0.0))
+            theta0 = float(det.get("theta0_rad", 0.0))
+
+            bx = float(bob.get("x", float("nan")))
+            by = float(bob.get("y", float("nan")))
+            px = float(pivot.get("x", float("nan")))
+            py = float(pivot.get("y", float("nan")))
+
+            geom_valid = True
+            geom_issue = ""
+
+            if not (math.isfinite(bx) and math.isfinite(by) and math.isfinite(px) and math.isfinite(py)):
+                geom_valid = False
+                geom_issue = "Bob or pivot coordinates are non-finite."
+            elif not (0 <= bx <= w and 0 <= by <= h and 0 <= px <= w and 0 <= py <= h):
+                geom_valid = False
+                geom_issue = f"Bob ({bx:.1f}, {by:.1f}) or pivot ({px:.1f}, {py:.1f}) outside source bounds ({w}x{h})."
+            elif py >= by:
+                geom_valid = False
+                geom_issue = f"Pivot y ({py:.1f}) must be strictly above bob y ({by:.1f})."
+            elif radius <= 4.0 or radius > min(w, h) * 0.4:
+                geom_valid = False
+                geom_issue = f"Bob radius ({radius:.1f}px) is implausible for image size ({w}x{h})."
+            elif length < 2.0 * radius or length > math.hypot(w, h):
+                geom_valid = False
+                geom_issue = f"String length ({length:.1f}px) is implausible relative to bob radius or image diagonal."
+            elif abs(length - math.hypot(bx - px, by - py)) > 1.0:
+                geom_valid = False
+                geom_issue = f"String length ({length:.1f}px) inconsistent with distance between bob and pivot."
+            elif abs(theta0 - math.atan2(bx - px, by - py)) > 0.05:
+                geom_valid = False
+                geom_issue = "Reported initial angle inconsistent with coordinate vector."
+
+            if not geom_valid:
+                return make_analysis_response(
+                    status="needs_review",
+                    domain="mechanics",
+                    scenario="pendulum",
+                    scene=None,
+                    mode="user_override",
+                    width=w,
+                    height=h,
+                    issues=[{
+                        "code": "PENDULUM_GEOMETRY_INCONSISTENT",
+                        "message": f"Geometry sanity check failed: {geom_issue}",
+                    }],
+                )
+
+            gravity_m_s2 = float(req.gravity) if req.gravity is not None else 9.81
+
+            pendulum_obj = {
+                "id": "pendulum_system",
+                "role": "dynamic",
+                "type": "pendulum",
+                "model": "ideal_pendulum",
+                "pivot": {"x": px, "y": py},
+                "bob_position": {"x": bx, "y": by},
+                "radius": radius,
+                "length": length,
+                "string_length_px": length,
+                "mass_kg": None,
+                "initial_velocity": None,
+                "damping": 0.0,
+                "friction": 0.0,
+                "friction_air": 0.0,
+                "restitution": 1.0,
+            }
+            if det.get("sprite_url"):
+                pendulum_obj["visual"] = {"sprite_url": det["sprite_url"]}
+
+            scene = {
+                "schema_version": "1.0-compat",
+                "simulation_type": "kinematics",
+                "visual": {"background_url": det.get("clean_bg_url") or req.image_url},
+                "environment": {
+                    "gravity": gravity_m_s2,
+                    "gravity_m_s2": gravity_m_s2,
+                },
+                "objects": [pendulum_obj],
+                "render": {
+                    "canvas_width_px": w,
+                    "canvas_height_px": h,
+                    "source_width_px": w,
+                    "source_height_px": h,
+                    "coordinate_space": "source_px",
+                },
             }
 
-        if scenario == "interface_refraction":
-            scene = build_interface_refraction_scene(img, req.image_url)
-        elif scenario == "mirror":
-            scene = build_mirror_scene(img, req.image_url, mirror_type="concave")
-        elif scenario == "prism":
-            scene = build_prism_scene(img, req.image_url)
-        elif scenario == "concave_lens":
-            scene = build_thin_lens_scene(img, req.image_url, req.focal_length_cm or 20.0, model="concave")
-        elif scenario == "pendulum":
-            scene = build_pendulum_scene(img, req.image_url, req.gravity or 1.0)
-        elif scenario == "incline":
-            scene = build_incline_scene(img, req.image_url, req.gravity or 1.0)
-        elif scenario == "projectile":
-            scene = build_projectile_scene(img, req.image_url, req.gravity or 1.0)
-        elif scenario == "spring_mass":
-            scene = build_spring_mass_scene(img, req.image_url, req.gravity or 1.0)
-        else: # default thin_lens
-            scene = build_thin_lens_scene(img, req.image_url, req.focal_length_cm or 20.0, model="convex")
+            assumptions = [
+                {
+                    "parameter": "gravity_m_s2",
+                    "value": gravity_m_s2,
+                    "status": "user_provided" if req.gravity is not None else "assumed",
+                    "source": "user_override" if req.gravity is not None else "standard_earth",
+                },
+                {
+                    "parameter": "damping",
+                    "value": 0.0,
+                    "status": "assumed",
+                    "source": "ideal_textbook_model",
+                },
+            ]
+            extracted_params = {
+                "theta0_rad": theta0,
+                "string_length_px": length,
+                "geometry_score": det.get("confidence"),
+            }
 
-        return {
-            "success": True,
-            "domain": domain,
-            "scenario": scenario,
-            "scene": scene,
-        }
+            return make_analysis_response(
+                status="ready",
+                domain="mechanics",
+                scenario="pendulum",
+                scene=scene,
+                mode="user_override",
+                width=w,
+                height=h,
+                assumptions=assumptions,
+                extracted_parameters=extracted_params,
+            )
+
+        # For all other uploaded-image scenarios in PR-01, return needs_review with STRICT_EXTRACTION_NOT_IMPLEMENTED
+        return make_analysis_response(
+            status="needs_review",
+            domain=domain,
+            scenario=scenario,
+            scene=None,
+            mode="user_override",
+            width=w,
+            height=h,
+            issues=[
+                {
+                    "code": "STRICT_EXTRACTION_NOT_IMPLEMENTED",
+                    "message": f"Strict geometry extraction for '{scenario}' is not yet implemented in PR-01. Scene generation withheld to prevent fabrication.",
+                }
+            ],
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
