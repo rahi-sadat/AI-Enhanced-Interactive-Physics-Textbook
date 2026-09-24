@@ -28,6 +28,8 @@ outputs/
 *.zip
 *.log
 *.tmp
+*.diff
+*.patch
 
 # System & OS Files
 .DS_Store

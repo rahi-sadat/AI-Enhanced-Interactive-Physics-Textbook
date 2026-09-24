@@ -195,7 +195,7 @@ console.log('\n[4/4] Testing CircuitAdapter (DC Series Loop with MNA):');
   assertClose(state1.nodeVoltages.N1b, 12.0, 0.1, 'Node N1b voltage is 12.0 V');
   assertClose(state1.nodeVoltages.N2, 8.0, 0.1, 'Node N2 voltage is 8.0 V');
   assertClose(state1.nodeVoltages.N0, 0.0, 0.01, 'Node N0 (ground) is 0.0 V');
-  assertClose(state1.branchCurrents['R1.branch'], 400.0, 1.0, 'Branch current through R1 is 400 mA');
+  assertClose(state1.branchCurrents.R1 * 1000.0, 400.0, 1.0, 'Branch current through R1 is 400 mA');
   assertClose(state1.totalPower, 4.8, 0.2, 'Total DC power is 4.8 W');
 
   // Change R1 from 10 Ω to 20 Ω:
@@ -206,7 +206,7 @@ console.log('\n[4/4] Testing CircuitAdapter (DC Series Loop with MNA):');
   runtime.setParameter('R1', 20.0);
   const state2 = runtime.getState();
   assertClose(state2.nodeVoltages.N2, 6.0, 0.1, 'Updated node N2 voltage is 6.0 V');
-  assertClose(state2.branchCurrents['R1.branch'], 300.0, 1.0, 'Updated branch current is 300 mA');
+  assertClose(state2.branchCurrents.R1 * 1000.0, 300.0, 1.0, 'Updated branch current is 300 mA');
   assertClose(state2.totalPower, 3.6, 0.2, 'Updated total power is 3.6 W');
 
   const r1Param = runtime.getParameter('R1');

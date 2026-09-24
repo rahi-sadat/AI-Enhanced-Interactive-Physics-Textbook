@@ -537,6 +537,39 @@ graph LR
 - **Authoritative MNA & SPICE Adapter**: NumPy MNA engine solving node voltages, branch currents, powers, and KCL residuals. Step-by-step equation derivation engine with bilingual explanations. SPICE netlist generator with sandboxed ngspice verification.
 - **Schematic Perception Pipeline & Uploads Verification**: Diagram region cropping, text masking, wire skeletonization via `scikit-image`, PCA terminal localization, junction classification, and spatial-semantic parameter binding. Verified on uploaded schematics `circuit1.png` - `circuit4.png` with 11 automated tests.
 
+### ✅ PR-01: Strict Automatic Analysis Audit & Anti-Fabrication Invariants
+- **Core Principle**: No automatic path may convert missing or uncertain evidence into fabricated runnable physics.
+- **Abstention & Review Policy**: Ambiguous or uncalibrated scenario uploads return `needs_review` with specific issue codes (`STRICT_PENDULUM_NOT_FOUND`, `STRICT_LENS_AXIS_NOT_FOUND`, etc.) and `scene: null`.
+- **Null Defaults**: Request payloads pass `gravity: null` and `focal_length_cm: null` rather than fabricating arbitrary constants ($g=9.81$ or $f=20$).
+
+### ✅ PR-02: Canonical Physics Runtime & Multi-Domain Solver Registry
+- **Unified Runtime Architecture**:
+  ```text
+  PhysicsScene
+       ↓
+  Structural Validation (JSON Schema)
+       ↓
+  Semantic Validation (engine/core/validation.js)
+       ↓
+  PhysicsRuntime
+       ↓
+  SolverRegistry
+   ┌─────────────┼─────────────┐
+   ▼             ▼             ▼
+  Mechanics     Optics       Circuits
+   Adapter       Adapter      Adapter
+   (Pendulum/    (Lens/Mirror/ (MNA DC
+    Projectile)   Snell/Prism)  Linear)
+  ```
+- **Authoritative JSON Schema**: `shared/schemas/physicsScene.schema.json` is the sole structural source of truth. Internal canonical properties are `subtype` and `coordinateSpace`.
+- **Discriminated CoordinateSpace**: Supports `source_px` (textbook overlay), `world` (physics-generated simulation in meters), and `local` (synthetic text-scenario visualization).
+- **Validation vs. Solver Support Separation**: Well-formed scenes of unimplemented physical subtypes (e.g. `mechanics/inclined_plane`) cleanly pass validation and throw `UnsupportedPhysicsSubtypeError` upon adapter routing.
+- **Operational Physical Units**: `getParameterInUnit(scene, path, targetUnit)` converts units across metric prefixes and validates physical dimension compatibility (rejects assigning grams to meters).
+- **Targeted Parameter Addressing**: Stable multi-component addresses (`"R2.resistance"` or `{ targetId, key, value, unit }`) with explicit `"student"` provenance tracking.
+- **Unified Engine Lifecycle**: `load`, `start`, `pause`, `step`, `reset`, `updateParameter`, `getOutput`, `dispose`.
+- **Strict UI Decoupling**: All engine modules under `engine/` are pure mathematical runtimes with 0 imports from `apps/`.
+
 ### 🔄 Phase 13: Full-Page NCTB Layout Parser & Bangla Voice Tutor
 - Multi-diagram full page PDF layout analysis.
 - Bilingual (Bangla + English) conversational tutoring agent with synchronized simulation object highlighting.
+

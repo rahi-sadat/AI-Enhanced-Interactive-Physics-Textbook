@@ -9,13 +9,15 @@
  */
 
 import { CoordinateMapper } from '../core/coordinateMapper.js';
+import { PendulumKernel } from './kernels.js';
 
 export class PendulumSimulation {
   /**
    * @param {HTMLElement} container
    * @param {object} scene - Canonical Schema 3.0 scene
+   * @param {object} options - Optional { kernel, ... }
    */
-  constructor(container, scene) {
+  constructor(container, scene, options = {}) {
     this.container = container;
     this.scene = scene;
 
@@ -28,25 +30,28 @@ export class PendulumSimulation {
     this.geometry = pendulumObj.geometry;
     this.physics = pendulumObj.physics || {};
 
-    // Physics parameters in SI units
-    this.g = Number(scene.environment?.gravity_m_s2) || 9.81;
-    this.lengthM = Number(this.physics.length_m) || 1.0;
-    this.calibrated = Boolean(this.physics.length_m && this.physics.length_m > 0);
-    this.massKg = Number(this.physics.mass_kg) || 1.0; // Used for energy display
-    this.damping = Number(this.physics.damping_s_inv) || 0.0;
+    const g = Number(scene.environment?.gravity_m_s2);
+    const lengthM = Number(this.physics.length_m);
+    const massKg = Number(this.physics.mass_kg);
+    const damping = Number(this.physics.damping_s_inv);
+    const theta0 = Number(this.physics.theta0_rad);
+    const omega0 = Number(this.physics.omega0_rad_s) || 0.0;
 
-    // Initial state: theta measured from downward vertical (rad)
-    this.theta0 = Number(this.physics.theta0_rad) || 0.0;
-    this.omega0 = Number(this.physics.omega0_rad_s) || 0.0;
+    this.kernel = options.kernel || new PendulumKernel({
+      lengthM: Number.isFinite(lengthM) ? lengthM : 1.0,
+      gravityMS2: Number.isFinite(g) ? g : 9.81,
+      theta0Rad: Number.isFinite(theta0) ? theta0 : 0.0,
+      omega0Rad: omega0,
+      massKg: Number.isFinite(massKg) ? massKg : 1.0,
+      damping: Number.isFinite(damping) ? damping : 0.0
+    });
 
-    this.theta = this.theta0;
-    this.omega = this.omega0;
-    this.prevState = { theta: this.theta0, omega: this.omega0 };
+    this.calibrated = Boolean(this.kernel.lengthM && this.kernel.lengthM > 0);
+    this.prevState = { theta: this.kernel.theta, omega: this.kernel.omega };
 
     // Numerical integration parameters (240 Hz)
     this.fixedDt = 1.0 / 240.0;
     this.accumulator = 0.0;
-    this.simTime = 0.0;
     this.timeScale = 1.0;
     this.lastTime = null;
     this.running = false;
@@ -112,30 +117,37 @@ export class PendulumSimulation {
   }
 
 
+  get theta() { return this.kernel.theta; }
+  set theta(v) { this.kernel.theta = v; }
+  get omega() { return this.kernel.omega; }
+  set omega(v) { this.kernel.omega = v; }
+  get simTime() { return this.kernel.simTime; }
+  set simTime(v) { this.kernel.simTime = v; }
+  get g() { return this.kernel.g; }
+  set g(v) { this.kernel.g = v; }
+  get lengthM() { return this.kernel.lengthM; }
+  set lengthM(v) { this.kernel.lengthM = v; }
+  get massKg() { return this.kernel.massKg; }
+  set massKg(v) { this.kernel.massKg = v; }
+  get damping() { return this.kernel.damping; }
+  set damping(v) { this.kernel.damping = v; }
+  get theta0() { return this.kernel.theta0; }
+  set theta0(v) { this.kernel.theta0 = v; }
+  get omega0() { return this.kernel.omega0; }
+  set omega0(v) { this.kernel.omega0 = v; }
+
   /**
    * Evaluates angular acceleration: d²θ/dt² = -(g/L)*sin(θ) - γ*ω
    */
   derivative(theta, omega) {
-    return {
-      thetaDot: omega,
-      omegaDot: -(this.g / this.lengthM) * Math.sin(theta) - this.damping * omega,
-    };
+    return this.kernel.derivative(theta, omega);
   }
 
   /**
    * 4th-Order Runge-Kutta step
    */
   integrateRK4(dt) {
-    const t0 = this.theta;
-    const w0 = this.omega;
-
-    const k1 = this.derivative(t0, w0);
-    const k2 = this.derivative(t0 + 0.5 * dt * k1.thetaDot, w0 + 0.5 * dt * k1.omegaDot);
-    const k3 = this.derivative(t0 + 0.5 * dt * k2.thetaDot, w0 + 0.5 * dt * k2.omegaDot);
-    const k4 = this.derivative(t0 + dt * k3.thetaDot, w0 + dt * k3.omegaDot);
-
-    this.theta += (dt / 6.0) * (k1.thetaDot + 2.0 * k2.thetaDot + 2.0 * k3.thetaDot + k4.thetaDot);
-    this.omega += (dt / 6.0) * (k1.omegaDot + 2.0 * k2.omegaDot + 2.0 * k3.omegaDot + k4.omegaDot);
+    this.kernel.step(dt);
   }
 
   /**
@@ -171,7 +183,6 @@ export class PendulumSimulation {
     while (this.accumulator >= this.fixedDt) {
       this.prevState = { theta: this.theta, omega: this.omega };
       this.integrateRK4(this.fixedDt);
-      this.simTime += this.fixedDt;
       this.accumulator -= this.fixedDt;
     }
 
@@ -208,10 +219,8 @@ export class PendulumSimulation {
 
   reset() {
     this.pause();
-    this.theta = this.theta0;
-    this.omega = this.omega0;
-    this.prevState = { theta: this.theta0, omega: this.omega0 };
-    this.simTime = 0.0;
+    this.kernel.reset();
+    this.prevState = { theta: this.kernel.theta, omega: this.kernel.omega };
     this.accumulator = 0.0;
     this.trail = [];
     this.render(this.theta, this.omega);

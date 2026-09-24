@@ -7,7 +7,8 @@
     "schemaVersion",
     "id",
     "domain",
-    "type",
+    "subtype",
+    "coordinateSpace",
     "parameters"
   ],
   "properties": {
@@ -24,9 +25,13 @@
       "enum": ["mechanics", "optics", "circuits"],
       "description": "Physics domain category"
     },
+    "subtype": {
+      "type": "string",
+      "description": "Canonical scenario subtype (e.g. pendulum, projectile, thin_lens, spherical_mirror, interface_refraction, prism, dc)"
+    },
     "type": {
       "type": "string",
-      "description": "Specific simulation scenario type (e.g. pendulum, projectile, thin_lens, mirror, series_parallel)"
+      "description": "Legacy alias for subtype"
     },
     "title": {
       "type": "string",
@@ -42,11 +47,11 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["book_figure", "upload", "synthetic", "interactive_lab"]
+          "enum": ["book_figure", "upload", "synthetic", "interactive_lab", "text_scenario"]
         },
         "image": {
           "type": "string",
-          "description": "Path or URL to the reference textbook diagram image"
+          "description": "Path or URL to reference diagram image"
         },
         "page": {
           "type": "integer"
@@ -62,25 +67,80 @@
         }
       }
     },
+    "coordinateSpace": {
+      "description": "Authoritative coordinate space definition (discriminated union: source_px, world, local)",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "width", "height"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["source_px"]
+            },
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "unit"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["world"]
+            },
+            "unit": {
+              "type": "string"
+            },
+            "bounds": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "width", "height"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["local"]
+            },
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
     "coordinateSystem": {
       "type": "object",
-      "description": "Authoritative coordinate space definition",
+      "description": "Legacy alias for coordinateSpace",
       "properties": {
         "width": {
-          "type": "number",
-          "default": 800
+          "type": "number"
         },
         "height": {
-          "type": "number",
-          "default": 600
+          "type": "number"
         },
         "unit": {
-          "type": "string",
-          "default": "source-pixel"
+          "type": "string"
         },
         "pixelsPerUnit": {
-          "type": "number",
-          "default": 1.0
+          "type": "number"
         }
       }
     },
@@ -89,16 +149,22 @@
       "description": "Simulation parameters with evidentiary provenance",
       "additionalProperties": {
         "type": "object",
-        "required": ["value"],
         "properties": {
           "value": {
-            "type": ["number", "string", "boolean"]
+            "type": ["number", "string", "boolean", "null"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["known", "symbolic", "unknown"]
           },
           "unit": {
             "type": "string"
           },
           "label": {
             "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
           },
           "min": {
             "type": "number"
@@ -117,38 +183,74 @@
               "inferred",
               "author_override",
               "default",
-              "student"
+              "student",
+              "teacher",
+              "detected",
+              "derived",
+              "system",
+              "user"
             ],
             "description": "Evidentiary classification of where this parameter value originated"
           },
           "source": {
             "type": "string",
-            "description": "Description of the evidentiary source (e.g. surrounding_text, diagram_label, earth_default)"
+            "description": "Description of the evidentiary source"
           },
           "confidence": {
             "type": "number",
             "minimum": 0.0,
-            "maximum": 1.0,
-            "description": "Confidence score of extraction or inference (0.0 to 1.0)"
+            "maximum": 1.0
+          },
+          "control": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["slider", "number", "toggle", "select"]
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "step": {
+                "type": "number"
+              },
+              "options": {
+                "type": "array"
+              }
+            }
+          },
+          "description": {
+            "type": "string"
           }
         }
       }
     },
+    "environment": {
+      "type": "object",
+      "description": "Physical environment specifications (gravity, ambient medium)"
+    },
     "geometry": {
       "type": "object",
-      "description": "Domain-specific geometric layout and landmarks in source pixels"
+      "description": "Geometric layout and landmarks"
     },
     "objects": {
       "type": "array",
-      "description": "List of physical, optical, or electrical entities in the simulation"
+      "description": "Physical or optical entities"
+    },
+    "circuit": {
+      "type": "object",
+      "description": "Circuit graph specification for electrical domain"
     },
     "visual": {
       "type": "object",
-      "description": "Visual presentation overrides and background assets"
+      "description": "Visual presentation overrides"
     },
     "metadata": {
       "type": "object",
-      "description": "Educational metadata, curriculum tags, and chapter links"
+      "description": "Curriculum links, textbook chapter, and authoring metadata"
     }
   }
 }

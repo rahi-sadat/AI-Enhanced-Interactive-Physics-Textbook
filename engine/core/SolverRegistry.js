@@ -1,71 +1,96 @@
 /**
  * engine/core/SolverRegistry.js
  * 
- * Central registry mapping canonical PhysicsScene specifications
+ * Central deterministic registry mapping canonical PhysicsScene specifications
  * to appropriate domain SimulationAdapter implementations.
  */
 
+import { UnsupportedPhysicsDomainError } from './errors.js';
+import { MechanicsAdapter } from '../mechanics/MechanicsAdapter.js';
+import { OpticsAdapter } from '../optics/OpticsAdapter.js';
+import { CircuitAdapter } from '../circuits/CircuitAdapter.js';
+
 export class SolverRegistry {
   constructor() {
-    this._adapters = [];
+    /** @type {Map<string, typeof import('./SimulationAdapter.js').SimulationAdapter>} */
+    this._domainMap = new Map();
   }
 
   /**
-   * Registers a SimulationAdapter class.
-   * @param {typeof import('./SimulationAdapter.js').SimulationAdapter} AdapterClass
+   * Registers a SimulationAdapter class for a domain.
+   * @param {string|typeof import('./SimulationAdapter.js').SimulationAdapter} domainOrClass
+   * @param {typeof import('./SimulationAdapter.js').SimulationAdapter} [AdapterClass]
    */
-  register(AdapterClass) {
-    if (!AdapterClass) return;
-    if (!this._adapters.includes(AdapterClass)) {
-      this._adapters.push(AdapterClass);
+  register(domainOrClass, AdapterClass) {
+    if (typeof domainOrClass === 'string' && AdapterClass) {
+      this._domainMap.set(domainOrClass.toLowerCase(), AdapterClass);
+      return;
+    }
+
+    const Cls = AdapterClass || domainOrClass;
+    if (Cls && typeof Cls.domain === 'string' && Cls.domain.trim()) {
+      this._domainMap.set(Cls.domain.toLowerCase(), Cls);
+      return;
+    }
+
+    throw new Error(`[SolverRegistry] Registration requires an explicit domain string or a static "domain" property on the adapter class.`);
+  }
+
+  /**
+   * Unregisters an adapter class or domain.
+   * @param {string|typeof import('./SimulationAdapter.js').SimulationAdapter} domainOrClass
+   */
+  unregister(domainOrClass) {
+    if (typeof domainOrClass === 'string') {
+      this._domainMap.delete(domainOrClass.toLowerCase());
+      return;
+    }
+    for (const [d, cls] of this._domainMap.entries()) {
+      if (cls === domainOrClass) {
+        this._domainMap.delete(d);
+      }
     }
   }
 
   /**
-   * Unregisters an adapter class.
-   * @param {typeof import('./SimulationAdapter.js').SimulationAdapter} AdapterClass
+   * Retrieves registered adapter class by domain.
+   * @param {string} domain
+   * @returns {typeof import('./SimulationAdapter.js').SimulationAdapter}
    */
-  unregister(AdapterClass) {
-    const idx = this._adapters.indexOf(AdapterClass);
-    if (idx !== -1) {
-      this._adapters.splice(idx, 1);
+  get(domain) {
+    if (!domain || typeof domain !== 'string') {
+      throw new UnsupportedPhysicsDomainError(String(domain));
     }
+    const AdapterClass = this._domainMap.get(domain.toLowerCase());
+    if (!AdapterClass) {
+      throw new UnsupportedPhysicsDomainError(domain);
+    }
+    return AdapterClass;
   }
 
   /**
-   * Finds the first registered adapter class capable of handling the scene.
+   * Finds the registered adapter class for a canonical scene.
    * @param {object} scene - Canonical PhysicsScene
    * @returns {typeof import('./SimulationAdapter.js').SimulationAdapter|null}
    */
   findAdapterClass(scene) {
-    for (const AdapterClass of this._adapters) {
-      try {
-        // Instantiate temporary lightweight probe or check static canHandle
-        if (typeof AdapterClass.canHandle === 'function' && AdapterClass.canHandle(scene)) {
-          return AdapterClass;
-        }
-        const probe = new AdapterClass();
-        if (probe.canHandle(scene)) {
-          return AdapterClass;
-        }
-      } catch (err) {
-        console.warn('[SolverRegistry] Adapter probe failed:', err);
-      }
-    }
-    return null;
+    const domain = scene?.domain;
+    if (!domain || typeof domain !== 'string') return null;
+    return this._domainMap.get(domain.toLowerCase()) || null;
   }
 
   /**
    * Instantiates the matching SimulationAdapter for the scene.
-   * @param {object} scene
+   * Throws UnsupportedPhysicsDomainError if domain is not registered.
+   * @param {object} scene - Canonical PhysicsScene
    * @returns {import('./SimulationAdapter.js').SimulationAdapter}
    */
   resolve(scene) {
-    const AdapterClass = this.findAdapterClass(scene);
-    if (!AdapterClass) {
-      const domain = scene?.domain || scene?.simulation?.domain || scene?.simulation_type || 'unknown';
-      throw new Error(`[SolverRegistry] No simulation adapter registered for domain/type: ${domain}`);
+    const domain = scene?.domain;
+    if (!domain || typeof domain !== 'string') {
+      throw new UnsupportedPhysicsDomainError(domain || 'unknown');
     }
+    const AdapterClass = this.get(domain);
     return new AdapterClass();
   }
 
@@ -73,24 +98,19 @@ export class SolverRegistry {
    * Returns list of all registered adapter classes.
    */
   getRegisteredAdapters() {
-    return [...this._adapters];
+    return [...new Set(this._domainMap.values())];
   }
 
   /**
    * Clears all registered adapters.
    */
   clear() {
-    this._adapters = [];
+    this._domainMap.clear();
   }
 }
 
-import { MechanicsAdapter } from '../mechanics/MechanicsAdapter.js';
-import { OpticsAdapter } from '../optics/OpticsAdapter.js';
-import { CircuitAdapter } from '../circuits/CircuitAdapter.js';
-
 /** Global default registry instance */
 export const defaultRegistry = new SolverRegistry();
-defaultRegistry.register(MechanicsAdapter);
-defaultRegistry.register(OpticsAdapter);
-defaultRegistry.register(CircuitAdapter);
-
+defaultRegistry.register('mechanics', MechanicsAdapter);
+defaultRegistry.register('optics', OpticsAdapter);
+defaultRegistry.register('circuits', CircuitAdapter);

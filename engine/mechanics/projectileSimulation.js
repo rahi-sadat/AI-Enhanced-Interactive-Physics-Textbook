@@ -9,41 +9,41 @@
  */
 
 import { CoordinateMapper } from '../core/coordinateMapper.js';
+import { ProjectileKernel } from './kernels.js';
 
 export class ProjectileSimulation {
   /**
    * @param {HTMLElement} container
    * @param {object} scene
+   * @param {object} options - Optional { kernel, ... }
    */
-  constructor(container, scene) {
+  constructor(container, scene, options = {}) {
     this.container = container;
     this.scene = scene;
 
     const ballObj = scene.objects?.find(o => o.type === 'projectile' || o.type === 'circle') || scene.objects?.[0];
     this.object = ballObj;
 
-    // Physical calibration
-    this.ppm = Number(scene.calibration?.pixels_per_meter) || 50.0;
-    this.g = Number(scene.environment?.gravity_m_s2) || 9.81;
-
-    // Physics parameters in SI units
     const phys = ballObj?.physics || {};
-    this.speedMps = Number(phys.speed_m_s) || 15.0;
-    this.angleDeg = Number(phys.launch_angle_deg) || 45.0;
+    const speedMps = Number(phys.speed_m_s);
+    const angleDeg = Number(phys.launch_angle_deg);
+    const g = Number(scene.environment?.gravity_m_s2);
 
-    // Source launch position
-    const initPos = ballObj?.geometry?.launch_source_px || ballObj?.initial_position || { x: 120, y: 450 };
+    this.kernel = options.kernel || new ProjectileKernel({
+      speedMps: Number.isFinite(speedMps) ? speedMps : 15.0,
+      angleDeg: Number.isFinite(angleDeg) ? angleDeg : 45.0,
+      gravityMS2: Number.isFinite(g) ? g : 9.81
+    });
+
+    this.ppm = options.ppm || Number(scene.calibration?.pixels_per_meter) || 50.0;
+    const initPos = options.launchSource || ballObj?.geometry?.launch_source_px || ballObj?.initial_position || { x: 120, y: 450 };
     this.launchSource = { x: Number(initPos.x) || 120, y: Number(initPos.y) || 450 };
-    this.ballRadiusPx = Number(ballObj?.geometry?.radius_source_px || ballObj?.radius) || 18.0;
+    this.ballRadiusPx = options.ballRadiusPx || Number(ballObj?.geometry?.radius_source_px || ballObj?.radius) || 18.0;
 
-    this.simTime = 0.0;
     this.running = false;
     this.timeScale = 1.0;
     this.lastTime = null;
     this.raf = null;
-
-    // Calculate flight properties
-    this._computeFlightParams();
 
     // Canvas overlay
     this.canvas = document.createElement('canvas');
@@ -65,18 +65,22 @@ export class ProjectileSimulation {
     this.render();
   }
 
+  get speedMps() { return this.kernel.speedMps; }
+  set speedMps(v) { this.kernel.speedMps = v; }
+  get angleDeg() { return this.kernel.angleDeg; }
+  set angleDeg(v) { this.kernel.angleDeg = v; }
+  get g() { return this.kernel.g; }
+  set g(v) { this.kernel.g = v; }
+  get simTime() { return this.kernel.simTime; }
+  set simTime(v) { this.kernel.simTime = v; }
+  get vx0() { return this.kernel.vx0; }
+  get vy0() { return this.kernel.vy0; }
+  get flightTime() { return this.kernel.flightTime; }
+  get maxHeightM() { return this.kernel.maxHeightM; }
+  get rangeM() { return this.kernel.rangeM; }
+
   _computeFlightParams() {
-    const rad = (this.angleDeg * Math.PI) / 180.0;
-    this.vx0 = this.speedMps * Math.cos(rad);
-    this.vy0 = this.speedMps * Math.sin(rad);
-
-    // Max height above launch point
-    this.maxHeightM = (this.vy0 * this.vy0) / (2.0 * this.g);
-    this.timeToApex = this.vy0 / this.g;
-
-    // Flight time to return to launch Y
-    this.flightTime = (2.0 * this.vy0) / this.g;
-    this.rangeM = this.vx0 * this.flightTime;
+    // Kept for backward compatibility; properties are handled directly by this.kernel
   }
 
   resize() {
@@ -100,12 +104,7 @@ export class ProjectileSimulation {
    * Evaluates position in meters relative to launch point.
    */
   getPositionMeters(t = this.simTime) {
-    const clampedT = Math.max(0, Math.min(t, this.flightTime));
-    const xM = this.vx0 * clampedT;
-    const yM = this.vy0 * clampedT - 0.5 * this.g * clampedT * clampedT;
-    const vx = this.vx0;
-    const vy = this.vy0 - this.g * clampedT;
-    return { xM, yM, vx, vy, hasLanded: t >= this.flightTime };
+    return this.kernel.getState(t);
   }
 
   /**
@@ -133,7 +132,7 @@ export class ProjectileSimulation {
     const elapsed = Math.min((now - this.lastTime) / 1000.0, 0.05);
     this.lastTime = now;
 
-    this.simTime += elapsed * this.timeScale;
+    this.kernel.step(elapsed * this.timeScale);
 
     if (this.simTime >= this.flightTime) {
       this.simTime = this.flightTime;
@@ -149,7 +148,7 @@ export class ProjectileSimulation {
 
   play() {
     if (this.simTime >= this.flightTime) {
-      this.simTime = 0.0;
+      this.kernel.reset();
     }
     this.running = true;
     this.lastTime = null;
@@ -166,7 +165,7 @@ export class ProjectileSimulation {
 
   reset() {
     this.pause();
-    this.simTime = 0.0;
+    this.kernel.reset();
     this.render();
   }
 
