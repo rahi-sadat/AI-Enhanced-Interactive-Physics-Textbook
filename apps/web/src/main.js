@@ -5,6 +5,9 @@ import { createLegacySimulation } from './features/simulations/legacy/legacyScen
 import { OverlayStage }     from './features/simulations/core/overlayStage.js';
 import { uploadDiagramFile, analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
 import { InteractiveFigure } from './components/InteractiveFigure.js';
+// PR-04: Real image ingestion pipeline
+import { UploadService }    from './features/simulations/core/UploadService.js';
+import { IRDebugPanel }     from './features/simulations/core/IRDebugPanel.js';
 
 const SCENES = {
   mechanics: '/scenes/kinematics/physics_scene.json',
@@ -128,6 +131,7 @@ function closeModal() {
 function resetUploadState() {
   uploadedFile = null;
   uploadedImageUrl = null;
+  if (fileInput) fileInput.value = '';
   dropzonePrompt.style.display = 'block';
   dropzonePreview.style.display = 'none';
   btnGenerateSim.disabled = true;
@@ -155,11 +159,13 @@ modal?.addEventListener('click', (e) => {
 
 // Dropzone click & drag
 dropzone?.addEventListener('click', (e) => {
-  if (e.target === btnChangeImage) {
+  if (e.target === btnChangeImage || btnChangeImage?.contains(e.target)) {
+    if (fileInput) fileInput.value = '';
     fileInput.click();
     return;
   }
   if (!uploadedImageUrl) {
+    if (fileInput) fileInput.value = '';
     fileInput.click();
   }
 });
@@ -188,11 +194,21 @@ fileInput?.addEventListener('change', () => {
 });
 
 async function handleFile(file) {
+  if (!file) return;
   uploadedFile = file;
   const localUrl = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
     setPreview(file.name, localUrl, img.naturalWidth, img.naturalHeight);
+  };
+  img.onerror = () => {
+    console.error('Failed to decode image preview for file:', file.name);
+    previewFilename.textContent = file.name;
+    previewDims.textContent = 'Invalid / unreadable image';
+    previewImage.src = '';
+    dropzonePrompt.style.display = 'none';
+    dropzonePreview.style.display = 'flex';
+    btnGenerateSim.disabled = true;
   };
   img.src = localUrl;
 }
@@ -202,6 +218,8 @@ const scenarioSelect = document.getElementById('upload-scenario-select');
 
 document.querySelectorAll('.preset-pill').forEach(pill => {
   pill.addEventListener('click', () => {
+    uploadedFile = null; // Clear real uploaded file so presets use legacy path
+    if (fileInput) fileInput.value = '';
     const preset = pill.dataset.preset;
     if (preset === 'circuit1') {
       setPreview('circuit1.png', '/uploads/circuit1.png', 484, 399);
@@ -272,6 +290,57 @@ btnGenerateSim?.addEventListener('click', async () => {
   };
 
   try {
+    // ---------------------------------------------------------------
+    // PR-04 PATH: actual uploaded File → /api/ingest (real bytes sent)
+    // ---------------------------------------------------------------
+    if (uploadedFile) {
+      updateProgress('Sending image to ingestion pipeline...', 15);
+      let ingestResult;
+      try {
+        ingestResult = await UploadService.ingest(uploadedFile, updateProgress);
+      } catch (ingestErr) {
+        // FATAL FOR USER UPLOAD: NEVER fall through to legacy analysis!
+        console.error('[PR-04] Ingestion failed:', ingestErr);
+        btnGenerateSim.disabled = false;
+        progressStatus.textContent = `Upload / analysis failed: ${ingestErr.message || ingestErr}`;
+        return; // STOP! No legacy rescue for uploaded files.
+      }
+
+      // Update debug panel
+      if (irDebugPanel) irDebugPanel.update(ingestResult);
+
+      updateProgress(ingestResult.statusMessage, 100);
+
+      if (ingestResult.isReady && ingestResult.scene) {
+        // Backend understood the physics — launch simulation
+        const scene = ingestResult.scene;
+        if (!scene.visual) scene.visual = {};
+        if (!scene.visual.background_url) {
+          scene.visual.background_url = ingestResult.imageUrl;
+        }
+        setTimeout(() => {
+          closeModal();
+          if (activeFigure && (ingestResult.domain === 'optics' || ingestResult.domain === 'circuits')) {
+            setPlatformMode('runtime');
+            activeFigure.load(scene);
+          } else {
+            bootstrap(ingestResult.domain, scene);
+          }
+        }, 400);
+      } else {
+        // Honest non-ready response — show informative message without fabricating
+        btnGenerateSim.disabled = false;
+        const issueTexts = ingestResult.issues.map(i => i.message || i.code).join('; ');
+        progressStatus.textContent =
+          ingestResult.statusMessage +
+          (issueTexts ? ` (${issueTexts})` : '');
+      }
+      return; // STOP! Complete path for user-uploaded file.
+    }
+
+    // ---------------------------------------------------------------
+    // LEGACY PATH: pre-compiled preset scenes (no uploaded file)
+    // ---------------------------------------------------------------
     let finalImageUrl = uploadedImageUrl;
 
     // If actual file was uploaded, upload it to the backend
@@ -391,6 +460,32 @@ if (figureHost) {
   activeFigure = new InteractiveFigure(figureHost);
   activeFigure.load('/scenes/canonical/pendulum_figure.json');
 }
+
+// PR-04: IR Debug Panel (development/debug-only — guarded from students)
+function isDevOrDebugMode() {
+  if (typeof window === 'undefined') return false;
+  if (window.__AUGMENTED_PHYSICS_DEBUG__ === true) return true;
+  if (new URLSearchParams(window.location.search).get('debug') === 'true') return true;
+  if (localStorage.getItem('augmented_physics_debug') === 'true') return true;
+  if (import.meta.env && import.meta.env.DEV) return true;
+  return false;
+}
+
+const irDebugHost = document.getElementById('ir-debug-panel');
+const irDebugSection = document.getElementById('ir-debug-section');
+let irDebugPanel = null;
+if (irDebugHost) {
+  irDebugPanel = new IRDebugPanel(irDebugHost);
+  const _origUpdate = irDebugPanel.update.bind(irDebugPanel);
+  irDebugPanel.update = (result) => {
+    _origUpdate(result);
+    // Explicit safeguard: only reveal debug section in dev or debug mode
+    if (irDebugSection && isDevOrDebugMode()) {
+      irDebugSection.style.display = 'block';
+    }
+  };
+}
+
 
 const btnModeRuntime = document.getElementById('view-mode-runtime');
 const btnModeStudio = document.getElementById('view-mode-studio');
