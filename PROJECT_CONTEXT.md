@@ -156,44 +156,42 @@ This project transforms static physics textbook pages (specifically the NCTB Ban
 
 ```mermaid
 flowchart TD
-    A[Input Image / Diagram] --> B[SAM 2 Image Encoder]
-    B --> C[Image Embeddings in VRAM]
-    D[User / AI Prompt Points & Labels] --> E[SAM 2 Mask Decoder]
-    C --> E
-    E --> F[Candidate Masks + Raw Scores]
-    F --> G[Mask Quality Evaluator mask_quality.py]
-    G --> H[Human Confirmation / Refinement UI]
-    H --> I[Accepted Mask]
-    I --> J[Geometry Extractor geometry_utils.py]
-    I --> K[Sprite Extractor sprite_utils.py]
-    J --> L[Scene Builder scene_builder.py]
-    K --> L
-    L --> M[physics_scene_full.json Canonical v2 / CircuitScene v3]
-    L --> N[physics_scene.json Multi-Domain Compat]
-    N --> O[SceneRouter / DiagramAnalyzer]
-    O -->|Mechanics: Rigid/Ramp/Spring| P1[Matter.js + SI Unit Adapter]
-    O -->|Mechanics: Pendulum| P2[Analytical RK4 Solver 240Hz]
-    O -->|Mechanics: Projectile| P3[Closed-Form Kinematics]
-    O -->|Optics: Lens/Mirror/Prism| P4[Optics2D Ray Tracer]
-    O -->|Circuits: DC Linear/MNA| P5[Python MNA + SPICE Adapter]
-    P1 & P2 & P3 & P4 & P5 --> Q[OverlayStage + CoordinateMapper]
+    A[Textbook Image Upload / Scan] --> B[SourceAsset: Raw Bytes, SHA-256, Native Dimensions]
+    B --> C[PageIR: Native source_px Coordinates & Transforms]
+    C --> D[PhysicsVisionAnalyzer: Gemini / Mock VLM Provider]
+    D --> E[SemanticAnalysisResult: Strict Schema Invariants]
+    E --> F[BookUnderstandingPipeline: Domain, Subtype, Entities, VLM BBoxes]
+    F --> G[BookIR: High-Level Intermediate Representation]
+    G --> H{PR-06 CV/OCR Grounding Active?}
+    H -->|No: PR-05 State| I[BookIR status=UNRESOLVED, geometry=null]
+    I --> J[PhysicsCompiler: Strict Zero-Fabrication Invariant]
+    J --> K[Result: NEEDS_REVIEW + scene=null]
+    K --> L[Gate Zero Review UI: IRDebugPanel / UploadModal]
+    H -->|Yes: PR-06+ Future| M[CV Segmenter SAM 2 + OCR Parameter Binder]
+    M --> N[Canonical PhysicsScene v1.0 source_px]
+    N --> O[PhysicsRuntime & SolverRegistry]
+    O -->|Mechanics: Pendulum/Projectile| P1[Matter.js / Analytical RK4]
+    O -->|Optics: Lens/Mirror/Prism| P2[Optics2D Ray Tracer]
+    O -->|Circuits: DC Linear/MNA| P3[Python MNA + SPICE Adapter]
+    P1 & P2 & P3 --> Q[RendererRegistry & OverlayStage]
     Q --> R[Layer 1: Diagram Image | Layer 2: Transparent Precision Canvas]
 ```
 
-### Perception vs Physics Separation (Critical Rule)
-The canonical `physics_scene_full.json` strictly records **what is visually perceived or confirmed by the author**:
+### Perception vs Physics Separation & Zero-Fabrication Invariant
+The canonical `PhysicsScene` and `BookIR` strictly record **what is visually perceived, grounded by CV/OCR, or confirmed by the author**:
 - Geometry (centroids, vertices, radii, angles) in source pixels
-- Masks and coordinates
+- Explicit parameters with parameter provenance (`observed`, `derived`, `assumed`, `default`, `student`)
 - Author role (`dynamic`, `static`, `unknown`)
-- Semantic labels and sprite dimensions
 
 It **never** invents physical facts:
 - `mass_kg`: `null` (unless explicitly provided by text/OCR)
 - `initial_velocity`: `null`
 - `friction`, `restitution`: `null`
 - `gravity`: `null`
+- `focal_length_px`: `null` (unless measured from optical axis or labeled)
+- `resistance`: `null` (unless bound from schematic text)
 
-Defaults (like `mass_kg = 1.0` or `gravity = 9.81 m/s²`) are translated only at runtime via `MatterUnitAdapter`.
+In PR-05, the Multimodal VLM classifies `domain`, `subtype`, and semantic entities, but `parameters` remains empty (`{}`) and `BookEntity.position_source_px = None`. Downstream `PhysicsCompiler` evaluates these ungrounded entities and returns `status="NEEDS_REVIEW"` with `scene=null`, guaranteeing that unverified predictions never fabricate runnable simulations.
 
 ---
 
@@ -205,7 +203,7 @@ d:\AugmentedPhysics\
 ├── apps/
 │   ├── api/                                  # FastAPI backend server (:8000) for diagram upload & CV/MNA analysis
 │   │   ├── main.py                           # REST endpoints (/api/upload-diagram, /api/analyze-diagram, /api/health)
-│   │   └── __init__.py
+│   │   └── __init__.py                       # Async event-loop offloading via asyncio.to_thread
 │   └── web/                                  # Modern Vite Multi-Domain Simulation Platform
 │       ├── package.json                      # Vite, p5.js, Matter.js, poly-decomp
 │       ├── vite.config.js                    # Vite config with path aliases (@engine, @ai, @shared, @features)
@@ -218,10 +216,16 @@ d:\AugmentedPhysics\
 │           ├── style.css                     # Glassmorphic dark theme, responsive stage layout
 │           └── features/
 │               └── simulations/              # Modular simulation feature controllers & views
-│                   ├── circuits/             # CircuitController.js, CircuitTelemetry.js
-│                   ├── core/                 # overlayStage.js (2-layer stage with ResizeObserver)
+│                   ├── circuits/             # CircuitController.js, CircuitTelemetry.js, CircuitRenderer.js
+│                   ├── core/                 # Shared canvas & review infrastructure
+│                   │   ├── overlayStage.js   # 2-layer stage with ResizeObserver
+│                   │   ├── IRDebugPanel.js   # Gate Zero raw IR inspection drawer (PR-04/PR-05)
+│                   │   ├── UploadModal.js    # Drag-and-drop ingestion dialog with Gate Zero UI
+│                   │   ├── UploadService.js  # Client-side raw byte reading, SHA-256 computation
+│                   │   ├── RendererRegistry.js           # Multi-domain overlay renderer registry (PR-03)
+│                   │   └── SimulationCapabilityRegistry.js # Non-fabricating interaction capability binder (PR-03)
 │                   ├── mechanics/            # mechanicsController.js, pendulumSimulation.js, projectileSimulation.js
-│                   └── optics/               # opticsController.js, opticsSceneAdapter.js, view/
+│                   └── optics/               # opticsController.js, opticsSceneAdapter.js, OpticsRenderer.js, view/
 │
 ├── engine/                                   # Pure, framework-agnostic physics engines & solvers
 │   ├── circuits/                             # Modified Nodal Analysis (MNA), equation generator, SPICE adapter
@@ -235,7 +239,9 @@ d:\AugmentedPhysics\
 │   │   ├── coordinateMapper.js               # JavaScript bidirectional contain transform
 │   │   ├── parameter_resolver.py             # SI prefix parser and formatter (case-sensitive)
 │   │   ├── provenance.py                     # Diagnostic confidence & attribution tracking
-│   │   └── sceneRouter.js                    # Domain router (Mechanics, Optics, Circuits)
+│   │   ├── sceneRouter.js                    # Domain router (Mechanics, Optics, Circuits)
+│   │   ├── validation.js                     # Canonical PR-02 semantic scene validator
+│   │   └── physicsRuntime.js                 # Unified engine lifecycle manager
 │   ├── mechanics/                            # Mechanics collision & constraint models
 │   │   ├── physicsBodyFactory.js             # Matter.js body creation & spring dynamics
 │   │   ├── simulation.js                     # Simulation runner & transparent canvas loop
@@ -249,6 +255,16 @@ d:\AugmentedPhysics\
 │       └── rayGeometry.js                    # Vector geometry, ray bounding intersections
 │
 ├── ai/                                       # Multimodal perception & document intelligence
+│   ├── ingestion/                            # Real-file ingestion pipeline (PR-04 & PR-05)
+│   │   ├── SourceAsset.py                    # Raw byte container, SHA-256, MIME type, dimensions
+│   │   ├── PageIRBuilder.py                  # Native source_px page representation & invertible transforms
+│   │   ├── BookUnderstandingPipeline.py      # VLM-driven semantic ingestion pipeline
+│   │   ├── UploadService.py                  # Server-side upload handler & byte validation
+│   │   └── vision/                           # Multimodal Vision-Language Model provider layer
+│   │       ├── provider_interface.py         # Abstract VisionProvider protocol
+│   │       ├── analyzer.py                   # PhysicsVisionAnalyzer semantic classifier
+│   │       ├── gemini_provider.py            # Production Google GenAI provider with structured JSON
+│   │       └── mock_provider.py              # Offline deterministic mock provider for unit tests
 │   ├── document_intelligence/                # OCR & text parameter extraction
 │   │   ├── ocr/                              # Heuristic and adapter OCR (circuit_ocr.py)
 │   │   └── parsing/                          # parameter_binder.py, value_parser.py, optics_text.py, optics_semantics.py
@@ -258,20 +274,26 @@ d:\AugmentedPhysics\
 │   │   ├── kinematics/                       # Sub-pixel pendulum geometry detection & circle fitting
 │   │   └── optics/                           # optics_geometry.py (lens center, aperture, optical axis)
 │   └── scene_compiler/                       # Compiles detected features into canonical scene schemas
+│       ├── physics_compiler.py               # Canonical PhysicsCompiler (BookIR -> PR-02 PhysicsScene)
 │       ├── circuit_scene_builder.py          # Canonical CircuitScene v3 builder
 │       ├── optics_scene_builder.py           # Canonical PhysicsScene v2.1 optics builder
 │       └── scene_builder.py                  # Generic CanvasMapper and scene compiler
 │
 ├── shared/                                   # Domain schemas and cross-tier data contracts
-│   └── schemas/                              # circuit_models.py (CircuitScene v3), physics_scene*.json
+│   └── schemas/                              # Canonical typed contracts & JSON schemas
+│       ├── semantic.py                       # VLM semantic schemas & strict validators (PR-05)
+│       ├── ingestion.py                      # SourceAsset, PageIR, BookIR, BookEntity contracts (PR-04)
+│       ├── physics_scene.schema.json         # Canonical PR-02 PhysicsScene schema v1.0
+│       └── circuit_models.py                 # CircuitScene v3 dataclasses
 │
 ├── storage/                                  # Persistent uploads, outputs, and cache (git-ignored)
-│   └── uploads/                              # Diagram uploads (circuit1-4.png, test1.jpg, etc.)
+│   └── uploads/                              # Diagram uploads (SHA-256 hashed files)
 │
 ├── tests/                                    # Multi-domain automated test suites
-│   ├── fixtures/                             # Benchmark images, diagrams, and ground-truth scenes
-│   ├── integration/                          # test_circuit_images.py, test_optics_precision.py
-│   └── unit/                                 # Fast unit tests (Python MNA & JS optics/coordinate mapper)
+│   ├── acceptance/                           # End-to-end acceptance tests (test_pr05_live_gemini.py)
+│   ├── fixtures/                             # Benchmark images, diagrams, ground-truth scenes
+│   ├── integration/                          # test_pr04_api_upload.py, test_pr05_pipeline.py
+│   └── unit/                                 # Fast offline unit tests (schemas, MNA, solvers, VLM)
 │
 ├── scripts/                                  # Offline CLI authoring tools & pipeline runners
 │   ├── build_kinematics_scene.py             # Desktop interactive kinematics annotator
@@ -516,7 +538,14 @@ graph LR
     M7 --> M9[M9-M10: Optics Precision & Alignment ✅]
     M9 --> M11[M11: Augmented Circuit Lab Frontend ✅]
     M11 --> M12[M12: Circuits Backend Perception & MNA Solver ✅]
-    M12 --> M13[Phase 13: Full-Page PDF Layout & Bangla Voice Tutor 🔄]
+    M12 --> PR01[PR-01: Strict Audit & Anti-Fabrication ✅]
+    PR01 --> PR02[PR-02: Canonical Physics Runtime & Registry ✅]
+    PR02 --> PR03[PR-03: Source-Aligned Rendering & Capabilities ✅]
+    PR03 --> PR04[PR-04: Real Upload Ingestion & Gate Zero ✅]
+    PR04 --> PR05[PR-05: Multimodal VLM Semantic Understanding ✅]
+    PR05 --> PR06[PR-06: Classical CV & OCR Parameter Grounding 🔄]
+    PR06 --> PR07[PR-07: End-to-End Simulation Bootstrapping 🔄]
+    PR07 --> M13[Phase 13: Full-Page PDF Layout & Bangla Voice Tutor 🔄]
 ```
 
 ### ✅ Phase 11: Augmented Circuit Laboratory (Domain 3 Frontend)
@@ -569,7 +598,75 @@ graph LR
 - **Unified Engine Lifecycle**: `load`, `start`, `pause`, `step`, `reset`, `updateParameter`, `getOutput`, `dispose`.
 - **Strict UI Decoupling**: All engine modules under `engine/` are pure mathematical runtimes with 0 imports from `apps/`.
 
+### ✅ PR-03: Source-Aligned Interactive Rendering, Capability Resolution & Bidirectional Manipulation
+- **Decoupled Renderers & Pure Visual Overlays**:
+  - Separated visual rendering from numerical solvers: `OpticsRenderer.js` and `CircuitRenderer.js` are dedicated overlay renderers operating directly in native `source_px` coordinates via `CoordinateMapper`.
+  - Introduced `RendererRegistry` mapping `(domain, subtype)` pairs to modular overlay renderers.
+- **Simulation Capability Registry (`SimulationCapabilityRegistry.js`)**:
+  - Non-fabricating, role-based interaction binding. Inspects the canonical `PhysicsScene` to discover what objects are interactive (`draggable`, `rotatable`, `value-editable`) based purely on explicit scene capabilities rather than hardcoded assumptions.
+  - Respects author provenance: if `editable: false` or parameter provenance is locked, UI sliders and direct manipulation are disabled.
+- **Bidirectional Direct Manipulation & Control Synchronization**:
+  - Bidirectional synchronization between direct canvas/SVG pointer dragging (e.g. dragging optical candle object, lens center, or circuit potentiometer) and the floating parameter panel/HUD.
+  - Pointer events are inverted via `mapper.viewToSource(px, py)` with hit-test radii dynamically scaled by `1 / mapper.scale` for consistent touch/mouse accuracy across any screen resolution.
+- **Headless Safety & Non-Regression**:
+  - Guarded browser globals (`window`, `document`, canvas rendering contexts) ensuring all mechanics and optics simulation engines execute cleanly in headless Node test runners.
+  - Comprehensive 28-section interactive rendering acceptance test suite.
+
+### ✅ PR-04: Real Upload Ingestion Pipeline (`SourceAsset` → `PageIR` → Gate Zero Anti-Fabrication)
+- **Canonical Ingestion Contracts (`shared/schemas/ingestion.py`)**:
+  - `SourceAsset`: Immutable container for raw file bytes, SHA-256 digest, MIME type sniffing, storage path, and native pixel dimensions (`width_px`, `height_px`).
+  - `PageIR`: Intermediate representation of textbook page or diagram crop in native `source_px` coordinates with invertible affine transforms (`local_to_page`, `page_to_local`).
+  - `BookIR`: High-level domain understanding (`domain`, `subtype`, `entities`, `relationships`, `status`, `confidence`).
+  - `BookIRStatus`: Discriminated status enumeration (`RESOLVED`, `AMBIGUOUS`, `UNSUPPORTED`, `UNRESOLVED`).
+  - `PhysicalValue`: Explicit provenance-carrying typed value (`value`, `unit`, `uncertainty`, `provenance`).
+  - `BookEntity`: Semantic entity representation with label, role, bounding box, and provenance.
+- **Real-File Upload Service (`ai/ingestion/UploadService.py` & `apps/web/.../UploadService.js`)**:
+  - Ingestion driven entirely by raw byte content validation, cryptographic hashing, and image decoding.
+  - Completely eliminated legacy filename-based or URL-string heuristics (e.g., routing based on `"circuit"` or `"lens"` in filename).
+- **Canonical Physics Compiler (`ai/scene_compiler/physics_compiler.py`)**:
+  - Translates `BookIR` into canonical PR-02 `PhysicsScene` schema v1 (`schemaVersion: '1.0'`, `coordinateSpace: 'source_px'`).
+  - Enforces zero-fabrication invariant: if parameters (focal length, resistance, mass, voltage) or geometric positions lack explicit evidence, the compiler refuses to invent defaults ($g=9.81$, $f=20$, $R=10$, etc.) and honestly returns `status="NEEDS_REVIEW"` with `scene=null` and precise diagnostics (`MISSING_PARAMETER`, `UNGROUNDED_GEOMETRY`).
+  - Validates dimensional physical units strictly (rejecting incompatible units like speed in 'cm').
+- **Gate Zero Review UI (`IRDebugPanel.js` & `UploadModal.js`)**:
+  - Embedded review drawer showing honest IR status (`UNRESOLVED`, `NEEDS_REVIEW`), missing parameter warnings, and parameter provenance badges before any simulation is rendered.
+- **Comprehensive Test Suite**:
+  - 18 unit tests, 12 regression tests, and 6 full-stack API integration tests.
+
+### ✅ PR-05: Multimodal VLM Semantic Understanding & Strict Validation
+- **Real Multimodal VLM Integration (`Google Gemini`)**:
+  - Integrated Google GenAI SDK (`google-genai`) with official structured output (`response_schema=GEMINI_RESPONSE_SCHEMA`) via `GeminiVisionProvider`.
+  - Model tier fallback (`gemini-3.1-flash-lite` -> `gemini-3-flash-preview` -> `gemini-3.8-flash`) ensuring graceful degradation and resilience against free-tier rate limits (20 req/day).
+- **Strict Architectural Separation (Semantic Classification vs. Geometric/Metric Grounding)**:
+  - **What VLM Does (Semantic)**: Identifies `classification` (`supported | unsupported_physics | non_physics | unknown`), native boolean `isPhysics`, `domain` (`mechanics | optics | circuits | null`), `subtype` (`pendulum | projectile | thin_lens | spherical_mirror | interface_refraction | prism | dc_linear | null`), confidence $[0.0, 1.0]$, and semantic entities with coarse bounding boxes.
+  - **What VLM Never Does (Anti-Fabrication Invariants)**:
+    - **Zero Parameter Fabrication**: VLM never invents numerical physics parameters (mass, resistance, voltage, focal length, refractive index). `parameters` dictionary remains strictly `{}`.
+    - **Zero Authoritative Geometry**: VLM predictions never pollute authoritative coordinate fields. `BookEntity.position_source_px = None`, `BookIR.geometry = None`. Coarse VLM bounding boxes are strictly quarantined inside `attributes["vlmApproxBBox"]`.
+  - Downstream `BookUnderstandingPipeline` sets `BookIR.status = UNRESOLVED` because physical geometry and parameters are ungrounded.
+  - `PhysicsCompiler` truthfully returns `status="NEEDS_REVIEW"` and `scene=null`, perfectly upholding the zero-fabrication invariant until PR-06 CV/OCR grounding is active.
+- **Strict Semantic Schema Validation (`shared/schemas/semantic.py`)**:
+  - `isPhysics`: Enforces native JSON boolean or `None` (strings like `"true"` strictly rejected).
+  - Subtype Purity: Subtypes strictly limited to physical models. Non-physics and unsupported diagrams force `domain=None` and `subtype=None`.
+  - Strict `DOMAIN_SUBTYPES` pairing: Prevents invalid combinations (e.g. `mechanics` with `thin_lens`).
+  - Finite normalized confidence: All confidence values validated as finite floats in $[0.0, 1.0]$, defaulting conservatively to `0.0`.
+  - Entity & Relationship Integrity: Rejects duplicate entity IDs and guarantees all relationship entity references point to valid entity IDs.
+- **Async Event Loop Offloading**:
+  - `apps/api/main.py` offloads synchronous `book_pipeline.analyze(...)` via `await asyncio.to_thread(...)`, keeping the FastAPI event loop unblocked.
+- **Test Isolation & Live Acceptance Verification**:
+  - 100% offline unit/integration test isolation using `MockVisionProvider` (zero external network dependency).
+  - Live acceptance test suite (`tests/acceptance/test_pr05_live_gemini.py`) successfully verified 7 real image uploads (`x17.jpg` pendulum, `a91.png` projectile, `photo42.png` thin lens, `scan77.jpg` spherical mirror, `c88.png` DC circuit, `random_photo.jpg` non-physics, `wave_interfere.png` unsupported physics) against live Gemini models, confirming 100% non-fabricating `scene=null` pipeline behavior.
+
+### 🔄 PR-06: Classical CV & OCR Parameter Grounding (Next Step)
+- Multi-signal classical computer vision (SAM 2, line detection, circle fitting, Hough transforms) to extract authoritative visual geometry in `source_px`.
+- Tesseract / Document Intelligence OCR to detect, segment, and parse parameter labels ($R_1 = 10\,\Omega$, $f = 20\,\text{cm}$, $m = 2\,\text{kg}$).
+- Spatial-semantic parameter binding mapping OCR physical values to detected CV components.
+
+### 🔄 PR-07: End-to-End Simulation Bootstrapping & Automatic Resolution
+- Merging PR-05 semantic classification, PR-06 CV geometry, and PR-06 OCR parameters into fully-grounded `BookIR(status=RESOLVED)`.
+- `PhysicsCompiler` producing active, runnable PR-02 `PhysicsScene` objects with 100% parameter provenance.
+- Automatic bootstrap of interactive simulation overlays on uploaded textbook diagrams.
+
 ### 🔄 Phase 13: Full-Page NCTB Layout Parser & Bangla Voice Tutor
 - Multi-diagram full page PDF layout analysis.
 - Bilingual (Bangla + English) conversational tutoring agent with synchronized simulation object highlighting.
+
 

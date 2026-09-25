@@ -19,6 +19,10 @@ This document establishes mandatory rules for AI coding assistants (including An
 11. **Edit Source, Not Generated Artifacts**: If a file is generated from a script, template, or perception pipeline, modify the generator rather than patching the output artifact directly.
 12. **Stable Domain Boundaries**: New physics domains (e.g., waves, thermodynamics, electromagnetism) must integrate through independent modules under `engine/<domain>/` and register with `engine/core/sceneRouter.js` rather than modifying existing solvers.
 13. **High-Collision File Coordination**: High-collision files (`apps/web/src/main.js`, `apps/web/index.html`, `apps/web/src/style.css`, `engine/core/sceneRouter.js`, `apps/api/main.py`) follow a single-writer policy. Inspect recent Git history before modifying them.
+14. **Multimodal VLM Boundaries & Zero Parameter Fabrication**: VLMs (such as Google Gemini) are purely semantic classifiers. They categorize `classification`, `isPhysics`, `domain`, `subtype`, and rough entity taxonomy with coarse bounding boxes isolated in `attributes["vlmApproxBBox"]`. VLMs must **never** fabricate numerical physics parameters (mass, resistance, voltage, focal length, refractive index) or authoritative visual coordinates (`position_source_px = None`, `geometry = None`). Downstream compilers must return `NEEDS_REVIEW` with `scene: null` until verified classical CV/OCR grounding (PR-06+) is active.
+15. **Strict Schema Invariants & Subtype Purity**: Subtypes must strictly correspond to physical models (`pendulum`, `projectile`, `thin_lens`, `spherical_mirror`, `interface_refraction`, `prism`, `dc_linear`). Non-physics or unsupported status flags belong in `classification` and must force `domain = null` and `subtype = null`. `isPhysics` must be a native JSON boolean (or `null`). Confidence scores must be finite numbers in $[0.0, 1.0]$, defaulting conservatively to `0.0`. Entity IDs in relationships must resolve to valid declared entities.
+16. **Offline Test Isolation & Mock Providers**: Automated CI/CD, unit tests, and regression tests MUST use `MockVisionProvider` with deterministic canned responses and zero external network/API calls. Live VLM tests (e.g. `GeminiVisionProvider`) must be placed in `tests/acceptance/`, gated by `GEMINI_API_KEY` presence and isolated from fast test suites. Never log API credentials. Support multi-model fallback (`gemini-3.1-flash-lite`, `gemini-3-flash-preview`) to handle Google GenAI rate limits.
+17. **Async Event Loop Offloading for Blocking I/O**: Heavy synchronous operations (such as external VLM HTTP requests, OpenCV/scikit-image perception, or MNA matrix inversions) invoked from within FastAPI async route handlers must be offloaded using `await asyncio.to_thread(...)` to ensure the server's async event loop remains unblocked and responsive.
 
 ---
 
@@ -35,6 +39,8 @@ This document establishes mandatory rules for AI coding assistants (including An
 | Common physics runtime & coordinates | `engine/core/` |
 | Diagram CV, segmentation, SAM 2 | `ai/perception/` |
 | OCR, text detection, parameter binding | `ai/document_intelligence/` |
+| Real-file ingestion, SourceAsset, PageIR, VLM providers | `ai/ingestion/` |
+| Canonical PhysicsCompiler (BookIR -> PhysicsScene) | `ai/scene_compiler/physics_compiler.py` |
 | Canonical scene builders & adapters | `ai/scene_compiler/` |
 | Shared schemas, models, contracts | `shared/schemas/` |
 | Demo textbook assets & curriculum | `content/demo-books/` |
@@ -49,4 +55,8 @@ Before completing any task or proposing changes:
 - [ ] Checked `git status` to ensure no stray or generated files are staged.
 - [ ] Verified that existing tests pass (`apps/web` tests, Python unit tests).
 - [ ] Confirmed zero unexpected logic changes in working physics.
+- [ ] Confirmed zero parameter fabrication (VLM never populates physical constants or coordinates).
+- [ ] Verified strict schema invariants and subtype purity (domain-subtype pairing, finite confidence).
+- [ ] Ensured unit tests run with offline mocks (`MockVisionProvider`) and no external network calls.
 - [ ] Preserved all existing comments, docstrings, and parameter provenance.
+

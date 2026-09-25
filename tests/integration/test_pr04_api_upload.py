@@ -22,7 +22,19 @@ from apps.api.main import app
 class TestPR04ApiUpload(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        import apps.api.main as api_main
+        from ai.ingestion.vision.mock_provider import MockVisionProvider
+        from ai.ingestion.vision.analyzer import PhysicsVisionAnalyzer
+        api_main._get_ingestion_pipeline()
+        cls._orig_analyzer = api_main._BOOK_PIPELINE.analyzer
+        api_main._BOOK_PIPELINE.analyzer = PhysicsVisionAnalyzer(MockVisionProvider())
         cls.client = TestClient(app)
+
+    @classmethod
+    def tearDownClass(cls):
+        import apps.api.main as api_main
+        if hasattr(cls, "_orig_analyzer"):
+            api_main._BOOK_PIPELINE.analyzer = cls._orig_analyzer
 
     def _create_test_image(self, width: int, height: int, fmt: str = "PNG", color=(100, 150, 200)) -> bytes:
         img = Image.new("RGB", (width, height), color=color)
@@ -31,12 +43,12 @@ class TestPR04ApiUpload(unittest.TestCase):
         return buf.getvalue()
 
     def test_01_ingest_health(self):
-        """GET /api/ingest/health returns available=True and PR-04 info."""
+        """GET /api/ingest/health returns available=True and PR-04/PR-05 info."""
         res = self.client.get("/api/ingest/health")
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertTrue(data.get("available"))
-        self.assertEqual(data.get("pipeline"), "PR-04")
+        self.assertIn(data.get("pipeline"), ("PR-04", "PR-05"))
 
     def test_02_upload_arbitrary_png_bytes(self):
         """POST /api/ingest with unseen PNG verifies full pipeline contract."""
@@ -54,7 +66,7 @@ class TestPR04ApiUpload(unittest.TestCase):
 
         # 1. Pipeline status
         self.assertTrue(payload["success"])
-        self.assertEqual(payload["pipeline"], "PR-04")
+        self.assertIn(payload["pipeline"], ("PR-04", "PR-05"))
         self.assertTrue(payload["image_url"].startswith("/"))
 
         # 2. SourceAsset
