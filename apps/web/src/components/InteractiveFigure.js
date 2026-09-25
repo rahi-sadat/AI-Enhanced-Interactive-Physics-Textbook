@@ -10,6 +10,7 @@
 import './interactiveFigure.css';
 import { PhysicsRuntime } from '@engine/core/PhysicsRuntime.js';
 import { FigureViewport } from './FigureViewport.js';
+import { defaultRendererRegistry } from '../features/simulations/core/RendererRegistry.js';
 
 export class InteractiveFigure {
   /**
@@ -31,6 +32,7 @@ export class InteractiveFigure {
     this.currentDomain = 'mechanics';
     this.state = null;
     this.viewport = null;
+    this.renderer = null;
 
     this.dom = {
       root: null,
@@ -151,6 +153,9 @@ export class InteractiveFigure {
     this.viewport = new FigureViewport(this.dom.viewportHost, {
       onLayoutChange: (context) => {
         this.runtime.resize(context.displayWidth, context.displayHeight, context);
+        if (this.renderer) {
+          this.renderer.resize(this.viewport.mapper);
+        }
       }
     });
 
@@ -234,29 +239,65 @@ export class InteractiveFigure {
       this.dom.curriculumTag.textContent = `Canonical Scene v1 (${domain})`;
     }
 
-    // 5. Render Dynamic Parameters with Provenance Badges
-    this._renderParameters(scene.parameters || {});
-
-    // 6. Clear previous overlay canvas and mount into FigureViewport overlay container
+    // 5. Clear previous overlay canvas and mount into FigureViewport overlay container
     const overlayContainer = this.viewport.getOverlayContainer();
     overlayContainer.innerHTML = '';
+
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer = null;
+    }
+
+    const subtype = scene.subtype || scene.type;
+
+    if (defaultRendererRegistry.has(domain, subtype)) {
+      this.renderer = defaultRendererRegistry.resolve(scene);
+      this.renderer.mount({
+        container: overlayContainer,
+        sourceImage: bgUrl,
+        scene,
+        coordinateMapper: this.viewport.mapper,
+        onInteract: (action) => {
+          this.runtime.updateParameter(action);
+        }
+      });
+    }
+
     await this.runtime.load(scene, overlayContainer, {
       viewport: this.viewport,
       renderContext: this.viewport.getRenderContext()
     });
 
+    const initialOutput = this.runtime.getOutput();
+    if (this.renderer && initialOutput) {
+      this.renderer.render(initialOutput);
+    }
+
+    // 6. Render Dynamic Parameters with Provenance Badges
+    // Strictly render editableParameters from runtime output.
+    // Never fall back to scene.parameters; non-editable parameters show no controls.
+    const initialParams = initialOutput?.editableParameters || {};
+    this._renderParameters(initialParams);
+
     // 7. Subscribe to real-time telemetry updates
     this._stateUnsub?.();
     this._stateUnsub = this.runtime.onStateChange((state) => {
       this.state = state;
-      this._updateTelemetry(state);
+      const output = this.runtime.getOutput();
+      if (this.renderer && output) {
+        this.renderer.render(output);
+      }
+      if (output?.editableParameters) {
+        this._syncParametersUI(output.editableParameters);
+      }
+      this._updateTelemetry(output?.telemetry || state);
       this._updateStatusPill(state);
       this.options.onStateChange?.(state);
     });
 
     const initial = this.runtime.getState();
     this.state = initial;
-    this._updateTelemetry(initial);
+    this._updateTelemetry(initialOutput?.telemetry || initial);
     this._updateStatusPill(initial);
   }
 
@@ -309,54 +350,158 @@ export class InteractiveFigure {
     for (const [key, param] of paramEntries) {
       const item = document.createElement('div');
       item.className = 'if-param-item';
+      item.setAttribute('data-param-key', key);
 
       const labelText = param.label || key;
       const unitText = param.unit ? ` ${param.unit}` : '';
       const provenance = param.provenance || 'observed';
       const sourceDesc = param.source || 'textbook';
       const confPercent = param.confidence != null ? `${Math.round(param.confidence * 100)}%` : '100%';
-      const minVal = param.min ?? 0;
-      const maxVal = param.max ?? (Number(param.value) * 2 || 100);
-      const stepVal = param.step ?? 1;
+      const isBoolean = typeof param.value === 'boolean' || param.control?.type === 'toggle';
 
-      item.innerHTML = `
-        <div class="if-param-header">
-          <span class="if-param-label">${labelText}</span>
-          <span class="if-param-provenance ${provenance}" title="Evidence: ${provenance} • Source: ${sourceDesc} • Confidence: ${confPercent}">
-            ${this._provenanceIcon(provenance)} ${provenance}
-          </span>
-        </div>
-        <div class="if-param-controls">
-          <input type="range" class="if-slider" 
-                 min="${minVal}" max="${maxVal}" step="${stepVal}" value="${param.value}" />
-          <input type="number" class="if-val-input" 
-                 min="${minVal}" max="${maxVal}" step="${stepVal}" value="${param.value}" />
-          <span class="if-unit-badge">${unitText}</span>
-        </div>
-      `;
+      if (isBoolean) {
+        const isTrue = Boolean(param.value);
+        item.innerHTML = `
+          <div class="if-param-header">
+            <span class="if-param-label">${labelText}</span>
+            <span class="if-param-provenance ${provenance}" title="Evidence: ${provenance} • Source: ${sourceDesc} • Confidence: ${confPercent}">
+              ${this._provenanceIcon(provenance)} ${provenance}
+            </span>
+          </div>
+          <div class="if-param-controls" style="margin-top:4px;">
+            <button type="button" class="if-btn ${isTrue ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn" style="width:100%; font-size:0.8rem; padding:4px 8px;">
+              ${isTrue ? 'ON / CLOSED' : 'OFF / OPEN'}
+            </button>
+          </div>
+          <div class="if-param-error" style="display:none; color:#ef4444; font-size:0.72rem; margin-top:2px;"></div>
+        `;
+
+        const toggleBtn = item.querySelector('.if-toggle-btn');
+        const provBadge = item.querySelector('.if-param-provenance');
+        const errDiv = item.querySelector('.if-param-error');
+
+        toggleBtn.addEventListener('click', () => {
+          const currentVal = Boolean(this.runtime.getParameter(key)?.value ?? param.value);
+          const nextVal = !currentVal;
+
+          try {
+            // Runtime is authority: call updateParameter first
+            this.runtime.updateParameter(key, nextVal);
+
+            // Succeeded: synchronize button
+            toggleBtn.className = `if-btn ${nextVal ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn`;
+            toggleBtn.textContent = nextVal ? 'ON / CLOSED' : 'OFF / OPEN';
+            provBadge.className = 'if-param-provenance student';
+            provBadge.innerHTML = '✏️ student';
+            if (errDiv) errDiv.style.display = 'none';
+
+            this.options.onParameterChange?.(key, nextVal);
+          } catch (err) {
+            // Rejected update: roll back UI to previous valid state and show concise error
+            const validVal = Boolean(this.runtime.getParameter(key)?.value ?? param.value);
+            toggleBtn.className = `if-btn ${validVal ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn`;
+            toggleBtn.textContent = validVal ? 'ON / CLOSED' : 'OFF / OPEN';
+            if (errDiv) {
+              errDiv.textContent = err.message || 'Invalid parameter update';
+              errDiv.style.display = 'block';
+            }
+          }
+        });
+      } else {
+        const minVal = param.control?.min ?? param.min;
+        const maxVal = param.control?.max ?? param.max;
+        const stepVal = param.control?.step ?? param.step;
+
+        const minAttr = minVal !== undefined ? `min="${minVal}"` : '';
+        const maxAttr = maxVal !== undefined ? `max="${maxVal}"` : '';
+        const stepAttr = stepVal !== undefined ? `step="${stepVal}"` : '';
+
+        item.innerHTML = `
+          <div class="if-param-header">
+            <span class="if-param-label">${labelText}</span>
+            <span class="if-param-provenance ${provenance}" title="Evidence: ${provenance} • Source: ${sourceDesc} • Confidence: ${confPercent}">
+              ${this._provenanceIcon(provenance)} ${provenance}
+            </span>
+          </div>
+          <div class="if-param-controls">
+            <input type="range" class="if-slider" 
+                   ${minAttr} ${maxAttr} ${stepAttr} value="${param.value}" />
+            <input type="number" class="if-val-input" 
+                   ${minAttr} ${maxAttr} ${stepAttr} value="${param.value}" />
+            <span class="if-unit-badge">${unitText}</span>
+          </div>
+          <div class="if-param-error" style="display:none; color:#ef4444; font-size:0.72rem; margin-top:2px;"></div>
+        `;
+
+        const slider = item.querySelector('.if-slider');
+        const numInput = item.querySelector('.if-val-input');
+        const provBadge = item.querySelector('.if-param-provenance');
+        const errDiv = item.querySelector('.if-param-error');
+
+        const onValChange = (newVal) => {
+          const val = Number(newVal);
+          try {
+            // Runtime is authority: validate and apply in runtime first
+            this.runtime.updateParameter(key, val);
+
+            // Succeeded: update input display and provenance
+            slider.value = val;
+            numInput.value = val;
+            provBadge.className = 'if-param-provenance student';
+            provBadge.innerHTML = '✏️ student';
+            provBadge.title = `Evidence: student • Source: runtime_interaction • Confidence: 100%`;
+            if (errDiv) errDiv.style.display = 'none';
+
+            this.options.onParameterChange?.(key, val);
+          } catch (err) {
+            // Rejected update: rollback UI to current valid runtime state and show error
+            const validParam = this.runtime.getParameter(key);
+            const validVal = validParam?.value !== undefined ? validParam.value : param.value;
+            slider.value = validVal;
+            numInput.value = validVal;
+            if (errDiv) {
+              errDiv.textContent = err.message || 'Invalid parameter update';
+              errDiv.style.display = 'block';
+            }
+          }
+        };
+
+        slider.addEventListener('input', (e) => onValChange(e.target.value));
+        numInput.addEventListener('change', (e) => onValChange(e.target.value));
+      }
+
+      this.dom.paramsList.appendChild(item);
+    }
+  }
+
+  _syncParametersUI(parameters) {
+    if (!parameters) return;
+    for (const [key, param] of Object.entries(parameters)) {
+      const item = this.dom.paramsList.querySelector(`[data-param-key="${key}"]`);
+      if (!item) continue;
 
       const slider = item.querySelector('.if-slider');
       const numInput = item.querySelector('.if-val-input');
+      const toggleBtn = item.querySelector('.if-toggle-btn');
       const provBadge = item.querySelector('.if-param-provenance');
 
-      const onValChange = (newVal) => {
-        const val = Number(newVal);
+      const val = param.value;
+      if (slider && document.activeElement !== slider) {
         slider.value = val;
+      }
+      if (numInput && document.activeElement !== numInput) {
         numInput.value = val;
-        this.runtime.setParameter(key, val);
-
-        // Update badge to 'student' modified state
-        provBadge.className = 'if-param-provenance student';
-        provBadge.innerHTML = '✏️ student';
-        provBadge.title = `Evidence: student • Source: runtime_interaction • Confidence: 100%`;
-
-        this.options.onParameterChange?.(key, val);
-      };
-
-      slider.addEventListener('input', (e) => onValChange(e.target.value));
-      numInput.addEventListener('change', (e) => onValChange(e.target.value));
-
-      this.dom.paramsList.appendChild(item);
+      }
+      if (toggleBtn) {
+        const isTrue = Boolean(val);
+        toggleBtn.className = `if-btn ${isTrue ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn`;
+        toggleBtn.textContent = isTrue ? 'ON / CLOSED' : 'OFF / OPEN';
+      }
+      if (provBadge) {
+        const prov = param.provenance || 'observed';
+        provBadge.className = `if-param-provenance ${prov}`;
+        provBadge.innerHTML = `${this._provenanceIcon(prov)} ${prov}`;
+      }
     }
   }
 
@@ -439,6 +584,15 @@ export class InteractiveFigure {
 
   reset() {
     this.runtime.reset();
+    const output = this.runtime.getOutput();
+    if (this.renderer && output) {
+      this.renderer.reset();
+      this.renderer.render(output);
+    }
+    if (output?.editableParameters) {
+      this._syncParametersUI(output.editableParameters);
+    }
+    this._updateTelemetry(output?.telemetry || this.runtime.getState());
   }
 
   setParameter(name, value) {
@@ -451,6 +605,10 @@ export class InteractiveFigure {
 
   destroy() {
     this._stateUnsub?.();
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer = null;
+    }
     this.viewport?.destroy();
     this.runtime.destroy();
     this.host.innerHTML = '';

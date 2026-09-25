@@ -8,6 +8,7 @@
 
 import { PhysicsSceneValidationError } from './errors.js';
 import { resolveParameterSpec, validateAndConvertParameterUpdate } from './units.js';
+import { defaultCapabilityRegistry } from './capabilities.js';
 
 export class SimulationAdapter {
   constructor() {
@@ -36,7 +37,9 @@ export class SimulationAdapter {
    * @returns {Promise<void>}
    */
   async initialize(scene, container = null, options = {}) {
-    this.scene = scene;
+    const interactiveScene = defaultCapabilityRegistry.resolve(scene);
+    this.scene = interactiveScene;
+    this._initialScene = interactiveScene ? JSON.parse(JSON.stringify(interactiveScene)) : null;
     this.container = container;
     this.running = false;
     this.time = 0.0;
@@ -76,6 +79,10 @@ export class SimulationAdapter {
   reset() {
     this.running = false;
     this.time = 0.0;
+    this._parameterOverrides.clear();
+    if (this._initialScene) {
+      this.scene = JSON.parse(JSON.stringify(this._initialScene));
+    }
   }
 
   /**
@@ -98,7 +105,7 @@ export class SimulationAdapter {
     if (typeof addressOrSpec === 'object' && addressOrSpec !== null) {
       targetId = addressOrSpec.targetId || '';
       key = addressOrSpec.key || '';
-      address = targetId ? `${targetId}.${key}` : key;
+      address = addressOrSpec.address || (targetId ? `${targetId}.${key}` : key);
       incomingVal = addressOrSpec.value !== undefined ? addressOrSpec.value : value;
       incomingUnit = addressOrSpec.unit || null;
     } else {
@@ -119,13 +126,17 @@ export class SimulationAdapter {
       }]);
     }
 
-    // 1. Validate numeric finite
-    if (incomingVal === null || incomingVal === undefined || !Number.isFinite(Number(incomingVal))) {
-      throw new PhysicsSceneValidationError([{
-        code: 'INVALID_PARAMETER_VALUE',
-        path: address,
-        message: `Parameter "${address}" value must be a valid finite number: got ${incomingVal}`
-      }]);
+    const isBooleanParam = key === 'closed' || key === 'state' || typeof incomingVal === 'boolean' || incomingVal === 'open' || incomingVal === 'closed';
+
+    // 1. Validate numeric finite (or boolean for switch states)
+    if (!isBooleanParam) {
+      if (incomingVal === null || incomingVal === undefined || !Number.isFinite(Number(incomingVal))) {
+        throw new PhysicsSceneValidationError([{
+          code: 'INVALID_PARAMETER_VALUE',
+          path: address,
+          message: `Parameter "${address}" value must be a valid finite number: got ${incomingVal}`
+        }]);
+      }
     }
 
     // 2. Resolve target specification
@@ -152,8 +163,10 @@ export class SimulationAdapter {
     let canonicalUnit = targetSpec?.unit || null;
     if (key === 'length' || key === 'length_m') {
       canonicalUnit = 'm';
-    } else if (key === 'initialAngle' || key === 'theta0' || key === 'angle') {
-      canonicalUnit = 'rad';
+    } else if (key === 'initialAngle' || key === 'theta0') {
+      canonicalUnit = targetSpec?.unit || 'rad';
+    } else if (key === 'angle' || key === 'launch_angle_deg') {
+      canonicalUnit = targetSpec?.unit || 'deg';
     } else if (key === 'resistance') {
       canonicalUnit = 'Ω';
     } else if (key === 'voltage') {
@@ -166,7 +179,9 @@ export class SimulationAdapter {
       canonicalUnit = 'm/s²';
     }
 
-    const convertedVal = validateAndConvertParameterUpdate(this.scene, address, incomingVal, incomingUnit, canonicalUnit);
+    const convertedVal = isBooleanParam
+      ? (incomingVal === true || incomingVal === 'closed' || incomingVal === 1 || incomingVal === '1')
+      : validateAndConvertParameterUpdate(this.scene, address, incomingVal, incomingUnit, canonicalUnit);
 
     // 4. Validate physical domain constraints
     const isResistance = key === 'resistance' || targetSpec?.unit === 'Ω' || comp?.type === 'resistor';
@@ -217,12 +232,15 @@ export class SimulationAdapter {
     if (this.scene?.parameters?.[address]) {
       this.scene.parameters[address].value = convertedVal;
       this.scene.parameters[address].provenance = 'student';
+      this.scene.parameters[address].editable = true;
     } else if (this.scene?.parameters?.[key]) {
       this.scene.parameters[key].value = convertedVal;
       this.scene.parameters[key].provenance = 'student';
+      this.scene.parameters[key].editable = true;
     } else if (targetId && this.scene?.parameters?.[targetId]) {
       this.scene.parameters[targetId].value = convertedVal;
       this.scene.parameters[targetId].provenance = 'student';
+      this.scene.parameters[targetId].editable = true;
     }
 
     if (comp) {
@@ -270,11 +288,19 @@ export class SimulationAdapter {
   }
 
   /**
-   * Returns parameter dictionary with provenance metadata.
+   * Returns parameter dictionary for editable parameters with provenance metadata.
+   * Strictly filters for parameters declared with editable === true.
    * @returns {Record<string, object>}
    */
   getParameters() {
-    return this.scene?.parameters || {};
+    const params = this.scene?.parameters || {};
+    const editable = {};
+    for (const [k, p] of Object.entries(params)) {
+      if (p && p.editable === true) {
+        editable[k] = { ...p };
+      }
+    }
+    return editable;
   }
 
   /**

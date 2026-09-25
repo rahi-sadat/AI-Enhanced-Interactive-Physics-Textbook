@@ -82,3 +82,20 @@ export class DomainObjectMismatchError extends Error {
     this.objectId = objectId;
   }
 }
+
+/**
+ * Thrown when physical-unit parameters (cm, m, etc.) lack explicit or derivable calibration.
+ */
+export class MissingCalibrationError extends Error {
+  /**
+   * @param {string} unit
+   * @param {string} [paramName='']
+   */
+  constructor(unit, paramName = '') {
+    super(`Missing required coordinate calibration (pixelsPerUnit) for physical-unit parameter "${paramName || 'parameter'}" with unit "${unit}". Physical units require explicit or derivable calibration in coordinateSpace or diagram metadata.`);
+    this.name = 'MissingCalibrationError';
+    this.unit = unit;
+    this.paramName = paramName;
+    this.code = 'MISSING_CALIBRATION';
+  }
+}

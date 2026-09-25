@@ -44,6 +44,9 @@ export class ProjectileSimulation {
     this.timeScale = 1.0;
     this.lastTime = null;
     this.raf = null;
+    this.options = options;
+    this.dragging = false;
+    this.wasRunning = false;
 
     // Canvas overlay
     this.canvas = document.createElement('canvas');
@@ -56,11 +59,16 @@ export class ProjectileSimulation {
     this.ctx = this.canvas.getContext('2d');
 
     this.resize();
-    this.resizeObserver = new ResizeObserver(() => {
-      this.resize();
-      this.render();
-    });
-    this.resizeObserver.observe(this.container);
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.resize();
+        this.render();
+      });
+      this.resizeObserver.observe(this.container);
+    }
+
+    this.abortController = new AbortController();
+    this._bindPointerEvents();
 
     this.render();
   }
@@ -301,8 +309,106 @@ export class ProjectileSimulation {
     ctx.restore();
   }
 
+  _bindPointerEvents() {
+    const signal = this.abortController.signal;
+
+    this.canvas.addEventListener(
+      'pointerdown',
+      (e) => {
+        const rect = this.canvas.getBoundingClientRect();
+        const ptView = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        const currSrc = this.sourcePositionAt(this.simTime);
+        const currView = this.mapper.sourceToView(currSrc);
+        const rView = this.mapper.sourceLengthToView(this.ballRadiusPx);
+
+        const dist = Math.hypot(ptView.x - currView.x, ptView.y - currView.y);
+        const speedRatio = 2.0;
+        const vTipView = {
+          x: currView.x + currSrc.vx * speedRatio,
+          y: currView.y - currSrc.vy * speedRatio
+        };
+        const distTip = Math.hypot(ptView.x - vTipView.x, ptView.y - vTipView.y);
+
+        if (dist <= rView + 16 || distTip <= 20) {
+          this.dragging = true;
+          this.wasRunning = this.running;
+          this.pause();
+          try {
+            this.canvas.setPointerCapture(e.pointerId);
+          } catch (_) {}
+        }
+      },
+      { signal }
+    );
+
+    this.canvas.addEventListener(
+      'pointermove',
+      (e) => {
+        if (!this.dragging) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const ptView = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        const ptSrc = this.mapper.viewToSource(ptView);
+
+        // Vector from launch point: Image Y increases downwards, physics Y increases upwards
+        const dx = ptSrc.x - this.launchSource.x;
+        const dy = this.launchSource.y - ptSrc.y;
+
+        const angleRad = Math.atan2(dy, dx);
+        const angleDeg = Math.max(0, Math.min(90, (angleRad * 180.0) / Math.PI));
+        const distPx = Math.hypot(dx, dy);
+        const speedMps = Math.max(1.0, Math.min(100.0, distPx / (this.ppm || 50.0)));
+
+        this.kernel.angleDeg = Number(angleDeg.toFixed(1));
+        this.kernel.speedMps = Number(speedMps.toFixed(1));
+        this.render();
+
+        this.options.onInteract?.({
+          key: 'speed',
+          value: Number(speedMps.toFixed(1)),
+          unit: 'm/s'
+        });
+        this.options.onInteract?.({
+          key: 'angle',
+          value: Number(angleDeg.toFixed(1)),
+          unit: '°'
+        });
+      },
+      { signal }
+    );
+
+    const onRelease = (e) => {
+      if (!this.dragging) return;
+      this.dragging = false;
+      try {
+        this.canvas.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+
+      const angleDeg = this.kernel.angleDeg;
+      const speedMps = this.kernel.speedMps;
+
+      this.options.onInteract?.({
+        key: 'speed',
+        value: Number(speedMps.toFixed(1)),
+        unit: 'm/s'
+      });
+      this.options.onInteract?.({
+        key: 'angle',
+        value: Number(angleDeg.toFixed(1)),
+        unit: '°'
+      });
+
+      if (this.wasRunning) {
+        this.play();
+      }
+    };
+
+    this.canvas.addEventListener('pointerup', onRelease, { signal });
+    this.canvas.addEventListener('pointercancel', onRelease, { signal });
+  }
+
   destroy() {
     this.pause();
+    this.abortController?.abort();
     this.resizeObserver?.disconnect();
     this.canvas?.remove();
   }

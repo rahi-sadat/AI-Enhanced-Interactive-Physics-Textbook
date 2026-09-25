@@ -1,21 +1,28 @@
-import { MechanicsController } from '../../apps/web/src/features/simulations/mechanics/mechanicsController.js';
-import { OpticsController }    from '../../apps/web/src/features/simulations/optics/opticsController.js';
-import { CircuitController }   from '../../apps/web/src/features/simulations/circuits/CircuitController.js';
+/**
+ * engine/core/sceneRouter.js
+ * 
+ * Domain resolution and routing for canonical physics scenes.
+ * Book-agnostic core module. STRICTLY ZERO IMPORTS FROM apps/ OR DOM.
+ */
 
-function resolveDomain(scene) {
+export function resolveDomain(scene) {
   if (scene?.simulation?.domain) return scene.simulation.domain;
+  if (scene?.domain)             return scene.domain;
   if (scene?.simulation_type === 'kinematics') return 'mechanics';
   if (scene?.simulation_type === 'optics')     return 'optics';
   if (scene?.simulation_type === 'circuits')   return 'circuits';
-  return 'mechanics';
+  return null;
 }
 
+/**
+ * Legacy router placeholder.
+ * Engine files cannot import UI controllers from apps/.
+ * For runtime execution, use PhysicsRuntime and domain SimulationRenderers.
+ * For legacy studio canvas, use apps/web createLegacySimulation.
+ */
 export function createSimulation(scene, overlayStage) {
-  const domain = resolveDomain(scene);
-  console.log('[Router] domain:', domain);
-  if (domain === 'mechanics') return new MechanicsController(scene, overlayStage);
-  if (domain === 'optics')    return new OpticsController(scene, overlayStage);
-  if (domain === 'circuits')  return new CircuitController(scene, overlayStage);
-  throw new Error('Unsupported domain: ' + domain);
+  throw new Error(
+    '[engine/sceneRouter] createSimulation() in engine/core/ has been retired. ' +
+    'The physics engine cannot import UI controllers. Use PhysicsRuntime + apps/web SimulationRenderer.'
+  );
 }
-

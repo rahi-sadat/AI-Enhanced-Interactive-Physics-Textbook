@@ -1,7 +1,7 @@
 /** main.js - Application entrypoint with domain switcher and diagram upload studio. */
 import './style.css';
 import { loadScene }        from '@engine/core/sceneLoader.js';
-import { createSimulation } from '@engine/core/sceneRouter.js';
+import { createLegacySimulation } from './features/simulations/legacy/legacySceneRouter.js';
 import { OverlayStage }     from './features/simulations/core/overlayStage.js';
 import { uploadDiagramFile, analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
 import { InteractiveFigure } from './components/InteractiveFigure.js';
@@ -56,7 +56,7 @@ export async function bootstrap(domain, sceneDataOrUrl = null) {
 
     setActive(activeBtnId);
     showDomainControls(resolvedDomain);
-    currentController = createSimulation(scene, currentStage);
+    currentController = createLegacySimulation(scene, currentStage);
     console.log('[Main] Loaded simulation domain:', resolvedDomain, scene);
   } catch (err) {
     console.error('[Main] Failed to load domain:', domain, err);
@@ -304,7 +304,12 @@ btnGenerateSim?.addEventListener('click', async () => {
       const pScene = await pRes.json();
       setTimeout(() => {
         closeModal();
-        bootstrap(presetInfo.domain, pScene);
+        if (activeFigure && (presetInfo.domain === 'optics' || presetInfo.domain === 'circuits')) {
+          setPlatformMode('runtime');
+          activeFigure.load(pScene);
+        } else {
+          bootstrap(presetInfo.domain, pScene);
+        }
       }, 300);
       return;
     }
@@ -358,7 +363,12 @@ btnGenerateSim?.addEventListener('click', async () => {
           result.scene.visual.background_url = uploadedImageUrl;
         }
       }
-      bootstrap(result.domain, result.scene);
+      if (activeFigure && (result.domain === 'optics' || result.domain === 'circuits')) {
+        setPlatformMode('runtime');
+        activeFigure.load(result.scene);
+      } else {
+        bootstrap(result.domain, result.scene);
+      }
     }, 400);
   } catch (err) {
     console.error('[Upload] Analysis error:', err);
@@ -411,9 +421,10 @@ btnModeStudio?.addEventListener('click', () => setPlatformMode('studio'));
 
 // Canonical Verification Figure Switcher
 const figPills = [
-  { id: 'fig-btn-pendulum', url: '/scenes/canonical/pendulum_figure.json' },
-  { id: 'fig-btn-lens',     url: '/scenes/canonical/lens_figure.json' },
-  { id: 'fig-btn-circuit',  url: '/scenes/canonical/circuit_figure.json' }
+  { id: 'fig-btn-pendulum',   url: '/scenes/canonical/pendulum_figure.json' },
+  { id: 'fig-btn-lens',       url: '/scenes/canonical/lens_figure.json' },
+  { id: 'fig-btn-circuit',    url: '/scenes/canonical/circuit_figure.json' },
+  { id: 'fig-btn-projectile', url: '/scenes/canonical/projectile_figure.json' }
 ];
 
 figPills.forEach(({ id, url }) => {

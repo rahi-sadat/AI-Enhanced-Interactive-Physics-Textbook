@@ -20,6 +20,7 @@ export class PendulumSimulation {
   constructor(container, scene, options = {}) {
     this.container = container;
     this.scene = scene;
+    this.options = options;
 
     const pendulumObj = scene.objects?.find(o => o.type === 'pendulum') || scene.objects?.[0];
     if (!pendulumObj) {
@@ -85,11 +86,13 @@ export class PendulumSimulation {
 
     // Resize handling with DPR & ResizeObserver
     this.resize();
-    this.resizeObserver = new ResizeObserver(() => {
-      this.resize();
-      this.render(this.theta, this.omega);
-    });
-    this.resizeObserver.observe(this.container);
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.resize();
+        this.render(this.theta, this.omega);
+      });
+      this.resizeObserver.observe(this.container);
+    }
 
     // Pointer events for drag & release interaction
     this.abortController = new AbortController();
@@ -445,6 +448,17 @@ export class PendulumSimulation {
         this.omega = 0.0;
         this.prevState = { theta: this.theta, omega: 0.0 };
         this.render(this.theta, 0.0);
+
+        const deg = (this.theta * 180.0) / Math.PI;
+        const angleParam = this.scene.parameters?.initialAngle || this.scene.parameters?.angle;
+        const isDeg = !angleParam?.unit || angleParam.unit === '°' || angleParam.unit === 'deg';
+        const sendVal = isDeg ? Number(deg.toFixed(1)) : Number(this.theta.toFixed(3));
+        const sendUnit = isDeg ? '°' : 'rad';
+        this.options.onInteract?.({
+          key: 'initialAngle',
+          value: sendVal,
+          unit: sendUnit
+        });
       },
       { signal }
     );
@@ -455,6 +469,18 @@ export class PendulumSimulation {
       try {
         this.canvas.releasePointerCapture(e.pointerId);
       } catch (_) {}
+
+      const deg = (this.theta * 180.0) / Math.PI;
+      const angleParam = this.scene.parameters?.initialAngle || this.scene.parameters?.angle;
+      const isDeg = !angleParam?.unit || angleParam.unit === '°' || angleParam.unit === 'deg';
+      const sendVal = isDeg ? Number(deg.toFixed(1)) : Number(this.theta.toFixed(3));
+      const sendUnit = isDeg ? '°' : 'rad';
+      this.options.onInteract?.({
+        key: 'initialAngle',
+        value: sendVal,
+        unit: sendUnit
+      });
+
       if (this.wasRunning) {
         this.play();
       }

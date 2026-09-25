@@ -204,7 +204,10 @@ export class MechanicsAdapter extends SimulationAdapter {
         kernel: this.physicsKernel,
         pivot,
         stringLengthPx,
-        bobRadiusPx
+        bobRadiusPx,
+        onInteract: (action) => {
+          this.updateParameter(action);
+        }
       });
       this.sim.onStateChange?.(() => {
         this.notifyStateChange(this.getState());
@@ -329,7 +332,10 @@ export class MechanicsAdapter extends SimulationAdapter {
         kernel: this.physicsKernel,
         ppm,
         ballRadiusPx: radiusSourcePx,
-        launchSource: launchPos
+        launchSource: launchPos,
+        onInteract: (action) => {
+          this.updateParameter(action);
+        }
       });
     }
 
@@ -385,17 +391,24 @@ export class MechanicsAdapter extends SimulationAdapter {
   _applyParameterUpdate(address, convertedVal, key, targetId, incomingUnit) {
     if (this.subtype === 'pendulum') {
       if (key === 'length' || key === 'length_m') {
-        this.physicsKernel.lengthM = convertedVal;
-        if (this.sim) this.sim.render?.(this.physicsKernel.theta, this.physicsKernel.omega);
+        const lengthM = convertedVal;
+        this.physicsKernel.lengthM = lengthM;
+        if (this.sim) {
+          this.sim.lengthM = lengthM;
+          this.sim.render?.(this.physicsKernel.theta, this.physicsKernel.omega);
+        }
       } else if (key === 'gravity' || key === 'gravity_m_s2') {
         this.physicsKernel.g = convertedVal;
         if (this.sim) this.sim.render?.(this.physicsKernel.theta, this.physicsKernel.omega);
       } else if (key === 'initialAngle' || key === 'theta0' || key === 'angle') {
-        this.physicsKernel.theta0 = convertedVal;
-        this.physicsKernel.theta = convertedVal;
+        const p = this.scene.parameters?.[address] || this.scene.parameters?.[key];
+        const unit = incomingUnit || p?.unit;
+        const rad = (unit === '°' || unit === 'deg') ? (convertedVal * Math.PI) / 180.0 : convertedVal;
+        this.physicsKernel.theta0 = rad;
+        this.physicsKernel.theta = rad;
         this.physicsKernel.omega = 0.0;
         if (this.sim) {
-          this.sim.render?.(convertedVal, 0.0);
+          this.sim.render?.(rad, 0.0);
         }
       } else if (key === 'damping' || key === 'damping_s_inv') {
         this.physicsKernel.damping = convertedVal;
@@ -409,7 +422,9 @@ export class MechanicsAdapter extends SimulationAdapter {
           this.sim.render?.();
         }
       } else if (key === 'angle' || key === 'launch_angle_deg') {
-        const deg = (convertedVal * 180.0) / Math.PI;
+        const p = this.scene.parameters?.[address] || this.scene.parameters?.[key];
+        const unit = incomingUnit || p?.unit;
+        const deg = (unit === 'rad') ? (convertedVal * 180.0) / Math.PI : convertedVal;
         this.physicsKernel.angleDeg = deg;
         if (this.sim) {
           this.sim.render?.();

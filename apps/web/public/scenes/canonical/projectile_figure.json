@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "id": "PHY-MECH-002",
+  "domain": "mechanics",
+  "subtype": "projectile",
+  "title": "Analytical Projectile Motion",
+  "description": "Exploration of launch speed v0, launch angle theta, and parabolic trajectory using exact analytical kinematics.",
+  "source": {
+    "type": "book_figure",
+    "width": 800,
+    "height": 600,
+    "book": "NCTB Physics Class 9-10",
+    "page": 78
+  },
+  "coordinateSpace": {
+    "type": "source_px",
+    "width": 800,
+    "height": 600
+  },
+  "calibration": {
+    "pixels_per_meter": 50.0
+  },
+  "parameters": {
+    "speed": {
+      "value": 15.0,
+      "unit": "m/s",
+      "label": "Launch Speed (v₀)",
+      "min": 2.0,
+      "max": 40.0,
+      "step": 1.0,
+      "provenance": "observed"
+    },
+    "angle": {
+      "value": 45.0,
+      "unit": "°",
+      "label": "Launch Angle (θ)",
+      "min": 5.0,
+      "max": 85.0,
+      "step": 1.0,
+      "provenance": "observed"
+    },
+    "gravity": {
+      "value": 9.81,
+      "unit": "m/s²",
+      "label": "Gravity (g)",
+      "provenance": "assumed"
+    }
+  },
+  "geometry": {
+    "launch_source": { "x": 120, "y": 450 },
+    "sourceWidth": 800,
+    "sourceHeight": 600
+  },
+  "objects": [
+    {
+      "id": "projectile_ball_1",
+      "type": "projectile",
+      "role": "projectile",
+      "geometry": {
+        "launch_source_px": { "x": 120, "y": 450 },
+        "radius_source_px": 16.0
+      },
+      "physics": {
+        "speed_m_s": 15.0,
+        "launch_angle_deg": 45.0
+      }
+    }
+  ],
+  "visual": {
+    "background_url": null
+  },
+  "metadata": {
+    "curriculum": "NCTB",
+    "chapter": "Chapter 3: Motion",
+    "topic": "Projectile Motion & Kinematics"
+  }
+}

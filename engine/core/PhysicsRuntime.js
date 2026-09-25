@@ -9,6 +9,7 @@
 import { defaultRegistry } from './SolverRegistry.js';
 import { normalizeLegacyScene, validatePhysicsScene } from './validation.js';
 import { PhysicsSceneValidationError } from './errors.js';
+import { defaultCapabilityRegistry } from './capabilities.js';
 
 export class PhysicsRuntime {
   /**
@@ -18,7 +19,7 @@ export class PhysicsRuntime {
   constructor(options = {}) {
     this.registry = options.registry || defaultRegistry;
     this.adapter = null;
-    this.scene = null;
+    this._scene = null;
     this.container = null;
     this._listeners = new Set();
     this._stateUnsubscribe = null;
@@ -67,16 +68,19 @@ export class PhysicsRuntime {
       throw new PhysicsSceneValidationError(validation.issues);
     }
 
-    this.scene = normalizedScene;
+    // 3. Resolve interactive capabilities without fabricating physical data
+    const interactiveScene = defaultCapabilityRegistry.resolve(normalizedScene);
+
+    this.scene = interactiveScene;
     if (container) {
       this.container = container;
     }
 
-    // 3. Resolve domain adapter deterministically
-    this.adapter = this.registry.resolve(normalizedScene);
+    // 4. Resolve domain adapter deterministically
+    this.adapter = this.registry.resolve(interactiveScene);
 
-    // 4. Initialize adapter (adapter performs subtype routing)
-    await this.adapter.initialize(normalizedScene, this.container, options);
+    // 5. Initialize adapter (adapter performs subtype routing)
+    await this.adapter.initialize(interactiveScene, this.container, options);
 
     // 5. Subscribe to reactive state updates
     this._stateUnsubscribe = this.adapter.onStateChange((state) => {
@@ -86,6 +90,18 @@ export class PhysicsRuntime {
     const output = this.getOutput();
     this._notifyStateChange(this.getState());
     return output;
+  }
+
+  /**
+   * Authoritative canonical scene representation.
+   * @returns {object|null}
+   */
+  get scene() {
+    return this.adapter?.scene || this._scene;
+  }
+
+  set scene(s) {
+    this._scene = s;
   }
 
   /**

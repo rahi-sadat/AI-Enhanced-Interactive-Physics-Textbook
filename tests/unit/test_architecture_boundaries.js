@@ -66,11 +66,6 @@ console.log('[1/4] Verifying Engine/UI isolation (0 imports of apps/ in engine/)
   const violations = [];
   for (const file of engineFiles) {
     const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
-    // The ONLY temporary exception allowed until PR-03 is legacy sceneRouter.js
-    if (relPath === 'engine/core/sceneRouter.js') {
-      continue;
-    }
-
     const content = fs.readFileSync(file, 'utf-8');
     // Match import ... from '...apps/...' or import('...apps/...')
     const regex = /(from\s+['"][^'"]*apps\/|import\s*\(\s*['"][^'"]*apps\/)/g;
@@ -83,6 +78,35 @@ console.log('[1/4] Verifying Engine/UI isolation (0 imports of apps/ in engine/)
   assert(violations.length === 0, `Zero imports of apps/ across all engine files (found ${violations.length})`);
   if (violations.length > 0) {
     console.error('Violations detected:', violations);
+  }
+
+  // Verify required PR-03 files exist and renderers do NOT import or invoke numerical physics solvers directly
+  const requiredPR03Files = [
+    'apps/web/src/features/simulations/core/SimulationRenderer.js',
+    'apps/web/src/features/simulations/core/RendererRegistry.js',
+    'apps/web/src/features/simulations/optics/OpticsRenderer.js',
+    'apps/web/src/features/simulations/circuits/CircuitRenderer.js',
+    'apps/web/src/features/simulations/legacy/legacySceneRouter.js',
+    'tests/unit/test_interactive_rendering.js'
+  ];
+
+  for (const rel of requiredPR03Files) {
+    const fullPath = path.resolve(rootDir, rel);
+    assert(fs.existsSync(fullPath), `Required PR-03 file must exist: ${rel}`);
+  }
+
+  const rendererFiles = [
+    'apps/web/src/features/simulations/core/SimulationRenderer.js',
+    'apps/web/src/features/simulations/core/RendererRegistry.js',
+    'apps/web/src/features/simulations/optics/OpticsRenderer.js',
+    'apps/web/src/features/simulations/circuits/CircuitRenderer.js',
+  ];
+
+  for (const rel of rendererFiles) {
+    const fullPath = path.resolve(rootDir, rel);
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    const importsSolvers = /(CircuitSolver|CircuitCompiler|thinLensEngine|mirrorEngine|snellInterfaceEngine|prismEngine)/i.test(content);
+    assert(!importsSolvers, `${rel} does NOT import or call numerical solvers directly (renderer consumes RuntimeOutput only)`);
   }
 }
 

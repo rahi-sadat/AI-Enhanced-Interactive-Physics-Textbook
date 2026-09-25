@@ -60,6 +60,18 @@
     "sourceWidth": 800,
     "sourceHeight": 600
   },
+  "objects": [
+    {
+      "id": "object_arrow_1",
+      "role": "object",
+      "type": "optical_object"
+    },
+    {
+      "id": "lens_1",
+      "role": "lens",
+      "type": "thin_lens"
+    }
+  ],
   "visual": {
     "background_url": "/scenes/optics/nctb_lens_diagram.png"
   },

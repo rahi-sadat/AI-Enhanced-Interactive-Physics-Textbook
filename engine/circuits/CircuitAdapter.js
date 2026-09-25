@@ -73,6 +73,14 @@ export class CircuitAdapter extends SimulationAdapter {
    * and scene mutation succeed.
    */
   _applyParameterUpdate(address, convertedVal, key, targetId, incomingUnit) {
+    if (key === 'closed' || key === 'state' || typeof convertedVal === 'boolean') {
+      const swId = targetId || address.split('.')[0];
+      const sw = this.scene.circuit?.components?.find(c => c.id === swId || (c.type === 'switch' && (!targetId || targetId === c.id)));
+      if (sw) {
+        sw.state = (convertedVal === true || convertedVal === 'closed') ? 'closed' : 'open';
+      }
+    }
+
     this.model = CircuitCompiler.compile(this.scene);
     this.solver.load(this.model);
     this.solve();
@@ -81,12 +89,101 @@ export class CircuitAdapter extends SimulationAdapter {
 
   reset() {
     super.reset();
+    this.model = CircuitCompiler.compile(this.scene);
+    this.solver.load(this.model);
     this.solve();
     this.notifyStateChange(this.getState());
   }
 
   getOutput() {
     const state = this.getState();
+    const model = this.model || {};
+
+    // Map compiled wires with topology-aware directional branch current
+    const wires = (model.wires || []).map(w => {
+      let current_A = 0.0;
+      let direction = 'none';
+
+      // 1. Authoritative structural currentReference (from scene or compiler)
+      if (w.currentReference?.componentId && state.branchCurrents) {
+        const refCur = state.branchCurrents[w.currentReference.componentId];
+        if (refCur !== undefined) {
+          const sign = w.currentReference.sign ?? 1;
+          current_A = refCur * sign;
+        }
+      }
+
+      // If cannot be mapped confidently, return direction: "none" rather than inventing current flow
+      if (Math.abs(current_A) > 1e-6) {
+        direction = current_A > 0 ? 'forward' : 'backward';
+      } else {
+        current_A = 0.0;
+        direction = 'none';
+      }
+
+      return {
+        id: w.id,
+        node: w.node,
+        from: w.from,
+        to: w.to,
+        points: w.points,
+        totalLength: w.totalLength,
+        segmentLengths: w.segmentLengths,
+        cumulativeLengths: w.cumulativeLengths,
+        current_A,
+        direction
+      };
+    });
+
+    // Map components with live currents, power, and coordinate geometry
+    const components = Array.from(model.componentById?.values() || []).map(c => {
+      const cur = state.branchCurrents?.[c.id] || 0.0;
+      const power = state.branchPowers?.[c.id] || 0.0;
+      return {
+        id: c.id,
+        type: c.type,
+        label: c.label,
+        value: c.value,
+        unit: c.unit,
+        state: c.state,
+        geometry: c.geometry || {},
+        bbox_source_px: c.bbox_source_px || c.geometry?.bbox_source_px,
+        center_source_px: c.geometry?.center_source_px,
+        terminals: c.terminals || [],
+        current_A: cur,
+        power_W: power
+      };
+    });
+
+    // Map switches with hit targets ONLY when geometric evidence exists in scene
+    const switches = (model.switches || []).map(s => {
+      let hitTarget = null;
+      const tA = s.terminals?.[0]?.source_px;
+      const tB = s.terminals?.[1]?.source_px;
+      const center = s.geometry?.center_source_px;
+      const bbox = s.geometry?.bbox_source_px;
+
+      if (center && Array.isArray(center) && center.length >= 2) {
+        const radius = bbox ? Math.max(20, Math.hypot(bbox[2] - bbox[0], bbox[3] - bbox[1]) / 2) : 35;
+        hitTarget = { x: center[0], y: center[1], radius };
+      } else if (tA && tB && Array.isArray(tA) && Array.isArray(tB)) {
+        const midX = (tA[0] + tB[0]) / 2;
+        const midY = (tA[1] + tB[1]) / 2;
+        const radius = Math.max(25, Math.hypot(tB[0] - tA[0], tB[1] - tA[1]) / 2 + 10);
+        hitTarget = { x: midX, y: midY, radius };
+      }
+      // If neither center nor terminal coordinates exist: hitTarget remains null.
+      // Interaction is unavailable without geometry evidence.
+
+      return {
+        id: s.id,
+        state: s.state || 'closed',
+        closed: s.state !== 'open',
+        terminals: s.terminals || [],
+        hitTarget
+      };
+    });
+
     return {
       domain: 'circuits',
       subtype: this.subtype,
@@ -94,7 +191,12 @@ export class CircuitAdapter extends SimulationAdapter {
       state,
       geometry: {
         nodeVoltages: state.nodeVoltages,
-        branchCurrents: state.branchCurrents
+        branchCurrents: state.branchCurrents,
+        wires,
+        components,
+        switches,
+        nodeLabels: model.nodeLabels ? Object.fromEntries(model.nodeLabels) : {},
+        referenceNode: model.refNodeId
       },
       telemetry: state,
       events: [],
@@ -115,15 +217,99 @@ export class CircuitAdapter extends SimulationAdapter {
       }
     }
 
-    return {
+    // Compute individual source currents delivered into the circuit
+    const sourceCurrents = {};
+    let totalSourceCurrent = 0.0;
+    if (this.model?.voltageSources && branchCurrents) {
+      for (const vs of this.model.voltageSources) {
+        const cur = branchCurrents[vs.id];
+        if (cur !== undefined) {
+          const delivered = -cur;
+          sourceCurrents[vs.id] = Number(delivered.toFixed(4));
+          if (delivered > 1e-6) {
+            totalSourceCurrent += delivered;
+          }
+        }
+      }
+    }
+
+    const numSources = this.model?.voltageSources?.length || 0;
+    // Only expose totalCurrent_A and loopCurrent_A when there is a single source with a well-defined loop/total current.
+    // For arbitrary multi-source circuits, preserve branch/source currents rather than inventing an authoritative single current.
+    const hasSingleSource = numSources === 1;
+    const singleSourceCurrent = hasSingleSource ? (Object.values(sourceCurrents)[0] ?? 0.0) : undefined;
+    const totalCurrent_A = hasSingleSource ? Number(singleSourceCurrent.toFixed(4)) : undefined;
+
+    const state = {
       domain: 'circuits',
       subtype: this.subtype,
       running: this.running,
       nodeVoltages,
       branchCurrents,
       branchPowers,
+      sourceCurrents,
+      totalDeliveredSourceCurrent_A: Number(totalSourceCurrent.toFixed(4)),
       totalPower: Number(totalPower.toFixed(4))
     };
+
+    if (totalCurrent_A !== undefined) {
+      state.totalCurrent_A = totalCurrent_A;
+      state.loopCurrent_A = totalCurrent_A;
+    }
+
+    return state;
+  }
+
+  getParameters() {
+    const params = {};
+
+    // 1. Include explicit scene parameters ONLY if declared editable
+    if (this.scene?.parameters) {
+      for (const [key, p] of Object.entries(this.scene.parameters)) {
+        if (p && p.editable === true) {
+          params[key] = { ...p };
+        }
+      }
+    }
+
+    // 2. Include components ONLY if explicitly declared editable in scene or component
+    if (this.scene?.circuit?.components) {
+      for (const comp of this.scene.circuit.components) {
+        if (params[comp.id] || params[`${comp.id}.resistance`] || params[`${comp.id}.voltage`] || params[`${comp.id}.closed`]) {
+          continue;
+        }
+
+        // Only expose if component explicitly declared editable: true
+        if (comp.editable === true || comp.parameter?.editable === true) {
+          if (comp.type === 'switch') {
+            params[`${comp.id}.closed`] = {
+              value: comp.state !== 'open',
+              label: comp.label || `${comp.id} (Switch)`,
+              type: 'boolean',
+              editable: true,
+              provenance: comp.provenance || 'observed',
+              control: comp.control || { type: 'toggle' }
+            };
+          } else if (comp.value !== undefined) {
+            const key = (comp.type === 'voltage_source' || comp.type === 'battery') ? 'voltage' : 'resistance';
+            const unit = comp.unit || ((comp.type === 'voltage_source' || comp.type === 'battery') ? 'V' : 'Ω');
+            const pMeta = comp.parameter || {};
+            params[`${comp.id}.${key}`] = {
+              value: comp.value,
+              unit,
+              label: comp.label || `${comp.id} (${key})`,
+              editable: true,
+              provenance: comp.provenance || pMeta.provenance || 'observed',
+              ...(pMeta.min !== undefined ? { min: pMeta.min } : {}),
+              ...(pMeta.max !== undefined ? { max: pMeta.max } : {}),
+              ...(pMeta.step !== undefined ? { step: pMeta.step } : {}),
+              control: pMeta.control || comp.control || { type: 'number' }
+            };
+          }
+        }
+      }
+    }
+    return params;
   }
 
   dispose() {

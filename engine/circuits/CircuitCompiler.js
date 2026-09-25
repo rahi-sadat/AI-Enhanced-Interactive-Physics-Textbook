@@ -116,15 +116,31 @@ export class CircuitCompiler {
 
       componentById.set(c.id, c);
 
-      // Index terminals
+      // Index terminals with structural role and nodeIndex
       if (Array.isArray(c.terminals)) {
-        for (const t of c.terminals) {
-          terminalById.set(t.id, {
+        c.terminals = c.terminals.map((t, i) => {
+          const node = t.node || c.nodes?.[i];
+          const isSource = (c.type === 'voltage_source' || c.type === 'battery' || c.type === 'dc_source');
+
+          let nodeIdx = (c.nodes && node) ? c.nodes.indexOf(node) : i;
+          if (nodeIdx === -1) nodeIdx = i;
+
+          const role = t.role || (isSource ? (nodeIdx === 0 ? 'positive' : 'negative') : (nodeIdx === 0 ? 'anode' : 'cathode'));
+          const polarity = t.polarity || (nodeIdx === 0 ? '+' : '-');
+
+          const compiledTerm = {
             ...t,
             componentId: c.id,
-            source_px: t.source_px ? [...t.source_px] : [0, 0]
-          });
-        }
+            node,
+            nodeIndex: nodeIdx,
+            role,
+            polarity,
+            source_px: t.source_px ? [...t.source_px] : null
+          };
+
+          terminalById.set(t.id, compiledTerm);
+          return compiledTerm;
+        });
       }
 
       switch (c.type) {
@@ -172,17 +188,58 @@ export class CircuitCompiler {
     const numAuxVariables = nextSourceIdx;
     const matrixSize = numUnknownNodes + numAuxVariables;
 
-    // 4. Precompute Wire Polylines and Parametric Lengths for Smooth Particle Flow
+    // 4. Precompute Wire Polylines and Authoritative Electrical Current References
     const compiledWires = [];
     const wireById = new Map();
 
     for (const wire of rawWires) {
-      const pts = wire.polyline_source_px || wire.points || [];
+      const pts = wire.polyline_source_px || wire.points || wire.path_source_px || [];
       const poly = this._compilePolyline(pts);
+
+      let currentReference = wire.currentReference || wire.current_reference || null;
+
+      // Derive authoritative currentReference from structural terminal roles if not explicitly declared
+      if (!currentReference) {
+        const fromId = (typeof wire.from === 'object' && wire.from !== null) ? wire.from.terminalId : wire.from;
+        const toId = (typeof wire.to === 'object' && wire.to !== null) ? wire.to.terminalId : wire.to;
+        const fromTerm = fromId ? terminalById.get(fromId) : null;
+        const toTerm = toId ? terminalById.get(toId) : null;
+
+        if (fromTerm) {
+          const comp = componentById.get(fromTerm.componentId);
+          if (comp) {
+            const isSource = comp.type === 'voltage_source' || comp.type === 'battery' || comp.type === 'dc_source';
+            if (isSource) {
+              // Current leaving positive terminal into wire is -iSource; leaving negative is +iSource
+              currentReference = { componentId: comp.id, sign: fromTerm.nodeIndex === 0 ? -1 : 1 };
+            } else {
+              // Passive branch: current flows from nodeIndex 0 to nodeIndex 1.
+              // Leaving nodeIndex 1 into wire: +1; leaving nodeIndex 0 into wire: -1.
+              currentReference = { componentId: comp.id, sign: fromTerm.nodeIndex === 1 ? 1 : -1 };
+            }
+          }
+        } else if (toTerm) {
+          const comp = componentById.get(toTerm.componentId);
+          if (comp) {
+            const isSource = comp.type === 'voltage_source' || comp.type === 'battery' || comp.type === 'dc_source';
+            if (isSource) {
+              // Current entering negative terminal from wire is -iSource; entering positive is +iSource
+              currentReference = { componentId: comp.id, sign: toTerm.nodeIndex === 1 ? -1 : 1 };
+            } else {
+              // Passive branch: current entering nodeIndex 0 from wire: +1; entering nodeIndex 1 from wire: -1.
+              currentReference = { componentId: comp.id, sign: toTerm.nodeIndex === 0 ? 1 : -1 };
+            }
+          }
+        }
+      }
+
       const compiledWire = {
         id: wire.id,
         node: wire.node,
+        from: wire.from,
+        to: wire.to,
         points: pts,
+        currentReference,
         totalLength: poly.totalLength,
         segmentLengths: poly.segmentLengths,
         cumulativeLengths: poly.cumulativeLengths,
