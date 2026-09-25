@@ -21,6 +21,12 @@ import sys
 import traceback
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 # Make sure project root is on path
 _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
@@ -749,4 +755,11 @@ if _ERRORS:
         print(f"    ✗ {e}")
 print(f"{'═'*60}\n")
 
-sys.exit(0 if _FAIL == 0 else 1)
+if __name__ == "__main__":
+    sys.exit(0 if _FAIL == 0 else 1)
+else:
+    import unittest
+    class TestPR04Ingestion(unittest.TestCase):
+        def test_pr04_ingestion_suite(self):
+            self.assertEqual(_FAIL, 0, f"{_FAIL} tests failed: {_ERRORS}")
+

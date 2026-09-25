@@ -40,6 +40,9 @@ export class UploadService {
         // Do NOT set Content-Type header — browser sets it with boundary automatically
       });
     } catch (networkErr) {
+      if (networkErr.message === 'Failed to fetch' || networkErr.name === 'TypeError') {
+        throw new Error('Backend server is offline (port 8000). Please ensure the FastAPI backend is running via "python apps/api/main.py".');
+      }
       throw new Error(`Network error during upload: ${networkErr.message}`);
     }
 
