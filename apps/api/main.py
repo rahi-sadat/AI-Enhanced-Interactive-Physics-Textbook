@@ -1509,6 +1509,151 @@ def circuit_spice(scene_data: dict):
 
 
 
+# ===========================================================================
+# PR-04: Real Image Ingestion Pipeline — /api/ingest
+# ===========================================================================
+# Import the PR-04 ingestion stack.
+# These imports are isolated here so the existing endpoint behaviour is
+# completely unchanged (single-writer policy on this high-collision file).
+try:
+    from ai.ingestion import (
+        UploadService,
+        UploadValidationError,
+        PageIRBuilder,
+        BookUnderstandingPipeline,
+        PhysicsCompiler,
+    )
+    _INGESTION_AVAILABLE = True
+except Exception as _ingestion_err:
+    _INGESTION_AVAILABLE = False
+    print(f"[Backend] PR-04 ingestion imports unavailable: {_ingestion_err}")
+
+# Singletons for the ingestion pipeline
+_UPLOAD_SERVICE: "UploadService | None" = None
+_PAGE_IR_BUILDER: "PageIRBuilder | None" = None
+_BOOK_PIPELINE: "BookUnderstandingPipeline | None" = None
+_PHYSICS_COMPILER: "PhysicsCompiler | None" = None
+
+
+def _get_ingestion_pipeline():
+    """Lazily initialise the PR-04 ingestion pipeline singletons."""
+    global _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _PHYSICS_COMPILER
+    if not _INGESTION_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="PR-04 ingestion pipeline not available (missing dependencies).",
+        )
+    if _UPLOAD_SERVICE is None:
+        _UPLOAD_SERVICE = UploadService(
+            storage_dir=UPLOADS_DIR,
+            public_dir=FRONTEND_UPLOADS,
+        )
+        _PAGE_IR_BUILDER = PageIRBuilder()
+        _BOOK_PIPELINE = BookUnderstandingPipeline()
+        _PHYSICS_COMPILER = PhysicsCompiler()
+    return _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _PHYSICS_COMPILER
+
+
+@app.post("/api/ingest")
+async def ingest_diagram(file: UploadFile = File(...)):
+    """PR-04 Real Image Ingestion endpoint.
+
+    Accepts an arbitrary image file via multipart/form-data and runs it
+    through the full ingestion pipeline:
+
+        raw bytes
+            → UploadService  (validate, store, SourceAsset)
+            → PageIRBuilder  (PageIR in source_px)
+            → BookUnderstandingPipeline (BookIR — honest UNRESOLVED for PR-04)
+            → PhysicsCompiler (PhysicsScene or non-ready result)
+
+    Returns a JSON envelope with:
+        source_asset:  SourceAsset identity (no filename-based routing)
+        page_ir:       PageIR (source_px geometry, regions, figures)
+        book_ir:       BookIR (domain/subtype/entities/parameters)
+        compiler:      PhysicsCompilerResult (READY/NEEDS_REVIEW/UNSUPPORTED/UNRESOLVED)
+        image_url:     Frontend-accessible URL for the uploaded image
+
+    Rules:
+        - filename is metadata only — never used for physics routing
+        - sha256 is identity only — never used for physics routing
+        - An unknown image always returns UNRESOLVED, not a fallback simulation
+    """
+    try:
+        upload_svc, page_ir_builder, book_pipeline, compiler = _get_ingestion_pipeline()
+
+        # 1. Read bytes with streaming size limit (do not buffer oversized uploads into RAM)
+        CHUNK_SIZE = 64 * 1024
+        MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
+        chunks = []
+        total_size = 0
+        while True:
+            chunk = await file.read(CHUNK_SIZE)
+            if not chunk:
+                break
+            total_size += len(chunk)
+            if total_size > MAX_UPLOAD_SIZE:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Uploaded file exceeds size limit of {MAX_UPLOAD_SIZE // (1024 * 1024)}MB."
+                )
+            chunks.append(chunk)
+
+        data = b"".join(chunks)
+        mime_type = file.content_type or "application/octet-stream"
+        original_filename = file.filename or "upload"
+
+        # 2. Validate, store, create SourceAsset
+        try:
+            asset = upload_svc.ingest(data, original_filename, mime_type)
+        except UploadValidationError as ve:
+            raise HTTPException(status_code=422, detail=str(ve))
+
+        public_url = upload_svc.get_public_url(asset)
+
+        # 3. Build PageIR
+        page_ir = page_ir_builder.build(asset, public_url)
+
+        # 4. BookUnderstandingPipeline → BookIR
+        book_ir = book_pipeline.analyze(page_ir)
+
+        # 5. PhysicsCompiler
+        compiler_result = compiler.compile(book_ir)
+
+        return {
+            "success": True,
+            "pipeline": "PR-04",
+            "image_url": public_url,
+            "source_asset": asset.to_dict(),
+            "page_ir": page_ir.to_dict(),
+            "book_ir": book_ir.to_dict(),
+            "compiler": compiler_result.to_dict(),
+            # Convenience top-level fields matching existing frontend expectations
+            "status": compiler_result.status.lower().replace("_", "-"),
+            "domain": book_ir.domain,
+            "scenario": book_ir.subtype,
+            "scene": compiler_result.scene,
+            "issues": compiler_result.issues,
+            "width": asset.width_px,
+            "height": asset.height_px,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ingestion pipeline error: {e}")
+
+
+@app.get("/api/ingest/health")
+def ingest_health():
+    """Check PR-04 ingestion pipeline availability."""
+    return {
+        "available": _INGESTION_AVAILABLE,
+        "pipeline": "PR-04",
+        "note": "Use POST /api/ingest with multipart/form-data file upload.",
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
