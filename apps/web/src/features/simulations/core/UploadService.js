@@ -126,8 +126,28 @@ export class IngestResult {
   /** @returns {boolean} True only when a runnable scene is available. */
   get isReady() { return this.status === 'ready' && this.scene !== null; }
 
-  /** @returns {boolean} True when physics was not understood (expected for PR-04). */
+  /** @returns {boolean} True when physics was not understood or unresolved. */
   get isUnresolved() { return this.status === 'unresolved'; }
+
+  /** @returns {string} Semantic classification status. */
+  get classification() {
+    return this.bookIR?.provenance?.classification || (this.isReady ? 'supported' : 'unknown');
+  }
+
+  /** @returns {Array} Semantic entities identified by VLM. */
+  get entities() { return this.bookIR?.entities || []; }
+
+  /** @returns {Array} Semantic relationships identified by VLM. */
+  get relationships() { return this.bookIR?.relationships || []; }
+
+  /** @returns {Array} Visible text labels (unverified candidate evidence). */
+  get visibleLabels() { return this.bookIR?.provenance?.visible_labels || []; }
+
+  /** @returns {Array} Alternative candidate interpretations. */
+  get candidates() { return this.bookIR?.provenance?.candidates || []; }
+
+  /** @returns {object} Confidence breakdown. */
+  get confidence() { return this.bookIR?.confidence || {}; }
 
   /** @returns {string} Human-readable status message. */
   get statusMessage() {
@@ -135,17 +155,16 @@ export class IngestResult {
       case 'ready':
         return 'Physics understood — interactive simulation ready.';
       case 'needs-review':
+        if (this.domain && this.scenario) {
+          return `Recognized ${this.domain} / ${this.scenario} — precise extraction needed before simulation.`;
+        }
         return 'Physics partially understood — manual review required.';
       case 'unsupported':
-        return 'Physics concept identified but no solver is available yet.';
+        return 'Physics concept identified but no simulation solver is currently available for this topic.';
       case 'unresolved':
       default:
-        return (
-          'Image uploaded successfully. ' +
-          'The physics concept has not been identified yet — ' +
-          'VLM/OCR analysis is not yet implemented. ' +
-          'No simulation was fabricated.'
-        );
+        return this.bookIR?.statusNotes || 'Image could not be identified as a supported physics concept.';
     }
   }
 }
+

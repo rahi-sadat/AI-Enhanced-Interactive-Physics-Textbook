@@ -134,6 +134,24 @@ export class IRDebugPanel {
             : '<span style="color:#475569;font-size:0.82rem;">None extracted yet</span>'),
         ].join(''))}
 
+        ${section('🤖 VLM Semantic Understanding (PR-05)', [
+          kv('Classification', badge((result.classification || 'unknown').toUpperCase(), statusColor), true),
+          kv('Provider / Model', `${bi.provenance?.provider || '—'} / ${bi.provenance?.model || '—'}`),
+          kv('Confidence', `isPhysics: ${(result.confidence.isPhysics || 0).toFixed(2)}, domain: ${(result.confidence.domain || 0).toFixed(2)}, subtype: ${(result.confidence.subtype || 0).toFixed(2)}`),
+          '<div style="margin-top:6px;font-size:0.78rem;color:#64748b;">Semantic Roles & Entities:</div>',
+          (result.entities?.length
+            ? result.entities.map(e => kv(`${e.id} (${e.type})`, `${e.label ? `"${e.label}" ` : ''}[${e.attributes?.precision || 'approximate'}] conf: ${(e.attributes?.confidence || 1.0).toFixed(2)}`)).join('')
+            : '<span style="color:#475569;font-size:0.82rem;">None identified</span>'),
+          '<div style="margin-top:6px;font-size:0.78rem;color:#64748b;">Observed Labels (Unverified Evidence):</div>',
+          (result.visibleLabels?.length
+            ? result.visibleLabels.map(l => kv(l.text, `(role: ${l.semanticRole || 'general'}, conf: ${(l.confidence || 1.0).toFixed(2)})`)).join('')
+            : '<span style="color:#475569;font-size:0.82rem;">No text/parameter labels observed</span>'),
+          (result.candidates?.length
+            ? '<div style="margin-top:6px;font-size:0.78rem;color:#64748b;">Candidate Interpretations:</div>' +
+              result.candidates.map(c => kv(`${c.domain || 'unknown'} / ${c.subtype || 'unknown'}`, `conf: ${(c.confidence || 0).toFixed(2)}`)).join('')
+            : ''),
+        ].join(''))}
+
         ${section('📚 BookIR', [
           kv('Status', badge(bi.status || 'UNRESOLVED', statusColor), true),
           kv('Domain', bi.domain ? escapeHtml(bi.domain) : '<span style="color:#475569">null — not identified</span>', true),

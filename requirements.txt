@@ -13,3 +13,13 @@ shapely>=2.0.0
 # SAM 2 (Segment Anything 2)
 # Install via git:
 # pip install -e git+https://github.com/facebookresearch/segment-anything-2.git
+
+# Backend API & Server Runtime
+fastapi>=0.111.0
+uvicorn>=0.30.0
+python-multipart>=0.0.9
+python-dotenv>=1.2.0
+httpx>=0.28.0
+
+# Multimodal VLM Semantic Analysis
+google-genai>=2.25.0

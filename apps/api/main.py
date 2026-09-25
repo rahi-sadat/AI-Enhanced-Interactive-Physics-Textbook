@@ -16,9 +16,12 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+
 # Setup import paths
 _API_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_PROJECT_ROOT / ".env")
 
 # Ensure SAM 2 package directory and repository root are on sys.path
 _SAM2_DIR = _PROJECT_ROOT / "sam2"
@@ -1614,15 +1617,15 @@ async def ingest_diagram(file: UploadFile = File(...)):
         # 3. Build PageIR
         page_ir = page_ir_builder.build(asset, public_url)
 
-        # 4. BookUnderstandingPipeline → BookIR
-        book_ir = book_pipeline.analyze(page_ir)
+        # 4. BookUnderstandingPipeline → BookIR (PR-05 VLM semantic analysis)
+        book_ir = book_pipeline.analyze(page_ir, asset=asset)
 
         # 5. PhysicsCompiler
         compiler_result = compiler.compile(book_ir)
 
         return {
             "success": True,
-            "pipeline": "PR-04",
+            "pipeline": "PR-05",
             "image_url": public_url,
             "source_asset": asset.to_dict(),
             "page_ir": page_ir.to_dict(),
@@ -1646,10 +1649,10 @@ async def ingest_diagram(file: UploadFile = File(...)):
 
 @app.get("/api/ingest/health")
 def ingest_health():
-    """Check PR-04 ingestion pipeline availability."""
+    """Check PR-05 ingestion pipeline availability."""
     return {
         "available": _INGESTION_AVAILABLE,
-        "pipeline": "PR-04",
+        "pipeline": "PR-05",
         "note": "Use POST /api/ingest with multipart/form-data file upload.",
     }
 

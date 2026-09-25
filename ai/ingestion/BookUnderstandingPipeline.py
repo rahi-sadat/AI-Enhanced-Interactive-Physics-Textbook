@@ -1,80 +1,249 @@
-"""PR-04 BookUnderstandingPipeline — clean boundary for future VLM/OCR/CV perception.
+"""PR-05 BookUnderstandingPipeline — Multimodal VLM Semantic Understanding.
 
-For PR-04:
-  - Returns an honest UNRESOLVED BookIR.
-  - Does NOT write fake heuristics just to make fields look populated.
-  - Does NOT infer domain from filename, hash, or URL patterns.
-  - Does NOT assume any specific physics type.
+Integrates PhysicsVisionAnalyzer into the real ingestion pipeline:
+  real image bytes → SourceAsset → PageIR → VLM semantic analysis → BookIR
 
-Future PRs will fill this with:
-  - VLM semantic understanding
-  - OCR parameter extraction
-  - SAM2/CV entity detection
-
-The clean boundary here is the contract: analyze(page_ir) → BookIR.
+Rules:
+  - domain and subtype are strictly canonical physics identifiers or null.
+  - subtype NEVER contains status words like 'non_physics' or 'unsupported_physics'.
+  - VLM-read numbers/text remain unverified semantic evidence in visible_labels,
+    NEVER directly trusted into BookIR.parameters.
+  - Zero fabricated coordinates or parameters.
+  - Status is determined truthfully:
+      supported concept → NEEDS_REVIEW (requires CV/OCR geometry before simulation)
+      unsupported concept → UNSUPPORTED
+      non-physics / unknown → UNRESOLVED
+      provider failure → UNRESOLVED with honest failure message
 """
 from __future__ import annotations
 
-from shared.schemas.ingestion import BookIR, BookIRStatus, PageIR
+import logging
+from typing import Any, Dict, Optional
+
+from shared.schemas.ingestion import (
+    BookEntity,
+    BookIR,
+    BookIRStatus,
+    PageIR,
+    SourceAsset,
+)
+from shared.schemas.semantic import (
+    SemanticAnalysisResult,
+    SemanticCandidate,
+    SemanticConfidence,
+)
+from ai.ingestion.vision.analyzer import PhysicsVisionAnalyzer
+from ai.ingestion.vision.provider_interface import (
+    VisionProvider,
+    VisionProviderError,
+    VLMConfigurationError,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class BookUnderstandingPipeline:
-    """Semantic physics understanding pipeline.
+    """Semantic physics understanding pipeline for textbook diagrams."""
 
-    PR-04 implementation: always returns UNRESOLVED with no invented content.
-    No filename matching, no hash matching, no default physics fallback.
-    """
+    PIPELINE_VERSION = "PR-05-vlm"
 
-    def analyze(self, page_ir: PageIR) -> BookIR:
-        """Analyze a PageIR and return a BookIR.
+    def __init__(self, analyzer: Optional[PhysicsVisionAnalyzer] = None):
+        self.analyzer = analyzer
+
+    def _get_analyzer(self) -> PhysicsVisionAnalyzer:
+        """Lazily build default analyzer with GeminiVisionProvider if none supplied."""
+        if self.analyzer is None:
+            from ai.ingestion.vision.gemini_provider import GeminiVisionProvider
+            provider = GeminiVisionProvider()
+            self.analyzer = PhysicsVisionAnalyzer(provider=provider)
+        return self.analyzer
+
+    def analyze(
+        self,
+        page_ir: PageIR,
+        asset: Optional[SourceAsset] = None,
+    ) -> BookIR:
+        """Analyze a PageIR and SourceAsset to produce a semantic BookIR.
 
         Args:
             page_ir: The PageIR constructed from the uploaded image.
+            asset:   The SourceAsset pointing to the actual image file on disk.
 
         Returns:
-            BookIR with status=UNRESOLVED when no semantic understanding
-            is available (which is always the case in PR-04).
+            BookIR populated with semantic understanding without fabricated parameters.
         """
-        # Extract figure ref for traceability
         figure_id = page_ir.figures[0].id if page_ir.figures else None
-        asset_id = page_ir.source.get("assetId")
+        asset_id = asset.id if asset else page_ir.source.get("assetId")
 
-        book_ir = BookIR(
+        # If no asset is provided, we cannot run multimodal vision
+        if not asset:
+            return self._build_unresolved_ir(
+                asset_id=asset_id,
+                page_ir_version=page_ir.version,
+                figure_id=figure_id,
+                reason="No SourceAsset provided to BookUnderstandingPipeline for VLM analysis.",
+            )
+
+        try:
+            analyzer = self._get_analyzer()
+            result: SemanticAnalysisResult = analyzer.analyze(asset, page_ir)
+            return self._build_book_ir_from_result(result, asset_id, page_ir.version, figure_id)
+
+        except VLMConfigurationError as ce:
+            logger.warning("[BookUnderstandingPipeline] VLM Configuration error: %s", ce)
+            return self._build_unresolved_ir(
+                asset_id=asset_id,
+                page_ir_version=page_ir.version,
+                figure_id=figure_id,
+                reason=f"VLM configuration error: {ce}",
+                error_type="VLMConfigurationError",
+            )
+        except VisionProviderError as pe:
+            logger.error("[BookUnderstandingPipeline] Vision Provider error: %s", pe)
+            return self._build_unresolved_ir(
+                asset_id=asset_id,
+                page_ir_version=page_ir.version,
+                figure_id=figure_id,
+                reason=f"Vision provider analysis failed: {pe}",
+                error_type="VisionProviderError",
+            )
+        except Exception as e:
+            logger.error("[BookUnderstandingPipeline] Unexpected analysis error: %s", e)
+            return self._build_unresolved_ir(
+                asset_id=asset_id,
+                page_ir_version=page_ir.version,
+                figure_id=figure_id,
+                reason=f"Semantic analysis error: {e}",
+                error_type=type(e).__name__,
+            )
+
+    def _build_book_ir_from_result(
+        self,
+        result: SemanticAnalysisResult,
+        asset_id: Optional[str],
+        page_ir_version: str,
+        figure_id: Optional[str],
+    ) -> BookIR:
+        """Map validated SemanticAnalysisResult into canonical BookIR."""
+        # 1. Transform semantic entities into BookEntities
+        book_entities: list[BookEntity] = []
+        for e in result.entities:
+            pos_px = None
+            if e.approx_bbox:
+                pos_px = {
+                    "precision": "approximate",
+                    "bbox": e.approx_bbox,
+                    "provenance": "vlm",
+                }
+            book_entities.append(
+                BookEntity(
+                    id=e.temporary_id,
+                    type=e.role,
+                    label=e.label,
+                    position_source_px=pos_px,
+                    geometry=None,
+                    attributes={
+                        "confidence": e.confidence,
+                        "precision": e.precision,
+                    },
+                    evidence_refs=[figure_id] if figure_id else [],
+                )
+            )
+
+        # 2. Transform relationships
+        relationships = [r.to_dict() for r in result.relationships]
+
+        # 3. Parameters remain EMPTY in PR-05
+        # Visible labels remain unverified candidate evidence
+        visible_labels_data = [l.to_dict() for l in result.visible_labels]
+
+        # 4. Status determination
+        if result.classification == "supported" and result.is_supported:
+            status = BookIRStatus.NEEDS_REVIEW
+            status_notes = (
+                f"Semantically understood as {result.domain}/{result.subtype}. "
+                "Precise geometric localization and OCR parameter extraction (PR-06) "
+                "required before simulation can be compiled."
+            )
+        elif result.classification == "unsupported_physics":
+            status = BookIRStatus.UNSUPPORTED
+            status_notes = (
+                "Image contains a physics diagram for which no interactive "
+                "simulation solver is currently implemented."
+            )
+        elif result.classification == "non_physics":
+            status = BookIRStatus.UNRESOLVED
+            status_notes = "Image does not depict a recognizable physics diagram or experiment."
+        else:
+            status = BookIRStatus.UNRESOLVED
+            status_notes = "Unable to classify diagram into a supported physics scenario with sufficient confidence."
+
+        provenance = {
+            "pipeline": self.PIPELINE_VERSION,
+            "provider": result.provider,
+            "model": result.model,
+            "prompt_version": result.prompt_version,
+            "timestamp": result.timestamp,
+            "classification": result.classification,
+            "visible_labels": visible_labels_data,
+            "candidates": [c.to_dict() for c in result.candidates],
+            "notes": result.notes,
+        }
+
+        return BookIR(
             version="1.0",
             source_asset_id=asset_id,
-            page_ir_version=page_ir.version,
+            page_ir_version=page_ir_version,
             figure_id=figure_id,
+            domain=result.domain,
+            subtype=result.subtype,
+            entities=book_entities,
+            relationships=relationships,
+            parameters={},  # STRICTLY EMPTY: PR-06 OCR will promote verified parameters
+            geometry={},    # STRICTLY EMPTY: PR-06 CV will provide source_px geometry
+            assumptions=[],
+            provenance=provenance,
+            confidence=result.confidence.to_dict(),
+            status=status,
+            status_notes=status_notes,
+        )
 
-            # domain and subtype are intentionally None.
-            # PR-04 does not have VLM/OCR to determine these.
+    def _build_unresolved_ir(
+        self,
+        asset_id: Optional[str],
+        page_ir_version: str,
+        figure_id: Optional[str],
+        reason: str,
+        error_type: Optional[str] = None,
+    ) -> BookIR:
+        """Construct an honest UNRESOLVED BookIR on failure or missing requirements."""
+        prov = {
+            "pipeline": self.PIPELINE_VERSION,
+            "note": reason,
+        }
+        if error_type:
+            prov["error_type"] = error_type
+            prov["error"] = reason
+
+        return BookIR(
+            version="1.0",
+            source_asset_id=asset_id,
+            page_ir_version=page_ir_version,
+            figure_id=figure_id,
             domain=None,
             subtype=None,
-
             entities=[],
             relationships=[],
             parameters={},
             geometry={},
             assumptions=[],
-            provenance={
-                "pipeline": "BookUnderstandingPipeline",
-                "pipeline_version": "PR-04-stub",
-                "note": (
-                    "No VLM, OCR, or CV analysis was performed. "
-                    "Domain and subtype are unknown. "
-                    "Automatic population will be implemented in future PRs."
-                ),
-            },
+            provenance=prov,
             confidence={
+                "isPhysics": 0.0,
                 "domain": 0.0,
                 "subtype": 0.0,
                 "overall": 0.0,
             },
             status=BookIRStatus.UNRESOLVED,
-            status_notes=(
-                "Image received and PageIR created. "
-                "No physics concept was identified — BookUnderstandingPipeline "
-                "returned UNRESOLVED (expected for PR-04). "
-                "VLM/OCR/CV perception is not yet implemented."
-            ),
+            status_notes=reason,
         )
-        return book_ir
