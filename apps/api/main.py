@@ -7,6 +7,7 @@ Provides automated diagram analysis and interactive simulation synthesis:
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import math
 import os
@@ -1618,7 +1619,8 @@ async def ingest_diagram(file: UploadFile = File(...)):
         page_ir = page_ir_builder.build(asset, public_url)
 
         # 4. BookUnderstandingPipeline → BookIR (PR-05 VLM semantic analysis)
-        book_ir = book_pipeline.analyze(page_ir, asset=asset)
+        # Execute blocking VLM network operations off the async event loop to prevent starvation
+        book_ir = await asyncio.to_thread(book_pipeline.analyze, page_ir, asset=asset)
 
         # 5. PhysicsCompiler
         compiler_result = compiler.compile(book_ir)

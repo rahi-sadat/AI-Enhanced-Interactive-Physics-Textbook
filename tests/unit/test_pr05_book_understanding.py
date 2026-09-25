@@ -206,7 +206,85 @@ class TestPR05BookUnderstanding(unittest.TestCase):
         self.assertIn("VLM configuration error", book_ir.status_notes)
         self.assertEqual(book_ir.provenance.get("error_type"), "VLMConfigurationError")
 
+    def test_vlm_approx_bbox_never_becomes_verified_source_geometry(self):
+        """VLM approximate bounding boxes must remain in attributes, never position_source_px."""
+        asset = _make_asset(b"OPTICS_BYTES", "lens.png")
+        page_ir = _make_page_ir(asset)
+
+        mock_prov = MockVisionProvider(
+            default_result=SemanticAnalysisResult(
+                classification="supported",
+                is_physics=True,
+                domain="optics",
+                subtype="thin_lens",
+                confidence=SemanticConfidence(is_physics=0.97, domain=0.96, subtype=0.95),
+                entities=[
+                    SemanticEntity(
+                        temporary_id="e1",
+                        role="lens",
+                        confidence=0.95,
+                        approx_bbox=[120.0, 45.0, 30.0, 300.0],
+                        precision="approximate",
+                    ),
+                ],
+                provider="gemini",
+                model="gemini-3.8-flash",
+            )
+        )
+        pipeline = BookUnderstandingPipeline(analyzer=PhysicsVisionAnalyzer(mock_prov))
+        book_ir = pipeline.analyze(page_ir, asset=asset)
+
+        entity = book_ir.entities[0]
+        # CRITICAL PR-05/PR-06 boundary invariant:
+        self.assertIsNone(
+            entity.position_source_px,
+            "PR-05 must NEVER populate position_source_px from VLM approximate bboxes (reserved for PR-06 CV)"
+        )
+        self.assertIsNone(entity.geometry, "geometry must remain None in PR-05")
+        self.assertEqual(entity.attributes.get("vlmApproxBBox"), [120.0, 45.0, 30.0, 300.0])
+        self.assertFalse(entity.attributes.get("vlmLocalizationVerified"))
+        self.assertEqual(entity.attributes.get("vlmPrecision"), "approximate")
+
         os.remove(asset.storage_path)
+
+    def test_hash_independence(self):
+        """Pipeline routing must not depend on image SHA-256 hash or hash-table lookups."""
+        content = b"GENERIC_BINARY_PAYLOAD"
+        asset_sha1 = _make_asset(content, "arbitrary_1.png")
+        # Artificially alter the sha256 to simulate different hash metadata
+        asset_sha2 = _make_asset(content, "arbitrary_2.png")
+        asset_sha2.sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+
+        page_ir1 = _make_page_ir(asset_sha1)
+        page_ir2 = _make_page_ir(asset_sha2)
+
+        mock_prov = MockVisionProvider(
+            default_result=SemanticAnalysisResult(
+                classification="supported",
+                is_physics=True,
+                domain="circuits",
+                subtype="dc_linear",
+                confidence=SemanticConfidence(is_physics=0.95, domain=0.92, subtype=0.91),
+                provider="gemini",
+                model="gemini-3.8-flash",
+            )
+        )
+        pipeline = BookUnderstandingPipeline(analyzer=PhysicsVisionAnalyzer(mock_prov))
+
+        ir1 = pipeline.analyze(page_ir1, asset=asset_sha1)
+        ir2 = pipeline.analyze(page_ir2, asset=asset_sha2)
+
+        # Classification, domain, and subtype are completely independent of hash
+        self.assertEqual(ir1.provenance["classification"], ir2.provenance["classification"])
+        self.assertEqual(ir1.domain, ir2.domain)
+        self.assertEqual(ir1.subtype, ir2.subtype)
+        self.assertEqual(ir1.status, ir2.status)
+
+        # Confirm there is no known_hashes routing table in pipeline
+        self.assertFalse(hasattr(pipeline, "known_hashes"))
+
+        os.remove(asset_sha1.storage_path)
+        os.remove(asset_sha2.storage_path)
 
 
 if __name__ == "__main__":

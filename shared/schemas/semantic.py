@@ -29,19 +29,31 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 
+import math
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Set
+
+
 SUPPORTED_DOMAINS = {"mechanics", "optics", "circuits"}
 
+DOMAIN_SUBTYPES: Dict[str, Set[str]] = {
+    "mechanics": {
+        "pendulum",
+        "projectile",
+    },
+    "optics": {
+        "thin_lens",
+        "spherical_mirror",
+        "interface_refraction",
+        "prism",
+    },
+    "circuits": {
+        "dc_linear",
+    },
+}
+
 SUPPORTED_SUBTYPES = {
-    # Mechanics
-    "pendulum",
-    "projectile",
-    # Optics
-    "thin_lens",
-    "spherical_mirror",
-    "interface_refraction",
-    "prism",
-    # Circuits
-    "dc_linear",
+    sub for subs in DOMAIN_SUBTYPES.values() for sub in subs
 }
 
 VALID_CLASSIFICATIONS = {
@@ -50,6 +62,31 @@ VALID_CLASSIFICATIONS = {
     "non_physics",
     "unknown",
 }
+
+
+def _validate_confidence(
+    val: Any,
+    field_name: str,
+    allow_none: bool = False,
+    default: float = 0.0,
+) -> float:
+    """Validate that a confidence score is finite and within [0.0, 1.0]."""
+    if val is None:
+        if allow_none:
+            return default
+        raise SemanticValidationError(f"'{field_name}' confidence is required and cannot be null")
+    if isinstance(val, bool) or not isinstance(val, (int, float)):
+        raise SemanticValidationError(
+            f"'{field_name}' confidence must be a number, got {type(val).__name__}: {val!r}"
+        )
+    f_val = float(val)
+    if not math.isfinite(f_val):
+        raise SemanticValidationError(f"'{field_name}' confidence must be finite, got {f_val}")
+    if f_val < 0.0 or f_val > 1.0:
+        raise SemanticValidationError(
+            f"'{field_name}' confidence must be between 0.0 and 1.0, got {f_val}"
+        )
+    return f_val
 
 
 @dataclass
@@ -69,11 +106,11 @@ class SemanticConfidence:
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "SemanticConfidence":
         if not isinstance(d, dict):
-            return cls()
+            raise SemanticValidationError(f"'confidence' must be a dict, got {type(d).__name__}")
         return cls(
-            is_physics=float(d.get("isPhysics", d.get("is_physics", 0.0))),
-            domain=float(d.get("domain", 0.0)),
-            subtype=float(d.get("subtype", 0.0)),
+            is_physics=_validate_confidence(d.get("isPhysics", d.get("is_physics")), "isPhysics", allow_none=True, default=0.0),
+            domain=_validate_confidence(d.get("domain"), "domain", allow_none=True, default=0.0),
+            subtype=_validate_confidence(d.get("subtype"), "subtype", allow_none=True, default=0.0),
         )
 
 
@@ -83,7 +120,7 @@ class SemanticEntity:
     temporary_id: str
     role: str                       # e.g., "pivot", "bob", "lens", "resistor"
     label: Optional[str] = None     # visible label if any (e.g. "m1", "R1")
-    confidence: float = 1.0
+    confidence: float = 0.0         # Default to 0.0 (conservative, never assume 1.0)
     approx_bbox: Optional[List[float]] = None  # [x, y, w, h] coarse bbox
     precision: str = "approximate"  # ALWAYS coarse/approximate from VLM
 
@@ -98,12 +135,15 @@ class SemanticEntity:
         }
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "SemanticEntity":
+    def from_dict(cls, d: Dict[str, Any], default_id: Optional[str] = None) -> "SemanticEntity":
+        tid = d.get("temporaryId", d.get("temporary_id"))
+        if not tid:
+            tid = default_id or "entity_1"
         return cls(
-            temporary_id=str(d.get("temporaryId", d.get("temporary_id", f"entity_{id(d)}"))),
+            temporary_id=str(tid),
             role=str(d.get("role", "unknown")),
             label=d.get("label"),
-            confidence=float(d.get("confidence", 1.0)),
+            confidence=_validate_confidence(d.get("confidence"), "entity.confidence", allow_none=True, default=0.0),
             approx_bbox=d.get("approxBbox", d.get("approx_bbox")),
             precision="approximate",
         )
@@ -115,7 +155,7 @@ class SemanticRelationship:
     type: str                       # e.g., "connected_to", "mounted_on", "aligned_with"
     source_id: str                  # from temporaryId
     target_id: str                  # to temporaryId
-    confidence: float = 1.0
+    confidence: float = 0.0         # Default to 0.0 (never assume 1.0)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -131,7 +171,7 @@ class SemanticRelationship:
             type=str(d.get("type", "related_to")),
             source_id=str(d.get("from", d.get("source_id", ""))),
             target_id=str(d.get("to", d.get("target_id", ""))),
-            confidence=float(d.get("confidence", 1.0)),
+            confidence=_validate_confidence(d.get("confidence"), "relationship.confidence", allow_none=True, default=0.0),
         )
 
 
@@ -143,7 +183,7 @@ class SemanticVisibleLabel:
     verify and promote values into physical parameters.
     """
     text: str
-    confidence: float = 1.0
+    confidence: float = 0.0              # Default to 0.0 (conservative, never assume 1.0)
     semantic_role: Optional[str] = None  # e.g. "parameter_value", "component_name"
     source: str = "vlm"
     verified: bool = False               # ALWAYS False in PR-05
@@ -161,7 +201,7 @@ class SemanticVisibleLabel:
     def from_dict(cls, d: Dict[str, Any]) -> "SemanticVisibleLabel":
         return cls(
             text=str(d.get("text", "")),
-            confidence=float(d.get("confidence", 1.0)),
+            confidence=_validate_confidence(d.get("confidence"), "visibleLabel.confidence", allow_none=True, default=0.0),
             semantic_role=d.get("semanticRole", d.get("semantic_role")),
             source=str(d.get("source", "vlm")),
             verified=False,  # Enforce unverified in PR-05
@@ -187,7 +227,7 @@ class SemanticCandidate:
         return cls(
             domain=d.get("domain"),
             subtype=d.get("subtype"),
-            confidence=float(d.get("confidence", 0.0)),
+            confidence=_validate_confidence(d.get("confidence"), "candidate.confidence", allow_none=True, default=0.0),
         )
 
 
@@ -234,12 +274,12 @@ class SemanticAnalysisResult:
 
     @property
     def is_supported(self) -> bool:
-        """True only if classification is 'supported' with real domain and subtype."""
+        """True only if classification is 'supported' with real domain and paired subtype."""
         return (
             self.classification == "supported"
             and self.is_physics is True
             and self.domain in SUPPORTED_DOMAINS
-            and self.subtype in SUPPORTED_SUBTYPES
+            and self.subtype in DOMAIN_SUBTYPES.get(self.domain or "", set())
         )
 
 
@@ -251,23 +291,41 @@ class SemanticValidationError(ValueError):
 def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
     """Strictly validates a raw dict against the PR-05 semantic schema.
 
-    Rejects free-form strings, missing required fields, or illegal types.
-    Enforces that 'subtype' is NEVER populated with status words like
-    'non_physics' or 'unsupported_physics'.
+    Enforces:
+      - isPhysics is strictly boolean or None (rejects string booleans).
+      - Confidence scores are finite floats in [0.0, 1.0].
+      - Domain / Subtype pairs must strictly belong together.
+      - unsupported_physics clears both domain and subtype to None.
+      - Entity IDs are unique and deterministic.
+      - Relationships strictly refer to existing entity IDs.
+      - Subtype is NEVER populated with status words.
     """
     if not isinstance(raw, dict):
         raise SemanticValidationError(
             f"VLM response must be a JSON object, got {type(raw).__name__}"
         )
 
-    # 1. isPhysics
+    # 1. isPhysics (Strictly bool or None)
     raw_is_phys = raw.get("isPhysics", raw.get("is_physics"))
-    is_physics = bool(raw_is_phys) if raw_is_phys is not None else None
+    if raw_is_phys is not None:
+        if not isinstance(raw_is_phys, bool):
+            raise SemanticValidationError(
+                f"'isPhysics' must be boolean (true/false) or null, got {type(raw_is_phys).__name__}: {raw_is_phys!r}"
+            )
+    is_physics = raw_is_phys
 
     # 2. classification
     classification = raw.get("classification")
     if classification is not None:
-        classification = str(classification).strip().lower()
+        if not isinstance(classification, str):
+            raise SemanticValidationError(
+                f"'classification' must be string, got {type(classification).__name__}"
+            )
+        classification = classification.strip().lower()
+        if classification not in VALID_CLASSIFICATIONS:
+            raise SemanticValidationError(
+                f"Invalid classification '{classification}'. Valid options: {sorted(VALID_CLASSIFICATIONS)}"
+            )
     else:
         # Infer classification if model omitted it but gave isPhysics/domain/subtype
         if is_physics is False:
@@ -281,44 +339,41 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
         else:
             classification = "unknown"
 
-    if classification not in VALID_CLASSIFICATIONS:
-        classification = "unknown"
-
-    # 3. domain & subtype
-    domain = raw.get("domain")
-    if domain is not None:
-        if not isinstance(domain, str):
-            raise SemanticValidationError(f"'domain' must be string or null, got {type(domain).__name__}")
-        domain = domain.strip().lower()
-        if domain not in SUPPORTED_DOMAINS:
-            domain = None
-
-    subtype = raw.get("subtype")
-    if subtype is not None:
-        if not isinstance(subtype, str):
-            raise SemanticValidationError(f"'subtype' must be string or null, got {type(subtype).__name__}")
-        subtype = subtype.strip().lower()
-        # CRITICAL RULE: If subtype is a status word or unknown, force it to None
-        if subtype in ("non_physics", "physics_but_unsupported", "unknown", "none", "null") or subtype not in SUPPORTED_SUBTYPES:
-            subtype = None
-
-    # Strict boundary enforcement:
+    # 3. Domain & Subtype Boundary Enforcement
     if classification == "non_physics":
         is_physics = False
         domain = None
         subtype = None
     elif classification == "unsupported_physics":
         is_physics = True
+        domain = None
         subtype = None
     elif classification == "unknown":
         domain = None
         subtype = None
     elif classification == "supported":
-        if not domain or not subtype:
-            # If model claimed supported but domain/subtype are missing, downgrade to unknown
-            classification = "unknown"
-            domain = None
-            subtype = None
+        if is_physics is not True:
+            raise SemanticValidationError("classification='supported' requires isPhysics=true")
+        raw_dom = raw.get("domain")
+        if not raw_dom or not isinstance(raw_dom, str):
+            raise SemanticValidationError("classification='supported' requires string 'domain'")
+        domain = raw_dom.strip().lower()
+        if domain not in SUPPORTED_DOMAINS:
+            raise SemanticValidationError(f"Invalid domain '{domain}'. Valid domains: {sorted(SUPPORTED_DOMAINS)}")
+
+        raw_sub = raw.get("subtype")
+        if not raw_sub or not isinstance(raw_sub, str):
+            raise SemanticValidationError("classification='supported' requires string 'subtype'")
+        subtype = raw_sub.strip().lower()
+        if subtype not in SUPPORTED_SUBTYPES:
+            raise SemanticValidationError(f"Invalid subtype '{subtype}'. Valid subtypes: {sorted(SUPPORTED_SUBTYPES)}")
+        if subtype not in DOMAIN_SUBTYPES.get(domain, set()):
+            raise SemanticValidationError(
+                f"Subtype '{subtype}' does not belong to domain '{domain}'. Valid subtypes for {domain}: {sorted(DOMAIN_SUBTYPES[domain])}"
+            )
+    else:
+        domain = None
+        subtype = None
 
     # 4. Confidence
     raw_conf = raw.get("confidence")
@@ -326,20 +381,26 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
         raise SemanticValidationError("Missing or invalid 'confidence' object")
     confidence = SemanticConfidence.from_dict(raw_conf)
 
-    # 5. Entities
+    # 5. Entities (Unique, deterministic IDs)
     entities: List[SemanticEntity] = []
     raw_entities = raw.get("entities", [])
     if not isinstance(raw_entities, list):
         raise SemanticValidationError("'entities' must be a list")
+    seen_entity_ids: Set[str] = set()
     for idx, e in enumerate(raw_entities):
         if not isinstance(e, dict):
             raise SemanticValidationError(f"Entity at index {idx} must be a dict")
         role = e.get("role")
         if not role or not isinstance(role, str):
             raise SemanticValidationError(f"Entity at index {idx} must have non-empty string 'role'")
-        entities.append(SemanticEntity.from_dict(e))
+        default_id = f"entity_{idx + 1}"
+        ent = SemanticEntity.from_dict(e, default_id=default_id)
+        if ent.temporary_id in seen_entity_ids:
+            raise SemanticValidationError(f"Duplicate entity ID '{ent.temporary_id}' at index {idx}")
+        seen_entity_ids.add(ent.temporary_id)
+        entities.append(ent)
 
-    # 6. Relationships
+    # 6. Relationships (Strict reference validation)
     relationships: List[SemanticRelationship] = []
     raw_rels = raw.get("relationships", [])
     if not isinstance(raw_rels, list):
@@ -347,7 +408,16 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
     for idx, r in enumerate(raw_rels):
         if not isinstance(r, dict):
             raise SemanticValidationError(f"Relationship at index {idx} must be a dict")
-        relationships.append(SemanticRelationship.from_dict(r))
+        rel = SemanticRelationship.from_dict(r)
+        if rel.source_id not in seen_entity_ids:
+            raise SemanticValidationError(
+                f"Relationship at index {idx} 'from' reference '{rel.source_id}' does not exist in entities: {sorted(seen_entity_ids)}"
+            )
+        if rel.target_id not in seen_entity_ids:
+            raise SemanticValidationError(
+                f"Relationship at index {idx} 'to' reference '{rel.target_id}' does not exist in entities: {sorted(seen_entity_ids)}"
+            )
+        relationships.append(rel)
 
     # 7. Visible Labels (candidate evidence, unverified)
     visible_labels: List[SemanticVisibleLabel] = []
@@ -356,23 +426,30 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
         raise SemanticValidationError("'visibleLabels' must be a list")
     for idx, l in enumerate(raw_labels):
         if isinstance(l, str):
-            visible_labels.append(SemanticVisibleLabel(text=l))
+            visible_labels.append(SemanticVisibleLabel(text=l, confidence=0.0))
         elif isinstance(l, dict):
             visible_labels.append(SemanticVisibleLabel.from_dict(l))
+        else:
+            raise SemanticValidationError(f"Visible label at index {idx} must be string or dict")
 
-    # 8. Candidates
+    # 8. Candidates (Valid domain/subtype pairing)
     candidates: List[SemanticCandidate] = []
     raw_cands = raw.get("candidates", [])
     if isinstance(raw_cands, list):
         for c in raw_cands:
             if isinstance(c, dict):
-                cand_sub = c.get("subtype")
-                if cand_sub not in SUPPORTED_SUBTYPES:
-                    cand_sub = None
+                c_dom = c.get("domain")
+                c_sub = c.get("subtype")
+                if c_dom and c_dom not in SUPPORTED_DOMAINS:
+                    c_dom = None
+                if c_sub and c_sub not in SUPPORTED_SUBTYPES:
+                    c_sub = None
+                if c_dom and c_sub and c_sub not in DOMAIN_SUBTYPES.get(c_dom, set()):
+                    c_sub = None
                 candidates.append(SemanticCandidate(
-                    domain=c.get("domain") if c.get("domain") in SUPPORTED_DOMAINS else None,
-                    subtype=cand_sub,
-                    confidence=float(c.get("confidence", 0.0)),
+                    domain=c_dom,
+                    subtype=c_sub,
+                    confidence=_validate_confidence(c.get("confidence"), "candidate.confidence", allow_none=True, default=0.0),
                 ))
 
     # 9. Notes

@@ -93,6 +93,99 @@ RULES & CONSTRAINTS:
 """
 
 
+GEMINI_RESPONSE_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "classification": {
+            "type": "STRING",
+            "enum": ["supported", "unsupported_physics", "non_physics", "unknown"],
+        },
+        "isPhysics": {
+            "type": "BOOLEAN",
+        },
+        "domain": {
+            "type": "STRING",
+            "enum": ["mechanics", "optics", "circuits"],
+        },
+        "subtype": {
+            "type": "STRING",
+            "enum": [
+                "pendulum",
+                "projectile",
+                "thin_lens",
+                "spherical_mirror",
+                "interface_refraction",
+                "prism",
+                "dc_linear",
+            ],
+        },
+        "confidence": {
+            "type": "OBJECT",
+            "properties": {
+                "isPhysics": {"type": "NUMBER"},
+                "domain": {"type": "NUMBER"},
+                "subtype": {"type": "NUMBER"},
+            },
+            "required": ["isPhysics", "domain", "subtype"],
+        },
+        "entities": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "temporaryId": {"type": "STRING"},
+                    "role": {"type": "STRING"},
+                    "label": {"type": "STRING"},
+                    "confidence": {"type": "NUMBER"},
+                },
+                "required": ["temporaryId", "role"],
+            },
+        },
+        "relationships": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "type": {"type": "STRING"},
+                    "from": {"type": "STRING"},
+                    "to": {"type": "STRING"},
+                    "confidence": {"type": "NUMBER"},
+                },
+                "required": ["type", "from", "to"],
+            },
+        },
+        "visibleLabels": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "text": {"type": "STRING"},
+                    "confidence": {"type": "NUMBER"},
+                    "semanticRole": {"type": "STRING"},
+                },
+                "required": ["text"],
+            },
+        },
+        "candidates": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "domain": {"type": "STRING"},
+                    "subtype": {"type": "STRING"},
+                    "confidence": {"type": "NUMBER"},
+                },
+            },
+        },
+        "notes": {
+            "type": "ARRAY",
+            "items": {"type": "STRING"},
+        },
+    },
+    "required": ["classification", "confidence"],
+}
+
+
 class GeminiVisionProvider(VisionProvider):
     """Multimodal vision provider implementing Google Gemini via google-genai SDK."""
 
@@ -107,7 +200,7 @@ class GeminiVisionProvider(VisionProvider):
         self.model_name = (
             model
             or os.getenv("GEMINI_MODEL")
-            or "gemini-3.8-flash"
+            or "gemini-3.1-flash-lite"
         )
         self._client = None
 
@@ -158,30 +251,48 @@ class GeminiVisionProvider(VisionProvider):
 
             config = types.GenerateContentConfig(
                 response_mime_type="application/json",
+                response_schema=GEMINI_RESPONSE_SCHEMA,
                 temperature=0.1,  # Low temperature for deterministic semantic categorization
             )
 
-            max_retries = 3
-            last_err = None
+            # Model fallback sequence for quota resilience
+            models_to_try = [self.model_name]
+            for candidate in ["gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-3-flash-preview"]:
+                if candidate not in models_to_try:
+                    models_to_try.append(candidate)
+
             response = None
-            for attempt in range(max_retries):
-                try:
-                    response = client.models.generate_content(
-                        model=self.model_name,
-                        contents=prompt_content,
-                        config=config,
-                    )
+            last_err = None
+            used_model = self.model_name
+
+            for current_model in models_to_try:
+                for attempt in range(2):
+                    try:
+                        response = client.models.generate_content(
+                            model=current_model,
+                            contents=prompt_content,
+                            config=config,
+                        )
+                        used_model = current_model
+                        break
+                    except Exception as call_err:
+                        last_err = call_err
+                        err_str = str(call_err)
+                        if (
+                            "429" in err_str
+                            or "RESOURCE_EXHAUSTED" in err_str
+                            or "503" in err_str
+                            or "404" in err_str
+                            or "UNAVAILABLE" in err_str
+                        ):
+                            time.sleep(1.0)
+                            break
+                        raise
+                if response is not None:
                     break
-                except Exception as call_err:
-                    last_err = call_err
-                    err_str = str(call_err)
-                    if attempt < max_retries - 1 and ("503" in err_str or "UNAVAILABLE" in err_str or "429" in err_str or "high demand" in err_str):
-                        time.sleep(1.5 * (2 ** attempt))
-                        continue
-                    raise
 
             if response is None:
-                raise VisionProviderError(f"Gemini call failed after retries: {last_err}")
+                raise VisionProviderError(f"Gemini call failed across models {models_to_try}: {last_err}")
 
             raw_text = response.text
             if not raw_text or not raw_text.strip():
@@ -198,7 +309,7 @@ class GeminiVisionProvider(VisionProvider):
 
             # Attach metadata
             result.provider = "gemini"
-            result.model = self.model_name
+            result.model = used_model
             result.prompt_version = self.PROMPT_VERSION
             result.timestamp = datetime.now(timezone.utc).isoformat()
 

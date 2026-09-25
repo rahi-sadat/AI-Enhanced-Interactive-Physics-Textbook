@@ -126,26 +126,30 @@ class BookUnderstandingPipeline:
     ) -> BookIR:
         """Map validated SemanticAnalysisResult into canonical BookIR."""
         # 1. Transform semantic entities into BookEntities
+        # CRITICAL RULE (PR-05 vs PR-06 boundary):
+        # PR-05 establishes WHAT an entity is (semantic role), NOT WHERE it precisely is.
+        # Authoritative position_source_px and geometry remain strictly None until PR-06 CV.
+        # Any coarse VLM bbox is preserved only in unverified attributes.
         book_entities: list[BookEntity] = []
         for e in result.entities:
-            pos_px = None
+            entity_attrs = {
+                "confidence": e.confidence,
+                "precision": e.precision,
+                "vlmLocalizationVerified": False,
+            }
             if e.approx_bbox:
-                pos_px = {
-                    "precision": "approximate",
-                    "bbox": e.approx_bbox,
-                    "provenance": "vlm",
-                }
+                entity_attrs["vlmApproxBBox"] = e.approx_bbox
+                entity_attrs["vlmPrecision"] = "approximate"
+                entity_attrs["source"] = "vlm"
+
             book_entities.append(
                 BookEntity(
                     id=e.temporary_id,
                     type=e.role,
                     label=e.label,
-                    position_source_px=pos_px,
-                    geometry=None,
-                    attributes={
-                        "confidence": e.confidence,
-                        "precision": e.precision,
-                    },
+                    position_source_px=None,  # STRICTLY None in PR-05
+                    geometry=None,            # STRICTLY None in PR-05
+                    attributes=entity_attrs,
                     evidence_refs=[figure_id] if figure_id else [],
                 )
             )

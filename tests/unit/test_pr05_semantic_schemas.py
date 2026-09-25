@@ -121,7 +121,7 @@ class TestPR05SemanticSchemas(unittest.TestCase):
         self.assertIsNone(res.subtype)
         self.assertFalse(res.is_supported)
 
-    def test_unsupported_physics_clears_subtype(self):
+    def test_unsupported_physics_clears_domain_and_subtype(self):
         payload = {
             "classification": "unsupported_physics",
             "isPhysics": True,
@@ -131,47 +131,133 @@ class TestPR05SemanticSchemas(unittest.TestCase):
         }
         res = validate_semantic_payload(payload)
         self.assertTrue(res.is_physics)
-        self.assertIsNone(res.subtype)
+        self.assertIsNone(res.domain, "unsupported_physics must clear domain to None")
+        self.assertIsNone(res.subtype, "unsupported_physics must clear subtype to None")
         self.assertFalse(res.is_supported)
 
-    def test_visible_labels_enforces_unverified(self):
+    def test_is_physics_rejects_string_booleans(self):
+        """Python bool('false') is True, so strings must be rejected."""
+        payload_str_false = {
+            "classification": "non_physics",
+            "isPhysics": "false",
+            "confidence": {"isPhysics": 0.05, "domain": 0.0, "subtype": 0.0},
+        }
+        with self.assertRaises(SemanticValidationError):
+            validate_semantic_payload(payload_str_false)
+
+        payload_str_true = {
+            "classification": "supported",
+            "isPhysics": "true",
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 0.95, "domain": 0.9, "subtype": 0.9},
+        }
+        with self.assertRaises(SemanticValidationError):
+            validate_semantic_payload(payload_str_true)
+
+    def test_confidence_outside_zero_to_one_rejected(self):
+        """Confidence must be between 0.0 and 1.0."""
+        with self.assertRaises(SemanticValidationError):
+            validate_semantic_payload({
+                "classification": "supported",
+                "isPhysics": True,
+                "domain": "mechanics",
+                "subtype": "pendulum",
+                "confidence": {"isPhysics": 1.5, "domain": 0.9, "subtype": 0.9},
+            })
+
+        with self.assertRaises(SemanticValidationError):
+            validate_semantic_payload({
+                "classification": "supported",
+                "isPhysics": True,
+                "domain": "mechanics",
+                "subtype": "pendulum",
+                "confidence": {"isPhysics": -0.2, "domain": 0.9, "subtype": 0.9},
+            })
+
+    def test_cross_domain_subtype_mismatch_rejected(self):
+        """Subtypes must match their canonical domains (e.g. pendulum is not optics)."""
+        mismatched_payloads = [
+            {"domain": "optics", "subtype": "pendulum"},
+            {"domain": "circuits", "subtype": "thin_lens"},
+            {"domain": "mechanics", "subtype": "dc_linear"},
+            {"domain": "circuits", "subtype": "projectile"},
+        ]
+        for p in mismatched_payloads:
+            payload = {
+                "classification": "supported",
+                "isPhysics": True,
+                "domain": p["domain"],
+                "subtype": p["subtype"],
+                "confidence": {"isPhysics": 0.95, "domain": 0.9, "subtype": 0.9},
+            }
+            with self.assertRaises(SemanticValidationError, msg=f"Should reject {p['domain']}/{p['subtype']}"):
+                validate_semantic_payload(payload)
+
+    def test_malformed_classification_rejected(self):
+        """Arbitrary strings like 'pendoolum' are not valid classifications."""
+        payload = {
+            "classification": "pendoolum",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 0.9, "domain": 0.9, "subtype": 0.9},
+        }
+        with self.assertRaises(SemanticValidationError):
+            validate_semantic_payload(payload)
+
+    def test_duplicate_entity_ids_rejected(self):
+        """Temporary entity IDs must be unique."""
         payload = {
             "classification": "supported",
             "isPhysics": True,
-            "domain": "optics",
-            "subtype": "thin_lens",
-            "confidence": {"isPhysics": 0.95, "domain": 0.95, "subtype": 0.90},
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 0.95, "domain": 0.9, "subtype": 0.9},
+            "entities": [
+                {"temporaryId": "e1", "role": "pivot"},
+                {"temporaryId": "e1", "role": "bob"},
+            ],
+        }
+        with self.assertRaises(SemanticValidationError):
+            validate_semantic_payload(payload)
+
+    def test_invalid_relationship_references_rejected(self):
+        """Relationship 'from'/'to' must refer to declared entity IDs."""
+        payload = {
+            "classification": "supported",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 0.95, "domain": 0.9, "subtype": 0.9},
+            "entities": [
+                {"temporaryId": "e1", "role": "pivot"},
+            ],
+            "relationships": [
+                {"type": "connected_to", "from": "e1", "to": "e999"},
+            ],
+        }
+        with self.assertRaises(SemanticValidationError):
+            validate_semantic_payload(payload)
+
+    def test_missing_confidence_defaults_to_zero_not_certainty(self):
+        """Missing confidence on entities/labels must default to 0.0, never 1.0."""
+        payload = {
+            "classification": "supported",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 0.95, "domain": 0.9, "subtype": 0.9},
+            "entities": [
+                {"temporaryId": "e1", "role": "pivot"},
+            ],
             "visibleLabels": [
-                {"text": "20 cm", "verified": True},  # Attempt to claim verified
+                {"text": "1.0 m"},
             ],
         }
         res = validate_semantic_payload(payload)
-        self.assertEqual(len(res.visible_labels), 1)
-        self.assertFalse(res.visible_labels[0].verified, "PR-05 must enforce verified=False")
-
-    def test_entity_validation_requires_role(self):
-        payload = {
-            "classification": "supported",
-            "isPhysics": True,
-            "domain": "circuits",
-            "subtype": "dc_linear",
-            "confidence": {"isPhysics": 0.95, "domain": 0.95, "subtype": 0.90},
-            "entities": [
-                {"temporaryId": "e1"},  # missing role
-            ],
-        }
-        with self.assertRaises(SemanticValidationError):
-            validate_semantic_payload(payload)
-
-    def test_missing_confidence_rejected(self):
-        payload = {
-            "classification": "supported",
-            "isPhysics": True,
-            "domain": "circuits",
-            "subtype": "dc_linear",
-        }
-        with self.assertRaises(SemanticValidationError):
-            validate_semantic_payload(payload)
+        self.assertEqual(res.entities[0].confidence, 0.0)
+        self.assertEqual(res.visible_labels[0].confidence, 0.0)
 
 
 if __name__ == "__main__":

@@ -204,5 +204,40 @@ class TestPR05VisionAnalyzer(unittest.TestCase):
         os.remove(asset.storage_path)
 
 
+class TestPR05MalformedProviderOutput(unittest.TestCase):
+    """Tests that malformed or non-compliant provider responses are strictly rejected."""
+
+    def test_non_json_string_rejected(self):
+        """Provider returning raw unparseable prose fails validation."""
+        raw_non_json = "I cannot fulfill this request as I am an AI."
+        with self.assertRaises(Exception):
+            import json
+            data = json.loads(raw_non_json)
+            validate_semantic_payload(data)
+
+    def test_missing_confidence_rejected(self):
+        """Missing confidence block raises SemanticValidationError."""
+        raw_no_conf = {
+            "classification": "supported",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+        }
+        with self.assertRaises(Exception):
+            validate_semantic_payload(raw_no_conf)
+
+    def test_invalid_confidence_values_rejected(self):
+        """Confidences > 1.0 or < 0.0 raise SemanticValidationError."""
+        raw_bad_conf = {
+            "classification": "supported",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 1.5, "domain": -0.2, "subtype": 0.9},
+        }
+        with self.assertRaises(Exception):
+            validate_semantic_payload(raw_bad_conf)
+
+
 if __name__ == "__main__":
     unittest.main()
