@@ -100,6 +100,7 @@ class PendulumGrounder:
                     "string_end": cv_string["end"].to_dict() if (cv_string and hasattr(cv_string.get("end"), "to_dict")) else (cv_string.get("end") if cv_string else None),
                     "string_length_px": cv_string.get("length_to_bob_center_px") if cv_string else None,
                     "pivot": cv_pivot.to_dict() if hasattr(cv_pivot, "to_dict") else cv_pivot,
+                    "vertical_reference": cv_candidates.get("vertical_reference").to_dict() if (cv_candidates.get("vertical_reference") and hasattr(cv_candidates.get("vertical_reference"), "to_dict")) else None,
                 },
             )
         else:
@@ -155,7 +156,60 @@ class PendulumGrounder:
                 cv_r = cv_bob.get("radius_px", cv_bob.get("radius", 10.0))
                 tol = max(self.min_tolerance_px, cv_r * self.bob_agreement_tolerance_ratio)
 
-                if bob_mask and bob_mask.centroid_source_px:
+                # Independent consistency checks
+                is_consistent = True
+                inconsistency_reasons = []
+
+                # Check 1: Size sanity relative to image
+                src_w = grounded_ir.geometry.get("width", 1000) if grounded_ir.geometry else 1000
+                src_h = grounded_ir.geometry.get("height", 1000) if grounded_ir.geometry else 1000
+                if cv_r > min(src_w, src_h) * 0.12:
+                    is_consistent = False
+                    inconsistency_reasons.append(f"Bob radius {cv_r:.1f}px exceeds 12% of image dimension.")
+
+                # Check 2: String attachment
+                if cv_string:
+                    str_end = cv_string.get("end")
+                    if str_end:
+                        pt_end = SourcePoint(str_end.x, str_end.y) if hasattr(str_end, "x") else SourcePoint(str_end["x"], str_end["y"])
+                        gap_to_perimeter = abs(cv_center.distance_to(pt_end) - cv_r)
+                        if gap_to_perimeter > max(25.0, cv_r * 0.55):
+                            is_consistent = False
+                            inconsistency_reasons.append(f"String does not attach to bob perimeter (gap: {gap_to_perimeter:.1f}px).")
+
+                    # Check 3: Ratio to string length
+                    s_len = cv_string.get("length_to_bob_center_px", cv_string.get("visible_length_px", 1.0))
+                    ratio = (2.0 * cv_r) / max(1.0, s_len)
+                    if ratio < 0.03 or ratio > 0.38:
+                        is_consistent = False
+                        inconsistency_reasons.append(f"Bob diameter to string length ratio ({ratio:.2f}) is physically implausible.")
+
+                # Check 4: SAM mask area sanity (mask should not be giant background region)
+                if bob_mask:
+                    expected_max_area = math.pi * (cv_r * 2.2) ** 2
+                    if bob_mask.area_px and bob_mask.area_px > expected_max_area * 2.5:
+                        is_consistent = False
+                        inconsistency_reasons.append(f"SAM mask area ({bob_mask.area_px:.0f}px) is far too large for bob candidate.")
+
+                if not is_consistent:
+                    # Inconsistency rejected candidate
+                    diagnostics.append(
+                        EntityGroundingDiagnostic(
+                            entity_id=bob_entity.id,
+                            grounding_state=GroundingState.AMBIGUOUS,
+                            supporting_evidence=list(filter(None, [cv_ev_id, mask_ev_id])),
+                            checks={
+                                "cv_center": cv_center.to_dict(),
+                                "radius_px": cv_r,
+                                "is_consistent": False,
+                            },
+                            conflicts=inconsistency_reasons,
+                            notes="Bob candidate rejected by independent geometric consistency checks.",
+                        )
+                    )
+                    bob_entity.position_source_px = None
+                    bob_entity.geometry = None
+                elif bob_mask and bob_mask.centroid_source_px:
                     sam_center = bob_mask.centroid_source_px
                     dist = cv_center.distance_to(sam_center)
 
@@ -210,7 +264,7 @@ class PendulumGrounder:
                                     "tolerance_px": round(tol, 2),
                                 },
                                 conflicts=[],
-                                notes="CV circle and SAM 2 mask centroids agree within tolerance.",
+                                notes="CV circle and SAM 2 mask centroids agree within tolerance and pass consistency checks.",
                             )
                         )
                         # Register in BookIR parameters/geometry for compiler
@@ -344,6 +398,55 @@ class PendulumGrounder:
                 grounded_ir.parameters["pivot"] = cv_pivot.to_dict() if hasattr(cv_pivot, "to_dict") else cv_pivot
 
         # -------------------------------------------------------------------
+        # 3b. Vertical Reference Grounding
+        # -------------------------------------------------------------------
+        vref_entity = next((e for e in grounded_ir.entities if e.type in ("vertical_reference", "reference_line")), None)
+        if vref_entity:
+            cv_vref = cv_candidates.get("vertical_reference")
+            if not cv_vref:
+                diagnostics.append(
+                    EntityGroundingDiagnostic(
+                        entity_id=vref_entity.id,
+                        grounding_state=GroundingState.UNRESOLVED,
+                        supporting_evidence=[],
+                        checks={"cv_detected": False},
+                        conflicts=[],
+                        notes="No vertical reference line candidate detected.",
+                    )
+                )
+            else:
+                vref_start = cv_vref.start
+                vref_end = cv_vref.end
+                vref_len = vref_start.distance_to(vref_end)
+                vref_entity.geometry = {
+                    "start": vref_start.to_dict(),
+                    "end": vref_end.to_dict(),
+                    "length_px": round(vref_len, 2),
+                    "style": "dashed",
+                }
+                vref_entity.position_source_px = {
+                    "x": vref_start.x,
+                    "y": vref_start.y,
+                    "coordinate_space": "source_px",
+                    "method": "line_detection",
+                }
+                vref_entity.evidence_refs = list(filter(None, [cv_ev_id]))
+                diagnostics.append(
+                    EntityGroundingDiagnostic(
+                        entity_id=vref_entity.id,
+                        grounding_state=GroundingState.GROUNDED,
+                        supporting_evidence=vref_entity.evidence_refs,
+                        checks={
+                            "start": vref_start.to_dict(),
+                            "end": vref_end.to_dict(),
+                            "length_px": round(vref_len, 2),
+                        },
+                        conflicts=[],
+                        notes="Vertical reference dashed line detected and grounded.",
+                    )
+                )
+
+        # -------------------------------------------------------------------
         # 4. OCR Evidence & Parameter Promotion (STRICT ZERO FABRICATION)
         # -------------------------------------------------------------------
         param_associations: List[ParameterAssociationResult] = []
@@ -400,15 +503,39 @@ class PendulumGrounder:
                             elif cand.raw_unit == "mm":
                                 canonical_val = cand.numeric_value * 0.001
 
+                            # Check for VLM corroboration and standalone symbol
+                            vlm_labels = grounded_ir.provenance.get("visible_labels", [])
+                            vlm_corroborates = any(
+                                ("l =" in str(vl.get("text", "")).lower() or "length" in str(vl.get("text", "")).lower())
+                                and (str(int(cand.numeric_value)) in str(vl.get("text", "")) or str(cand.numeric_value) in str(vl.get("text", "")))
+                                for vl in vlm_labels
+                            )
+                            # Look for standalone 'L' symbol
+                            l_tok = next((t for t in ocr_result.tokens if t.raw_text.strip() == "L"), None)
+                            if l_tok:
+                                supporting.append(f"ev_ocr_{l_tok.id}")
+
+                            if vlm_corroborates or "দৈর্ঘ্য" in tok.raw_text:
+                                source_type = "fused"
+                                conf = min(0.92, max(cand.confidence or 0.5, 0.88))
+                                notes = (
+                                    f"Fused from OCR text '{cand.raw_text}' with Bangla semantic context ('দৈর্ঘ্য') "
+                                    f"and corroborating VLM/symbol evidence."
+                                )
+                            else:
+                                source_type = "ocr"
+                                conf = cand.confidence or 0.85
+                                notes = f"Extracted from OCR text '{cand.raw_text}'"
+
                             grounded_ir.parameters["length"] = PhysicalValue(
                                 value=canonical_val,
                                 unit="m",
                                 status="observed",
                                 provenance=ProvenanceRecord(
-                                    source="ocr",
+                                    source=source_type,
                                     evidence_refs=supporting,
-                                    confidence=cand.confidence or 0.85,
-                                    notes=f"Extracted from OCR text '{cand.raw_text}'",
+                                    confidence=conf,
+                                    notes=notes,
                                 ),
                             )
                             if string_entity:
@@ -441,26 +568,44 @@ class PendulumGrounder:
 
                         assoc_checks = {"explicit_label": has_explicit_label, "near_pivot": near_pivot}
                         if has_explicit_label or near_pivot:
-                            assoc_state = AssociationState.ASSOCIATED
-                            supporting = [tok_ev_id]
-                            if cv_ev_id:
-                                supporting.append(cv_ev_id)
-
-                            canonical_val = cand.numeric_value
-                            if cand.raw_unit in ("rad", "radian", "radians"):
-                                canonical_val = cand.numeric_value * 180.0 / math.pi
-
-                            grounded_ir.parameters["initial_angle"] = PhysicalValue(
-                                value=canonical_val,
-                                unit="deg",
-                                status="observed",
-                                provenance=ProvenanceRecord(
-                                    source="ocr",
-                                    evidence_refs=supporting,
-                                    confidence=cand.confidence or 0.85,
-                                    notes=f"Extracted from OCR text '{cand.raw_text}'",
-                                ),
+                            cand_conf = cand.confidence or 0.0
+                            has_angle_arc = cv_candidates.get("angle_marker") is not None
+                            vlm_labels = grounded_ir.provenance.get("visible_labels", [])
+                            vlm_corroborates = any(
+                                ("θ" in str(vl.get("text", "")) or "theta" in str(vl.get("text", "")).lower() or "angle" in str(vl.get("text", "")).lower() or "কোণ" in str(vl.get("text", "")))
+                                and (str(int(cand.numeric_value)) in str(vl.get("text", "")) or str(cand.numeric_value) in str(vl.get("text", "")))
+                                for vl in vlm_labels
                             )
+
+                            # Strict Anti-Fabrication check:
+                            # If OCR confidence is low (< 0.50) and angle arc is ungrounded, mark AMBIGUOUS and do NOT promote to observed parameters.
+                            if cand_conf < 0.50 and not has_angle_arc:
+                                assoc_state = AssociationState.AMBIGUOUS
+                                supporting = [tok_ev_id]
+                            else:
+                                assoc_state = AssociationState.ASSOCIATED
+                                supporting = [tok_ev_id]
+                                if cv_ev_id:
+                                    supporting.append(cv_ev_id)
+
+                                canonical_val = cand.numeric_value
+                                if cand.raw_unit in ("rad", "radian", "radians"):
+                                    canonical_val = cand.numeric_value * 180.0 / math.pi
+
+                                src = "fused" if (vlm_corroborates or "কোণ" in tok.raw_text) else "ocr"
+                                conf = min(0.92, max(cand_conf, 0.85)) if src == "fused" else cand_conf
+
+                                grounded_ir.parameters["initial_angle"] = PhysicalValue(
+                                    value=canonical_val,
+                                    unit="deg",
+                                    status="observed",
+                                    provenance=ProvenanceRecord(
+                                        source=src,
+                                        evidence_refs=supporting,
+                                        confidence=conf,
+                                        notes=f"Extracted from OCR text '{cand.raw_text}' (corroborated={vlm_corroborates})",
+                                    ),
+                                )
                         else:
                             assoc_state = AssociationState.REJECTED
                             supporting = []

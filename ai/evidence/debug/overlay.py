@@ -138,6 +138,34 @@ def generate_evidence_overlay(
             cv2.LINE_AA,
         )
 
+    # Vertical reference line
+    ref_entity = next((e for e in grounded_book_ir.entities if e.type in ("vertical_reference", "reference_line")), None)
+    if ref_entity and ref_entity.geometry:
+        r_geom = ref_entity.geometry
+        r_start = r_geom.get("start")
+        r_end = r_geom.get("end")
+        if r_start and r_end:
+            rp1 = (int(round(r_start["x"])), int(round(r_start["y"])))
+            rp2 = (int(round(r_end["x"])), int(round(r_end["y"])))
+            dist = int(np.hypot(rp2[0] - rp1[0], rp2[1] - rp1[1]))
+            if dist > 0:
+                for d in range(0, dist, 16):
+                    t1 = d / float(dist)
+                    t2 = min(1.0, (d + 8) / float(dist))
+                    pt1 = (int(round(rp1[0] + (rp2[0] - rp1[0]) * t1)), int(round(rp1[1] + (rp2[1] - rp1[1]) * t1)))
+                    pt2 = (int(round(rp1[0] + (rp2[0] - rp1[0]) * t2)), int(round(rp1[1] + (rp2[1] - rp1[1]) * t2)))
+                    cv2.line(canvas, pt1, pt2, COLOR_VERT_REF, 2, cv2.LINE_AA)
+            cv2.putText(
+                canvas,
+                f"VertRef (L={r_geom.get('length_px', 0):.1f}px)",
+                (rp1[0] - 80, (rp1[1] + rp2[1]) // 2),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.50,
+                COLOR_VERT_REF,
+                1,
+                cv2.LINE_AA,
+            )
+
     # 3. Draw OCR Evidence Boxes and Text
     for ev_id, ev in grounded_book_ir.evidence.items():
         if ev.get("method") == "ocr":

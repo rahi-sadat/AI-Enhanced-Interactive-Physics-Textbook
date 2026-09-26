@@ -340,6 +340,83 @@ class TestPR06RealUnseenAcceptance(unittest.TestCase):
         compile_res = self.compiler.compile(grounded_ir)
         self.assertIsNone(compile_res.scene)
 
+    def test_real_bengali_textbook_pendulum_scan_acceptance(self):
+        """Evaluate real Bengali textbook pendulum diagram (regression fixture)."""
+        img_path = self.fixture_dir / "pendulum_bengali_textbook.png"
+        semantic = SemanticAnalysisResult(
+            classification="supported",
+            is_physics=True,
+            domain="mechanics",
+            subtype="pendulum",
+            confidence=SemanticConfidence(overall=0.96, is_physics=0.99, domain=0.98, subtype=0.96),
+            entities=[
+                SemanticEntity(temporary_id="pivot_1", role="pivot", confidence=0.95),
+                SemanticEntity(temporary_id="string_1", role="string", confidence=0.95),
+                SemanticEntity(temporary_id="bob_1", role="bob", confidence=0.95),
+                SemanticEntity(temporary_id="ref_1", role="vertical_reference", confidence=0.95),
+            ],
+            visible_labels=[
+                SemanticVisibleLabel(text="Pivot (ঘূর্ণনবিন্দু)", semantic_role="label", confidence=0.95),
+                SemanticVisibleLabel(text="L = 20 cm", semantic_role="parameter", confidence=0.95),
+                SemanticVisibleLabel(text="θ = 30°", semantic_role="parameter", confidence=0.95),
+                SemanticVisibleLabel(text="String (সুতা)", semantic_role="label", confidence=0.95),
+                SemanticVisibleLabel(text="Bob (ভরক)", semantic_role="label", confidence=0.95),
+                SemanticVisibleLabel(text="m", semantic_role="parameter", confidence=0.95),
+                SemanticVisibleLabel(text="Fig. 2 সরল দোলক", semantic_role="caption", confidence=0.95),
+            ],
+        )
+        grounded_ir = self._run_pipeline(img_path, semantic)
+
+        self.assertEqual(grounded_ir.domain, "mechanics")
+        self.assertEqual(grounded_ir.subtype, "pendulum")
+        self.assertEqual(grounded_ir.status, BookIRStatus.NEEDS_REVIEW)
+
+        # 1. Bob grounding verification (must be near (611.9, 792.5) with radius ~47px, NOT phantom at (238, 998))
+        bob_ent = next((e for e in grounded_ir.entities if e.type == "bob"), None)
+        self.assertIsNotNone(bob_ent)
+        self.assertIsNotNone(bob_ent.position_source_px)
+        self.assertAlmostEqual(bob_ent.position_source_px["x"], 611.9, delta=10.0)
+        self.assertAlmostEqual(bob_ent.position_source_px["y"], 792.5, delta=10.0)
+        self.assertAlmostEqual(bob_ent.geometry["radius_px"], 47.2, delta=8.0)
+        self.assertLess(bob_ent.geometry.get("area_px", 0), 15000.0)  # Must be compact bob, not giant 114k mask
+
+        # 2. String grounding verification (slopes down-right from pivot to bob)
+        string_ent = next((e for e in grounded_ir.entities if e.type == "string"), None)
+        self.assertIsNotNone(string_ent)
+        self.assertIsNotNone(string_ent.geometry)
+        self.assertAlmostEqual(string_ent.geometry["start"]["x"], 333.3, delta=10.0)
+        self.assertAlmostEqual(string_ent.geometry["start"]["y"], 101.2, delta=15.0)
+        self.assertAlmostEqual(string_ent.geometry["end"]["x"], 593.9, delta=15.0)
+        self.assertAlmostEqual(string_ent.geometry["end"]["y"], 748.9, delta=15.0)
+        # Verify downward-right slope (end.x > start.x, end.y > start.y)
+        self.assertGreater(string_ent.geometry["end"]["x"], string_ent.geometry["start"]["x"])
+        self.assertGreater(string_ent.geometry["end"]["y"], string_ent.geometry["start"]["y"])
+
+        # 3. Pivot grounding verification (near (333, 101))
+        pivot_ent = next((e for e in grounded_ir.entities if e.type == "pivot"), None)
+        self.assertIsNotNone(pivot_ent)
+        self.assertIsNotNone(pivot_ent.position_source_px)
+        self.assertAlmostEqual(pivot_ent.position_source_px["x"], 333.3, delta=10.0)
+        self.assertAlmostEqual(pivot_ent.position_source_px["y"], 101.2, delta=15.0)
+
+        # 4. Vertical reference line grounded
+        ref_ent = next((e for e in grounded_ir.entities if e.type == "vertical_reference"), None)
+        self.assertIsNotNone(ref_ent)
+        self.assertIsNotNone(ref_ent.geometry)
+        self.assertAlmostEqual(ref_ent.geometry["start"]["x"], 334.0, delta=10.0)
+        self.assertEqual(ref_ent.geometry["style"], "dashed")
+
+        # 5. Length parameter promotion with fused provenance
+        self.assertIn("length", grounded_ir.parameters)
+        self.assertAlmostEqual(float(grounded_ir.parameters["length"].value), 0.2, delta=0.01)
+        self.assertEqual(grounded_ir.parameters["length"].provenance.source, "fused")
+
+        # 6. Compiler safety: BookIR remains NEEDS_REVIEW and scene is None
+        compile_res = self.compiler.compile(grounded_ir)
+        self.assertIsNone(compile_res.scene)
+        self.assertEqual(compile_res.status, "NEEDS_REVIEW")
+
 
 if __name__ == "__main__":
     unittest.main()
+

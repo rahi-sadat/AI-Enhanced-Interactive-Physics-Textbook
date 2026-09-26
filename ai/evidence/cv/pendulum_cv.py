@@ -39,7 +39,7 @@ class PendulumCVCandidateExtractor:
         canny_thresh2: float = 120.0,
         min_string_len_ratio: float = 0.08,
         min_bob_radius_ratio: float = 0.015,
-        max_bob_radius_ratio: float = 0.22,
+        max_bob_radius_ratio: float = 0.095,
     ):
         self.canny_thresh1 = canny_thresh1
         self.canny_thresh2 = canny_thresh2
@@ -173,51 +173,92 @@ class PendulumCVCandidateExtractor:
                     "dy": dy,
                 })
 
-        # 4. Pair Bob and String Candidates
+        # 4. Line Role Classification & Pivot Refinement
+        hanging_lines = [l for l in line_proposals if l['length_px'] > h * 0.18 and l['dy'] > 0 and l['start'].y < h * 0.35]
+        if hanging_lines:
+            px = float(np.median([l['start'].x for l in hanging_lines]))
+            py = float(np.median([l['start'].y for l in hanging_lines]))
+            pivot_est = SourcePoint(x=px, y=py)
+        else:
+            pivot_est = SourcePoint(x=w * 0.4, y=h * 0.1)
+
+        # Check for small mounting pin circle near pivot
+        for c in circle_candidates:
+            if c['center'].y < h * 0.25 and c['center'].distance_to(pivot_est) < 40.0 and c['radius_px'] < 30.0:
+                pivot_est = c['center']
+                break
+
+        vertical_refs: List[Dict[str, Any]] = []
+        slanted_strings: List[Dict[str, Any]] = []
+
+        for l in line_proposals:
+            d_piv = l['start'].distance_to(pivot_est)
+            if d_piv > 85.0:
+                continue
+            dx = abs(l['dx'])
+            dy = abs(l['dy'])
+            if dy <= 0:
+                continue
+            ratio = dx / dy
+            if ratio < 0.08:
+                vertical_refs.append(l)
+            elif ratio >= 0.08 and l['length_px'] > h * 0.12:
+                slanted_strings.append(l)
+
+        # Fallback: if no slanted string found but lines exist from pivot, consider any downward line from pivot
+        if not slanted_strings:
+            for l in line_proposals:
+                if l['start'].distance_to(pivot_est) < 85.0 and l['length_px'] > h * 0.12:
+                    slanted_strings.append(l)
+
+        vertical_refs.sort(key=lambda l: l['length_px'], reverse=True)
+        vertical_ref_candidate: Optional[SourceLine] = (
+            SourceLine(start=vertical_refs[0]['start'], end=vertical_refs[0]['end'])
+            if vertical_refs else None
+        )
+
+        # 5. Joint Pivot -> String -> Bob Chain Verification
         paired_candidates: List[Dict[str, Any]] = []
-        diagonal = math.hypot(w, h)
 
-        circle_candidates.sort(key=lambda c: c["center"].y, reverse=True)
+        for sl in slanted_strings:
+            s_top = sl['start']
+            s_bot = sl['end']
+            s_len = sl['length_px']
 
-        for c_cand in circle_candidates:
-            bob_center = (c_cand["center"].x, c_cand["center"].y)
-            bob_r = c_cand["radius_px"]
+            for c_cand in circle_candidates:
+                c_center = c_cand['center']
+                c_r = c_cand['radius_px']
 
-            for l_cand in line_proposals:
-                p_top = (l_cand["start"].x, l_cand["start"].y)
-                p_bot = (l_cand["end"].x, l_cand["end"].y)
-
-                d_bot = distance_pt(p_bot, bob_center)
-                max_gap = max(bob_r * 3.2, diagonal * 0.06)
-                if d_bot > max_gap:
+                # Geometric Sanity: Bob diameter relative to string length (4% to 35%)
+                ratio = (2.0 * c_r) / s_len
+                if ratio < 0.04 or ratio > 0.35:
                     continue
 
-                if p_top[1] >= bob_center[1] - bob_r * 0.5:
+                # Relative Sanity: Bob radius relative to min image dimension
+                if c_r > min(w, h) * 0.10:
                     continue
 
-                line_mean, line_dir = fit_line_subpixel(raw_edges, p_top, p_bot)
+                d_bot_to_center = s_bot.distance_to(c_center)
+                dist_to_perimeter = abs(d_bot_to_center - c_r)
 
-                # Refine pivot by checking if there's a pin/mount circle near p_top
-                pivot_x, pivot_y = p_top
-                for other_c in circle_candidates:
-                    if other_c["center"].y < bob_center[1] - bob_r:
-                        if other_c["center"].distance_to(SourcePoint(x=p_top[0], y=p_top[1])) < 25.0:
-                            pivot_x, pivot_y = other_c["center"].x, other_c["center"].y
-                            break
+                # Distal attachment tolerance: line end must terminate near bob circumference
+                if dist_to_perimeter > max(16.0, c_r * 0.45):
+                    continue
 
-                pivot_pt = SourcePoint(x=pivot_x, y=pivot_y)
-                dist_pivot_to_bob_center = pivot_pt.distance_to(c_cand["center"])
+                # Subpixel direction fit
+                line_mean, line_dir = fit_line_subpixel(raw_edges, (s_top.x, s_top.y), (s_bot.x, s_bot.y))
+                bot_x = c_center.x - line_dir[0] * c_r
+                bot_y = c_center.y - line_dir[1] * c_r
 
-                # Project string onto bob boundary
-                bot_x = bob_center[0] - line_dir[0] * bob_r
-                bot_y = bob_center[1] - line_dir[1] * bob_r
+                # Refine pivot to nearest mounting pin or string top
+                pivot_pt = s_top
+                for c_pin in circle_candidates:
+                    if c_pin['center'].y < h * 0.25 and c_pin['center'].distance_to(s_top) < 30.0 and c_pin['radius_px'] < 30.0:
+                        pivot_pt = c_pin['center']
+                        break
 
-                score = (
-                    dist_pivot_to_bob_center * 2.0
-                    + (bob_center[1] - pivot_y) * 0.8
-                    - d_bot * 2.5
-                    + (bob_center[1] / float(h)) * 30.0
-                )
+                dist_pivot_to_bob_center = pivot_pt.distance_to(c_center)
+                score = 100.0 - dist_to_perimeter * 2.5 - abs(ratio - 0.14) * 80.0 + (s_len / float(h)) * 10.0
 
                 paired_candidates.append({
                     "score": score,
@@ -225,30 +266,17 @@ class PendulumCVCandidateExtractor:
                     "string": {
                         "start": pivot_pt,
                         "end": SourcePoint(x=bot_x, y=bot_y),
-                        "visible_length_px": distance_pt(p_top, p_bot),
+                        "visible_length_px": s_len,
                         "length_to_bob_center_px": dist_pivot_to_bob_center,
                         "subpixel_dir": line_dir,
                     },
                     "pivot": pivot_pt,
+                    "dist_to_perimeter": dist_to_perimeter,
+                    "diameter_to_string_ratio": ratio,
                 })
 
         paired_candidates.sort(key=lambda x: x["score"], reverse=True)
         best_pair = paired_candidates[0] if paired_candidates else None
-
-        # 5. Check for Vertical Reference Line Candidate
-        vertical_ref_candidate: Optional[SourceLine] = None
-        if best_pair:
-            pivot_pt = (best_pair["pivot"].x, best_pair["pivot"].y)
-            for l_cand in line_proposals:
-                if abs(l_cand["dx"]) > abs(l_cand["dy"]) * 0.12:
-                    continue
-                p_top = (l_cand["start"].x, l_cand["start"].y)
-                if distance_pt(p_top, pivot_pt) < 35.0:
-                    vertical_ref_candidate = SourceLine(
-                        start=SourcePoint(x=p_top[0], y=p_top[1]),
-                        end=SourcePoint(x=l_cand["end"].x, y=l_cand["end"].y),
-                    )
-                    break
 
         return {
             "all_circles": circle_candidates,

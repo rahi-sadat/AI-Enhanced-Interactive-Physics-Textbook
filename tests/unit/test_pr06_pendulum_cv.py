@@ -111,6 +111,42 @@ class TestPR06PendulumCV(unittest.TestCase):
         self.assertAlmostEqual(pivot.x, 389.8, delta=15.0)
         self.assertAlmostEqual(pivot.y, 82.6, delta=15.0)
 
+    def test_bengali_textbook_pendulum_extraction(self):
+        fixture_path = Path("tests/fixtures/unseen/acceptance/pendulum_bengali_textbook.png")
+        if not fixture_path.exists():
+            self.skipTest("Bengali pendulum fixture not found")
+
+        img = cv2.imread(str(fixture_path))
+        self.assertIsNotNone(img)
+        h, w = img.shape[:2]
+
+        extractor = PendulumCVCandidateExtractor()
+        res = extractor.extract_candidates(img, w, h)
+
+        best = res["best_proposal"]
+        self.assertIsNotNone(best, "Should detect pendulum proposal on Bengali textbook fixture")
+
+        bob = best["bob"]
+        # Actual bob is visually at (611.9, 792.5) with radius ~47px (NEVER 238, 998 with r=190)
+        self.assertAlmostEqual(bob["center"].x, 611.9, delta=5.0)
+        self.assertAlmostEqual(bob["center"].y, 792.5, delta=5.0)
+        self.assertAlmostEqual(bob["radius_px"], 47.2, delta=4.0)
+        self.assertLess(bob["radius_px"], 80.0, "Bob radius must never be enormous false candidate")
+
+        string = best["string"]
+        # Actual string connects from pivot (333, 101) to bob (594, 749), length ~686px
+        self.assertAlmostEqual(string["start"].x, 333.3, delta=10.0)
+        self.assertAlmostEqual(string["start"].y, 101.2, delta=15.0)
+        self.assertAlmostEqual(string["end"].x, 594.0, delta=10.0)
+        self.assertAlmostEqual(string["end"].y, 749.0, delta=10.0)
+        self.assertAlmostEqual(string["length_to_bob_center_px"], 745.0, delta=20.0)
+
+        # Vertical reference line: near vertical from pivot extending ~778px
+        vref = res["vertical_reference"]
+        self.assertIsNotNone(vref, "Should detect vertical reference line")
+        self.assertAlmostEqual(vref.start.x, 334.0, delta=10.0)
+        self.assertAlmostEqual(vref.end.y, 895.0, delta=15.0)
+
 
 if __name__ == "__main__":
     unittest.main()
