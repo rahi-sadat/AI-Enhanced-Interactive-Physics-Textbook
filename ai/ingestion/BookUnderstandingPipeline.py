@@ -193,6 +193,14 @@ class BookUnderstandingPipeline:
             "candidates": [c.to_dict() for c in result.candidates],
             "notes": result.notes,
         }
+        if result.latency_ms is not None:
+            provenance["latency_ms"] = result.latency_ms
+        if result.cache_hit:
+            provenance["cache_hit"] = result.cache_hit
+        if result.fallback_used:
+            provenance["fallback_used"] = result.fallback_used
+        if result.debug:
+            provenance["debug"] = result.debug
 
         return BookIR(
             version="1.0",

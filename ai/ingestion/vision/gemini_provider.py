@@ -279,6 +279,7 @@ class GeminiVisionProvider(VisionProvider):
             last_err = None
             used_model = self.model_name
 
+            t0 = time.perf_counter()
             for current_model in models_to_try:
                 for attempt in range(2):
                     try:
@@ -312,6 +313,8 @@ class GeminiVisionProvider(VisionProvider):
             if not raw_text or not raw_text.strip():
                 raise VisionProviderError("Gemini returned empty response text.")
 
+            latency_ms = int((time.perf_counter() - t0) * 1000)
+
             # Parse JSON
             try:
                 data = json.loads(raw_text)
@@ -326,6 +329,9 @@ class GeminiVisionProvider(VisionProvider):
             result.model = used_model
             result.prompt_version = self.PROMPT_VERSION
             result.timestamp = datetime.now(timezone.utc).isoformat()
+            result.latency_ms = latency_ms
+            result.cache_hit = False
+            result.fallback_used = (used_model != self.model_name)
 
             return result
 

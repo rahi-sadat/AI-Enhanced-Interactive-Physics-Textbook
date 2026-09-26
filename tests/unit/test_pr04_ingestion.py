@@ -70,6 +70,9 @@ def test(name: str, condition: bool, msg: str = ""):
         _ERRORS.append(f"{name}: {msg}")
 
 
+test.__test__ = False
+
+
 def section(title: str):
     print(f"\n{'─'*60}")
     print(f"  {title}")
