@@ -63,6 +63,80 @@ VALID_CLASSIFICATIONS = {
     "unknown",
 }
 
+# Enriched Semantic Roles by Physical Subtype (PR-05 Refinements)
+PENDULUM_SEMANTIC_ROLES: Set[str] = {
+    "pivot",
+    "bob",
+    "string",
+    "rod",
+    "support_ceiling",
+    "angle_marker",
+    "equilibrium_position",
+    "force_vector",
+    "vertical_reference",
+    "extreme_position",
+}
+
+SUPPORTED_ROLES_BY_SUBTYPE: Dict[str, Set[str]] = {
+    "pendulum": PENDULUM_SEMANTIC_ROLES,
+    "projectile": {
+        "projectile_body",
+        "launch_platform",
+        "trajectory_path",
+        "landing_surface",
+        "velocity_vector",
+        "apex_marker",
+        "angle_marker",
+    },
+    "thin_lens": {
+        "lens",
+        "optical_axis",
+        "focal_point",
+        "optical_center",
+        "object",
+        "image",
+        "light_ray",
+    },
+    "spherical_mirror": {
+        "mirror",
+        "optical_axis",
+        "focal_point",
+        "center_of_curvature",
+        "pole",
+        "object",
+        "image",
+        "light_ray",
+    },
+    "interface_refraction": {
+        "interface_boundary",
+        "normal_line",
+        "incident_ray",
+        "refracted_ray",
+        "medium_label",
+        "angle_marker",
+    },
+    "prism": {
+        "prism_body",
+        "incident_ray",
+        "refracted_ray",
+        "emergent_ray",
+        "normal_line",
+        "apex_angle",
+        "deviation_angle",
+    },
+    "dc_linear": {
+        "resistor",
+        "voltage_source",
+        "current_source",
+        "wire",
+        "ground",
+        "junction",
+        "switch",
+        "ammeter",
+        "voltmeter",
+    },
+}
+
 
 def _validate_confidence(
     val: Any,
@@ -91,27 +165,98 @@ def _validate_confidence(
 
 @dataclass
 class SemanticConfidence:
-    """Confidence scores for semantic categorization."""
+    """Confidence scores for semantic categorization.
+
+    Preserves raw provider confidence while computing calibrated, realistic metrics.
+    Avoids defaulting everything to 1.0; reserves 1.0 strictly for verified ground truth.
+    """
     is_physics: float = 0.0
     domain: float = 0.0
     subtype: float = 0.0
+    overall: float = 0.0
+    raw_provider: Optional[Dict[str, Any]] = None
 
-    def to_dict(self) -> Dict[str, float]:
-        return {
+    def to_dict(self) -> Dict[str, Any]:
+        d: Dict[str, Any] = {
             "isPhysics": self.is_physics,
             "domain": self.domain,
             "subtype": self.subtype,
+            "overall": self.overall,
         }
+        if self.raw_provider is not None:
+            d["rawProvider"] = self.raw_provider
+        return d
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "SemanticConfidence":
+    def from_dict(
+        cls,
+        d: Dict[str, Any],
+        classification: Optional[str] = None,
+    ) -> "SemanticConfidence":
         if not isinstance(d, dict):
             raise SemanticValidationError(f"'confidence' must be a dict, got {type(d).__name__}")
+
+        raw_is_phys = _validate_confidence(d.get("isPhysics", d.get("is_physics")), "isPhysics", allow_none=True, default=0.0)
+        raw_dom = _validate_confidence(d.get("domain"), "domain", allow_none=True, default=0.0)
+        raw_sub = _validate_confidence(d.get("subtype"), "subtype", allow_none=True, default=0.0)
+
+        # Preserve exact raw provider signals
+        raw_prov = d.get("rawProvider", d.get("raw_provider"))
+        if raw_prov is None:
+            raw_prov = {
+                "isPhysics": raw_is_phys,
+                "domain": raw_dom,
+                "subtype": raw_sub,
+            }
+            if "overall" in d:
+                raw_prov["overall"] = d["overall"]
+
+        # Calibrated values:
+        # Avoid overly perfect 1.0 values where unsupported or unverified.
+        # Reserve 1.0 only for ground truth / verified certainty.
+        is_phys = raw_is_phys
+        dom = raw_dom
+        sub = raw_sub
+
+        if classification == "supported":
+            # If the model output 1.0, gently calibrate it to a realistic maximum (0.98)
+            # reserving 1.0 only for strictly verified or author-confirmed ground truth
+            if is_phys >= 1.0:
+                is_phys = 0.99
+            if dom >= 1.0:
+                dom = 0.98
+            if sub >= 1.0:
+                sub = 0.96
+        elif classification in ("unsupported_physics", "non_physics", "unknown"):
+            # Unambiguously 0.0 for non-supported domain and subtype
+            dom = 0.0
+            sub = 0.0
+
+        # Calibrated overall confidence score
+        raw_overall = d.get("overall")
+        if raw_overall is not None:
+            overall = _validate_confidence(raw_overall, "overall", allow_none=True, default=0.0)
+            if overall >= 1.0 and classification != "author_override":
+                overall = 0.98
+        else:
+            if classification == "supported":
+                # Conservative hierarchical confidence: min of all active stages
+                overall = round(min(is_phys, dom, sub), 3)
+            elif classification == "unsupported_physics":
+                overall = round(is_phys, 3)
+            elif classification == "non_physics":
+                overall = round(1.0 - is_phys, 3) if is_phys < 0.5 else 0.5
+            else:
+                overall = 0.0
+
         return cls(
-            is_physics=_validate_confidence(d.get("isPhysics", d.get("is_physics")), "isPhysics", allow_none=True, default=0.0),
-            domain=_validate_confidence(d.get("domain"), "domain", allow_none=True, default=0.0),
-            subtype=_validate_confidence(d.get("subtype"), "subtype", allow_none=True, default=0.0),
+            is_physics=is_phys,
+            domain=dom,
+            subtype=sub,
+            overall=overall,
+            raw_provider=raw_prov,
         )
+
 
 
 @dataclass
@@ -251,8 +396,27 @@ class SemanticAnalysisResult:
     model: str = ""
     prompt_version: str = "pr05-v1"
     timestamp: str = ""
+    latency_ms: Optional[int] = None
+    cache_hit: bool = False
+    fallback_used: bool = False
+    debug: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
+        meta: Dict[str, Any] = {
+            "provider": self.provider,
+            "model": self.model,
+            "promptVersion": self.prompt_version,
+            "timestamp": self.timestamp,
+        }
+        if self.latency_ms is not None:
+            meta["latencyMs"] = self.latency_ms
+        if self.cache_hit:
+            meta["cacheHit"] = self.cache_hit
+        if self.fallback_used:
+            meta["fallbackUsed"] = self.fallback_used
+        if self.debug:
+            meta["debug"] = self.debug
+
         return {
             "classification": self.classification,
             "isPhysics": self.is_physics,
@@ -264,12 +428,7 @@ class SemanticAnalysisResult:
             "visibleLabels": [l.to_dict() for l in self.visible_labels],
             "candidates": [c.to_dict() for c in self.candidates],
             "notes": self.notes,
-            "metadata": {
-                "provider": self.provider,
-                "model": self.model,
-                "promptVersion": self.prompt_version,
-                "timestamp": self.timestamp,
-            },
+            "metadata": meta,
         }
 
     @property
@@ -375,11 +534,11 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
         domain = None
         subtype = None
 
-    # 4. Confidence
+    # 4. Confidence (calibrated with classification awareness)
     raw_conf = raw.get("confidence")
     if not isinstance(raw_conf, dict):
         raise SemanticValidationError("Missing or invalid 'confidence' object")
-    confidence = SemanticConfidence.from_dict(raw_conf)
+    confidence = SemanticConfidence.from_dict(raw_conf, classification=classification)
 
     # 5. Entities (Unique, deterministic IDs)
     entities: List[SemanticEntity] = []
@@ -462,6 +621,17 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
     model = str(meta.get("model", ""))
     prompt_version = str(meta.get("promptVersion", meta.get("prompt_version", "pr05-v1")))
     timestamp = str(meta.get("timestamp", ""))
+    latency_ms = meta.get("latencyMs", meta.get("latency_ms"))
+    if latency_ms is not None:
+        try:
+            latency_ms = int(latency_ms)
+        except (ValueError, TypeError):
+            latency_ms = None
+    cache_hit = bool(meta.get("cacheHit", meta.get("cache_hit", False)))
+    fallback_used = bool(meta.get("fallbackUsed", meta.get("fallback_used", False)))
+    debug = meta.get("debug", {})
+    if not isinstance(debug, dict):
+        debug = {}
 
     return SemanticAnalysisResult(
         classification=classification,
@@ -478,4 +648,8 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
         model=model,
         prompt_version=prompt_version,
         timestamp=timestamp,
+        latency_ms=latency_ms,
+        cache_hit=cache_hit,
+        fallback_used=fallback_used,
+        debug=debug,
     )

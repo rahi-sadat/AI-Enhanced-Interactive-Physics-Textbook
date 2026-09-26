@@ -49,10 +49,22 @@ RULES & CONSTRAINTS:
    - Only report visible textual/numerical labels in visibleLabels if they are explicitly visible in the image.
 
 4. SEMANTIC OBJECT ROLES:
-   - Identify visual components and assign clear roles (e.g. "pivot", "bob", "string", "lens", "optical_axis", "mirror", "resistor", "voltage_source", "wire").
+   - Identify visual components and assign clear roles:
+     - For pendulum: "pivot", "bob", "string", "rod", "support_ceiling", "angle_marker", "equilibrium_position", "force_vector", "vertical_reference", "extreme_position".
+     - For projectile: "projectile_body", "launch_platform", "trajectory_path", "landing_surface", "velocity_vector", "apex_marker", "angle_marker".
+     - For optics: "lens", "optical_axis", "focal_point", "mirror", "optical_center", "object", "image", "light_ray", "interface_boundary", "normal_line", "incident_ray", "refracted_ray", "prism_body".
+     - For circuits: "resistor", "voltage_source", "current_source", "wire", "ground", "junction", "switch", "ammeter", "voltmeter".
    - If bounding box coordinates are provided, they are understood to be coarse/approximate.
 
-5. OUTPUT FORMAT:
+5. CONFIDENCE CALIBRATION & REALISM:
+   - Score confidence conservatively on a realistic scale from 0.0 to 1.0.
+   - Reserve 1.0 ONLY for absolute textbook canonical ground truth certainty.
+   - Standard clear diagrams typically range from 0.85 to 0.95.
+   - Ambiguous, cropped, or hand-drawn diagrams should be 0.50 to 0.80.
+   - For unsupported_physics or non_physics, domain and subtype confidence MUST be 0.0.
+   - Include an "overall" confidence score in confidence reflecting your aggregate certainty.
+
+6. OUTPUT FORMAT:
    Return ONLY a valid JSON object matching this structure:
 {
   "classification": "supported" | "unsupported_physics" | "non_physics" | "unknown",
@@ -62,7 +74,8 @@ RULES & CONSTRAINTS:
   "confidence": {
     "isPhysics": 0.0 to 1.0,
     "domain": 0.0 to 1.0,
-    "subtype": 0.0 to 1.0
+    "subtype": 0.0 to 1.0,
+    "overall": 0.0 to 1.0
   },
   "entities": [
     {
@@ -125,6 +138,7 @@ GEMINI_RESPONSE_SCHEMA = {
                 "isPhysics": {"type": "NUMBER"},
                 "domain": {"type": "NUMBER"},
                 "subtype": {"type": "NUMBER"},
+                "overall": {"type": "NUMBER"},
             },
             "required": ["isPhysics", "domain", "subtype"],
         },

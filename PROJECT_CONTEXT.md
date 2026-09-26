@@ -632,7 +632,7 @@ graph LR
 - **Comprehensive Test Suite**:
   - 18 unit tests, 12 regression tests, and 6 full-stack API integration tests.
 
-### ✅ PR-05: Multimodal VLM Semantic Understanding & Strict Validation
+### ✅ PR-05: Multimodal VLM Semantic Understanding, Strict Validation & Calibrated Confidence
 - **Real Multimodal VLM Integration (`Google Gemini`)**:
   - Integrated Google GenAI SDK (`google-genai`) with official structured output (`response_schema=GEMINI_RESPONSE_SCHEMA`) via `GeminiVisionProvider`.
   - Model tier fallback (`gemini-3.1-flash-lite` -> `gemini-3-flash-preview` -> `gemini-3.8-flash`) ensuring graceful degradation and resilience against free-tier rate limits (20 req/day).
@@ -649,11 +649,22 @@ graph LR
   - Strict `DOMAIN_SUBTYPES` pairing: Prevents invalid combinations (e.g. `mechanics` with `thin_lens`).
   - Finite normalized confidence: All confidence values validated as finite floats in $[0.0, 1.0]$, defaulting conservatively to `0.0`.
   - Entity & Relationship Integrity: Rejects duplicate entity IDs and guarantees all relationship entity references point to valid entity IDs.
+- **Calibrated Confidence & Debug Metadata (`SemanticConfidence`)**:
+  - `SemanticConfidence` now carries `overall` confidence (conservative hierarchical minimum of active stage scores) plus `raw_provider` capture of the model's raw output for auditability.
+  - Calibration rule: `1.0` is never emitted for VLM predictions. Supported diagrams cap at `isPhysics ≤ 0.99`, `domain ≤ 0.98`, `subtype ≤ 0.96`; `overall` caps at `0.98`. Reserves 1.0 for strictly verified / author-confirmed ground truth only.
+  - `SemanticAnalysisResult` metadata fields: `latency_ms`, `cache_hit`, `fallback_used`, `debug` — populate provenance and reproducibility for every live VLM call.
+- **Enriched Semantic Roles by Subtype**:
+  - Pendulum: `pivot`, `bob`, `string`, `rod`, `support_ceiling`, `angle_marker`, `equilibrium_position`, `force_vector`, `vertical_reference`, `extreme_position`.
+  - Projectile, Optics (lens/mirror/interface/prism), and Circuits roles are similarly enriched and validated.
 - **Async Event Loop Offloading**:
   - `apps/api/main.py` offloads synchronous `book_pipeline.analyze(...)` via `await asyncio.to_thread(...)`, keeping the FastAPI event loop unblocked.
-- **Test Isolation & Live Acceptance Verification**:
-  - 100% offline unit/integration test isolation using `MockVisionProvider` (zero external network dependency).
-  - Live acceptance test suite (`tests/acceptance/test_pr05_live_gemini.py`) successfully verified 7 real image uploads (`x17.jpg` pendulum, `a91.png` projectile, `photo42.png` thin lens, `scan77.jpg` spherical mirror, `c88.png` DC circuit, `random_photo.jpg` non-physics, `wave_interfere.png` unsupported physics) against live Gemini models, confirming 100% non-fabricating `scene=null` pipeline behavior.
+- **Strengthened Live Acceptance Test Suite (`tests/acceptance/test_pr05_live_gemini.py`)**:
+  - **Hard assertions** on every test case: `classification`, `domain`, `subtype` must match expected values exactly.
+  - **Universal invariants** asserted for all cases: `scene=null`, `compiler_status=NEEDS_REVIEW`, `book_status=UNRESOLVED`, `parameters={}`.
+  - **Confidence range assertions**: all scores must be in `[0.0, 1.0]` and no VLM-emitted `1.0` values (calibrated cap enforced).
+  - Non-physics / unsupported-physics domain & subtype leak detection (must be `null`).
+  - Exits with code `1` on any failure so CI can gate merges.
+  - Successfully verified 7 real image uploads against live Gemini: pendulum, projectile, thin_lens, spherical_mirror, dc_linear, non_physics, unsupported_physics — 100% zero-fabrication confirmed.
 
 ### 🔄 PR-06: Classical CV & OCR Parameter Grounding (Next Step)
 - Multi-signal classical computer vision (SAM 2, line detection, circle fitting, Hough transforms) to extract authoritative visual geometry in `source_px`.
