@@ -59,7 +59,7 @@ Before completing any task or proposing changes:
 - [ ] Verified strict schema invariants and subtype purity (domain-subtype pairing, finite confidence).
 - [ ] Ensured unit tests run with offline mocks (`MockVisionProvider`) and no external network calls.
 - [ ] Preserved all existing comments, docstrings, and parameter provenance.
-- [ ] Confirmed VLM confidence values are never 1.0 (cap: isPhysics ≤ 0.99, domain ≤ 0.98, subtype ≤ 0.96, overall ≤ 0.98).
+- [ ] Confirmed VLM confidence values are never 1.0 (conservative confidence policy: isPhysics ≤ 0.99, domain ≤ 0.98, subtype ≤ 0.96, overall = min(isPhysics, domain, subtype); entity/relationship/label/candidate caps ≤ 0.95; reserving 1.0 strictly for verified ground truth).
 
 ---
 
@@ -71,7 +71,7 @@ Before completing any task or proposing changes:
 | PR-02 | ✅ | Canonical PhysicsScene schema v1.0, PhysicsRuntime, SolverRegistry, multi-domain validation. |
 | PR-03 | ✅ | Source-aligned rendering, RendererRegistry, SimulationCapabilityRegistry, bidirectional manipulation. |
 | PR-04 | ✅ | Real upload ingestion: `SourceAsset → PageIR → BookIR`. Gate Zero anti-fabrication UI. 36 tests. |
-| PR-05 | ✅ | Multimodal VLM semantic understanding (Gemini). Calibrated confidence, enriched roles, debug metadata, asserted acceptance test. |
+| PR-05 | ✅ | Multimodal VLM semantic understanding (Gemini). Conservative confidence policy, enriched roles, debug metadata, asserted acceptance test. |
 | PR-06 | 🔄 | Classical CV + OCR parameter grounding. SAM 2 geometry, Tesseract OCR, spatial-semantic parameter binding. |
 | PR-07 | 🔄 | End-to-end simulation bootstrapping: PR-05 + PR-06 → `BookIR(RESOLVED)` → runnable PhysicsScene. |
 
@@ -84,11 +84,11 @@ classification       ✅            position_source_px          ❌ (null)
 isPhysics            ✅            geometry                     ❌ (null)
 domain               ✅            parameters (numeric)         ❌ (empty {})
 subtype              ✅
-confidence (0–0.99)  ✅
+confidence (< 1.0)   ✅
 entities (coarse)    ✅ → quarantined in vlmApproxBBox only
 visibleLabels        ✅ → verified=False only (unverified evidence)
 ```
 
-- `BookIR.status` **must** remain `UNRESOLVED` at end of PR-05 pipeline.
-- `PhysicsCompiler` **must** return `status="NEEDS_REVIEW"` with `scene=null`.
+- `BookIR.status` **must** remain non-runnable at end of PR-05 pipeline (`NEEDS_REVIEW` for supported, `UNSUPPORTED` for unsupported, `UNRESOLVED` for non-physics/unknown).
+- `PhysicsCompiler` **must** return `scene=null` (`NEEDS_REVIEW` for supported; never `READY`).
 - Any agent that sets `BookIR.status = RESOLVED` or populates `position_source_px` from VLM output is violating the PR-05 boundary.

@@ -280,7 +280,8 @@ class GeminiVisionProvider(VisionProvider):
             used_model = self.model_name
 
             t0 = time.perf_counter()
-            for current_model in models_to_try:
+            fallback_used = False
+            for idx, current_model in enumerate(models_to_try):
                 for attempt in range(2):
                     try:
                         response = client.models.generate_content(
@@ -289,6 +290,8 @@ class GeminiVisionProvider(VisionProvider):
                             config=config,
                         )
                         used_model = current_model
+                        if idx > 0 or current_model != self.model_name or attempt > 0:
+                            fallback_used = True
                         break
                     except Exception as call_err:
                         last_err = call_err
@@ -331,7 +334,7 @@ class GeminiVisionProvider(VisionProvider):
             result.timestamp = datetime.now(timezone.utc).isoformat()
             result.latency_ms = latency_ms
             result.cache_hit = False
-            result.fallback_used = (used_model != self.model_name)
+            result.fallback_used = fallback_used
 
             return result
 

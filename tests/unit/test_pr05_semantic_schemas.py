@@ -259,6 +259,90 @@ class TestPR05SemanticSchemas(unittest.TestCase):
         self.assertEqual(res.entities[0].confidence, 0.0)
         self.assertEqual(res.visible_labels[0].confidence, 0.0)
 
+    def test_overall_confidence_is_strict_hierarchical_min_and_raw_preserved(self):
+        """Supported overall confidence must be min(isPhysics, domain, subtype) and rawProvider preserved."""
+        payload = {
+            "classification": "supported",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0,
+            },
+        }
+        res = validate_semantic_payload(payload)
+        conf = res.confidence
+        # Conservative caps
+        self.assertEqual(conf.is_physics, 0.99)
+        self.assertEqual(conf.domain, 0.98)
+        self.assertEqual(conf.subtype, 0.96)
+        # min(0.99, 0.98, 0.96) is strictly 0.96
+        self.assertEqual(conf.overall, 0.96)
+        # Raw provider preserved untouched
+        self.assertIsNotNone(conf.raw_provider)
+        self.assertEqual(conf.raw_provider.get("isPhysics"), 1.0)
+        self.assertEqual(conf.raw_provider.get("domain"), 1.0)
+        self.assertEqual(conf.raw_provider.get("subtype"), 1.0)
+        self.assertEqual(conf.raw_provider.get("overall"), 1.0)
+
+    def test_entity_relationship_label_candidate_confidence_capped_below_one(self):
+        """VLM sub-object confidences must never assert 1.0 (capped at 0.95)."""
+        payload = {
+            "classification": "supported",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 0.95, "domain": 0.9, "subtype": 0.9},
+            "entities": [
+                {"temporaryId": "e1", "role": "pivot", "confidence": 1.0},
+                {"temporaryId": "e2", "role": "bob", "confidence": 1.0},
+            ],
+            "relationships": [
+                {"type": "connected_to", "from": "e1", "to": "e2", "confidence": 1.0},
+            ],
+            "visibleLabels": [
+                {"text": "L = 1m", "confidence": 1.0},
+            ],
+            "candidates": [
+                {"domain": "mechanics", "subtype": "pendulum", "confidence": 1.0},
+            ],
+        }
+        res = validate_semantic_payload(payload)
+        self.assertLess(res.entities[0].confidence, 1.0)
+        self.assertEqual(res.entities[0].confidence, 0.95)
+        self.assertLess(res.relationships[0].confidence, 1.0)
+        self.assertEqual(res.relationships[0].confidence, 0.95)
+        self.assertLess(res.visible_labels[0].confidence, 1.0)
+        self.assertEqual(res.visible_labels[0].confidence, 0.95)
+        self.assertLess(res.candidates[0].confidence, 1.0)
+        self.assertEqual(res.candidates[0].confidence, 0.95)
+
+    def test_explicit_boolean_telemetry_fields(self):
+        """cacheHit and fallbackUsed must be explicit booleans in serialized dicts."""
+        payload = {
+            "classification": "supported",
+            "isPhysics": True,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {"isPhysics": 0.95, "domain": 0.9, "subtype": 0.9},
+            "metadata": {
+                "provider": "gemini",
+                "model": "gemini-3.1-flash-lite",
+                "cacheHit": False,
+                "fallbackUsed": True,
+                "latencyMs": 1234,
+            },
+        }
+        res = validate_semantic_payload(payload)
+        d = res.to_dict()
+        meta = d["metadata"]
+        self.assertIs(meta["cacheHit"], False)
+        self.assertIs(meta["fallbackUsed"], True)
+        self.assertEqual(meta["latencyMs"], 1234)
+
 
 if __name__ == "__main__":
     unittest.main()

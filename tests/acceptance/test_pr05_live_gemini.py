@@ -200,29 +200,62 @@ for idx, tc in enumerate(TEST_CASES):
     tc_failures = []
 
     # -----------------------------------------------------------------------
-    # Assert: Universal invariants (must hold for ALL test cases)
+    # Assert: Universal invariants in PR-05 (must hold for ALL test cases)
+    # Zero fabrication: scene is null, parameters empty, no authoritative geometry
     # -----------------------------------------------------------------------
     if scene is not None:
         tc_failures.append(
             f"INVARIANT VIOLATED — scene fabricated: expected null, got {type(scene).__name__}"
         )
-    if compiler_status != "NEEDS_REVIEW":
-        tc_failures.append(
-            f"INVARIANT VIOLATED — compiler_status: expected 'NEEDS_REVIEW', got {compiler_status!r}"
-        )
-    if book_status != "UNRESOLVED":
-        tc_failures.append(
-            f"INVARIANT VIOLATED — book_status: expected 'UNRESOLVED', got {book_status!r}"
-        )
     if parameters:
         tc_failures.append(
             f"INVARIANT VIOLATED — fabricated parameters detected: {parameters}"
         )
+    for ent in entities:
+        if ent.get("positionSourcePx") is not None:
+            tc_failures.append(
+                f"INVARIANT VIOLATED — positionSourcePx fabricated for entity {ent.get('id')}: {ent.get('positionSourcePx')}"
+            )
+        if ent.get("geometry") is not None:
+            tc_failures.append(
+                f"INVARIANT VIOLATED — geometry fabricated for entity {ent.get('id')}: {ent.get('geometry')}"
+            )
+
+    # -----------------------------------------------------------------------
+    # Assert: Statuses based on classification (PR-05 truthful contract)
+    # -----------------------------------------------------------------------
+    exp_cls = tc["expected_classification"]
+    if exp_cls == "supported":
+        if book_status != "NEEDS_REVIEW":
+            tc_failures.append(
+                f"STATUS MISMATCH for supported: book_status expected 'NEEDS_REVIEW', got {book_status!r}"
+            )
+        if compiler_status != "NEEDS_REVIEW":
+            tc_failures.append(
+                f"STATUS MISMATCH for supported: compiler_status expected 'NEEDS_REVIEW', got {compiler_status!r}"
+            )
+    elif exp_cls == "unsupported_physics":
+        if book_status != "UNSUPPORTED":
+            tc_failures.append(
+                f"STATUS MISMATCH for unsupported_physics: book_status expected 'UNSUPPORTED', got {book_status!r}"
+            )
+        if compiler_status not in ("UNSUPPORTED", "UNRESOLVED", "NEEDS_REVIEW"):
+            tc_failures.append(
+                f"UNEXPECTED compiler_status for unsupported_physics: got {compiler_status!r}"
+            )
+    elif exp_cls in ("non_physics", "unknown"):
+        if book_status != "UNRESOLVED":
+            tc_failures.append(
+                f"STATUS MISMATCH for {exp_cls}: book_status expected 'UNRESOLVED', got {book_status!r}"
+            )
+        if compiler_status not in ("UNRESOLVED", "NEEDS_REVIEW"):
+            tc_failures.append(
+                f"UNEXPECTED compiler_status for {exp_cls}: got {compiler_status!r}"
+            )
 
     # -----------------------------------------------------------------------
     # Assert: Classification correctness
     # -----------------------------------------------------------------------
-    exp_cls = tc["expected_classification"]
     if actual_classification != exp_cls:
         tc_failures.append(
             f"CLASSIFICATION MISMATCH: expected {exp_cls!r}, got {actual_classification!r}"
@@ -254,18 +287,29 @@ for idx, tc in enumerate(TEST_CASES):
             )
 
     # -----------------------------------------------------------------------
-    # Assert: Confidence scores are in [0.0, 1.0] and not suspiciously perfect
+    # Assert: Confidence policy (in [0.0, 1.0), 1.0 strictly reserved for ground truth)
     # -----------------------------------------------------------------------
     for conf_key in ("isPhysics", "domain", "subtype", "overall"):
         cv = conf.get(conf_key)
         if cv is not None:
             if not (0.0 <= cv <= 1.0):
                 tc_failures.append(f"CONFIDENCE OUT OF RANGE: {conf_key}={cv}")
-            if cv == 1.0 and exp_cls != "author_override":
-                # 1.0 should never appear (calibrated down to at most 0.99)
+            if cv >= 1.0 and exp_cls != "author_override":
                 tc_failures.append(
-                    f"UNCALIBRATED CONFIDENCE: {conf_key}=1.0 (should be ≤ 0.99 for VLM output)"
+                    f"UNCAPPED CONFIDENCE: {conf_key}={cv} (must be < 1.0 for VLM output)"
                 )
+    for ent in entities:
+        ec = ent.get("attributes", {}).get("confidence")
+        if ec is not None and ec >= 1.0:
+            tc_failures.append(f"UNCAPPED ENTITY CONFIDENCE: entity {ent.get('id')} has confidence {ec} >= 1.0")
+    for rel in bi.get("relationships", []):
+        rc = rel.get("confidence")
+        if rc is not None and rc >= 1.0:
+            tc_failures.append(f"UNCAPPED RELATIONSHIP CONFIDENCE: rel has confidence {rc} >= 1.0")
+    for lab in visible_labels:
+        lc = lab.get("confidence")
+        if lc is not None and lc >= 1.0:
+            tc_failures.append(f"UNCAPPED VISIBLE LABEL CONFIDENCE: label has confidence {lc} >= 1.0")
 
     # -----------------------------------------------------------------------
     # Record and print outcome

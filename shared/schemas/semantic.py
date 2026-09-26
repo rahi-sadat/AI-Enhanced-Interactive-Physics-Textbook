@@ -143,8 +143,14 @@ def _validate_confidence(
     field_name: str,
     allow_none: bool = False,
     default: float = 0.0,
+    cap_max: Optional[float] = None,
 ) -> float:
-    """Validate that a confidence score is finite and within [0.0, 1.0]."""
+    """Validate that a confidence score is finite and within [0.0, 1.0].
+
+    If cap_max is set and f_val >= 1.0, clips to cap_max.
+    Enforces conservative confidence policy reserving 1.0 strictly for
+    author-confirmed or verified ground truth.
+    """
     if val is None:
         if allow_none:
             return default
@@ -160,6 +166,8 @@ def _validate_confidence(
         raise SemanticValidationError(
             f"'{field_name}' confidence must be between 0.0 and 1.0, got {f_val}"
         )
+    if cap_max is not None and f_val >= 1.0:
+        return cap_max
     return f_val
 
 
@@ -167,7 +175,7 @@ def _validate_confidence(
 class SemanticConfidence:
     """Confidence scores for semantic categorization.
 
-    Preserves raw provider confidence while computing calibrated, realistic metrics.
+    Preserves raw provider confidence while applying conservative confidence policy.
     Avoids defaulting everything to 1.0; reserves 1.0 strictly for verified ground truth.
     """
     is_physics: float = 0.0
@@ -199,6 +207,7 @@ class SemanticConfidence:
         raw_is_phys = _validate_confidence(d.get("isPhysics", d.get("is_physics")), "isPhysics", allow_none=True, default=0.0)
         raw_dom = _validate_confidence(d.get("domain"), "domain", allow_none=True, default=0.0)
         raw_sub = _validate_confidence(d.get("subtype"), "subtype", allow_none=True, default=0.0)
+        raw_overall = d.get("overall")
 
         # Preserve exact raw provider signals
         raw_prov = d.get("rawProvider", d.get("raw_provider"))
@@ -208,46 +217,41 @@ class SemanticConfidence:
                 "domain": raw_dom,
                 "subtype": raw_sub,
             }
-            if "overall" in d:
-                raw_prov["overall"] = d["overall"]
+            if raw_overall is not None:
+                raw_prov["overall"] = _validate_confidence(raw_overall, "overall", allow_none=True, default=0.0)
+        elif raw_overall is not None and "overall" not in raw_prov:
+            raw_prov["overall"] = _validate_confidence(raw_overall, "overall", allow_none=True, default=0.0)
 
-        # Calibrated values:
+        # Conservative confidence policy:
         # Avoid overly perfect 1.0 values where unsupported or unverified.
-        # Reserve 1.0 only for ground truth / verified certainty.
+        # Reserve 1.0 strictly for author-confirmed / verified ground truth.
         is_phys = raw_is_phys
         dom = raw_dom
         sub = raw_sub
 
         if classification == "supported":
-            # If the model output 1.0, gently calibrate it to a realistic maximum (0.98)
-            # reserving 1.0 only for strictly verified or author-confirmed ground truth
             if is_phys >= 1.0:
                 is_phys = 0.99
             if dom >= 1.0:
                 dom = 0.98
             if sub >= 1.0:
                 sub = 0.96
-        elif classification in ("unsupported_physics", "non_physics", "unknown"):
-            # Unambiguously 0.0 for non-supported domain and subtype
+            # Overall is strictly the conservative hierarchical minimum across stages
+            overall = round(min(is_phys, dom, sub), 3)
+        elif classification == "unsupported_physics":
             dom = 0.0
             sub = 0.0
-
-        # Calibrated overall confidence score
-        raw_overall = d.get("overall")
-        if raw_overall is not None:
-            overall = _validate_confidence(raw_overall, "overall", allow_none=True, default=0.0)
-            if overall >= 1.0 and classification != "author_override":
-                overall = 0.98
+            overall = round(min(is_phys, 0.98), 3)
+        elif classification == "non_physics":
+            dom = 0.0
+            sub = 0.0
+            overall = round(1.0 - is_phys, 3) if is_phys < 0.5 else 0.5
+        elif classification == "author_override":
+            overall = _validate_confidence(raw_overall, "overall", allow_none=True, default=1.0)
         else:
-            if classification == "supported":
-                # Conservative hierarchical confidence: min of all active stages
-                overall = round(min(is_phys, dom, sub), 3)
-            elif classification == "unsupported_physics":
-                overall = round(is_phys, 3)
-            elif classification == "non_physics":
-                overall = round(1.0 - is_phys, 3) if is_phys < 0.5 else 0.5
-            else:
-                overall = 0.0
+            dom = 0.0
+            sub = 0.0
+            overall = 0.0
 
         return cls(
             is_physics=is_phys,
@@ -288,7 +292,7 @@ class SemanticEntity:
             temporary_id=str(tid),
             role=str(d.get("role", "unknown")),
             label=d.get("label"),
-            confidence=_validate_confidence(d.get("confidence"), "entity.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "entity.confidence", allow_none=True, default=0.0, cap_max=0.95),
             approx_bbox=d.get("approxBbox", d.get("approx_bbox")),
             precision="approximate",
         )
@@ -316,7 +320,7 @@ class SemanticRelationship:
             type=str(d.get("type", "related_to")),
             source_id=str(d.get("from", d.get("source_id", ""))),
             target_id=str(d.get("to", d.get("target_id", ""))),
-            confidence=_validate_confidence(d.get("confidence"), "relationship.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "relationship.confidence", allow_none=True, default=0.0, cap_max=0.95),
         )
 
 
@@ -346,7 +350,7 @@ class SemanticVisibleLabel:
     def from_dict(cls, d: Dict[str, Any]) -> "SemanticVisibleLabel":
         return cls(
             text=str(d.get("text", "")),
-            confidence=_validate_confidence(d.get("confidence"), "visibleLabel.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "visibleLabel.confidence", allow_none=True, default=0.0, cap_max=0.95),
             semantic_role=d.get("semanticRole", d.get("semantic_role")),
             source=str(d.get("source", "vlm")),
             verified=False,  # Enforce unverified in PR-05
@@ -372,7 +376,7 @@ class SemanticCandidate:
         return cls(
             domain=d.get("domain"),
             subtype=d.get("subtype"),
-            confidence=_validate_confidence(d.get("confidence"), "candidate.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "candidate.confidence", allow_none=True, default=0.0, cap_max=0.95),
         )
 
 
@@ -407,13 +411,11 @@ class SemanticAnalysisResult:
             "model": self.model,
             "promptVersion": self.prompt_version,
             "timestamp": self.timestamp,
+            "cacheHit": bool(self.cache_hit),
+            "fallbackUsed": bool(self.fallback_used),
         }
         if self.latency_ms is not None:
             meta["latencyMs"] = self.latency_ms
-        if self.cache_hit:
-            meta["cacheHit"] = self.cache_hit
-        if self.fallback_used:
-            meta["fallbackUsed"] = self.fallback_used
         if self.debug:
             meta["debug"] = self.debug
 
@@ -608,7 +610,7 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
                 candidates.append(SemanticCandidate(
                     domain=c_dom,
                     subtype=c_sub,
-                    confidence=_validate_confidence(c.get("confidence"), "candidate.confidence", allow_none=True, default=0.0),
+                    confidence=_validate_confidence(c.get("confidence"), "candidate.confidence", allow_none=True, default=0.0, cap_max=0.95),
                 ))
 
     # 9. Notes

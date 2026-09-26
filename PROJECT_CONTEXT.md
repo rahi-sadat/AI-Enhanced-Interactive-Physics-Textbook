@@ -641,18 +641,18 @@ graph LR
   - **What VLM Never Does (Anti-Fabrication Invariants)**:
     - **Zero Parameter Fabrication**: VLM never invents numerical physics parameters (mass, resistance, voltage, focal length, refractive index). `parameters` dictionary remains strictly `{}`.
     - **Zero Authoritative Geometry**: VLM predictions never pollute authoritative coordinate fields. `BookEntity.position_source_px = None`, `BookIR.geometry = None`. Coarse VLM bounding boxes are strictly quarantined inside `attributes["vlmApproxBBox"]`.
-  - Downstream `BookUnderstandingPipeline` sets `BookIR.status = UNRESOLVED` because physical geometry and parameters are ungrounded.
-  - `PhysicsCompiler` truthfully returns `status="NEEDS_REVIEW"` and `scene=null`, perfectly upholding the zero-fabrication invariant until PR-06 CV/OCR grounding is active.
+  - Downstream `BookUnderstandingPipeline` sets `BookIR.status = NEEDS_REVIEW` for supported physics diagrams (reflecting semantic identification requiring CV/OCR parameter grounding), `UNSUPPORTED` for unhandled physics, and `UNRESOLVED` for non-physics/unknown diagrams.
+  - `PhysicsCompiler` truthfully returns `status="NEEDS_REVIEW"` (or canonical unresolvable status) with `scene=null`, perfectly upholding the zero-fabrication invariant until PR-06 CV/OCR grounding is active.
 - **Strict Semantic Schema Validation (`shared/schemas/semantic.py`)**:
   - `isPhysics`: Enforces native JSON boolean or `None` (strings like `"true"` strictly rejected).
   - Subtype Purity: Subtypes strictly limited to physical models. Non-physics and unsupported diagrams force `domain=None` and `subtype=None`.
   - Strict `DOMAIN_SUBTYPES` pairing: Prevents invalid combinations (e.g. `mechanics` with `thin_lens`).
   - Finite normalized confidence: All confidence values validated as finite floats in $[0.0, 1.0]$, defaulting conservatively to `0.0`.
   - Entity & Relationship Integrity: Rejects duplicate entity IDs and guarantees all relationship entity references point to valid entity IDs.
-- **Calibrated Confidence & Debug Metadata (`SemanticConfidence`)**:
-  - `SemanticConfidence` now carries `overall` confidence (conservative hierarchical minimum of active stage scores) plus `raw_provider` capture of the model's raw output for auditability.
-  - Calibration rule: `1.0` is never emitted for VLM predictions. Supported diagrams cap at `isPhysics ≤ 0.99`, `domain ≤ 0.98`, `subtype ≤ 0.96`; `overall` caps at `0.98`. Reserves 1.0 for strictly verified / author-confirmed ground truth only.
-  - `SemanticAnalysisResult` metadata fields: `latency_ms`, `cache_hit`, `fallback_used`, `debug` — populate provenance and reproducibility for every live VLM call.
+- **Conservative Confidence Policy & Explicit Telemetry (`SemanticConfidence`)**:
+  - `SemanticConfidence` carries `overall` confidence, strictly derived as the conservative hierarchical minimum across stages: `overall = min(isPhysics, domain, subtype)` for supported diagrams (e.g. `min(0.99, 0.98, 0.96) = 0.96`), plus `rawProvider` capturing the unaltered raw provider signals for auditability.
+  - `1.0` reserved strictly for author-confirmed / verified ground truth: all VLM-origin predictions are capped below 1.0 (concepts: `isPhysics ≤ 0.99`, `domain ≤ 0.98`, `subtype ≤ 0.96`; entities, relationships, visible labels, and candidates capped at `≤ 0.95`).
+  - `SemanticAnalysisResult` and `BookIR.provenance` explicitly serialize boolean telemetry: `cache_hit` (bool), `fallback_used` (bool), and `latency_ms` (int), ensuring complete reproducibility and auditability.
 - **Enriched Semantic Roles by Subtype**:
   - Pendulum: `pivot`, `bob`, `string`, `rod`, `support_ceiling`, `angle_marker`, `equilibrium_position`, `force_vector`, `vertical_reference`, `extreme_position`.
   - Projectile, Optics (lens/mirror/interface/prism), and Circuits roles are similarly enriched and validated.
@@ -660,11 +660,13 @@ graph LR
   - `apps/api/main.py` offloads synchronous `book_pipeline.analyze(...)` via `await asyncio.to_thread(...)`, keeping the FastAPI event loop unblocked.
 - **Strengthened Live Acceptance Test Suite (`tests/acceptance/test_pr05_live_gemini.py`)**:
   - **Hard assertions** on every test case: `classification`, `domain`, `subtype` must match expected values exactly.
-  - **Universal invariants** asserted for all cases: `scene=null`, `compiler_status=NEEDS_REVIEW`, `book_status=UNRESOLVED`, `parameters={}`.
-  - **Confidence range assertions**: all scores must be in `[0.0, 1.0]` and no VLM-emitted `1.0` values (calibrated cap enforced).
-  - Non-physics / unsupported-physics domain & subtype leak detection (must be `null`).
+  - **Classification-aware status assertions**:
+    - `supported` → `BookIR.status == "NEEDS_REVIEW"`, `compiler.status == "NEEDS_REVIEW"`, `scene == null`
+    - `unsupported_physics` → `BookIR.status == "UNSUPPORTED"`, `scene == null`
+    - `non_physics` / `unknown` → `BookIR.status == "UNRESOLVED"`, `scene == null`
+  - **Universal zero-fabrication invariants**: `scene=null`, `parameters={}`, no authoritative geometry (`position_source_px=None`, `geometry=None`).
+  - **Confidence policy assertions**: all VLM-origin confidence scores strictly `< 1.0` across concepts, entities, relationships, and labels.
   - Exits with code `1` on any failure so CI can gate merges.
-  - Successfully verified 7 real image uploads against live Gemini: pendulum, projectile, thin_lens, spherical_mirror, dc_linear, non_physics, unsupported_physics — 100% zero-fabrication confirmed.
 
 ### 🔄 PR-06: Classical CV & OCR Parameter Grounding (Next Step)
 - Multi-signal classical computer vision (SAM 2, line detection, circle fitting, Hough transforms) to extract authoritative visual geometry in `source_px`.
