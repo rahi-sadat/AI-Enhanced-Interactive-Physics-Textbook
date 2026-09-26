@@ -51,6 +51,8 @@ legacy/frontend-v1/*.png
 storage/outputs/
 storage/generated/
 storage/cache/
+storage/artifacts/
+storage/test_pr06/
 storage/uploads/*
 !storage/uploads/.gitkeep
 !storage/uploads/circuit1.png

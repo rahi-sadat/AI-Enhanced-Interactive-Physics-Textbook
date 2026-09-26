@@ -263,6 +263,7 @@ class BookIR:
 
     assumptions: List[Dict[str, Any]] = field(default_factory=list)
     provenance: Dict[str, Any] = field(default_factory=dict)
+    evidence: Dict[str, Any] = field(default_factory=dict)
     confidence: Dict[str, Any] = field(default_factory=dict)
 
     status: str = BookIRStatus.UNRESOLVED
@@ -282,6 +283,7 @@ class BookIR:
             "geometry": self.geometry,
             "assumptions": self.assumptions,
             "provenance": self.provenance,
+            "evidence": {k: (v.to_dict() if hasattr(v, "to_dict") else v) for k, v in self.evidence.items()},
             "confidence": self.confidence,
             "status": self.status,
             "statusNotes": self.status_notes,
