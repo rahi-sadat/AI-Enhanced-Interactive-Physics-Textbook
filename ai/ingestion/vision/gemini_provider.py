@@ -218,6 +218,13 @@ class GeminiVisionProvider(VisionProvider):
         )
         self._client = None
 
+    @property
+    def name(self) -> str:
+        return "gemini"
+
+    def available(self) -> bool:
+        return bool(self.api_key)
+
     def _get_client(self):
         """Lazily initialize google-genai Client."""
         if not self.api_key:
