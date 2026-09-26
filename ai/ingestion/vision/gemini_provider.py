@@ -49,10 +49,22 @@ RULES & CONSTRAINTS:
    - Only report visible textual/numerical labels in visibleLabels if they are explicitly visible in the image.
 
 4. SEMANTIC OBJECT ROLES:
-   - Identify visual components and assign clear roles (e.g. "pivot", "bob", "string", "lens", "optical_axis", "mirror", "resistor", "voltage_source", "wire").
+   - Identify visual components and assign clear roles:
+     - For pendulum: "pivot", "bob", "string", "rod", "support_ceiling", "angle_marker", "equilibrium_position", "force_vector", "vertical_reference", "extreme_position".
+     - For projectile: "projectile_body", "launch_platform", "trajectory_path", "landing_surface", "velocity_vector", "apex_marker", "angle_marker".
+     - For optics: "lens", "optical_axis", "focal_point", "mirror", "optical_center", "object", "image", "light_ray", "interface_boundary", "normal_line", "incident_ray", "refracted_ray", "prism_body".
+     - For circuits: "resistor", "voltage_source", "current_source", "wire", "ground", "junction", "switch", "ammeter", "voltmeter".
    - If bounding box coordinates are provided, they are understood to be coarse/approximate.
 
-5. OUTPUT FORMAT:
+5. CONFIDENCE CALIBRATION & REALISM:
+   - Score confidence conservatively on a realistic scale from 0.0 to 1.0.
+   - Reserve 1.0 ONLY for absolute textbook canonical ground truth certainty.
+   - Standard clear diagrams typically range from 0.85 to 0.95.
+   - Ambiguous, cropped, or hand-drawn diagrams should be 0.50 to 0.80.
+   - For unsupported_physics or non_physics, domain and subtype confidence MUST be 0.0.
+   - Include an "overall" confidence score in confidence reflecting your aggregate certainty.
+
+6. OUTPUT FORMAT:
    Return ONLY a valid JSON object matching this structure:
 {
   "classification": "supported" | "unsupported_physics" | "non_physics" | "unknown",
@@ -62,7 +74,8 @@ RULES & CONSTRAINTS:
   "confidence": {
     "isPhysics": 0.0 to 1.0,
     "domain": 0.0 to 1.0,
-    "subtype": 0.0 to 1.0
+    "subtype": 0.0 to 1.0,
+    "overall": 0.0 to 1.0
   },
   "entities": [
     {
@@ -125,6 +138,7 @@ GEMINI_RESPONSE_SCHEMA = {
                 "isPhysics": {"type": "NUMBER"},
                 "domain": {"type": "NUMBER"},
                 "subtype": {"type": "NUMBER"},
+                "overall": {"type": "NUMBER"},
             },
             "required": ["isPhysics", "domain", "subtype"],
         },
@@ -265,7 +279,9 @@ class GeminiVisionProvider(VisionProvider):
             last_err = None
             used_model = self.model_name
 
-            for current_model in models_to_try:
+            t0 = time.perf_counter()
+            fallback_used = False
+            for idx, current_model in enumerate(models_to_try):
                 for attempt in range(2):
                     try:
                         response = client.models.generate_content(
@@ -274,6 +290,8 @@ class GeminiVisionProvider(VisionProvider):
                             config=config,
                         )
                         used_model = current_model
+                        if idx > 0 or current_model != self.model_name or attempt > 0:
+                            fallback_used = True
                         break
                     except Exception as call_err:
                         last_err = call_err
@@ -298,6 +316,8 @@ class GeminiVisionProvider(VisionProvider):
             if not raw_text or not raw_text.strip():
                 raise VisionProviderError("Gemini returned empty response text.")
 
+            latency_ms = int((time.perf_counter() - t0) * 1000)
+
             # Parse JSON
             try:
                 data = json.loads(raw_text)
@@ -312,6 +332,9 @@ class GeminiVisionProvider(VisionProvider):
             result.model = used_model
             result.prompt_version = self.PROMPT_VERSION
             result.timestamp = datetime.now(timezone.utc).isoformat()
+            result.latency_ms = latency_ms
+            result.cache_hit = False
+            result.fallback_used = fallback_used
 
             return result
 

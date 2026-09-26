@@ -63,14 +63,94 @@ VALID_CLASSIFICATIONS = {
     "unknown",
 }
 
+# Enriched Semantic Roles by Physical Subtype (PR-05 Refinements)
+PENDULUM_SEMANTIC_ROLES: Set[str] = {
+    "pivot",
+    "bob",
+    "string",
+    "rod",
+    "support_ceiling",
+    "angle_marker",
+    "equilibrium_position",
+    "force_vector",
+    "vertical_reference",
+    "extreme_position",
+}
+
+SUPPORTED_ROLES_BY_SUBTYPE: Dict[str, Set[str]] = {
+    "pendulum": PENDULUM_SEMANTIC_ROLES,
+    "projectile": {
+        "projectile_body",
+        "launch_platform",
+        "trajectory_path",
+        "landing_surface",
+        "velocity_vector",
+        "apex_marker",
+        "angle_marker",
+    },
+    "thin_lens": {
+        "lens",
+        "optical_axis",
+        "focal_point",
+        "optical_center",
+        "object",
+        "image",
+        "light_ray",
+    },
+    "spherical_mirror": {
+        "mirror",
+        "optical_axis",
+        "focal_point",
+        "center_of_curvature",
+        "pole",
+        "object",
+        "image",
+        "light_ray",
+    },
+    "interface_refraction": {
+        "interface_boundary",
+        "normal_line",
+        "incident_ray",
+        "refracted_ray",
+        "medium_label",
+        "angle_marker",
+    },
+    "prism": {
+        "prism_body",
+        "incident_ray",
+        "refracted_ray",
+        "emergent_ray",
+        "normal_line",
+        "apex_angle",
+        "deviation_angle",
+    },
+    "dc_linear": {
+        "resistor",
+        "voltage_source",
+        "current_source",
+        "wire",
+        "ground",
+        "junction",
+        "switch",
+        "ammeter",
+        "voltmeter",
+    },
+}
+
 
 def _validate_confidence(
     val: Any,
     field_name: str,
     allow_none: bool = False,
     default: float = 0.0,
+    cap_max: Optional[float] = None,
 ) -> float:
-    """Validate that a confidence score is finite and within [0.0, 1.0]."""
+    """Validate that a confidence score is finite and within [0.0, 1.0].
+
+    If cap_max is set and f_val >= 1.0, clips to cap_max.
+    Enforces conservative confidence policy reserving 1.0 strictly for
+    author-confirmed or verified ground truth.
+    """
     if val is None:
         if allow_none:
             return default
@@ -86,32 +166,101 @@ def _validate_confidence(
         raise SemanticValidationError(
             f"'{field_name}' confidence must be between 0.0 and 1.0, got {f_val}"
         )
+    if cap_max is not None and f_val >= 1.0:
+        return cap_max
     return f_val
 
 
 @dataclass
 class SemanticConfidence:
-    """Confidence scores for semantic categorization."""
+    """Confidence scores for semantic categorization.
+
+    Preserves raw provider confidence while applying conservative confidence policy.
+    Avoids defaulting everything to 1.0; reserves 1.0 strictly for verified ground truth.
+    """
     is_physics: float = 0.0
     domain: float = 0.0
     subtype: float = 0.0
+    overall: float = 0.0
+    raw_provider: Optional[Dict[str, Any]] = None
 
-    def to_dict(self) -> Dict[str, float]:
-        return {
+    def to_dict(self) -> Dict[str, Any]:
+        d: Dict[str, Any] = {
             "isPhysics": self.is_physics,
             "domain": self.domain,
             "subtype": self.subtype,
+            "overall": self.overall,
         }
+        if self.raw_provider is not None:
+            d["rawProvider"] = self.raw_provider
+        return d
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "SemanticConfidence":
+    def from_dict(
+        cls,
+        d: Dict[str, Any],
+        classification: Optional[str] = None,
+    ) -> "SemanticConfidence":
         if not isinstance(d, dict):
             raise SemanticValidationError(f"'confidence' must be a dict, got {type(d).__name__}")
+
+        raw_is_phys = _validate_confidence(d.get("isPhysics", d.get("is_physics")), "isPhysics", allow_none=True, default=0.0)
+        raw_dom = _validate_confidence(d.get("domain"), "domain", allow_none=True, default=0.0)
+        raw_sub = _validate_confidence(d.get("subtype"), "subtype", allow_none=True, default=0.0)
+        raw_overall = d.get("overall")
+
+        # Preserve exact raw provider signals
+        raw_prov = d.get("rawProvider", d.get("raw_provider"))
+        if raw_prov is None:
+            raw_prov = {
+                "isPhysics": raw_is_phys,
+                "domain": raw_dom,
+                "subtype": raw_sub,
+            }
+            if raw_overall is not None:
+                raw_prov["overall"] = _validate_confidence(raw_overall, "overall", allow_none=True, default=0.0)
+        elif raw_overall is not None and "overall" not in raw_prov:
+            raw_prov["overall"] = _validate_confidence(raw_overall, "overall", allow_none=True, default=0.0)
+
+        # Conservative confidence policy:
+        # Avoid overly perfect 1.0 values where unsupported or unverified.
+        # Reserve 1.0 strictly for author-confirmed / verified ground truth.
+        is_phys = raw_is_phys
+        dom = raw_dom
+        sub = raw_sub
+
+        if classification == "supported":
+            if is_phys >= 1.0:
+                is_phys = 0.99
+            if dom >= 1.0:
+                dom = 0.98
+            if sub >= 1.0:
+                sub = 0.96
+            # Overall is strictly the conservative hierarchical minimum across stages
+            overall = round(min(is_phys, dom, sub), 3)
+        elif classification == "unsupported_physics":
+            dom = 0.0
+            sub = 0.0
+            overall = round(min(is_phys, 0.98), 3)
+        elif classification == "non_physics":
+            dom = 0.0
+            sub = 0.0
+            overall = round(1.0 - is_phys, 3) if is_phys < 0.5 else 0.5
+        elif classification == "author_override":
+            overall = _validate_confidence(raw_overall, "overall", allow_none=True, default=1.0)
+        else:
+            dom = 0.0
+            sub = 0.0
+            overall = 0.0
+
         return cls(
-            is_physics=_validate_confidence(d.get("isPhysics", d.get("is_physics")), "isPhysics", allow_none=True, default=0.0),
-            domain=_validate_confidence(d.get("domain"), "domain", allow_none=True, default=0.0),
-            subtype=_validate_confidence(d.get("subtype"), "subtype", allow_none=True, default=0.0),
+            is_physics=is_phys,
+            domain=dom,
+            subtype=sub,
+            overall=overall,
+            raw_provider=raw_prov,
         )
+
 
 
 @dataclass
@@ -143,7 +292,7 @@ class SemanticEntity:
             temporary_id=str(tid),
             role=str(d.get("role", "unknown")),
             label=d.get("label"),
-            confidence=_validate_confidence(d.get("confidence"), "entity.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "entity.confidence", allow_none=True, default=0.0, cap_max=0.95),
             approx_bbox=d.get("approxBbox", d.get("approx_bbox")),
             precision="approximate",
         )
@@ -171,7 +320,7 @@ class SemanticRelationship:
             type=str(d.get("type", "related_to")),
             source_id=str(d.get("from", d.get("source_id", ""))),
             target_id=str(d.get("to", d.get("target_id", ""))),
-            confidence=_validate_confidence(d.get("confidence"), "relationship.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "relationship.confidence", allow_none=True, default=0.0, cap_max=0.95),
         )
 
 
@@ -201,7 +350,7 @@ class SemanticVisibleLabel:
     def from_dict(cls, d: Dict[str, Any]) -> "SemanticVisibleLabel":
         return cls(
             text=str(d.get("text", "")),
-            confidence=_validate_confidence(d.get("confidence"), "visibleLabel.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "visibleLabel.confidence", allow_none=True, default=0.0, cap_max=0.95),
             semantic_role=d.get("semanticRole", d.get("semantic_role")),
             source=str(d.get("source", "vlm")),
             verified=False,  # Enforce unverified in PR-05
@@ -227,7 +376,7 @@ class SemanticCandidate:
         return cls(
             domain=d.get("domain"),
             subtype=d.get("subtype"),
-            confidence=_validate_confidence(d.get("confidence"), "candidate.confidence", allow_none=True, default=0.0),
+            confidence=_validate_confidence(d.get("confidence"), "candidate.confidence", allow_none=True, default=0.0, cap_max=0.95),
         )
 
 
@@ -251,8 +400,25 @@ class SemanticAnalysisResult:
     model: str = ""
     prompt_version: str = "pr05-v1"
     timestamp: str = ""
+    latency_ms: Optional[int] = None
+    cache_hit: bool = False
+    fallback_used: bool = False
+    debug: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
+        meta: Dict[str, Any] = {
+            "provider": self.provider,
+            "model": self.model,
+            "promptVersion": self.prompt_version,
+            "timestamp": self.timestamp,
+            "cacheHit": bool(self.cache_hit),
+            "fallbackUsed": bool(self.fallback_used),
+        }
+        if self.latency_ms is not None:
+            meta["latencyMs"] = self.latency_ms
+        if self.debug:
+            meta["debug"] = self.debug
+
         return {
             "classification": self.classification,
             "isPhysics": self.is_physics,
@@ -264,12 +430,7 @@ class SemanticAnalysisResult:
             "visibleLabels": [l.to_dict() for l in self.visible_labels],
             "candidates": [c.to_dict() for c in self.candidates],
             "notes": self.notes,
-            "metadata": {
-                "provider": self.provider,
-                "model": self.model,
-                "promptVersion": self.prompt_version,
-                "timestamp": self.timestamp,
-            },
+            "metadata": meta,
         }
 
     @property
@@ -375,11 +536,11 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
         domain = None
         subtype = None
 
-    # 4. Confidence
+    # 4. Confidence (calibrated with classification awareness)
     raw_conf = raw.get("confidence")
     if not isinstance(raw_conf, dict):
         raise SemanticValidationError("Missing or invalid 'confidence' object")
-    confidence = SemanticConfidence.from_dict(raw_conf)
+    confidence = SemanticConfidence.from_dict(raw_conf, classification=classification)
 
     # 5. Entities (Unique, deterministic IDs)
     entities: List[SemanticEntity] = []
@@ -449,7 +610,7 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
                 candidates.append(SemanticCandidate(
                     domain=c_dom,
                     subtype=c_sub,
-                    confidence=_validate_confidence(c.get("confidence"), "candidate.confidence", allow_none=True, default=0.0),
+                    confidence=_validate_confidence(c.get("confidence"), "candidate.confidence", allow_none=True, default=0.0, cap_max=0.95),
                 ))
 
     # 9. Notes
@@ -462,6 +623,17 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
     model = str(meta.get("model", ""))
     prompt_version = str(meta.get("promptVersion", meta.get("prompt_version", "pr05-v1")))
     timestamp = str(meta.get("timestamp", ""))
+    latency_ms = meta.get("latencyMs", meta.get("latency_ms"))
+    if latency_ms is not None:
+        try:
+            latency_ms = int(latency_ms)
+        except (ValueError, TypeError):
+            latency_ms = None
+    cache_hit = bool(meta.get("cacheHit", meta.get("cache_hit", False)))
+    fallback_used = bool(meta.get("fallbackUsed", meta.get("fallback_used", False)))
+    debug = meta.get("debug", {})
+    if not isinstance(debug, dict):
+        debug = {}
 
     return SemanticAnalysisResult(
         classification=classification,
@@ -478,4 +650,8 @@ def validate_semantic_payload(raw: Any) -> SemanticAnalysisResult:
         model=model,
         prompt_version=prompt_version,
         timestamp=timestamp,
+        latency_ms=latency_ms,
+        cache_hit=cache_hit,
+        fallback_used=fallback_used,
+        debug=debug,
     )
