@@ -33,6 +33,13 @@ class MockVisionProvider(VisionProvider):
         self.call_history: List[Dict[str, Any]] = []
         self._custom_handler: Optional[Callable[[bytes, str, PageIR], SemanticAnalysisResult]] = None
 
+    @property
+    def name(self) -> str:
+        return "mock"
+
+    def available(self) -> bool:
+        return True
+
     def set_handler(self, handler: Callable[[bytes, str, PageIR], SemanticAnalysisResult]):
         """Set a dynamic response generator based on image bytes / page_ir."""
         self._custom_handler = handler

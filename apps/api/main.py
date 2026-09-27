@@ -93,14 +93,17 @@ app.add_middleware(
 # Upload and debug directories
 UPLOADS_DIR = _PROJECT_ROOT / "storage" / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+ARTIFACTS_DIR = _PROJECT_ROOT / "storage" / "artifacts"
+ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 FRONTEND_PUBLIC = _PROJECT_ROOT / "apps" / "web" / "public"
 FRONTEND_UPLOADS = FRONTEND_PUBLIC / "uploads"
 FRONTEND_UPLOADS.mkdir(parents=True, exist_ok=True)
 FRONTEND_SPRITES = FRONTEND_PUBLIC / "sprites"
 FRONTEND_SPRITES.mkdir(parents=True, exist_ok=True)
 
-# Mount static files so diagrams and uploads are served directly
+# Mount static files so diagrams, artifacts, and uploads are served directly
 app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+app.mount("/artifacts", StaticFiles(directory=str(ARTIFACTS_DIR)), name="artifacts")
 
 # Global model cache
 _SAM2_PREDICTOR = None
@@ -1527,25 +1530,27 @@ try:
         BookUnderstandingPipeline,
         PhysicsCompiler,
     )
+    from ai.evidence import EvidenceExtractionPipeline
     _INGESTION_AVAILABLE = True
 except Exception as _ingestion_err:
     _INGESTION_AVAILABLE = False
-    print(f"[Backend] PR-04 ingestion imports unavailable: {_ingestion_err}")
+    print(f"[Backend] Ingestion imports unavailable: {_ingestion_err}")
 
 # Singletons for the ingestion pipeline
 _UPLOAD_SERVICE: "UploadService | None" = None
 _PAGE_IR_BUILDER: "PageIRBuilder | None" = None
 _BOOK_PIPELINE: "BookUnderstandingPipeline | None" = None
+_EVIDENCE_PIPELINE: "EvidenceExtractionPipeline | None" = None
 _PHYSICS_COMPILER: "PhysicsCompiler | None" = None
 
 
 def _get_ingestion_pipeline():
-    """Lazily initialise the PR-04 ingestion pipeline singletons."""
-    global _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _PHYSICS_COMPILER
+    """Lazily initialise the ingestion pipeline singletons."""
+    global _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _EVIDENCE_PIPELINE, _PHYSICS_COMPILER
     if not _INGESTION_AVAILABLE:
         raise HTTPException(
             status_code=503,
-            detail="PR-04 ingestion pipeline not available (missing dependencies).",
+            detail="Ingestion pipeline not available (missing dependencies).",
         )
     if _UPLOAD_SERVICE is None:
         _UPLOAD_SERVICE = UploadService(
@@ -1554,27 +1559,29 @@ def _get_ingestion_pipeline():
         )
         _PAGE_IR_BUILDER = PageIRBuilder()
         _BOOK_PIPELINE = BookUnderstandingPipeline()
+        _EVIDENCE_PIPELINE = EvidenceExtractionPipeline()
         _PHYSICS_COMPILER = PhysicsCompiler()
-    return _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _PHYSICS_COMPILER
+    return _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _EVIDENCE_PIPELINE, _PHYSICS_COMPILER
 
 
 @app.post("/api/ingest")
 async def ingest_diagram(file: UploadFile = File(...)):
-    """PR-04 Real Image Ingestion endpoint.
+    """PR-06 Real Image Ingestion endpoint.
 
     Accepts an arbitrary image file via multipart/form-data and runs it
-    through the full ingestion pipeline:
+    through the full ingestion and evidence extraction pipeline:
 
         raw bytes
             → UploadService  (validate, store, SourceAsset)
             → PageIRBuilder  (PageIR in source_px)
-            → BookUnderstandingPipeline (BookIR — honest UNRESOLVED for PR-04)
+            → BookUnderstandingPipeline (BookIR — PR-05 semantic understanding)
+            → EvidenceExtractionPipeline (Grounded BookIR — PR-06 OCR, CV, SAM 2, Fusion)
             → PhysicsCompiler (PhysicsScene or non-ready result)
 
     Returns a JSON envelope with:
         source_asset:  SourceAsset identity (no filename-based routing)
         page_ir:       PageIR (source_px geometry, regions, figures)
-        book_ir:       BookIR (domain/subtype/entities/parameters)
+        book_ir:       Grounded BookIR (domain/subtype/entities/parameters/evidence)
         compiler:      PhysicsCompilerResult (READY/NEEDS_REVIEW/UNSUPPORTED/UNRESOLVED)
         image_url:     Frontend-accessible URL for the uploaded image
 
@@ -1584,7 +1591,7 @@ async def ingest_diagram(file: UploadFile = File(...)):
         - An unknown image always returns UNRESOLVED, not a fallback simulation
     """
     try:
-        upload_svc, page_ir_builder, book_pipeline, compiler = _get_ingestion_pipeline()
+        upload_svc, page_ir_builder, book_pipeline, evidence_pipeline, compiler = _get_ingestion_pipeline()
 
         # 1. Read bytes with streaming size limit (do not buffer oversized uploads into RAM)
         CHUNK_SIZE = 64 * 1024
@@ -1622,21 +1629,46 @@ async def ingest_diagram(file: UploadFile = File(...)):
         # Execute blocking VLM network operations off the async event loop to prevent starvation
         book_ir = await asyncio.to_thread(book_pipeline.analyze, page_ir, asset=asset)
 
-        # 5. PhysicsCompiler
-        compiler_result = compiler.compile(book_ir)
+        # 5. EvidenceExtractionPipeline → Grounded BookIR (PR-06 visual evidence, OCR, CV, segmentation & fusion)
+        grounded_book_ir = await asyncio.to_thread(
+            evidence_pipeline.extract_and_fuse,
+            asset=asset,
+            page_ir=page_ir,
+            book_ir=book_ir,
+        )
+
+        # Generate debug overlay artifact if explicitly enabled (never pollutes uploads)
+        debug_overlay_url = None
+        evidence_debug_enabled = os.getenv("EVIDENCE_DEBUG", "false").lower() in ("true", "1", "yes")
+        if evidence_debug_enabled:
+            try:
+                from ai.evidence.debug import generate_evidence_overlay
+                debug_img_path = ARTIFACTS_DIR / f"{asset.id}_evidence_debug.png"
+                img_bgr = cv2.imread(asset.storage_path)
+                if img_bgr is not None:
+                    generate_evidence_overlay(img_bgr, grounded_book_ir, output_path=debug_img_path)
+                    debug_overlay_url = f"/artifacts/{asset.id}_evidence_debug.png"
+            except Exception as _dbg_err:
+                print(f"[Backend] Debug overlay generation skipped: {_dbg_err}")
+
+        # 6. PhysicsCompiler
+        compiler_result = compiler.compile(grounded_book_ir)
 
         return {
             "success": True,
-            "pipeline": "PR-05",
+            "pipeline": "PR-06",
             "image_url": public_url,
+            "debug_overlay_url": debug_overlay_url,
             "source_asset": asset.to_dict(),
             "page_ir": page_ir.to_dict(),
-            "book_ir": book_ir.to_dict(),
+            "book_ir": grounded_book_ir.to_dict(),
             "compiler": compiler_result.to_dict(),
+            "evidence": grounded_book_ir.evidence,
+            "grounding": grounded_book_ir.provenance.get("grounding_diagnostics", []),
             # Convenience top-level fields matching existing frontend expectations
             "status": compiler_result.status.lower().replace("_", "-"),
-            "domain": book_ir.domain,
-            "scenario": book_ir.subtype,
+            "domain": grounded_book_ir.domain,
+            "scenario": grounded_book_ir.subtype,
             "scene": compiler_result.scene,
             "issues": compiler_result.issues,
             "width": asset.width_px,
@@ -1651,12 +1683,89 @@ async def ingest_diagram(file: UploadFile = File(...)):
 
 @app.get("/api/ingest/health")
 def ingest_health():
-    """Check PR-05 ingestion pipeline availability."""
-    return {
-        "available": _INGESTION_AVAILABLE,
-        "pipeline": "PR-05",
-        "note": "Use POST /api/ingest with multipart/form-data file upload.",
-    }
+    """Check PR-06 ingestion pipeline capability and runtime health."""
+    if not _INGESTION_AVAILABLE:
+        return {
+            "pipeline": "PR-06",
+            "available": False,
+            "error": "Ingestion pipeline dependencies unavailable",
+        }
+    try:
+        upload_svc, page_ir_builder, book_pipeline, evidence_pipeline, compiler = _get_ingestion_pipeline()
+
+        # Semantic (VLM)
+        semantic_avail = False
+        semantic_prov = "unknown"
+        if hasattr(book_pipeline, "_get_analyzer"):
+            try:
+                analyzer = book_pipeline._get_analyzer()
+                prov = getattr(analyzer, "provider", None)
+                if prov:
+                    semantic_avail = prov.available()
+                    semantic_prov = getattr(prov, "name", "vlm")
+            except Exception:
+                pass
+        elif hasattr(book_pipeline, "vision_provider") and book_pipeline.vision_provider:
+            semantic_avail = book_pipeline.vision_provider.available()
+            semantic_prov = getattr(book_pipeline.vision_provider, "name", "vlm")
+
+        # OCR
+        ocr_router = evidence_pipeline.ocr_provider
+        ocr_default = getattr(ocr_router, "name", "ocr")
+        eng_avail = getattr(ocr_router, "primary", ocr_router).available() if hasattr(ocr_router, "primary") else ocr_router.available()
+        bn_avail = getattr(ocr_router, "bangla", None).available() if hasattr(ocr_router, "bangla") else False
+        resolver = getattr(ocr_router, "symbol_resolver", getattr(ocr_router, "symbol_engine", None))
+        symbol_res_avail = resolver.available() if resolver else False
+        formula_avail = getattr(ocr_router, "formula", None).available() if hasattr(ocr_router, "formula") else False
+
+        # Segmentation
+        seg_prov = evidence_pipeline.segmentation_provider
+        seg_avail = seg_prov.available() if seg_prov else False
+        seg_name = getattr(seg_prov, "name", "none")
+
+        # Grounders - Truthful capability mapping (implemented vs partial/prototype)
+        grounders = {
+            "mechanics/pendulum": "implemented",
+            "mechanics/projectile": "partial",
+            "optics/thin_lens": "partial",
+            "optics/spherical_mirror": "partial",
+            "optics/interface_refraction": "partial",
+            "optics/prism": "partial",
+            "circuits/dc_linear": "partial",
+        }
+
+        return {
+            "pipeline": "PR-06",
+            "available": True,
+            "semantic": {
+                "available": semantic_avail,
+                "provider": semantic_prov,
+            },
+            "ocr": {
+                "default": ocr_default,
+                "english": eng_avail,
+                "bangla": bn_avail,
+                "greekRecognition": False,  # Truthful: no standalone pixel-level Greek OCR model
+                "physicsSymbolCandidateResolution": symbol_res_avail,
+            },
+            "formulaRecognition": {
+                "available": formula_avail,
+            },
+            "classicalCV": {
+                "available": True,
+            },
+            "segmentation": {
+                "available": seg_avail,
+                "provider": seg_name,
+            },
+            "grounders": grounders,
+        }
+    except Exception as e:
+        return {
+            "pipeline": "PR-06",
+            "available": False,
+            "error": str(e),
+        }
 
 
 if __name__ == "__main__":

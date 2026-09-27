@@ -1,4 +1,4 @@
-"""backend/circuits/scene
+"""Scene compiler package."""
+from .physics_compiler import PhysicsCompiler, PhysicsCompilerError, SUPPORTED_SUBTYPES
 
-CircuitScene construction, serialization, and canonical schema v3 validation.
-"""
+__all__ = ["PhysicsCompiler", "PhysicsCompilerError", "SUPPORTED_SUBTYPES"]

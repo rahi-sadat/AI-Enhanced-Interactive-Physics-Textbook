@@ -32,6 +32,10 @@ export class UploadService {
 
     onProgress('Uploading image bytes to server...', 20);
 
+    const processingTimer = setTimeout(() => {
+      onProgress('Running multimodal AI analysis, OCR & visual grounding (CPU)...', 50);
+    }, 1200);
+
     let res;
     try {
       res = await fetch('/api/ingest', {
@@ -44,9 +48,16 @@ export class UploadService {
         throw new Error('Backend server is offline (port 8000). Please ensure the FastAPI backend is running via "python apps/api/main.py".');
       }
       throw new Error(`Network error during upload: ${networkErr.message}`);
+    } finally {
+      clearTimeout(processingTimer);
     }
 
     if (!res.ok) {
+      if (res.status === 502 || res.status === 504) {
+        throw new Error(
+          `The ingestion service or one of its upstream providers failed or timed out. (HTTP ${res.status})`
+        );
+      }
       let detail = `Server returned HTTP ${res.status}`;
       try {
         const errBody = await res.json();
@@ -148,6 +159,15 @@ export class IngestResult {
 
   /** @returns {object} Confidence breakdown. */
   get confidence() { return this.bookIR?.confidence || {}; }
+
+  /** @returns {object} Traceable visual, OCR, and segmentation evidence records. */
+  get evidence() { return this._env.evidence || this.bookIR?.evidence || {}; }
+
+  /** @returns {Array} Entity grounding diagnostics. */
+  get grounding() { return this._env.grounding || this.bookIR?.provenance?.grounding_diagnostics || []; }
+
+  /** @returns {string} Debug overlay image URL if generated. */
+  get debugOverlayUrl() { return this._env.debug_overlay_url || ''; }
 
   /** @returns {string} Human-readable status message. */
   get statusMessage() {

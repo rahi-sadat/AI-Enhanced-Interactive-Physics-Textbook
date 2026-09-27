@@ -23,3 +23,8 @@ httpx>=0.28.0
 
 # Multimodal VLM Semantic Analysis
 google-genai>=2.25.0,<3.0.0
+
+# Deterministic Classical & Multilingual OCR (PR-06)
+rapidocr>=3.9.0,<4.0.0
+onnxruntime>=1.17.0,<2.0.0
+easyocr>=1.7.0,<2.0.0

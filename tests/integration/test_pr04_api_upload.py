@@ -48,7 +48,7 @@ class TestPR04ApiUpload(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertTrue(data.get("available"))
-        self.assertIn(data.get("pipeline"), ("PR-04", "PR-05"))
+        self.assertIn(data.get("pipeline"), ("PR-04", "PR-05", "PR-06"))
 
     def test_02_upload_arbitrary_png_bytes(self):
         """POST /api/ingest with unseen PNG verifies full pipeline contract."""
@@ -66,7 +66,7 @@ class TestPR04ApiUpload(unittest.TestCase):
 
         # 1. Pipeline status
         self.assertTrue(payload["success"])
-        self.assertIn(payload["pipeline"], ("PR-04", "PR-05"))
+        self.assertIn(payload["pipeline"], ("PR-04", "PR-05", "PR-06"))
         self.assertTrue(payload["image_url"].startswith("/"))
 
         # 2. SourceAsset
