@@ -238,6 +238,9 @@ class PendulumGrounder:
                         bob_entity.geometry = None
                     else:
                         # AGREEMENT PASSES: Fuse into grounded entity
+                        raw_bounds = cv_bob.get("bounds") if isinstance(cv_bob, dict) else getattr(cv_bob, "bounds", None)
+                        bounds_dict = raw_bounds.to_dict() if hasattr(raw_bounds, "to_dict") else (raw_bounds if isinstance(raw_bounds, dict) else {"x": cv_center.x - cv_r, "y": cv_center.y - cv_r, "width": cv_r * 2.0, "height": cv_r * 2.0})
+
                         bob_entity.position_source_px = {
                             "x": cv_center.x,
                             "y": cv_center.y,
@@ -246,7 +249,7 @@ class PendulumGrounder:
                             "center_agreement_distance_px": round(dist, 2),
                         }
                         bob_entity.geometry = {
-                            "bounds": cv_bob["bounds"].to_dict(),
+                            "bounds": bounds_dict,
                             "radius_px": cv_r,
                             "mask_ref": bob_mask.id,
                             "area_px": bob_mask.area_px,
@@ -272,11 +275,26 @@ class PendulumGrounder:
                             value=cv_r,
                             unit="px",
                             status="observed",
-                            provenance=ProvenanceRecord(source="cv", confidence=0.92),
+                            provenance=ProvenanceRecord(
+                                source="cv",
+                                evidence_refs=list(filter(None, [cv_ev_id, mask_ev_id])),
+                                confidence=0.92,
+                            ),
                         )
-                        grounded_ir.parameters["bob_position"] = cv_center.to_dict()
+                        grounded_ir.parameters["bob_position"] = {
+                            "x": cv_center.x,
+                            "y": cv_center.y,
+                            "provenance": {
+                                "source": "cv_sam_fused",
+                                "evidence_refs": list(filter(None, [cv_ev_id, mask_ev_id])),
+                                "confidence": 0.95,
+                            },
+                        }
                 else:
                     # CV-only grounding (when SAM is unavailable or produces no mask)
+                    raw_bounds = cv_bob.get("bounds") if isinstance(cv_bob, dict) else getattr(cv_bob, "bounds", None)
+                    bounds_dict = raw_bounds.to_dict() if hasattr(raw_bounds, "to_dict") else (raw_bounds if isinstance(raw_bounds, dict) else {"x": cv_center.x - cv_r, "y": cv_center.y - cv_r, "width": cv_r * 2.0, "height": cv_r * 2.0})
+
                     bob_entity.position_source_px = {
                         "x": cv_center.x,
                         "y": cv_center.y,
@@ -284,7 +302,7 @@ class PendulumGrounder:
                         "method": "classical_cv",
                     }
                     bob_entity.geometry = {
-                        "bounds": cv_bob["bounds"].to_dict(),
+                        "bounds": bounds_dict,
                         "radius_px": cv_r,
                     }
                     bob_entity.evidence_refs = list(filter(None, [cv_ev_id]))
@@ -302,9 +320,21 @@ class PendulumGrounder:
                         value=cv_r,
                         unit="px",
                         status="observed",
-                        provenance=ProvenanceRecord(source="cv", confidence=0.88),
+                        provenance=ProvenanceRecord(
+                            source="cv",
+                            evidence_refs=list(filter(None, [cv_ev_id])),
+                            confidence=0.88,
+                        ),
                     )
-                    grounded_ir.parameters["bob_position"] = cv_center.to_dict()
+                    grounded_ir.parameters["bob_position"] = {
+                        "x": cv_center.x,
+                        "y": cv_center.y,
+                        "provenance": {
+                            "source": "cv",
+                            "evidence_refs": list(filter(None, [cv_ev_id])),
+                            "confidence": 0.88,
+                        },
+                    }
 
         # -------------------------------------------------------------------
         # 2. String Grounding
@@ -323,14 +353,56 @@ class PendulumGrounder:
                 )
             else:
                 str_start = cv_string["start"]
-                str_end = cv_string["end"]
-                str_len = cv_string["length_to_bob_center_px"]
+                bob_center_pt = cv_bob.get("center") if isinstance(cv_bob, dict) else getattr(cv_bob, "center", None)
+                str_end = bob_center_pt if bob_center_pt is not None else cv_string["end"]
+
+                def _get_coord(pt: Any, coord: str) -> float:
+                    if pt is None:
+                        return 0.0
+                    if isinstance(pt, dict):
+                        return float(pt.get(coord, 0.0))
+                    return float(getattr(pt, coord, 0.0))
+
+                str_sx = _get_coord(str_start, "x")
+                str_sy = _get_coord(str_start, "y")
+                str_ex = _get_coord(str_end, "x")
+                str_ey = _get_coord(str_end, "y")
+                effective_len = math.hypot(str_ex - str_sx, str_ey - str_sy)
+
+                vis_start = cv_string.get("visible_start", str_start)
+                vis_end = cv_string.get("visible_end", cv_string.get("attachment_point", str_end))
+                vs_x = _get_coord(vis_start, "x")
+                vs_y = _get_coord(vis_start, "y")
+                ve_x = _get_coord(vis_end, "x")
+                ve_y = _get_coord(vis_end, "y")
+                vis_len = cv_string.get("visible_length_px") or math.hypot(ve_x - vs_x, ve_y - vs_y)
+
+                str_start_dict = str_start.to_dict() if hasattr(str_start, "to_dict") else (str_start if isinstance(str_start, dict) else {"x": str_sx, "y": str_sy})
+                str_end_dict = str_end.to_dict() if hasattr(str_end, "to_dict") else (str_end if isinstance(str_end, dict) else {"x": str_ex, "y": str_ey})
+                vis_start_dict = vis_start.to_dict() if hasattr(vis_start, "to_dict") else (vis_start if isinstance(vis_start, dict) else {"x": vs_x, "y": vs_y})
+                vis_end_dict = vis_end.to_dict() if hasattr(vis_end, "to_dict") else (vis_end if isinstance(vis_end, dict) else {"x": ve_x, "y": ve_y})
+                att_pt = cv_string.get("attachment_point")
+                att_dict = att_pt.to_dict() if hasattr(att_pt, "to_dict") else (att_pt if isinstance(att_pt, dict) else None)
 
                 string_entity.geometry = {
-                    "start": str_start.to_dict(),
-                    "end": str_end.to_dict(),
-                    "length_px": str_len,
-                    "visible_length_px": cv_string["visible_length_px"],
+                    "start": str_start_dict,
+                    "end": str_end_dict,
+                    "length_px": round(effective_len, 2),
+                    "visible_string_start": vis_start_dict,
+                    "visible_string_end": vis_end_dict,
+                    "visible_length_px": round(vis_len, 2),
+                    "effective_length_px": round(effective_len, 2),
+                    "attachment_point": att_dict,
+                    "effective_pendulum": {
+                        "start": str_start_dict,
+                        "end": str_end_dict,
+                        "length_px": round(effective_len, 2),
+                    },
+                    "visible_string": {
+                        "start": vis_start_dict,
+                        "end": vis_end_dict,
+                        "length_px": round(vis_len, 2),
+                    },
                 }
                 string_entity.evidence_refs = list(filter(None, [cv_ev_id]))
                 diagnostics.append(
@@ -339,23 +411,29 @@ class PendulumGrounder:
                         grounding_state=GroundingState.GROUNDED,
                         supporting_evidence=string_entity.evidence_refs,
                         checks={
-                            "start": str_start.to_dict(),
-                            "end": str_end.to_dict(),
-                            "length_px": round(str_len, 2),
+                            "start": str_start_dict,
+                            "end": str_end_dict,
+                            "visible_length_px": round(vis_len, 2),
+                            "effective_length_px": round(effective_len, 2),
                         },
                         conflicts=[],
                         notes="String verified and connected to bob candidate.",
                     )
                 )
                 grounded_ir.parameters["string_length_px"] = PhysicalValue(
-                    value=str_len,
+                    value=round(effective_len, 2),
                     unit="px",
                     status="observed",
-                    provenance=ProvenanceRecord(source="cv", confidence=0.90),
+                    provenance=ProvenanceRecord(
+                        source="derived",
+                        evidence_refs=list(filter(None, [cv_ev_id, mask_ev_id or cv_ev_id])),
+                        confidence=0.92,
+                        notes="Derived from verified pivot and bob center.",
+                    ),
                 )
 
         # -------------------------------------------------------------------
-        # 3. Pivot Grounding
+        # 3. Pivot Grounding & Multi-Constraint Cross-Validation
         # -------------------------------------------------------------------
         if pivot_entity:
             if not cv_pivot:
@@ -378,24 +456,94 @@ class PendulumGrounder:
                     px = getattr(cv_pivot, "x", 0.0)
                     py = getattr(cv_pivot, "y", 0.0)
 
-                pivot_entity.position_source_px = {
-                    "x": float(px),
-                    "y": float(py),
-                    "coordinate_space": "source_px",
-                    "method": "string_anchor",
-                }
-                pivot_entity.evidence_refs = list(filter(None, [cv_ev_id]))
-                diagnostics.append(
-                    EntityGroundingDiagnostic(
-                        entity_id=pivot_entity.id,
-                        grounding_state=GroundingState.GROUNDED,
-                        supporting_evidence=pivot_entity.evidence_refs,
-                        checks={"pivot": {"x": px, "y": py}},
-                        conflicts=[],
-                        notes="Pivot grounded at verified string suspension point.",
+                pivot_val = best_proposal.get("pivot_validation", {}) if best_proposal else {}
+                vref_cand = cv_candidates.get("vertical_reference")
+                vref_x = ((vref_cand.start.x + vref_cand.end.x) / 2.0) if vref_cand else None
+                vref_res = pivot_val.get("vref_residual_px")
+                if vref_res is None and vref_x is not None:
+                    vref_res = abs(float(px) - float(vref_x))
+
+                tol_vref = max(15.0, (grounded_ir.geometry.get("width", 1000) or 1000) * 0.02)
+                is_consistent = pivot_val.get("is_geometrically_consistent", True)
+
+                conflicts = []
+                if vref_x is not None and vref_res is not None and vref_res > tol_vref:
+                    is_consistent = False
+                    conflicts.append(
+                        f"Candidate pivot x={px:.1f} diverges from vertical reference line x={vref_x:.1f} "
+                        f"by {vref_res:.1f}px (tolerance: {tol_vref:.1f}px)."
                     )
+
+                if not is_consistent or conflicts:
+                    pivot_entity.position_source_px = None
+                    pivot_entity.geometry = None
+                    diagnostics.append(
+                        EntityGroundingDiagnostic(
+                            entity_id=pivot_entity.id,
+                            grounding_state=GroundingState.AMBIGUOUS,
+                            supporting_evidence=list(filter(None, [cv_ev_id])),
+                            checks={
+                                "pivot": {"x": px, "y": py},
+                                "vertical_reference_x": vref_x,
+                                "vref_residual_px": round(vref_res, 2) if vref_res is not None else None,
+                            },
+                            conflicts=conflicts or ["Pivot candidate failed multi-constraint geometric verification."],
+                            notes="Pivot candidate remains AMBIGUOUS due to geometric discrepancy.",
+                        )
+                    )
+                else:
+                    pivot_entity.position_source_px = {
+                        "x": float(px),
+                        "y": float(py),
+                        "coordinate_space": "source_px",
+                        "method": pivot_val.get("method", "multi_constraint_intersection"),
+                    }
+                    pivot_entity.evidence_refs = list(filter(None, [cv_ev_id]))
+                    diagnostics.append(
+                        EntityGroundingDiagnostic(
+                            entity_id=pivot_entity.id,
+                            grounding_state=GroundingState.GROUNDED,
+                            supporting_evidence=pivot_entity.evidence_refs,
+                            checks={
+                                "pivot": {"x": px, "y": py},
+                                "vertical_reference_x": vref_x,
+                                "vref_residual_px": round(vref_res, 2) if vref_res is not None else None,
+                                "support_residual_px": pivot_val.get("support_residual_px"),
+                                "string_fit_residual_px": pivot_val.get("string_fit_residual_px"),
+                            },
+                            conflicts=[],
+                            notes="Pivot grounded at multi-constraint suspension junction.",
+                        )
+                    )
+                    grounded_ir.parameters["pivot"] = {
+                        "x": float(px),
+                        "y": float(py),
+                        "provenance": {
+                            "source": "cv",
+                            "evidence_refs": list(filter(None, [cv_ev_id])),
+                            "confidence": 0.92,
+                        },
+                    }
+
+        # Derived visual initial angle (from pivot -> bob center vector relative to vertical)
+        if pivot_entity and pivot_entity.position_source_px and bob_entity and bob_entity.position_source_px:
+            p_pos = pivot_entity.position_source_px
+            b_pos = bob_entity.position_source_px
+            ang_dx = b_pos["x"] - p_pos["x"]
+            ang_dy = b_pos["y"] - p_pos["y"]
+            if ang_dy > 0:
+                v_angle_deg = math.degrees(math.atan2(ang_dx, ang_dy))
+                grounded_ir.parameters["visual_angle_deg"] = PhysicalValue(
+                    value=round(v_angle_deg, 2),
+                    unit="deg",
+                    status="observed",
+                    provenance=ProvenanceRecord(
+                        source="derived",
+                        evidence_refs=list(filter(None, [cv_ev_id])),
+                        confidence=0.88,
+                        notes="Derived geometrically from pivot-to-bob vector relative to downward vertical.",
+                    ),
                 )
-                grounded_ir.parameters["pivot"] = cv_pivot.to_dict() if hasattr(cv_pivot, "to_dict") else cv_pivot
 
         # -------------------------------------------------------------------
         # 3b. Vertical Reference Grounding

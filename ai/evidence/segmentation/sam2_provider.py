@@ -35,6 +35,11 @@ logger = logging.getLogger(__name__)
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
+# Global singletons for model caching across pipeline calls
+_CACHED_SAM2_MODEL = None
+_CACHED_SAM2_PREDICTOR = None
+_CACHED_IMAGE_SIG = None
+
 
 class SAM2SegmentationProvider:
     """Promptable segmentation provider using SAM 2 / SAM 2.1."""
@@ -52,6 +57,16 @@ class SAM2SegmentationProvider:
         self.device = device  # auto-detected if None
         self._predictor = None
         self._model = None
+
+    @property
+    def device_name(self) -> str:
+        if self.device:
+            return self.device
+        try:
+            import torch
+            return "cuda" if torch.cuda.is_available() else "cpu"
+        except ImportError:
+            return "cpu"
 
     @property
     def name(self) -> str:
@@ -75,7 +90,13 @@ class SAM2SegmentationProvider:
             sys.path.insert(0, str(sam2_dir))
 
     def _get_predictor(self):
-        """Lazily initialize SAM 2 model and predictor."""
+        """Lazily initialize SAM 2 model and predictor with singleton caching."""
+        global _CACHED_SAM2_MODEL, _CACHED_SAM2_PREDICTOR
+        if _CACHED_SAM2_PREDICTOR is not None:
+            self._model = _CACHED_SAM2_MODEL
+            self._predictor = _CACHED_SAM2_PREDICTOR
+            return self._predictor
+
         if self._predictor is None:
             self._ensure_sam2_on_path()
             try:
@@ -95,6 +116,8 @@ class SAM2SegmentationProvider:
             logger.info("[SAM2SegmentationProvider] Loading model on %s from %s...", dev, self.checkpoint_path)
             self._model = build_sam2(self.config_path, self.checkpoint_path, device=dev)
             self._predictor = SAM2ImagePredictor(self._model)
+            _CACHED_SAM2_MODEL = self._model
+            _CACHED_SAM2_PREDICTOR = self._predictor
 
         return self._predictor
 
@@ -107,6 +130,7 @@ class SAM2SegmentationProvider:
         source_height: int,
         entity_id: Optional[str] = None,
     ) -> SegmentationResult:
+        global _CACHED_IMAGE_SIG
         if not self.available():
             return SegmentationResult(
                 status=ExtractionStatus.UNAVAILABLE,
@@ -121,9 +145,12 @@ class SAM2SegmentationProvider:
         try:
             predictor = self._get_predictor()
 
-            # Convert BGR to RGB for SAM 2
-            img_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-            predictor.set_image(img_rgb)
+            # Reuse image embedding if identical image array is already loaded in predictor
+            current_sig = (id(image_bgr), image_bgr.shape, int(image_bgr[0, 0, 0]), int(image_bgr[-1, -1, -1]))
+            if _CACHED_IMAGE_SIG != current_sig:
+                img_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+                predictor.set_image(img_rgb)
+                _CACHED_IMAGE_SIG = current_sig
 
             # Build prompts
             point_coords = None
