@@ -38,18 +38,34 @@ def normalize_bengali_unicode(text: str) -> str:
     return unicodedata.normalize("NFC", text.strip())
 
 
+# Global singleton cache for EasyOCR reader
+_CACHED_EASYOCR_READER = None
+_CACHED_READER_GPU = None
+
+
 class EasyOCRBanglaProvider:
     """Local, offline Bangla and bilingual textbook OCR provider."""
 
-    def __init__(self, languages: tuple[str, ...] = ("bn", "en"), gpu: bool = False):
+    def __init__(self, languages: tuple[str, ...] = ("bn", "en"), gpu: Optional[bool] = None):
         self.languages = list(languages)
-        self.gpu = gpu
+        if gpu is None:
+            try:
+                import torch
+                self.gpu = torch.cuda.is_available()
+            except ImportError:
+                self.gpu = False
+        else:
+            self.gpu = gpu
         self._reader = None
         self._package_name = "easyocr"
         self._package_version = "unknown"
         self._detector_model = "craft_mlt_25k.pth"
         self._recognizer_model = "bengali.pth"
         self._model_version = "bengali.pth"
+
+    @property
+    def device_name(self) -> str:
+        return "cuda" if self.gpu else "cpu"
 
     @property
     def name(self) -> str:
@@ -63,11 +79,25 @@ class EasyOCRBanglaProvider:
             return False
 
     def _get_reader(self):
+        global _CACHED_EASYOCR_READER, _CACHED_READER_GPU
+        if _CACHED_EASYOCR_READER is not None and _CACHED_READER_GPU == self.gpu:
+            self._reader = _CACHED_EASYOCR_READER
+            return self._reader
         if self._reader is None:
             import easyocr
             self._package_version = importlib.metadata.version("easyocr")
-            logger.info("[EasyOCRBanglaProvider] Initializing EasyOCR reader for languages: %s", self.languages)
-            self._reader = easyocr.Reader(self.languages, gpu=self.gpu)
+            logger.info("[EasyOCRBanglaProvider] Initializing EasyOCR reader for languages: %s (gpu=%s)", self.languages, self.gpu)
+            try:
+                self._reader = easyocr.Reader(self.languages, gpu=self.gpu)
+            except Exception as e:
+                if self.gpu:
+                    logger.warning("[EasyOCRBanglaProvider] GPU init failed, falling back to CPU: %s", e)
+                    self.gpu = False
+                    self._reader = easyocr.Reader(self.languages, gpu=False)
+                else:
+                    raise
+            _CACHED_EASYOCR_READER = self._reader
+            _CACHED_READER_GPU = self.gpu
         return self._reader
 
     def extract(

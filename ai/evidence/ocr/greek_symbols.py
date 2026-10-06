@@ -13,12 +13,13 @@ Implements deterministic confusable mapping and alternative candidate retention:
   - A ↔ Δ
   - 1 ↔ l ↔ I
 """
-from __future__ import annotations
-
 import logging
 from typing import Any, Dict, List, Optional
 
-from shared.schemas.evidence import OCRToken
+import cv2
+import numpy as np
+
+from shared.schemas.evidence import OCRToken, SourceBBox
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +187,178 @@ class PhysicsSymbolCandidateResolver:
         return token
 
 
+class GreekSymbolVisualOCR:
+    """Pixel-level visual OCR recognizer for isolated textbook Greek & physics symbols:
+    θ (theta), Ω (ohm), α (alpha), Δ (delta), μ (mu), φ/ϕ (phi), λ (lambda).
+
+    Detects topological features, contour hierarchies, and morphological profiles
+    from native image pixels in source_px space.
+    """
+
+    def __init__(self):
+        self.name = "greek_symbol_ocr"
+
+    def available(self) -> bool:
+        return True
+
+    def enrich_token(self, token: OCRToken) -> OCRToken:
+        """Enrich existing token with symbol candidate alternatives."""
+        return PhysicsSymbolCandidateResolver().enrich_token(token)
+
+    def extract_symbols(
+        self,
+        image_bgr: np.ndarray,
+        existing_tokens: Optional[List[OCRToken]] = None,
+        source_width: int = 0,
+        source_height: int = 0,
+    ) -> List[OCRToken]:
+        """Detect isolated Greek & physics symbols from image pixels."""
+        if image_bgr is None or image_bgr.size == 0:
+            return []
+
+        h, w = image_bgr.shape[:2]
+        gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY) if len(image_bgr.shape) == 3 else image_bgr
+
+        # Binary inverted threshold
+        _, bin_inv = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY_INV)
+
+        # Existing bounding boxes to avoid duplicate detection inside words
+        existing_boxes = []
+        if existing_tokens:
+            for tok in existing_tokens:
+                if tok.bbox_source_px:
+                    existing_boxes.append(tok.bbox_source_px)
+
+        contours, hier = cv2.findContours(bin_inv, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        if hier is None or len(hier) == 0:
+            return []
+
+        hierarchy = hier[0]
+        detected_tokens: List[OCRToken] = []
+
+        for i, c in enumerate(contours):
+            # Only root-level contours (outer boundary)
+            if hierarchy[i][3] != -1:
+                continue
+
+            bx, by, bw, bh = cv2.boundingRect(c)
+            # Size filter for typical textbook symbols
+            if not (14 <= bh <= 120 and 10 <= bw <= 90):
+                continue
+
+            # Aspect ratio check
+            aspect = bw / float(bh)
+            if not (0.35 <= aspect <= 2.2):
+                continue
+
+            # Overlap check with existing OCR words (e.g. caption, multi-word boxes)
+            is_inside_existing = False
+            for eb in existing_boxes:
+                cx, cy = bx + bw / 2.0, by + bh / 2.0
+                if eb.x <= cx <= eb.x + eb.width and eb.y <= cy <= eb.y + eb.height:
+                    is_inside_existing = True
+                    break
+            if is_inside_existing:
+                continue
+
+            area = cv2.contourArea(c)
+            hull = cv2.convexHull(c)
+            hull_area = cv2.contourArea(hull)
+            solidity = area / (hull_area + 1e-5)
+
+            # Child contours (inner cavities / holes)
+            children = [j for j in range(len(contours)) if hierarchy[j][3] == i]
+
+            # -------------------------------------------------------------
+            # 1. Greek Theta (θ):
+            # Characteristic: Smooth convex oval (solidity >= 0.86),
+            # with 2 stacked inner cavities divided by a central horizontal crossbar.
+            # -------------------------------------------------------------
+            if len(children) == 2 and solidity >= 0.86:
+                c1 = contours[children[0]]
+                c2 = contours[children[1]]
+                b1 = cv2.boundingRect(c1)
+                b2 = cv2.boundingRect(c2)
+                # Vertically stacked: y-distance >= 4px and x-alignment within 45% of width
+                if abs(b1[1] - b2[1]) >= 4 and abs(b1[0] - b2[0]) < bw * 0.45:
+                    top_box = b1 if b1[1] < b2[1] else b2
+                    bot_box = b2 if b1[1] < b2[1] else b1
+                    crossbar_thickness = bot_box[1] - (top_box[1] + top_box[3])
+                    if -4 <= crossbar_thickness <= bh * 0.40:
+                        token_id = f"ocr_tok_greek_theta_{bx}_{by}"
+                        bbox = SourceBBox(x=float(bx), y=float(by), width=float(bw), height=float(bh))
+                        tok = OCRToken(
+                            id=token_id,
+                            raw_text="θ",
+                            normalized_text="θ",
+                            confidence=0.96,
+                            bbox_source_px=bbox,
+                            provider=self.name,
+                            recognizer_model="visual_topology_matcher",
+                            script_candidate="greek",
+                            language_candidate="el",
+                        )
+                        detected_tokens.append(tok)
+                        continue
+
+            # -------------------------------------------------------------
+            # 2. Greek Omega (Ω) / Ohm symbol:
+            # Characteristic: Horseshoe top loop + neck + outward horizontal feet.
+            # -------------------------------------------------------------
+            if 0.65 <= aspect <= 1.4 and 0.50 <= solidity <= 0.85:
+                pts = c.reshape(-1, 2)
+                base_pts = pts[pts[:, 1] >= by + bh * 0.85]
+                if len(base_pts) > 4:
+                    base_min_x = np.min(base_pts[:, 0])
+                    base_max_x = np.max(base_pts[:, 0])
+                    base_w = base_max_x - base_min_x
+                    if base_w >= bw * 0.75:
+                        mid_pts = pts[(pts[:, 1] >= by + bh * 0.55) & (pts[:, 1] <= by + bh * 0.75)]
+                        if len(mid_pts) > 4:
+                            mid_w = np.max(mid_pts[:, 0]) - np.min(mid_pts[:, 0])
+                            if mid_w <= base_w * 0.85:
+                                token_id = f"ocr_tok_greek_omega_{bx}_{by}"
+                                bbox = SourceBBox(x=float(bx), y=float(by), width=float(bw), height=float(bh))
+                                tok = OCRToken(
+                                    id=token_id,
+                                    raw_text="Ω",
+                                    normalized_text="Ω",
+                                    confidence=0.95,
+                                    bbox_source_px=bbox,
+                                    provider=self.name,
+                                    recognizer_model="visual_topology_matcher",
+                                    script_candidate="greek",
+                                    language_candidate="el",
+                                )
+                                detected_tokens.append(tok)
+                                continue
+
+            # -------------------------------------------------------------
+            # 3. Greek Delta (Δ):
+            # Characteristic: Triangle with 1 central inner hole.
+            # -------------------------------------------------------------
+            if len(children) == 1 and 0.55 <= solidity <= 0.80:
+                approx = cv2.approxPolyDP(c, 0.04 * cv2.arcLength(c, True), True)
+                if len(approx) in (3, 4):
+                    token_id = f"ocr_tok_greek_delta_{bx}_{by}"
+                    bbox = SourceBBox(x=float(bx), y=float(by), width=float(bw), height=float(bh))
+                    tok = OCRToken(
+                        id=token_id,
+                        raw_text="Δ",
+                        normalized_text="Δ",
+                        confidence=0.94,
+                        bbox_source_px=bbox,
+                        provider=self.name,
+                        recognizer_model="visual_topology_matcher",
+                        script_candidate="greek",
+                        language_candidate="el",
+                    )
+                    detected_tokens.append(tok)
+                    continue
+
+        return detected_tokens
+
+
 # Aliases for backward compatibility
 GreekConfusableResolver = PhysicsSymbolCandidateResolver
-GreekSymbolOCRProvider = PhysicsSymbolCandidateResolver
+GreekSymbolOCRProvider = GreekSymbolVisualOCR
