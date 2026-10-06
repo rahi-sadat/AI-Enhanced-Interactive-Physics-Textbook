@@ -80,3 +80,4 @@ storage/uploads/*
 # Root uploads and temporary frontend directories
 uploads/
 simulation_frontend/
+manual_pr06_results/

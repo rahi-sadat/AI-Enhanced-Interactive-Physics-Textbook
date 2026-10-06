@@ -148,8 +148,14 @@ def run_acceptance_test(image_path: Path, output_overlay_path: Path | None = Non
         cand_id = cv_rec.get("id")
         print(f"    - id={cand_id}")
 
-    # Grounded Entities
+    # PageIR text blocks
+    print("PAGE_IR TEXT BLOCKS:")
+    print(f"  Total textBlocks: {len(page_ir.text_blocks)}")
+    for tb in page_ir.text_blocks:
+        print(f"    - id={tb.id}, text='{tb.text}', bbox=({tb.x}, {tb.y}, {tb.width}, {tb.height})")
     print("-" * 80)
+
+    # Grounded Entities
     print("PR-06 GROUNDED BOOK_IR ENTITIES:")
     entities_by_type = {e.type: e for e in grounded_book_ir.entities}
 
@@ -176,8 +182,18 @@ def run_acceptance_test(image_path: Path, output_overlay_path: Path | None = Non
     if string_ent and string_ent.geometry:
         p_start = string_ent.geometry.get("start")
         p_end = string_ent.geometry.get("end")
-        print(f"  String Endpoints:       ({p_start['x']:.1f}, {p_start['y']:.1f}) -> ({p_end['x']:.1f}, {p_end['y']:.1f})")
-        print(f"  String Evidence Refs:   {string_ent.evidence_refs}")
+        length_px = string_ent.geometry.get("length_px", 0.0)
+        euc_dist = np.hypot(p_end["x"] - p_start["x"], p_end["y"] - p_start["y"])
+        print(f"  String Endpoints (Effective): ({p_start['x']:.1f}, {p_start['y']:.1f}) -> ({p_end['x']:.1f}, {p_end['y']:.1f})")
+        print(f"  Effective Length (length_px): {length_px:.2f} px (Euclidean dist: {euc_dist:.2f} px, delta: {abs(euc_dist - length_px):.4f} px)")
+        vis_start = string_ent.geometry.get("visible_string_start")
+        vis_end = string_ent.geometry.get("visible_string_end")
+        vis_len = string_ent.geometry.get("visible_length_px", 0.0)
+        if vis_start and vis_end:
+            vis_euc = np.hypot(vis_end["x"] - vis_start["x"], vis_end["y"] - vis_start["y"])
+            print(f"  Visible String Endpoints:    ({vis_start['x']:.1f}, {vis_start['y']:.1f}) -> ({vis_end['x']:.1f}, {vis_end['y']:.1f})")
+            print(f"  Visible Length:              {vis_len:.2f} px (Euclidean dist: {vis_euc:.2f} px, delta: {abs(vis_euc - vis_len):.4f} px)")
+        print(f"  String Evidence Refs:        {string_ent.evidence_refs}")
     else:
         print("  String: UNRESOLVED")
 

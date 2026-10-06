@@ -33,7 +33,7 @@ from shared.schemas.evidence import (
     SegmentationResult,
     SourceBBox,
 )
-from shared.schemas.ingestion import BookIR, BookIRStatus, PageIR, SourceAsset
+from shared.schemas.ingestion import BookIR, BookIRStatus, PageIR, PageTextBlock, SourceAsset
 from ai.evidence.cv import (
     CircuitCVCandidateExtractor,
     InterfaceRefractionCVCandidateExtractor,
@@ -164,6 +164,25 @@ class EvidenceExtractionPipeline:
                 error="OCR provider unavailable.",
             )
 
+        # Section 10: Populate PageIR text blocks from verified OCR tokens
+        if ocr_result and ocr_result.tokens:
+            page_ir.text_blocks = [
+                PageTextBlock(
+                    id=t.id,
+                    text=t.raw_text,
+                    x=float(t.bbox_source_px.x) if t.bbox_source_px else 0.0,
+                    y=float(t.bbox_source_px.y) if t.bbox_source_px else 0.0,
+                    width=float(t.bbox_source_px.width) if t.bbox_source_px else 0.0,
+                    height=float(t.bbox_source_px.height) if t.bbox_source_px else 0.0,
+                    confidence=float(t.confidence or 0.0),
+                    extraction_method="ocr",
+                )
+                for t in ocr_result.tokens
+            ]
+            page_ir.metadata["pipeline"] = "PR-06"
+            page_ir.metadata["ocr_provider"] = ocr_result.provider
+            page_ir.metadata["note"] = "Single-diagram upload. Text blocks populated via PR-06 OCR pipeline."
+
         # 3. Extract Classical CV candidates (with OCR text box suppression)
         cv_candidates: Dict[str, Any] = {}
         subtype_key = (book_ir.subtype or "").lower()
@@ -243,3 +262,20 @@ class EvidenceExtractionPipeline:
         grounded_ir.provenance["evidence_pipeline_latency_ms"] = (time.perf_counter() - start_time) * 1000.0
 
         return grounded_ir
+
+    def ground(
+        self,
+        asset: SourceAsset,
+        page_ir: PageIR,
+        book_ir: BookIR,
+    ) -> BookIR:
+        """Ground semantic BookIR entities using visual CV, SAM, and OCR evidence.
+
+        Canonical API for the PR-06 grounding orchestration layer.
+        """
+        return self.extract_and_fuse(asset=asset, page_ir=page_ir, book_ir=book_ir)
+
+
+# Canonical alias for PR-06 grounding orchestration
+GroundingPipeline = EvidenceExtractionPipeline
+
