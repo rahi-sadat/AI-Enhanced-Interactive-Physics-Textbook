@@ -94,7 +94,7 @@ class PageIRBuilder:
                 "pipeline": "PR-04-standalone-upload",
                 "note": (
                     "Single-diagram upload. figure_001 is the entire image. "
-                    "Multi-figure detection and OCR will be added in future PRs."
+                    "Text blocks populated downstream by PR-06 evidence pipeline."
                 ),
             },
         )

@@ -177,6 +177,7 @@ def merge_collinear_lines(
         else:
             x1, y1, x2, y2 = float(l[0]), float(l[1]), float(l[2]), float(l[3])
 
+        ang1 = math.atan2(y2 - y1, x2 - x1)
         covered = False
         mid_x, mid_y = (x1 + x2) / 2.0, (y1 + y2) / 2.0
         for ml in merged:
@@ -185,6 +186,13 @@ def merge_collinear_lines(
                 mx2, my2 = float(ml.end.x), float(ml.end.y)
             else:
                 mx1, my1, mx2, my2 = float(ml[0]), float(ml[1]), float(ml[2]), float(ml[3])
+
+            ang2 = math.atan2(my2 - my1, mx2 - mx1)
+            diff_deg = abs(math.degrees(ang1 - ang2)) % 180.0
+            if diff_deg > 90.0:
+                diff_deg = 180.0 - diff_deg
+            if diff_deg > angle_thresh_deg:
+                continue
 
             d = point_to_segment_distance((mid_x, mid_y), (mx1, my1), (mx2, my2))
             if d < tol:

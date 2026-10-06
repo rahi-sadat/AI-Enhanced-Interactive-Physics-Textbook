@@ -33,25 +33,110 @@ from ai.evidence.ocr.formula import (
     FormulaRecognitionProvider,
     UnavailableFormulaRecognitionProvider,
 )
-from ai.evidence.ocr.greek_symbols import PhysicsSymbolCandidateResolver
+from ai.evidence.ocr.greek_symbols import (
+    GreekSymbolVisualOCR,
+    PhysicsSymbolCandidateResolver,
+)
 from ai.evidence.ocr.rapidocr import RapidOCRProvider
 
 logger = logging.getLogger(__name__)
 
 
+def deduplicate_spatial_tokens(tokens: List[OCRToken]) -> List[OCRToken]:
+    """Canonical spatial & textual deduplication for OCR tokens.
+
+    If token B is mostly contained within token A (containment >= 0.60 of B's area)
+    and B's text is a substring, prefix, or suffix of A's text (e.g. 'Fig. 1' inside 'Fig. 1 Simple Pendulum'),
+    or if IoU >= 0.70 between two tokens, subsume token B into token A.
+
+    Preserves subsumed token in A's candidate_alternatives for diagnostic provenance,
+    while returning a clean list of non-redundant canonical tokens.
+    """
+    if len(tokens) <= 1:
+        return tokens
+
+    # Sort tokens by area descending (largest text span first)
+    sorted_tokens = sorted(
+        tokens,
+        key=lambda t: (t.bbox_source_px.width * t.bbox_source_px.height) if t.bbox_source_px else 0.0,
+        reverse=True,
+    )
+
+    kept: List[OCRToken] = []
+    dropped_ids = set()
+
+    for i, a in enumerate(sorted_tokens):
+        if a.id in dropped_ids:
+            continue
+        a_box = a.bbox_source_px
+        if not a_box:
+            kept.append(a)
+            continue
+
+        a_text = a.raw_text.strip().lower()
+        a_area = a_box.width * a_box.height
+
+        for j in range(i + 1, len(sorted_tokens)):
+            b = sorted_tokens[j]
+            if b.id in dropped_ids:
+                continue
+            b_box = b.bbox_source_px
+            if not b_box:
+                continue
+
+            b_text = b.raw_text.strip().lower()
+            b_area = b_box.width * b_box.height
+
+            # Intersection
+            ix1 = max(a_box.x, b_box.x)
+            iy1 = max(a_box.y, b_box.y)
+            ix2 = min(a_box.x + a_box.width, b_box.x + b_box.width)
+            iy2 = min(a_box.y + a_box.height, b_box.y + b_box.height)
+            iw = max(0.0, ix2 - ix1)
+            ih = max(0.0, iy2 - iy1)
+            inter_area = iw * ih
+
+            if inter_area <= 0:
+                continue
+
+            containment_b = inter_area / (b_area + 1e-5)
+            union_area = a_area + b_area - inter_area
+            iou = inter_area / (union_area + 1e-5)
+
+            # Check textual containment (prefix, suffix, substring)
+            text_contained = (b_text in a_text) or (a_text.startswith(b_text)) or (b_text == "")
+
+            # If B is mostly/fully inside A and text is subsumed, or high IoU
+            if (containment_b >= 0.60 and text_contained) or iou >= 0.70:
+                dropped_ids.add(b.id)
+                a.candidate_alternatives.append({
+                    "text": b.raw_text,
+                    "bbox": b_box.to_dict() if hasattr(b_box, "to_dict") else b_box,
+                    "confidence": b.confidence,
+                    "provider": b.provider,
+                    "subsumed_id": b.id,
+                })
+
+        kept.append(a)
+
+    return kept
+
+
 class MultiOCRRouter:
-    """Intelligent OCR router combining RapidOCR, EasyOCR Bangla, and physics symbol candidate resolution."""
+    """Intelligent OCR router combining RapidOCR, EasyOCR Bangla, Greek visual OCR, and physics symbol candidate resolution."""
 
     def __init__(
         self,
         primary_provider: Optional[RapidOCRProvider] = None,
         bangla_provider: Optional[EasyOCRBanglaProvider] = None,
         symbol_resolver: Optional[PhysicsSymbolCandidateResolver] = None,
+        greek_provider: Optional[GreekSymbolVisualOCR] = None,
         formula_provider: Optional[FormulaRecognitionProvider] = None,
     ):
         self.primary = primary_provider or RapidOCRProvider()
         self.bangla = bangla_provider or EasyOCRBanglaProvider()
         self.symbol_resolver = symbol_resolver or PhysicsSymbolCandidateResolver()
+        self.greek = greek_provider or GreekSymbolVisualOCR()
         self.formula = formula_provider or UnavailableFormulaRecognitionProvider()
 
     @property
@@ -130,11 +215,19 @@ class MultiOCRRouter:
                     inter_h = max(0.0, min(p_box.y + p_box.height, b_box.y + b_box.height) - max(p_box.y, b_box.y))
                     inter_area = inter_w * inter_h
                     if inter_area > 0:
-                        union_area = (p_box.width * p_box.height) + (b_box.width * b_box.height) - inter_area
+                        area_p = p_box.width * p_box.height
+                        area_b = b_box.width * b_box.height
+                        union_area = area_p + area_b - inter_area
                         iou = inter_area / union_area if union_area > 0 else 0.0
-                        if iou > 0.25 and iou > best_iou:
-                            best_iou = iou
-                            best_overlap_bn_idx = b_idx
+                        containment = inter_area / min(area_p, area_b) if min(area_p, area_b) > 0 else 0.0
+                        text_sub = (b_tok.raw_text.strip().lower() in p_tok.raw_text.strip().lower()) or (p_tok.raw_text.strip().lower() in b_tok.raw_text.strip().lower())
+
+                        is_overlapping = (iou > 0.25) or (containment > 0.60) or (text_sub and containment > 0.35)
+                        if is_overlapping:
+                            claimed_bn_indices.add(b_idx)
+                            if (iou > best_iou or containment > 0.80):
+                                best_iou = iou
+                                best_overlap_bn_idx = b_idx
 
             candidates = [p_cand]
             resolved_token = p_tok
@@ -209,7 +302,23 @@ class MultiOCRRouter:
                 )
                 final_tokens.append(b_tok)
 
-        # 4. Enrich all final tokens with physics symbol candidate resolver
+        # 4. Canonical spatial and textual deduplication pass
+        final_tokens = deduplicate_spatial_tokens(final_tokens)
+
+        # 5. Extract visual Greek & physics symbols from native image pixels
+        try:
+            greek_tokens = self.greek.extract_symbols(
+                image_bgr,
+                existing_tokens=final_tokens,
+                source_width=source_width,
+                source_height=source_height,
+            )
+            if greek_tokens:
+                final_tokens.extend(greek_tokens)
+        except Exception as _greek_err:
+            logger.warning("[MultiOCRRouter] Greek symbol extraction error: %s", _greek_err)
+
+        # 6. Enrich all final tokens with physics symbol candidate resolver
         for token in final_tokens:
             self.symbol_resolver.enrich_token(token)
 
@@ -225,14 +334,15 @@ class MultiOCRRouter:
             tokens=final_tokens,
             provider=self.name,
             model=getattr(primary_result, "model", "PP-OCRv6"),
-            package="rapidocr+easyocr",
+            package="rapidocr+easyocr+greek_ocr",
             package_version=getattr(primary_result, "package_version", "3.9.2"),
             detector_model=getattr(primary_result, "detector_model", "PP-OCRv6_det_small.onnx"),
             recognizer_model=rec_model,
-            recognizer_language="en+bn",
+            recognizer_language="en+bn+el",
             latency_ms=latency,
             metadata={
                 "bangla_available": self.bangla.available(),
+                "greek_available": self.greek.available(),
                 "formula_available": self.formula.available(),
                 "regions_count": len(regions),
                 "token_count": len(final_tokens),

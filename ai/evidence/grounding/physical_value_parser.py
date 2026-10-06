@@ -34,9 +34,9 @@ UNIT_MAP = {
 
     # Angle
     "°": ("°", "angle", 1.0),
-    "deg": ("deg", "angle", 1.0),
-    "degree": ("deg", "angle", 1.0),
-    "degrees": ("deg", "angle", 1.0),
+    "deg": ("°", "angle", 1.0),
+    "degree": ("°", "angle", 1.0),
+    "degrees": ("°", "angle", 1.0),
     "rad": ("rad", "angle", 1.0),
     "radian": ("rad", "angle", 1.0),
     "radians": ("rad", "angle", 1.0),
@@ -68,12 +68,28 @@ UNIT_MAP = {
     "ohms": ("ohm", "resistance", 1.0),
     "kω": ("kohm", "resistance", 1000.0),
     "kohm": ("kohm", "resistance", 1000.0),
+    "kΩ": ("kohm", "resistance", 1000.0),
+    "mω": ("Mohm", "resistance", 1e6),
+    "mohm": ("Mohm", "resistance", 1e6),
+    "mΩ": ("Mohm", "resistance", 1e6),
+
+    # Capacitance
+    "f": ("F", "capacitance", 1.0),
+    "farad": ("F", "capacitance", 1.0),
+    "uf": ("uF", "capacitance", 1e-6),
+    "µf": ("uF", "capacitance", 1e-6),
+    "μf": ("uF", "capacitance", 1e-6),
+    "pf": ("pF", "capacitance", 1e-12),
+    "nf": ("nF", "capacitance", 1e-9),
 
     # Current
     "a": ("A", "current", 1.0),
     "amp": ("A", "current", 1.0),
     "amps": ("A", "current", 1.0),
     "ma": ("mA", "current", 0.001),
+    "ua": ("uA", "current", 1e-6),
+    "µa": ("uA", "current", 1e-6),
+    "μa": ("uA", "current", 1e-6),
 
     # Velocity & Acceleration
     "m/s": ("m/s", "velocity", 1.0),
@@ -101,21 +117,39 @@ STANDALONE_SYMBOLS = {
     "g": ("gravity_symbol", "g"),
     "θ": ("angle_symbol", "θ"),
     "theta": ("angle_symbol", "θ"),
+    "α": ("angle_symbol", "α"),
+    "alpha": ("angle_symbol", "α"),
+    "β": ("angle_symbol", "β"),
+    "beta": ("angle_symbol", "β"),
+    "Δ": ("delta_symbol", "Δ"),
+    "delta": ("delta_symbol", "Δ"),
     "t": ("period_or_tension_symbol", "T"),
     "f": ("focal_or_force_symbol", "F"),
     "2f": ("two_f_symbol", "2F"),
     "c": ("center_of_curvature_symbol", "C"),
+    "r": ("resistance_symbol", "R"),
     "r1": ("resistor_label", "R1"),
     "r2": ("resistor_label", "R2"),
     "r3": ("resistor_label", "R3"),
+    "v": ("voltage_or_velocity_symbol", "V"),
     "v1": ("voltage_source_label", "V1"),
     "u": ("initial_velocity_symbol", "u"),
-    "v": ("final_velocity_symbol", "v"),
     "a": ("acceleration_symbol", "a"),
     "λ": ("wavelength_symbol", "λ"),
+    "lambda": ("wavelength_symbol", "λ"),
     "μ": ("friction_or_micro_symbol", "μ"),
+    "mu": ("friction_or_micro_symbol", "μ"),
     "ω": ("angular_velocity_symbol", "ω"),
+    "omega": ("angular_velocity_symbol", "ω"),
     "ρ": ("density_or_resistivity_symbol", "ρ"),
+    "rho": ("density_or_resistivity_symbol", "ρ"),
+    "π": ("pi_symbol", "π"),
+    "pi": ("pi_symbol", "π"),
+    "φ": ("phi_symbol", "φ"),
+    "ϕ": ("phi_symbol", "ϕ"),
+    "phi": ("phi_symbol", "φ"),
+    "Ω": ("resistance_symbol", "Ω"),
+    "ohm": ("resistance_symbol", "Ω"),
 }
 
 BENGALI_DIGITS_TABLE = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
@@ -141,7 +175,7 @@ def parse_physical_value_candidate(token: OCRToken) -> List[ParsedPhysicalValueC
 
     Handles:
       1. Quantity expressions: "20 cm", "45°", "12 V", "10 Ω", "1.5 m/s", "g = 9.8 m/s²", "২০ সেমি"
-      2. Variable declarations: "L = 50 cm", "m = 250 g", "θ = 30°"
+      2. Variable declarations: "L = 50 cm", "m = 250 g", "θ = 30°", "R1 = 2 kΩ", "n = 1.50"
       3. Standalone symbols: "L", "m", "g", "θ", "T", "F", "2F", "R1", "u", "v"
       4. Alternative interpretations from candidateAlternatives
     """
@@ -169,9 +203,9 @@ def parse_physical_value_candidate(token: OCRToken) -> List[ParsedPhysicalValueC
         return candidates
 
     # 2. Pattern: [Symbol =] Number [Unit]
-    # Examples: "20 cm", "L = 20 cm", "θ = 30°", "12V", "10 Ω", "45 deg", "২০ সেমি"
+    # Examples: "20 cm", "L = 20 cm", "θ = 30°", "12V", "10 Ω", "45 deg", "২০ সেমি", "R1 = 2 kΩ", "n = 1.50"
     pattern = re.compile(
-        r"(?:([A-Za-zθΘ\u0980-\u09FF]+)\s*=\s*)?([+-]?\d+(?:\.\d+)?)\s*([°ΩμA-Za-z/\^²2\u0980-\u09FF\.]+)?",
+        r"(?:([A-Za-zθΘ\u0980-\u09FF][A-Za-z0-9_θΘ\u0980-\u09FF]*)\s*=\s*)?([+-]?\d+(?:\.\d+)?)\s*([°ΩωμµuA-Za-z/\^²2\u0980-\u09FF\.]+)?",
         re.UNICODE,
     )
 
@@ -186,14 +220,18 @@ def parse_physical_value_candidate(token: OCRToken) -> List[ParsedPhysicalValueC
         canonical_unit = None
         quantity_type = None
 
+        # Section 13: Strict Candidate Filtering - Reject caption and non-physics words
         if raw_unit:
-            unit_key = raw_unit.lower()
+            raw_unit_lower = raw_unit.lower()
+            if raw_unit_lower in ("simple", "pendulum", "figure", "fig", "chapter", "example", "page", "diagram", "table", "part"):
+                continue
+            unit_key = raw_unit_lower
             if unit_key in UNIT_MAP:
                 canonical_unit, quantity_type, _ = UNIT_MAP[unit_key]
-            elif raw_unit == "°":
+            elif raw_unit in ("°", "deg", "degree"):
                 canonical_unit = "°"
                 quantity_type = "angle"
-            elif raw_unit in ("Ω", "ω"):
+            elif raw_unit in ("Ω", "ω", "ohm", "ohms"):
                 canonical_unit = "ohm"
                 quantity_type = "resistance"
 
@@ -204,12 +242,39 @@ def parse_physical_value_candidate(token: OCRToken) -> List[ParsedPhysicalValueC
                 quantity_type = "length"
             elif sym_key == "m" and quantity_type is None:
                 quantity_type = "mass"
-            elif sym_key in ("θ", "theta") and quantity_type is None:
+            elif sym_key in ("θ", "theta", "angle") and quantity_type is None:
+                quantity_type = "angle"
+            elif sym_key in ("a", "apex") and raw_unit in ("°", "deg", "degree") and quantity_type is None:
+                quantity_type = "angle"
+            elif sym_key in ("i", "r") and raw_unit in ("°", "deg", "degree") and quantity_type is None:
                 quantity_type = "angle"
             elif sym_key == "g" and quantity_type is None:
                 quantity_type = "acceleration"
-            elif sym_key == "v" and quantity_type is None:
+            elif sym_key in ("v", "v1", "v_source") and (quantity_type is None or quantity_type == "voltage"):
                 quantity_type = "voltage"
+            elif sym_key in ("u", "v0") and (quantity_type is None or quantity_type == "velocity"):
+                quantity_type = "velocity"
+            elif sym_key.startswith("r") and (quantity_type is None or quantity_type == "resistance"):
+                quantity_type = "resistance"
+            elif sym_key in ("i", "i1") and (quantity_type is None or quantity_type == "current"):
+                quantity_type = "current"
+            elif sym_key in ("n", "n1", "n2"):
+                quantity_type = "refractive_index"
+            elif sym_key == "f" and (quantity_type is None or quantity_type == "length"):
+                quantity_type = "focal_length"
+
+        # Strict requirement: Must have recognized physics unit OR recognized symbol assignment
+        if not symbol_prefix:
+            if canonical_unit is None and raw_unit not in ("°", "deg", "degree", "Ω", "ω"):
+                # Bare number with no physics unit (e.g. caption number "1") -> reject
+                continue
+        else:
+            if quantity_type is None and canonical_unit is None:
+                continue
+
+        # Reject caption patterns such as "Fig. 1", "Chapter 2"
+        if re.match(r"^(?:fig\.?|figure|chap\.?|chapter|example|page)\s*\d+$", normalized, re.IGNORECASE):
+            continue
 
         candidates.append(
             ParsedPhysicalValueCandidate(

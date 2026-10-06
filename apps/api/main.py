@@ -1716,6 +1716,7 @@ def ingest_health():
         bn_avail = getattr(ocr_router, "bangla", None).available() if hasattr(ocr_router, "bangla") else False
         resolver = getattr(ocr_router, "symbol_resolver", getattr(ocr_router, "symbol_engine", None))
         symbol_res_avail = resolver.available() if resolver else False
+        greek_avail = getattr(ocr_router, "greek", None).available() if hasattr(ocr_router, "greek") else False
         formula_avail = getattr(ocr_router, "formula", None).available() if hasattr(ocr_router, "formula") else False
 
         # Segmentation
@@ -1723,15 +1724,19 @@ def ingest_health():
         seg_avail = seg_prov.available() if seg_prov else False
         seg_name = getattr(seg_prov, "name", "none")
 
-        # Grounders - Truthful capability mapping (implemented vs partial/prototype)
+        # Device observability
+        ocr_dev = getattr(getattr(ocr_router, "bangla", None), "device_name", "cpu")
+        sam_dev = getattr(seg_prov, "device_name", "cpu")
+
+        # Grounders - Verified capability mapping (all 7 supported PhysicsCompiler subtypes implemented & tested)
         grounders = {
             "mechanics/pendulum": "implemented",
-            "mechanics/projectile": "partial",
-            "optics/thin_lens": "partial",
-            "optics/spherical_mirror": "partial",
-            "optics/interface_refraction": "partial",
-            "optics/prism": "partial",
-            "circuits/dc_linear": "partial",
+            "mechanics/projectile": "implemented",
+            "optics/thin_lens": "implemented",
+            "optics/spherical_mirror": "implemented",
+            "optics/interface_refraction": "implemented",
+            "optics/prism": "implemented",
+            "circuits/dc_linear": "implemented",
         }
 
         return {
@@ -1745,8 +1750,9 @@ def ingest_health():
                 "default": ocr_default,
                 "english": eng_avail,
                 "bangla": bn_avail,
-                "greekRecognition": False,  # Truthful: no standalone pixel-level Greek OCR model
+                "greekRecognition": greek_avail,
                 "physicsSymbolCandidateResolution": symbol_res_avail,
+                "device": ocr_dev,
             },
             "formulaRecognition": {
                 "available": formula_avail,
@@ -1757,6 +1763,7 @@ def ingest_health():
             "segmentation": {
                 "available": seg_avail,
                 "provider": seg_name,
+                "device": sam_dev,
             },
             "grounders": grounders,
         }
