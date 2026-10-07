@@ -72,23 +72,22 @@ Before completing any task or proposing changes:
 | PR-03 | ✅ | Source-aligned rendering, RendererRegistry, SimulationCapabilityRegistry, bidirectional manipulation. |
 | PR-04 | ✅ | Real upload ingestion: `SourceAsset → PageIR → BookIR`. Gate Zero anti-fabrication UI. 36 tests. |
 | PR-05 | ✅ | Multimodal VLM semantic understanding (Gemini). Conservative confidence policy, enriched roles, debug metadata, asserted acceptance test. |
-| PR-06 | 🔄 | Classical CV + OCR parameter grounding. SAM 2 geometry, Tesseract OCR, spatial-semantic parameter binding. |
-| PR-07 | 🔄 | End-to-end simulation bootstrapping: PR-05 + PR-06 → `BookIR(RESOLVED)` → runnable PhysicsScene. |
+| PR-06 | ✅ | Classical CV + OCR parameter grounding. SAM 2 geometry, Tesseract/EasyOCR, spatial-semantic parameter binding. |
+| PR-07 | ✅ | Evidence resolution, user review, explicit defaults policy registry, calibration derivation, and strict compilation readiness (`READY_TO_COMPILE`). |
 
-### PR-05 Active Boundary (CRITICAL — Do Not Cross Until PR-06)
+### PR-07 Active Boundary (Evidence vs Resolution)
 
 ```
-VLM Output Boundary                CV/OCR Grounding Boundary (PR-06+)
------------------------            -----------------------------------
-classification       ✅            position_source_px          ❌ (null)
-isPhysics            ✅            geometry                     ❌ (null)
-domain               ✅            parameters (numeric)         ❌ (empty {})
-subtype              ✅
-confidence (< 1.0)   ✅
-entities (coarse)    ✅ → quarantined in vlmApproxBBox only
-visibleLabels        ✅ → verified=False only (unverified evidence)
+PR-06 Evidence Boundary            PR-07 Resolution Boundary
+-----------------------            --------------------------
+observed_visual      ✅ (source_px) user_supplied        ✅ (validated, typed)
+observed_ocr         ✅ (tokens)    user_confirmed       ✅ (references candidate)
+derived_geometry     ✅ (angles/px) user_corrected       ✅ (preserves superseded)
+evidence bboxes      ✅ (immutable) policy_default       ✅ (explicit named policy)
+raw coordinates      ✅ (source_px) derived_calibration  ✅ (pixels_per_meter derived)
 ```
 
-- `BookIR.status` **must** remain non-runnable at end of PR-05 pipeline (`NEEDS_REVIEW` for supported, `UNSUPPORTED` for unsupported, `UNRESOLVED` for non-physics/unknown).
-- `PhysicsCompiler` **must** return `scene=null` (`NEEDS_REVIEW` for supported; never `READY`).
-- Any agent that sets `BookIR.status = RESOLVED` or populates `position_source_px` from VLM output is violating the PR-05 boundary.
+- **Zero Silent Defaults**: `PhysicsCompiler` forbids fallback constants (`or 9.81`, `or 0.0`, `n_air = 1.0`). Every parameter must be present with valid provenance.
+- **Evidence Immutability**: User corrections supersede values but NEVER delete or mutate underlying OCR tokens or CV visual detections.
+- **Coordinate Space Purity**: Native coordinates strictly remain `source_px`. Scale calibration (`pixels_per_meter`) is derived separately without rewriting pixel measurements.
+- **Strict Compilation Invariant**: `BookIR.status` transitions from `NEEDS_REVIEW` to `READY_TO_COMPILE` if and only if all mandatory subtype requirements are satisfied, provenance is valid, and no blockers exist. Removing a resolution immediately reverts status to `NEEDS_REVIEW`.

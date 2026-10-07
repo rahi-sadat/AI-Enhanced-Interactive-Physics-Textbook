@@ -169,13 +169,17 @@ class PendulumGrounder:
 
                 # Check 2: String attachment
                 if cv_string:
-                    str_end = cv_string.get("end")
+                    str_end = cv_string.get("attachment_point") or cv_string.get("visible_end") or cv_string.get("end")
                     if str_end:
                         pt_end = SourcePoint(str_end.x, str_end.y) if hasattr(str_end, "x") else SourcePoint(str_end["x"], str_end["y"])
-                        gap_to_perimeter = abs(cv_center.distance_to(pt_end) - cv_r)
-                        if gap_to_perimeter > max(25.0, cv_r * 0.55):
-                            is_consistent = False
-                            inconsistency_reasons.append(f"String does not attach to bob perimeter (gap: {gap_to_perimeter:.1f}px).")
+                        d_to_center = cv_center.distance_to(pt_end)
+                        # If pt_end is near bob center (effective pendulum end), attachment is verified.
+                        # Otherwise, verify pt_end connects near the bob perimeter.
+                        if d_to_center > cv_r * 0.25:
+                            gap_to_perimeter = abs(d_to_center - cv_r)
+                            if gap_to_perimeter > max(25.0, cv_r * 0.55):
+                                is_consistent = False
+                                inconsistency_reasons.append(f"String does not attach to bob perimeter (gap: {gap_to_perimeter:.1f}px).")
 
                     # Check 3: Ratio to string length
                     s_len = cv_string.get("length_to_bob_center_px", cv_string.get("visible_length_px", 1.0))

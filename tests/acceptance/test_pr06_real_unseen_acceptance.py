@@ -386,8 +386,12 @@ class TestPR06RealUnseenAcceptance(unittest.TestCase):
         self.assertIsNotNone(string_ent.geometry)
         self.assertAlmostEqual(string_ent.geometry["start"]["x"], 333.3, delta=10.0)
         self.assertAlmostEqual(string_ent.geometry["start"]["y"], 101.2, delta=15.0)
-        self.assertAlmostEqual(string_ent.geometry["end"]["x"], 593.9, delta=15.0)
-        self.assertAlmostEqual(string_ent.geometry["end"]["y"], 748.9, delta=15.0)
+        vis_end = string_ent.geometry.get("visible_string_end") or string_ent.geometry["end"]
+        self.assertAlmostEqual(vis_end["x"], 593.9, delta=15.0)
+        self.assertAlmostEqual(vis_end["y"], 748.9, delta=15.0)
+        # Effective pendulum end matches bob center
+        self.assertAlmostEqual(string_ent.geometry["end"]["x"], 611.9, delta=10.0)
+        self.assertAlmostEqual(string_ent.geometry["end"]["y"], 792.5, delta=10.0)
         # Verify downward-right slope (end.x > start.x, end.y > start.y)
         self.assertGreater(string_ent.geometry["end"]["x"], string_ent.geometry["start"]["x"])
         self.assertGreater(string_ent.geometry["end"]["y"], string_ent.geometry["start"]["y"])
