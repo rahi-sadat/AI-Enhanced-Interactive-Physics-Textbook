@@ -15,7 +15,7 @@ import shutil
 import sys
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional, Union
 
 from dotenv import load_dotenv
 
@@ -1739,8 +1739,10 @@ def ingest_health():
             "circuits/dc_linear": "implemented",
         }
 
+        from ai.resolution import PolicyRegistry, RequirementRegistry
+
         return {
-            "pipeline": "PR-06",
+            "pipeline": "PR-07",
             "available": True,
             "semantic": {
                 "available": semantic_avail,
@@ -1766,13 +1768,179 @@ def ingest_health():
                 "device": sam_dev,
             },
             "grounders": grounders,
+            "resolution": {
+                "available": True,
+                "resolutionEngine": True,
+                "unitEngine": True,
+                "policyRegistry": True,
+                "readinessEvaluator": True,
+                "policies": [p.id for p in PolicyRegistry().list_all()],
+                "supportedSubtypes": list(grounders.keys()),
+            },
         }
     except Exception as e:
         return {
-            "pipeline": "PR-06",
+            "pipeline": "PR-07",
             "available": False,
             "error": str(e),
         }
+
+
+# ===========================================================================
+# PR-07: Evidence Resolution & Compilation Readiness Endpoints
+# ===========================================================================
+
+from shared.schemas.ingestion import BookIR, BookEntity, BookIRStatus
+from ai.resolution import (
+    ResolutionAnalyzer,
+    ReadinessEvaluator,
+    ResolutionEngine,
+    PolicyRegistry,
+    RequirementRegistry,
+    UnitEngine,
+)
+
+
+class ReviewRequest(BaseModel):
+    book_ir: Dict[str, Any]
+
+
+class ResolveRequest(BaseModel):
+    book_ir: Dict[str, Any]
+    resolution: Optional[Dict[str, Any]] = None
+    policy_id: Optional[str] = None
+    confirm_candidate: Optional[Dict[str, Any]] = None
+    parameter_name: Optional[str] = None
+    remove_parameter: Optional[str] = None
+
+
+class EvaluateRequest(BaseModel):
+    book_ir: Dict[str, Any]
+
+
+class CompileResolvedRequest(BaseModel):
+    book_ir: Dict[str, Any]
+
+
+ReviewRequest.model_rebuild()
+ResolveRequest.model_rebuild()
+EvaluateRequest.model_rebuild()
+CompileResolvedRequest.model_rebuild()
+
+
+@app.post("/api/resolution/review")
+async def review_book_ir(req: ReviewRequest):
+    """PR-07: Analyze grounded BookIR and generate structured review issues/blockers."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+        review_state = ResolutionAnalyzer.analyze(book_ir)
+        return {
+            "success": True,
+            "review_state": review_state.to_dict(),
+            "ready_to_compile": review_state.ready_to_compile,
+            "blockers_count": review_state.blockers_count,
+            "warnings_count": review_state.warnings_count,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Review analysis failed: {e}")
+
+
+@app.post("/api/resolution/resolve")
+async def resolve_parameter(req: ResolveRequest):
+    """PR-07: Apply user input, candidate confirmation, or explicit policy default."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+
+        # Removal / reversal
+        if req.remove_parameter:
+            readiness = ResolutionEngine.remove_resolution(book_ir, req.remove_parameter)
+            return {
+                "success": True,
+                "action": "removed",
+                "parameter_name": req.remove_parameter,
+                "readiness_report": readiness.to_dict(),
+                "book_ir": book_ir.to_dict(),
+                "can_compile": readiness.ready,
+            }
+
+        # Explicit policy application
+        if req.policy_id:
+            res = ResolutionEngine.apply_policy(
+                book_ir,
+                policy_id=req.policy_id,
+                parameter_name=req.parameter_name,
+            )
+        # Candidate confirmation
+        elif req.confirm_candidate:
+            if not req.parameter_name:
+                raise HTTPException(status_code=400, detail="parameter_name is required to confirm candidate.")
+            res = ResolutionEngine.confirm_candidate(
+                book_ir,
+                parameter_name=req.parameter_name,
+                candidate=req.confirm_candidate,
+            )
+        # Direct resolution decision
+        elif req.resolution:
+            res = ResolutionEngine.apply_resolution(book_ir, req.resolution)
+        else:
+            raise HTTPException(status_code=400, detail="No resolution, policy_id, or candidate provided.")
+
+        out = res.to_dict()
+        out["book_ir"] = book_ir.to_dict()
+        out["can_compile"] = res.readiness_report.ready if res.readiness_report else False
+        return out
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Resolution application failed: {e}")
+
+
+@app.post("/api/resolution/evaluate")
+async def evaluate_readiness(req: EvaluateRequest):
+    """PR-07: Deterministically evaluate BookIR compilation readiness invariant."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+        readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+        return {
+            "success": True,
+            "readiness_report": readiness.to_dict(),
+            "book_ir": book_ir.to_dict(),
+            "can_compile": readiness.ready,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Readiness evaluation failed: {e}")
+
+
+@app.post("/api/resolution/compile")
+async def compile_resolved(req: CompileResolvedRequest):
+    """PR-07: Compile legitimately resolved BookIR into Canonical PhysicsScene."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+        readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+
+        if not readiness.ready:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": "BookIR is not ready to compile.",
+                    "blockers": readiness.blockers,
+                    "status": book_ir.status,
+                },
+            )
+
+        compiler = PhysicsCompiler()
+        compiled = compiler.compile(book_ir)
+
+        return {
+            "success": compiled.status == "READY",
+            "compiler": compiled.to_dict(),
+            "scene": compiled.scene,
+            "book_ir": book_ir.to_dict(),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Compilation failed: {e}")
 
 
 if __name__ == "__main__":

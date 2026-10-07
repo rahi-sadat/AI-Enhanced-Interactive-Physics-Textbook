@@ -113,13 +113,23 @@ Contains multimodal perception, computer vision, document intelligence, and peda
   - `ocr/`: Circuit text OCR.
   - `parsing/`: Case-sensitive value parsers, parameter binders, and focal length inference.
   - `[Future boundaries]`: Ingestion (PDF/image/DOCX), layout analysis, and caption association.
+- **`ai/resolution/`**:
+  - `requirements.py`: Machine-readable `ModelRequirementSpec` catalog for compiler parameter requirements across supported subtypes.
+  - `policies.py`: `PolicyRegistry` for auditable, named modeling defaults and assumptions (e.g. `policy_earth_gravity`, `policy_zero_damping`).
+  - `units.py`: `UnitEngine` for dimensional verification and SI conversion without string arithmetic.
+  - `calibration.py`: `CalibrationEngine` for evidence-based spatial scale derivation (`pixels_per_meter`) preserving native `source_px`.
+  - `analyzer.py`: Non-mutating `ResolutionAnalyzer` identifying satisfied requirements, review issues, candidates, and blockers.
+  - `engine.py`: `ResolutionEngine` applying user input, candidate confirmations/corrections, and explicit policies.
+  - `evaluator.py`: Strict `ReadinessEvaluator` enforcing the `READY_TO_COMPILE` invariant.
 - **`ai/scene_compiler/`**:
   - Compiles perception and extracted parameters into canonical `PhysicsScene` JSON contracts.
 - **`ai/tutor/`**:
   - Context grounding, curriculum alignment, and explanation synthesis.
 
 ### `shared/` — Canonical Schemas & Contracts
-- **`shared/schemas/`**: Canonical schemas defining the boundary between perception and simulation:
+- **`shared/schemas/`**: Canonical schemas defining the boundary between perception, resolution, and simulation:
+  - `resolution.py`: Strongly-typed dataclass schemas for review issues, user resolutions, explicit policy defaults, and readiness reports.
+  - `ingestion.py`: `SourceAsset`, `PageIR`, `BookIR` schemas with parameter provenance records and resolution state.
   - `physics_scene.json`: Multi-domain simulator compatibility schema.
   - `physics_scene_full.json`: Canonical visual perception contract.
   - `circuit_models.py`: Strongly-typed dataclass schemas for electrical networks.
