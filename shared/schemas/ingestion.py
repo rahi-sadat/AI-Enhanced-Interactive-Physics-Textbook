@@ -176,18 +176,42 @@ class PageIR:
 @dataclass
 class ProvenanceRecord:
     """Traces where a value came from."""
-    source: str                # "ocr" | "cv" | "vlm" | "derived" | "assumed" | "student" | "author_override"
+    source: str                # "ocr" | "cv" | "vlm" | "derived" | "assumed" | "student" | "author_override" | "user_supplied" | "user_confirmed" | "user_corrected" | "policy_default" | "derived_calibration"
     evidence_refs: List[str] = field(default_factory=list)   # e.g. ["text_11", "region_19"]
     confidence: float = 0.0
     notes: str = ""
+    policy_id: Optional[str] = None
+    policy_version: Optional[str] = None
+    user_accepted: Optional[bool] = None
+    superseded_value: Optional[Any] = None
+    derived_from: Optional[List[str]] = None
+
+    def __post_init__(self):
+        if self.derived_from and not self.evidence_refs:
+            self.evidence_refs = list(self.derived_from)
+        elif self.evidence_refs and not self.derived_from:
+            self.derived_from = list(self.evidence_refs)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d: Dict[str, Any] = {
             "source": self.source,
             "evidenceRefs": self.evidence_refs,
+            "derivedFrom": self.derived_from or self.evidence_refs,
             "confidence": self.confidence,
             "notes": self.notes,
         }
+        if self.policy_id is not None:
+            d["policyId"] = self.policy_id
+        if self.policy_version is not None:
+            d["policyVersion"] = self.policy_version
+        if self.user_accepted is not None:
+            d["userAccepted"] = self.user_accepted
+        if self.superseded_value is not None:
+            d["supersededValue"] = self.superseded_value
+        return d
+
+    def model_dump(self) -> Dict[str, Any]:
+        return self.to_dict()
 
 
 @dataclass
@@ -231,6 +255,18 @@ class BookEntity:
             "evidenceRefs": self.evidence_refs,
         }
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "BookEntity":
+        return cls(
+            id=data.get("id", ""),
+            type=data.get("type", data.get("role", "")),
+            label=data.get("label"),
+            position_source_px=data.get("positionSourcePx", data.get("position_source_px")),
+            geometry=data.get("geometry"),
+            attributes=data.get("attributes", {}),
+            evidence_refs=data.get("evidenceRefs", data.get("evidence_refs", [])),
+        )
+
 
 # BookIR status constants
 class BookIRStatus:
@@ -269,6 +305,22 @@ class BookIR:
     status: str = BookIRStatus.UNRESOLVED
     status_notes: str = ""
 
+    resolutions: Dict[str, Any] = field(default_factory=dict)
+    review_issues: List[Dict[str, Any]] = field(default_factory=list)
+    parameter_provenance: Dict[str, Any] = field(default_factory=dict)
+    calibration: Optional[Any] = None
+    id: Optional[str] = None
+    isPhysics: Optional[bool] = None
+
+    def __post_init__(self):
+        if self.id is None:
+            if self.source_asset_id and self.figure_id:
+                self.id = f"{self.source_asset_id}_{self.figure_id}"
+            else:
+                self.id = "book_ir"
+        if self.isPhysics is None:
+            self.isPhysics = self.domain is not None and self.subtype is not None
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "version": self.version,
@@ -279,15 +331,61 @@ class BookIR:
             "subtype": self.subtype,
             "entities": [e.to_dict() for e in self.entities],
             "relationships": self.relationships,
-            "parameters": self.parameters,
-            "geometry": self.geometry,
+            "parameters": {
+                k: (v.to_dict() if hasattr(v, "to_dict") else v)
+                for k, v in self.parameters.items()
+            } if isinstance(self.parameters, dict) else self.parameters,
+            "geometry": {
+                k: (v.to_dict() if hasattr(v, "to_dict") else v)
+                for k, v in self.geometry.items()
+            } if isinstance(self.geometry, dict) else self.geometry,
             "assumptions": self.assumptions,
             "provenance": self.provenance,
             "evidence": {k: (v.to_dict() if hasattr(v, "to_dict") else v) for k, v in self.evidence.items()},
             "confidence": self.confidence,
             "status": self.status,
             "statusNotes": self.status_notes,
+            "resolutions": self.resolutions,
+            "reviewIssues": self.review_issues,
+            "parameterProvenance": {
+                k: (v.to_dict() if hasattr(v, "to_dict") else v)
+                for k, v in self.parameter_provenance.items()
+            },
+            "calibration": self.calibration.to_dict() if hasattr(self.calibration, "to_dict") else self.calibration,
+            "id": self.id,
+            "isPhysics": self.isPhysics,
         }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "BookIR":
+        entities = [
+            BookEntity.from_dict(ed) if isinstance(ed, dict) else ed
+            for ed in data.get("entities", [])
+        ]
+        return cls(
+            version=data.get("version", "1.0"),
+            source_asset_id=data.get("sourceAssetId", data.get("source_asset_id")),
+            page_ir_version=data.get("pageIRVersion", data.get("page_ir_version")),
+            figure_id=data.get("figureId", data.get("figure_id")),
+            domain=data.get("domain"),
+            subtype=data.get("subtype"),
+            entities=entities,
+            relationships=data.get("relationships", []),
+            parameters=data.get("parameters", {}),
+            geometry=data.get("geometry", {}),
+            assumptions=data.get("assumptions", []),
+            provenance=data.get("provenance", {}),
+            evidence=data.get("evidence", {}),
+            confidence=data.get("confidence", {}),
+            status=data.get("status", BookIRStatus.UNRESOLVED),
+            status_notes=data.get("statusNotes", data.get("status_notes", "")),
+            resolutions=data.get("resolutions", {}),
+            review_issues=data.get("reviewIssues", data.get("review_issues", [])),
+            parameter_provenance=data.get("parameterProvenance", data.get("parameter_provenance", {})),
+            calibration=data.get("calibration"),
+            id=data.get("id"),
+            isPhysics=data.get("isPhysics"),
+        )
 
 
 # ---------------------------------------------------------------------------
