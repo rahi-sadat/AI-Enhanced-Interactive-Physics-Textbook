@@ -1931,8 +1931,19 @@ async def compile_resolved(req: CompileResolvedRequest):
         compiler = PhysicsCompiler()
         compiled = compiler.compile(book_ir)
 
+        if compiled.status != "READY" or not compiled.scene:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": "Compilation failed: scene could not be generated.",
+                    "blockers": [i.get("message", i.get("code")) for i in compiled.issues],
+                    "status": compiled.status,
+                    "issues": compiled.issues,
+                },
+            )
+
         return {
-            "success": compiled.status == "READY",
+            "success": True,
             "compiler": compiled.to_dict(),
             "scene": compiled.scene,
             "book_ir": book_ir.to_dict(),
