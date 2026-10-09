@@ -78,6 +78,9 @@ export class InteractiveFigure {
           <h3 class="if-title" data-el="title">Interactive Simulation</h3>
         </div>
         <div class="if-header-right">
+          <button class="if-btn if-btn-secondary" data-el="btnReviewSetup" title="Reopen evidence review and modeling setup" style="padding:4px 10px; font-size:0.76rem;">
+            ✎ Review Setup
+          </button>
           <button class="if-btn if-btn-secondary" data-el="btnToggleAnchors" title="Toggle sub-pixel alignment reticles" style="padding:4px 10px; font-size:0.76rem;">
             🎯 Anchors (0px)
           </button>
@@ -142,6 +145,7 @@ export class InteractiveFigure {
     this.dom.sidebar = root.querySelector('[data-el="sidebar"]');
     this.dom.btnPlayPause = root.querySelector('[data-el="btnPlayPause"]');
     this.dom.btnReset = root.querySelector('[data-el="btnReset"]');
+    this.dom.btnReviewSetup = root.querySelector('[data-el="btnReviewSetup"]');
     this.dom.btnToggleSidebar = root.querySelector('[data-el="btnToggleSidebar"]');
     this.dom.btnToggleAnchors = root.querySelector('[data-el="btnToggleAnchors"]');
     this.dom.paramsList = root.querySelector('[data-el="paramsList"]');
@@ -185,6 +189,11 @@ export class InteractiveFigure {
       this.dom.btnToggleAnchors.classList.toggle('if-btn-primary', active);
       this.dom.btnToggleAnchors.classList.toggle('if-btn-secondary', !active);
     });
+
+    // Bind review setup opener
+    this.dom.btnReviewSetup?.addEventListener('click', () => {
+      this.options.onOpenReview?.();
+    });
   }
 
   toggleSidebar() {
@@ -208,6 +217,7 @@ export class InteractiveFigure {
     }
 
     this.scene = scene;
+    this._sourceScene = JSON.parse(JSON.stringify(scene));
     const domain = scene.domain || scene.simulation?.domain || (scene.simulation_type === 'kinematics' ? 'mechanics' : scene.simulation_type || 'mechanics');
     this.currentDomain = domain;
 
@@ -583,6 +593,16 @@ export class InteractiveFigure {
   }
 
   reset() {
+    // Restore initial textbook parameters if they were experimentally changed
+    if (this._sourceScene?.parameters) {
+      for (const [key, param] of Object.entries(this._sourceScene.parameters)) {
+        if (param?.value !== undefined) {
+          try {
+            this.runtime.updateParameter(key, param.value);
+          } catch (_) {}
+        }
+      }
+    }
     this.runtime.reset();
     const output = this.runtime.getOutput();
     if (this.renderer && output) {
