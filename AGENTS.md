@@ -74,20 +74,23 @@ Before completing any task or proposing changes:
 | PR-05 | ✅ | Multimodal VLM semantic understanding (Gemini). Conservative confidence policy, enriched roles, debug metadata, asserted acceptance test. |
 | PR-06 | ✅ | Classical CV + OCR parameter grounding. SAM 2 geometry, Tesseract/EasyOCR, spatial-semantic parameter binding. |
 | PR-07 | ✅ | Evidence resolution, user review, explicit defaults policy registry, calibration derivation, and strict compilation readiness (`READY_TO_COMPILE`). |
+| PR-08 | ✅ | Interactive evidence review dialog, deterministic SimulationOrchestrator state machine, student-facing review UX, decoupled simulation activation, evidence vs exploration separation. |
 
-### PR-07 Active Boundary (Evidence vs Resolution)
+### PR-08 Active Boundary (Frontend Orchestration & Review)
 
 ```
-PR-06 Evidence Boundary            PR-07 Resolution Boundary
------------------------            --------------------------
-observed_visual      ✅ (source_px) user_supplied        ✅ (validated, typed)
-observed_ocr         ✅ (tokens)    user_confirmed       ✅ (references candidate)
-derived_geometry     ✅ (angles/px) user_corrected       ✅ (preserves superseded)
-evidence bboxes      ✅ (immutable) policy_default       ✅ (explicit named policy)
-raw coordinates      ✅ (source_px) derived_calibration  ✅ (pixels_per_meter derived)
+PR-07 Resolution Boundary          PR-08 Frontend Orchestration
+--------------------------          ----------------------------
+POST /api/ingest             ──►    ANALYZING / NEEDS_REVIEW
+POST /api/resolution/review  ──►    PhysicsReviewModal (human-readable issues)
+POST /api/resolution/resolve ──►    Candidate confirm / correct / policy assumptions
+POST /api/resolution/compile ──►    READY_TO_SIMULATE (gated by backend only)
+Compiled PhysicsScene        ──►    InteractiveFigure (CoordinateMapper + source_px)
+Slider exploration           ──►    Runtime state only (BookIR evidence immutable)
 ```
 
-- **Zero Silent Defaults**: `PhysicsCompiler` forbids fallback constants (`or 9.81`, `or 0.0`, `n_air = 1.0`). Every parameter must be present with valid provenance.
-- **Evidence Immutability**: User corrections supersede values but NEVER delete or mutate underlying OCR tokens or CV visual detections.
-- **Coordinate Space Purity**: Native coordinates strictly remain `source_px`. Scale calibration (`pixels_per_meter`) is derived separately without rewriting pixel measurements.
-- **Strict Compilation Invariant**: `BookIR.status` transitions from `NEEDS_REVIEW` to `READY_TO_COMPILE` if and only if all mandatory subtype requirements are satisfied, provenance is valid, and no blockers exist. Removing a resolution immediately reverts status to `NEEDS_REVIEW`.
+- **Backend Authoritative Readiness**: The frontend never declares `READY_TO_COMPILE` independently. All transitions are governed by backend `ReadinessEvaluator`.
+- **Evidence vs Exploration Separation**: Grounded BookIR contains resolved source evidence. Transient parameter modifications during simulation only mutate the live simulation instance, leaving BookIR pristine. "Reset to textbook values" restores the initial compiled scene.
+- **Decoupled Simulation Activation**: Successful compilation transitions to `READY_TO_SIMULATE`; simulation overlay is rendered and started only upon explicit user action ("Start Simulation").
+- **Native Coordinate Preservation**: Native `source_px` geometry is never altered or replaced by CSS/viewport pixels. All canvas transformations use `CoordinateMapper.js`.
+

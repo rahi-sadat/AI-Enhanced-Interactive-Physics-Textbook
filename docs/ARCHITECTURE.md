@@ -57,6 +57,8 @@ Code in `apps/` bootstraps and runs applications that end users interact with.
   - `src/app/`: Application shell, routing, global providers, and layouts.
   - `src/features/`: Feature-driven product modules:
     - `simulations/`: Stage controller, diagram overlay, and HUDs for Mechanics, Optics, and Circuits.
+      - `core/SimulationApi.js`: Strongly-typed HTTP client for `/api/ingest` and `/api/resolution/*`.
+      - `core/SimulationOrchestrator.js`: Explicit 12-state lifecycle controller managing ingest → review → resolution → evaluation → compilation → simulation activation.
     - `book/`: [Future] Interactive textbook reader, page navigator, and chapter viewer.
     - `tutor/`: [Future] AI Tutor chat interface and voice explanation panel.
     - `exams/`: [Future] Mock exam and formal assessment engine.

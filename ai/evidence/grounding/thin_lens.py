@@ -63,8 +63,17 @@ class ThinLensGrounder:
         source_width: int = 0,
         source_height: int = 0,
     ) -> GroundingOutcome:
+        import copy
+        grounded_ir = copy.deepcopy(book_ir)
+        if grounded_ir.geometry is None:
+            grounded_ir.geometry = {}
+        if source_width > 0:
+            grounded_ir.geometry["width"] = source_width
+        if source_height > 0:
+            grounded_ir.geometry["height"] = source_height
+        grounded_ir.geometry["coordinate_space"] = "source_px"
         return self.fuse(
-            book_ir=book_ir,
+            book_ir=grounded_ir,
             cv_candidates=cv_candidates,
             segmentation_candidates=seg_result,
             ocr_result=ocr_result,
@@ -170,21 +179,47 @@ class ThinLensGrounder:
                 )
 
         # 3. Ground Object Arrow
+        if not object_ent and obj_arrow:
+            object_ent = BookEntity(
+                id=f"object_{len(grounded_ir.entities) + 1}",
+                type="object",
+                label="Object Arrow",
+                evidence_refs=[cv_ev_id],
+            )
+            grounded_ir.entities.append(object_ent)
+
         if object_ent:
             if obj_arrow:
+                start_pt = obj_arrow.start.to_dict() if hasattr(obj_arrow.start, "to_dict") else obj_arrow.start
+                end_pt = obj_arrow.end.to_dict() if hasattr(obj_arrow.end, "to_dict") else obj_arrow.end
+                h_px = float(getattr(obj_arrow, "length_px", abs(float(end_pt["y"]) - float(start_pt["y"]))))
+                base_x = float(start_pt["x"])
+                base_y = float(axis_line.start.y) if (axis_line and hasattr(axis_line.start, "y")) else float(start_pt["y"])
+
+                object_ent.position_source_px = {
+                    "x": base_x,
+                    "y": base_y,
+                    "coordinate_space": "source_px",
+                    "method": "cv_object_arrow",
+                }
                 object_ent.geometry = {
-                    "start": obj_arrow.start.to_dict() if hasattr(obj_arrow.start, "to_dict") else obj_arrow.start,
-                    "end": obj_arrow.end.to_dict() if hasattr(obj_arrow.end, "to_dict") else obj_arrow.end,
-                    "height_px": getattr(obj_arrow, "length_px", 0.0),
+                    "start": {"x": base_x, "y": base_y},
+                    "end": {"x": float(end_pt["x"]), "y": float(end_pt["y"])},
+                    "height_px": h_px,
                 }
                 object_ent.evidence_refs = [cv_ev_id]
+                grounded_ir.parameters["object_position"] = {"x": base_x, "y": base_y}
+                grounded_ir.parameters["object_height_px"] = h_px
+                if lens_center:
+                    grounded_ir.parameters["objectDistance"] = abs(float(lens_center.x) - base_x)
+
                 diagnostics.append(
                     EntityGroundingDiagnostic(
                         entity_id=object_ent.id,
                         grounding_state=GroundingState.GROUNDED,
                         supporting_evidence=[cv_ev_id],
-                        checks={"height_px": getattr(obj_arrow, "length_px", 0.0)},
-                        notes="Object arrow verified.",
+                        checks={"height_px": h_px, "base": {"x": base_x, "y": base_y}},
+                        notes="Object arrow verified and grounded with base on optical axis.",
                     )
                 )
             else:

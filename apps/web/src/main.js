@@ -8,6 +8,9 @@ import { InteractiveFigure } from './components/InteractiveFigure.js';
 // PR-04: Real image ingestion pipeline
 import { UploadService }    from './features/simulations/core/UploadService.js';
 import { IRDebugPanel }     from './features/simulations/core/IRDebugPanel.js';
+// PR-08: Interactive evidence review & automatic simulation orchestration
+import { SimulationOrchestrator, OrchestratorState } from './features/simulations/core/SimulationOrchestrator.js';
+import { PhysicsReviewModal } from './components/PhysicsReviewModal.js';
 
 const SCENES = {
   mechanics: '/scenes/kinematics/physics_scene.json',
@@ -100,6 +103,27 @@ const btnOpenUpload = document.getElementById('btn-open-upload');
 const btnCloseModal = document.getElementById('btn-close-modal');
 const btnCancelModal = document.getElementById('btn-cancel-modal');
 const btnGenerateSim = document.getElementById('btn-generate-sim');
+
+// PR-08: Orchestrator & Evidence Review Dialog
+export const orchestrator = new SimulationOrchestrator();
+export const reviewModal = new PhysicsReviewModal(document.body, orchestrator, {
+  onStartSimulation: (scene) => {
+    closeModal();
+    setPlatformMode('runtime');
+    if (activeFigure) {
+      activeFigure.load(scene);
+    }
+  },
+  onClose: () => {
+    if (btnGenerateSim) btnGenerateSim.disabled = false;
+  }
+});
+
+// Dev & Testing inspection handles
+if (typeof window !== 'undefined') {
+  window.__orchestrator = orchestrator;
+  window.__reviewModal = reviewModal;
+}
 
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
@@ -291,49 +315,50 @@ btnGenerateSim?.addEventListener('click', async () => {
 
   try {
     // ---------------------------------------------------------------
-    // PR-04 PATH: actual uploaded File → /api/ingest (real bytes sent)
+    // PR-08 PATH: actual uploaded File -> SimulationOrchestrator -> Review UI / Simulation
     // ---------------------------------------------------------------
     if (uploadedFile) {
       updateProgress('Sending image to ingestion pipeline...', 15);
-      let ingestResult;
       try {
-        ingestResult = await UploadService.ingest(uploadedFile, updateProgress);
+        await orchestrator.startWithFile(uploadedFile, updateProgress);
       } catch (ingestErr) {
-        // FATAL FOR USER UPLOAD: NEVER fall through to legacy analysis!
-        console.error('[PR-04] Ingestion failed:', ingestErr);
+        console.error('[PR-08] Ingestion failed:', ingestErr);
         btnGenerateSim.disabled = false;
         progressStatus.textContent = `Upload / analysis failed: ${ingestErr.message || ingestErr}`;
-        return; // STOP! No legacy rescue for uploaded files.
+        return;
       }
 
       // Update debug panel
-      if (irDebugPanel) irDebugPanel.update(ingestResult);
+      const ctx = orchestrator.getSessionContext();
+      if (irDebugPanel) {
+        irDebugPanel.update({
+          book_ir: ctx.bookIR,
+          page_ir: ctx.pageIR,
+          source_asset: ctx.sourceAsset,
+          compiler: ctx.bookIR?.compiler || { status: orchestrator.state },
+          status: orchestrator.state.toLowerCase().replace('_', '-'),
+          issues: ctx.reviewState?.issues || []
+        });
+      }
 
-      updateProgress(ingestResult.statusMessage, 100);
-
-      if (ingestResult.isReady && ingestResult.scene) {
-        // Backend understood the physics — launch simulation
-        const scene = ingestResult.scene;
-        if (!scene.visual) scene.visual = {};
-        if (!scene.visual.background_url) {
-          scene.visual.background_url = ingestResult.imageUrl;
-        }
+      if (orchestrator.state === OrchestratorState.READY_TO_SIMULATE) {
+        updateProgress('Simulation ready!', 100);
         setTimeout(() => {
           closeModal();
-          if (activeFigure && (ingestResult.domain === 'optics' || ingestResult.domain === 'circuits')) {
-            setPlatformMode('runtime');
-            activeFigure.load(scene);
-          } else {
-            bootstrap(ingestResult.domain, scene);
+          setPlatformMode('runtime');
+          if (activeFigure) {
+            activeFigure.load(orchestrator.compiledScene);
           }
-        }, 400);
-      } else {
-        // Honest non-ready response — show informative message without fabricating
+        }, 300);
+      } else if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
+        updateProgress('Textbook evidence requires review...', 100);
+        setTimeout(() => {
+          closeModal();
+          reviewModal.open();
+        }, 200);
+      } else if (orchestrator.state === OrchestratorState.UNSUPPORTED || orchestrator.state === OrchestratorState.ERROR) {
         btnGenerateSim.disabled = false;
-        const issueTexts = ingestResult.issues.map(i => i.message || i.code).join('; ');
-        progressStatus.textContent =
-          ingestResult.statusMessage +
-          (issueTexts ? ` (${issueTexts})` : '');
+        progressStatus.textContent = ctx.currentError || 'Analysis could not proceed.';
       }
       return; // STOP! Complete path for user-uploaded file.
     }
@@ -457,7 +482,16 @@ const figureHost = document.getElementById('interactive-figure-container');
 let activeFigure = null;
 
 if (figureHost) {
-  activeFigure = new InteractiveFigure(figureHost);
+  activeFigure = new InteractiveFigure(figureHost, {
+    onOpenReview: () => {
+      if (orchestrator.bookIR) {
+        reviewModal.open();
+      }
+    }
+  });
+  if (typeof window !== 'undefined') {
+    window.__activeFigure = activeFigure;
+  }
   activeFigure.load('/scenes/canonical/pendulum_figure.json');
 }
 

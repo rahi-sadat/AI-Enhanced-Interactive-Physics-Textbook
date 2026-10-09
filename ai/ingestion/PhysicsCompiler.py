@@ -532,6 +532,8 @@ class PhysicsCompiler:
     def _extract_source_dimensions(self, book_ir: BookIR) -> Tuple[Optional[float], Optional[float]]:
         geom = book_ir.geometry or {}
         params = book_ir.parameters or {}
+        meta = getattr(book_ir, "metadata", {}) or {}
+        prov = book_ir.provenance or {}
 
         w = _first_not_none(
             geom.get("source_width"),
@@ -539,6 +541,9 @@ class PhysicsCompiler:
             geom.get("sourceWidth"),
             self._extract_raw_val(params.get("source_width")),
             self._extract_raw_val(params.get("width")),
+            meta.get("source_width"),
+            meta.get("width"),
+            meta.get("image_width_px"),
         )
         h = _first_not_none(
             geom.get("source_height"),
@@ -546,7 +551,26 @@ class PhysicsCompiler:
             geom.get("sourceHeight"),
             self._extract_raw_val(params.get("source_height")),
             self._extract_raw_val(params.get("height")),
+            meta.get("source_height"),
+            meta.get("height"),
+            meta.get("image_height_px"),
         )
+
+        if (w is None or h is None) and book_ir.source_asset_id:
+            try:
+                import glob
+                import os
+                from PIL import Image
+                asset_id = str(book_ir.source_asset_id).strip()
+                matches = glob.glob(f"storage/uploads/*{asset_id[:8]}*") + glob.glob(f"storage/uploads/*{asset_id}*")
+                for m in matches:
+                    if os.path.isfile(m):
+                        with Image.open(m) as im:
+                            w = w or float(im.width)
+                            h = h or float(im.height)
+                            break
+            except Exception as e:
+                logger.debug(f"[PhysicsCompiler] Could not infer dimensions from asset file: {e}")
 
         try:
             w_val = float(w) if w is not None else None
@@ -1097,7 +1121,14 @@ class PhysicsCompiler:
         focal_px = float(self._extract_raw_val(_first_not_none(params.get("focal_length_px"), params.get("focalLength"))))
         aperture = float(self._extract_raw_val(_first_not_none(params.get("aperture_height_px"), geom.get("aperture_height_px"), params.get("aperture"))))
 
+        obj_entity = self._find_entity(book_ir, ("object", "optical_object", "arrow", "object_arrow"))
         obj_pos = self._extract_point(_first_not_none(params.get("object_position"), geom.get("object_position")))
+        if obj_pos is None and obj_entity:
+            if obj_entity.position_source_px:
+                obj_pos = self._extract_point(obj_entity.position_source_px)
+            elif obj_entity.geometry and "start" in obj_entity.geometry:
+                obj_pos = self._extract_point(obj_entity.geometry["start"])
+
         obj_dist_raw = params.get("objectDistance")
 
         lens_entity = self._find_entity(book_ir, ("lens", "thin_lens", "convex_lens", "concave_lens"))
@@ -1129,22 +1160,32 @@ class PhysicsCompiler:
             }
         ]
 
-        # Handle object arrow if present
-        if obj_pos is not None or obj_dist_raw is not None:
-            obj_h = float(self._extract_raw_val(_first_not_none(params.get("object_height_px"), params.get("objectHeight"), geom.get("object_height_px"))))
+        # Handle object arrow (observed from diagram)
+        obj_h_raw = _first_not_none(
+            params.get("object_height_px"),
+            params.get("objectHeight"),
+            geom.get("object_height_px"),
+            obj_entity.geometry.get("height_px") if (obj_entity and obj_entity.geometry) else None,
+        )
+
+        if obj_pos is not None or obj_dist_raw is not None or (obj_entity and obj_entity.geometry):
+            obj_h = float(self._extract_raw_val(obj_h_raw)) if obj_h_raw is not None else (aperture * 0.35)
             if obj_pos is None and obj_dist_raw is not None:
                 u_px = float(self._extract_raw_val(obj_dist_raw))
                 obj_pos = {"x": center["x"] - u_px, "y": center["y"]}
-            else:
+            elif obj_pos is not None:
                 u_px = abs(center["x"] - obj_pos["x"])
+            else:
+                u_px = 1.5 * focal_px
+                obj_pos = {"x": center["x"] - u_px, "y": center["y"]}
+            prov = "observed"
 
-            obj_entity = self._find_entity(book_ir, ("object", "optical_object", "arrow", "object_arrow"))
             obj_id = obj_entity.id if obj_entity else "object_arrow_1"
 
-            scene["parameters"]["objectDistance"] = {"value": u_px, "unit": "px", "provenance": "observed"}
-            scene["parameters"]["objectHeight"] = {"value": -abs(obj_h), "unit": "px", "provenance": "observed"}
+            scene["parameters"]["objectDistance"] = {"value": u_px, "unit": "px", "provenance": prov}
+            scene["parameters"]["objectHeight"] = {"value": -abs(obj_h), "unit": "px", "provenance": prov}
 
-            objects.insert(0, {
+            objects.append({
                 "id": obj_id,
                 "type": "optical_object",
                 "role": "object",
