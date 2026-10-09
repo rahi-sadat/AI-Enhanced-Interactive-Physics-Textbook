@@ -136,6 +136,21 @@ class EvidenceExtractionPipeline:
 
         src_w, src_h = asset.width_px, asset.height_px
 
+        if book_ir.geometry is None:
+            book_ir.geometry = {}
+        if src_w and not book_ir.geometry.get("width"):
+            book_ir.geometry["width"] = src_w
+        if src_h and not book_ir.geometry.get("height"):
+            book_ir.geometry["height"] = src_h
+        if not book_ir.geometry.get("coordinate_space"):
+            book_ir.geometry["coordinate_space"] = "source_px"
+        if book_ir.provenance is None:
+            book_ir.provenance = {}
+        if src_w and not book_ir.provenance.get("source_width"):
+            book_ir.provenance["source_width"] = src_w
+        if src_h and not book_ir.provenance.get("source_height"):
+            book_ir.provenance["source_height"] = src_h
+
         # 2. Extract OCR evidence
         ocr_result: Optional[OCRExtractionResult] = None
         ocr_boxes: list[SourceBBox] = []
@@ -259,6 +274,20 @@ class EvidenceExtractionPipeline:
         )
 
         grounded_ir = outcome.grounded_book_ir
+        if grounded_ir.geometry is None:
+            grounded_ir.geometry = {}
+        if src_w and not grounded_ir.geometry.get("width"):
+            grounded_ir.geometry["width"] = src_w
+        if src_h and not grounded_ir.geometry.get("height"):
+            grounded_ir.geometry["height"] = src_h
+        if not grounded_ir.geometry.get("coordinate_space"):
+            grounded_ir.geometry["coordinate_space"] = "source_px"
+        if grounded_ir.provenance is None:
+            grounded_ir.provenance = {}
+        if src_w and not grounded_ir.provenance.get("source_width"):
+            grounded_ir.provenance["source_width"] = src_w
+        if src_h and not grounded_ir.provenance.get("source_height"):
+            grounded_ir.provenance["source_height"] = src_h
         grounded_ir.provenance["evidence_pipeline_latency_ms"] = (time.perf_counter() - start_time) * 1000.0
 
         return grounded_ir

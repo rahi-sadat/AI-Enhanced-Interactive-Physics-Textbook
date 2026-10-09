@@ -62,8 +62,17 @@ class PrismGrounder:
         source_width: int = 0,
         source_height: int = 0,
     ) -> GroundingOutcome:
+        import copy
+        grounded_ir = copy.deepcopy(book_ir)
+        if grounded_ir.geometry is None:
+            grounded_ir.geometry = {}
+        if source_width > 0:
+            grounded_ir.geometry["width"] = source_width
+        if source_height > 0:
+            grounded_ir.geometry["height"] = source_height
+        grounded_ir.geometry["coordinate_space"] = "source_px"
         return self.fuse(
-            book_ir=book_ir,
+            book_ir=grounded_ir,
             cv_candidates=cv_candidates,
             segmentation_candidates=seg_result,
             ocr_result=ocr_result,
