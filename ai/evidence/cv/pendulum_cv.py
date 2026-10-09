@@ -71,6 +71,7 @@ class PendulumCVCandidateExtractor:
             canny_thresh1=self.canny_thresh1,
             canny_thresh2=self.canny_thresh2,
         )
+        bg_median = float(np.median(gray))
 
         # 1. Mask out OCR text to avoid labels ("m", "L", "θ") corrupting line/circle detection
         if ocr_boxes:
@@ -137,6 +138,29 @@ class PendulumCVCandidateExtractor:
                         "initial_radius": cr,
                     })
 
+        # Extract dedicated mounting pin circle proposals (small circles in upper 35% of diagram)
+        pin_candidates: List[Dict[str, Any]] = []
+        _, bin_img = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY_INV)
+        cnts_pin, _ = cv2.findContours(bin_img[:int(h * 0.35), :], cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        for c in cnts_pin:
+            (cx, cy), cr = cv2.minEnclosingCircle(c)
+            area = cv2.contourArea(c)
+            perim = cv2.arcLength(c, True)
+            if perim > 0:
+                circ = 4.0 * math.pi * area / (perim * perim)
+                if 3.0 <= cr <= max(25.0, min(w, h) * 0.035) and circ > 0.65:
+                    pin_candidates.append({
+                        "center": SourcePoint(x=float(cx), y=float(cy)),
+                        "radius_px": float(cr),
+                        "bounds": SourceBBox(
+                            x=max(0.0, float(cx) - float(cr)),
+                            y=max(0.0, float(cy) - float(cr)),
+                            width=float(cr) * 2.0,
+                            height=float(cr) * 2.0,
+                        ),
+                        "initial_radius": float(cr),
+                    })
+
         # 3. Extract Line Proposals for String
         min_line_len = max(20, int(h * self.min_string_len_ratio))
         max_line_gap = max(5, int(h * 0.025))
@@ -198,9 +222,9 @@ class PendulumCVCandidateExtractor:
         else:
             pivot_est = SourcePoint(x=w * 0.4, y=h * 0.1)
 
-        # Check for small mounting pin circle near pivot
-        for c in circle_candidates:
-            if c['center'].y < h * 0.25 and c['center'].distance_to(pivot_est) < 40.0 and c['radius_px'] < 30.0:
+        # Check for small mounting pin circle near pivot estimate
+        for c in (pin_candidates + circle_candidates):
+            if c['center'].y < h * 0.30 and c['center'].distance_to(pivot_est) < max(45.0, min(w, h) * 0.05) and c['radius_px'] < max(30.0, min(w, h) * 0.035):
                 pivot_est = c['center']
                 break
 
@@ -279,30 +303,37 @@ class PendulumCVCandidateExtractor:
                 if vertical_ref_candidate is not None and slope is not None:
                     v_x = (vertical_ref_candidate.start.x + vertical_ref_candidate.end.x) / 2.0
                     extrap_y = s_top.y + slope * (v_x - s_top.x)
-                    # Verify intersection is above bob and near ceiling/reference start
-                    if extrap_y < c_center.y and (extrap_y <= s_top.y + 15.0):
-                        v_top_y = min(vertical_ref_candidate.start.y, vertical_ref_candidate.end.y)
-                        if abs(extrap_y - v_top_y) < max(75.0, h * 0.08) or (support_y and abs(extrap_y - support_y) < 45.0):
-                            pivot_pt = SourcePoint(x=float(v_x), y=float(extrap_y))
-                            pivot_method = "vertical_reference_intersection"
+                    # Verify intersection is above bob and near ceiling/reference start/string top
+                    v_top_y = min(vertical_ref_candidate.start.y, vertical_ref_candidate.end.y)
+                    is_near_v_top = abs(extrap_y - v_top_y) < max(75.0, h * 0.08)
+                    is_near_support = support_y is not None and abs(extrap_y - support_y) < max(45.0, h * 0.05)
+                    is_near_string_top = abs(extrap_y - s_top.y) < max(60.0, h * 0.08)
+                    if extrap_y < (c_center.y - min_line_len * 0.4) and (is_near_v_top or is_near_support or is_near_string_top):
+                        pivot_pt = SourcePoint(x=float(v_x), y=float(extrap_y))
+                        pivot_method = "vertical_reference_intersection"
 
-                # Candidate 2: If no vertical ref, intersection with ceiling support line
-                elif support_y is not None and slope is not None:
+                # Candidate 2: If no vertical ref (or Candidate 1 didn't match), intersection with ceiling support line
+                if pivot_method == "string_top_endpoint" and support_y is not None and slope is not None:
                     extrap_x = s_top.x + (support_y - s_top.y) / slope
-                    if support_y < c_center.y:
+                    if support_y < c_center.y and abs(extrap_x - s_top.x) < max(80.0, w * 0.12):
                         pivot_pt = SourcePoint(x=float(extrap_x), y=float(support_y))
                         pivot_method = "support_line_intersection"
 
                 # Candidate 3: Snap to small mounting pin circle near candidate pivot
-                for c_pin in circle_candidates:
-                    if (
-                        c_pin['center'].y < h * 0.25
-                        and c_pin['center'].distance_to(pivot_pt) < 35.0
-                        and c_pin['radius_px'] < 30.0
-                    ):
-                        pivot_pt = c_pin['center']
-                        pivot_method = "attachment_pin"
-                        break
+                tol_pin = max(45.0, min(w, h) * 0.045)
+                best_pin = None
+                best_pin_d = float("inf")
+                for c_pin in (pin_candidates + circle_candidates):
+                    c_pt = c_pin["center"]
+                    c_pr = c_pin.get("radius_px", 0.0)
+                    if c_pt.y < h * 0.35 and c_pr < max(30.0, min(w, h) * 0.035):
+                        d = c_pt.distance_to(pivot_pt)
+                        if d < tol_pin and d < best_pin_d:
+                            best_pin = c_pin
+                            best_pin_d = d
+                if best_pin is not None:
+                    pivot_pt = best_pin["center"]
+                    pivot_method = "attachment_pin"
 
                 # Cross-validation metrics for candidate pivot
                 vref_residual = None
@@ -329,6 +360,33 @@ class PendulumCVCandidateExtractor:
                 score = 100.0 - dist_to_perimeter * 2.5 - abs(ratio - 0.14) * 80.0 + (s_len / float(h)) * 10.0
                 if is_consistent:
                     score += 15.0
+
+                # Physical Bob Shading: reward solid filled bobs over dashed/empty ghost markers
+                bx, by = int(round(c_center.x)), int(round(c_center.y))
+                inner_r = max(2, int(round(c_r * 0.7)))
+                if 0 <= by < h and 0 <= bx < w:
+                    mask_bob = np.zeros_like(gray)
+                    cv2.circle(mask_bob, (bx, by), inner_r, 255, -1)
+                    inner_mean = cv2.mean(gray, mask=mask_bob)[0]
+                    fill_contrast = max(0.0, bg_median - inner_mean)
+                    score += min(20.0, fill_contrast * 0.18)
+
+                # String Ink Continuity: reward solid continuous strings over dashed guide lines
+                n_samples = 30
+                xs = np.linspace(s_top.x, s_bot.x, n_samples)
+                ys = np.linspace(s_top.y, s_bot.y, n_samples)
+                thresh_ink = bg_median - 25.0
+                dark_count = 0
+                valid_count = 0
+                for sx, sy in zip(xs, ys):
+                    isx, isy = int(round(sx)), int(round(sy))
+                    if 0 <= isy < h and 0 <= isx < w:
+                        valid_count += 1
+                        if gray[isy, isx] < thresh_ink:
+                            dark_count += 1
+                string_continuity = (dark_count / valid_count) if valid_count > 0 else 0.0
+                if string_continuity > 0.40:
+                    score += 15.0 * string_continuity
 
                 paired_candidates.append({
                     "score": score,
@@ -359,7 +417,8 @@ class PendulumCVCandidateExtractor:
         best_pair = paired_candidates[0] if paired_candidates else None
 
         return {
-            "all_circles": circle_candidates,
+            "all_circles": circle_candidates + pin_candidates,
+            "pin_candidates": pin_candidates,
             "all_lines": line_proposals,
             "support_lines": support_lines,
             "paired_candidates": paired_candidates,

@@ -59,19 +59,44 @@ class ThinLensCVCandidateExtractor:
 
         merged = merge_collinear_lines(raw_lines, dist_thresh=10.0, angle_thresh_deg=6.0)
 
-        # 1. Optical Axis: long horizontal line near vertical center
-        optical_axis = None
-        best_axis_len = 0.0
+        # 1. Optical Axis: horizontal line cluster near vertical center with maximum horizontal span across diagram
+        clusters: List[Dict[str, Any]] = []
         for l in merged:
             dy = abs(l.end.y - l.start.y)
             dx = abs(l.end.x - l.start.x)
             if dx > 0 and (dy / (dx + 1e-5)) < 0.10:
                 mid_y = (l.start.y + l.end.y) / 2.0
-                if abs(mid_y - h * 0.5) < h * 0.35 and l.length_px > best_axis_len:
-                    best_axis_len = l.length_px
-                    optical_axis = l
+                if abs(mid_y - h * 0.5) < h * 0.35:
+                    added = False
+                    for c in clusters:
+                        if abs(c["y"] - mid_y) < 10.0:
+                            c["lines"].append(l)
+                            c["min_x"] = min(c["min_x"], l.start.x, l.end.x)
+                            c["max_x"] = max(c["max_x"], l.start.x, l.end.x)
+                            c["total_len"] += l.length_px
+                            added = True
+                            break
+                    if not added:
+                        clusters.append({
+                            "y": mid_y,
+                            "min_x": min(l.start.x, l.end.x),
+                            "max_x": max(l.start.x, l.end.x),
+                            "total_len": l.length_px,
+                            "lines": [l],
+                        })
 
-        axis_y = (optical_axis.start.y + optical_axis.end.y) / 2.0 if optical_axis else None
+        optical_axis = None
+        axis_y = None
+        if clusters:
+            best_cluster = max(
+                clusters,
+                key=lambda c: (c["max_x"] - c["min_x"]) - abs(c["y"] - h * 0.5) * 0.5,
+            )
+            axis_y = best_cluster["y"]
+            optical_axis = SourceLine(
+                start=SourcePoint(float(best_cluster["min_x"]), float(axis_y)),
+                end=SourcePoint(float(best_cluster["max_x"]), float(axis_y)),
+            )
 
         # 2. Lens Body / Line: prominent vertical line intersecting optical axis near horizontal center
         lens_line = None
