@@ -249,9 +249,13 @@ export class InteractiveFigure {
       this.dom.curriculumTag.textContent = `Canonical Scene v1 (${domain})`;
     }
 
-    // 5. Clear previous overlay canvas and mount into FigureViewport overlay container
+    // 5. Clear previous overlay canvas, parameters and telemetry from previous domain
     const overlayContainer = this.viewport.getOverlayContainer();
     overlayContainer.innerHTML = '';
+    this.dom.paramsList.innerHTML = '<div style="font-size:0.8rem;color:#64748b;">Loading parameters...</div>';
+    if (this.dom.telemetryList) {
+      this.dom.telemetryList.innerHTML = '';
+    }
 
     if (this.renderer) {
       this.renderer.dispose();
@@ -562,16 +566,31 @@ export class InteractiveFigure {
       addMetric('Image Type', state.imageType || 'real');
       addMetric('Real / Inverted', `${state.isReal ? 'Real' : 'Virtual'} • ${state.isInverted ? 'Inverted' : 'Upright'}`);
     } else if (state.domain === 'circuits') {
-      addMetric('Total Power', `${state.totalPower ?? 0} W`, true);
+      const formatCurrent = (a) => {
+        if (a === undefined || a === null || isNaN(a)) return '0 A';
+        const abs = Math.abs(a);
+        if (abs >= 1.0) return `${abs.toFixed(2)} A`;
+        if (abs >= 0.001) return `${(abs * 1000).toFixed(1)} mA`;
+        if (abs >= 1e-6) return `${(abs * 1e6).toFixed(1)} µA`;
+        return '0 A';
+      };
+
+      addMetric('Total Power', `${Number((state.totalPower ?? 0).toFixed(2))} W`, true);
+      const totalI = state.totalDeliveredSourceCurrent_A ?? state.totalCurrent_A;
+      if (totalI !== undefined && !isNaN(totalI)) {
+        addMetric('Total Current (I)', formatCurrent(totalI), true);
+      }
       if (state.nodeVoltages) {
         for (const [node, v] of Object.entries(state.nodeVoltages)) {
-          addMetric(`Voltage ${node}`, `${v} V`);
+          const vNum = Number(v);
+          addMetric(`Voltage ${node}`, `${vNum >= 0 ? '+' : ''}${vNum.toFixed(2)} V`);
         }
       }
       if (state.branchCurrents) {
         for (const [branch, i] of Object.entries(state.branchCurrents)) {
           if (!branch.endsWith('.branch')) {
-            addMetric(`Current ${branch}`, `${i} mA`);
+            const delivered = state.sourceCurrents?.[branch] ?? Math.abs(i);
+            addMetric(`Current ${branch}`, formatCurrent(delivered));
           }
         }
       }

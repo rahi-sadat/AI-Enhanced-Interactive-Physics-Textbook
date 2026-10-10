@@ -38,6 +38,8 @@ export const PARAMETER_LABELS = {
   curvature_radius_px: 'Radius of Curvature (R)',
   source_voltage: 'Source Voltage (V)',
   resistance: 'Resistance (R)',
+  source_current: 'Source Current (I)',
+  current: 'Current (I)',
 };
 
 export const DEFAULT_UNITS = {
@@ -53,8 +55,24 @@ export const DEFAULT_UNITS = {
   focal_length: ['cm', 'm', 'mm'],
   object_distance: ['cm', 'm', 'px'],
   source_voltage: ['V', 'mV'],
-  resistance: ['Ω', 'kΩ'],
+  voltage: ['V', 'mV'],
+  resistance: ['Ω', 'kΩ', 'ohm'],
+  current: ['A', 'mA'],
 };
+
+export function getParameterUnits(paramName) {
+  if (DEFAULT_UNITS[paramName]) return DEFAULT_UNITS[paramName];
+  const p = (paramName || '').toLowerCase();
+  if (p.includes('resistance') || p.includes('resistor')) return ['Ω', 'kΩ', 'ohm'];
+  if (p.includes('voltage') || p.includes('emf') || p.startsWith('v')) return ['V', 'mV'];
+  if (p.includes('current')) return ['A', 'mA'];
+  if (p.includes('capacitance')) return ['μF', 'nF', 'pF', 'F'];
+  if (p.includes('angle')) return ['deg', 'rad'];
+  if (p.includes('speed') || p.includes('velocity')) return ['m/s', 'km/h'];
+  if (p.includes('mass')) return ['kg', 'g'];
+  if (p.includes('length') || p.includes('distance') || p.includes('height')) return ['m', 'cm', 'mm'];
+  return ['m'];
+}
 
 export class PhysicsReviewModal {
   /**
@@ -421,10 +439,22 @@ export class PhysicsReviewModal {
       card.appendChild(candBox);
     }
 
-    // B. Manual Entry Form (if no candidate or user selected Correct)
-    if (!candidate || isCorrecting) {
+    // B. Manual Entry Form (if applicable)
+    const isStructural = issue.issueType === 'ungrounded_geometry' ||
+                         issue.issueType === 'ambiguous_geometry' ||
+                         paramName === 'nodes' ||
+                         paramName === 'components' ||
+                         !paramName;
+
+    if (!isStructural && (!candidate || isCorrecting)) {
       const form = this._renderManualForm(issue, paramName, isBusy);
       card.appendChild(form);
+    } else if (isStructural && (!candidate || isCorrecting)) {
+      const infoBox = document.createElement('div');
+      infoBox.className = 'prm-info-box';
+      infoBox.style.cssText = 'padding: 8px 12px; font-size: 0.85rem; color: #94a3b8; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px dashed rgba(255,255,255,0.1); margin-top: 8px;';
+      infoBox.innerHTML = `<span>Schematic geometry requires visual grounding from diagram lines and symbols.</span>`;
+      card.appendChild(infoBox);
     }
 
     // C. Explicit Policy Options (Modeling Assumptions)
@@ -445,7 +475,7 @@ export class PhysicsReviewModal {
     const form = document.createElement('div');
     form.className = 'prm-manual-form';
 
-    const allowedUnits = issue.allowedUnits?.length ? issue.allowedUnits : (DEFAULT_UNITS[paramName] || ['m']);
+    const allowedUnits = issue.allowedUnits?.length ? issue.allowedUnits : getParameterUnits(paramName);
     const currentVal = this._manualValues.get(paramName) || '';
 
     let unitOptionsHtml = '';

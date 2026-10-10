@@ -332,9 +332,13 @@ btnGenerateSim?.addEventListener('click', async () => {
       const ctx = orchestrator.getSessionContext();
       if (irDebugPanel) {
         irDebugPanel.update({
+          bookIR: ctx.bookIR,
           book_ir: ctx.bookIR,
+          pageIR: ctx.pageIR,
           page_ir: ctx.pageIR,
+          sourceAsset: ctx.sourceAsset,
           source_asset: ctx.sourceAsset,
+          confidence: ctx.bookIR?.confidence || {},
           compiler: ctx.bookIR?.compiler || { status: orchestrator.state },
           status: orchestrator.state.toLowerCase().replace('_', '-'),
           issues: ctx.reviewState?.issues || []

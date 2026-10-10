@@ -56,17 +56,24 @@ export class IRDebugPanel {
       return;
     }
 
-    const sa = result.sourceAsset || {};
-    const pi = result.pageIR || {};
-    const bi = result.bookIR || {};
-    const cr = result.compiler || {};
+    const sa = result.sourceAsset || result.source_asset || {};
+    const pi = result.pageIR || result.page_ir || {};
+    const bi = result.bookIR || result.book_ir || {};
+    const cr = result.compiler || bi.compiler || {};
 
+    const rawStatus = (result.status || cr.status || bi.status || 'UNRESOLVED').toLowerCase().replace('_', '-');
     const statusColor = {
       'ready': '#22c55e',
       'needs-review': '#f59e0b',
       'unsupported': '#f97316',
       'unresolved': '#64748b',
-    }[result.status] || '#64748b';
+    }[rawStatus] || '#64748b';
+
+    const conf = result.confidence || bi.confidence || {};
+    const classification = result.classification || bi.provenance?.classification || (rawStatus === 'ready' ? 'supported' : 'unknown');
+    const entitiesList = result.entities || bi.entities || [];
+    const visibleLabelsList = result.visibleLabels || bi.provenance?.visible_labels || [];
+    const candidatesList = result.candidates || bi.provenance?.candidates || [];
 
     const badge = (text, color) =>
       `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${color}22;color:${color};font-size:0.78rem;font-weight:700;border:1px solid ${color}44;">${escapeHtml(text)}</span>`;
@@ -108,7 +115,7 @@ export class IRDebugPanel {
       <div style="font-family:'Inter',sans-serif;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
           <span style="font-size:0.82rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;">🔬 IR Debug Panel</span>
-          ${badge(result.status ? result.status.toUpperCase() : 'UNKNOWN', statusColor)}
+          ${badge((result.status || rawStatus).toUpperCase(), statusColor)}
         </div>
 
         ${section('📦 SourceAsset', [
@@ -135,20 +142,20 @@ export class IRDebugPanel {
         ].join(''))}
 
         ${section('🤖 VLM Semantic Understanding (PR-05)', [
-          kv('Classification', badge((result.classification || 'unknown').toUpperCase(), statusColor), true),
+          kv('Classification', badge((classification || 'unknown').toUpperCase(), statusColor), true),
           kv('Provider / Model', `${bi.provenance?.provider || '—'} / ${bi.provenance?.model || '—'}`),
-          kv('Confidence', `isPhysics: ${(result.confidence.isPhysics ?? 0).toFixed(2)}, domain: ${(result.confidence.domain ?? 0).toFixed(2)}, subtype: ${(result.confidence.subtype ?? 0).toFixed(2)}`),
+          kv('Confidence', `isPhysics: ${(conf.isPhysics ?? 0).toFixed(2)}, domain: ${(conf.domain ?? 0).toFixed(2)}, subtype: ${(conf.subtype ?? 0).toFixed(2)}`),
           '<div style="margin-top:6px;font-size:0.78rem;color:#64748b;">Semantic Roles & Entities:</div>',
-          (result.entities?.length
-            ? result.entities.map(e => kv(`${e.id} (${e.type})`, `${e.label ? `"${e.label}" ` : ''}[${e.attributes?.precision || 'approximate'}] conf: ${(e.attributes?.confidence ?? 0.0).toFixed(2)}`)).join('')
+          (entitiesList.length
+            ? entitiesList.map(e => kv(`${e.id} (${e.type})`, `${e.label ? `"${e.label}" ` : ''}[${e.attributes?.precision || 'approximate'}] conf: ${(e.attributes?.confidence ?? 0.0).toFixed(2)}`)).join('')
             : '<span style="color:#475569;font-size:0.82rem;">None identified</span>'),
           '<div style="margin-top:6px;font-size:0.78rem;color:#64748b;">Observed Labels (Unverified Evidence):</div>',
-          (result.visibleLabels?.length
-            ? result.visibleLabels.map(l => kv(l.text, `(role: ${l.semanticRole || 'general'}, conf: ${(l.confidence ?? 0.0).toFixed(2)})`)).join('')
+          (visibleLabelsList.length
+            ? visibleLabelsList.map(l => kv(l.text, `(role: ${l.semanticRole || 'general'}, conf: ${(l.confidence ?? 0.0).toFixed(2)})`)).join('')
             : '<span style="color:#475569;font-size:0.82rem;">No text/parameter labels observed</span>'),
-          (result.candidates?.length
+          (candidatesList.length
             ? '<div style="margin-top:6px;font-size:0.78rem;color:#64748b;">Candidate Interpretations:</div>' +
-              result.candidates.map(c => kv(`${c.domain || 'unknown'} / ${c.subtype || 'unknown'}`, `conf: ${(c.confidence ?? 0.0).toFixed(2)}`)).join('')
+              candidatesList.map(c => kv(`${c.domain || 'unknown'} / ${c.subtype || 'unknown'}`, `conf: ${(c.confidence ?? 0.0).toFixed(2)}`)).join('')
             : ''),
         ].join(''))}
 
