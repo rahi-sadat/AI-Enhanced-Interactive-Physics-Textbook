@@ -30,6 +30,7 @@ from shared.schemas.evidence import (
     OCRToken,
     SourceBBox,
     SourcePoint,
+    SourceLine,
 )
 from shared.schemas.ingestion import (
     BookEntity,
@@ -259,6 +260,59 @@ class TestPR06MultiDomainGrounding(unittest.TestCase):
         comp_res = self.compiler.compile(outcome.grounded_book_ir)
         self.assertEqual(comp_res.status, "NEEDS_REVIEW")
         self.assertIsNone(comp_res.scene)
+
+    def test_circuits_grounder_authentic_e2e(self):
+        """Valid wire continuity and authentic OCR tokens compile to runnable PhysicsScene."""
+        grounder = self.registry.find_grounder("circuits", "dc_linear")
+        self.assertIsNotNone(grounder)
+
+        book_ir = BookIR(
+            source_asset_id="asset_real_circ",
+            figure_id="fig_real_circ",
+            domain="circuits",
+            subtype="dc_linear",
+            status=BookIRStatus.NEEDS_REVIEW,
+            entities=[
+                BookEntity(id="r1", type="resistor"),
+                BookEntity(id="v1", type="voltage_source"),
+            ],
+            parameters={},
+        )
+        # 2 components with real connecting wires (loop)
+        cv_candidates = {
+            "components": [
+                {"id": "R1", "type": "resistor", "bbox": SourceBBox(300, 100, 50, 20), "center": SourcePoint(325, 110)},
+                {"id": "V1", "type": "voltage_source", "bbox": SourceBBox(100, 100, 50, 20), "center": SourcePoint(125, 110)},
+            ],
+            "wires": [
+                SourceLine(start=SourcePoint(100, 100), end=SourcePoint(350, 100)),
+                SourceLine(start=SourcePoint(100, 200), end=SourcePoint(350, 200)),
+            ],
+            "rails_y": [100, 200],
+            "branches_x": [100, 350],
+        }
+        ocr_result = OCRExtractionResult(
+            status=ExtractionStatus.SUCCESS,
+            tokens=[
+                OCRToken(id="t1", raw_text="R1", confidence=0.95, bbox_source_px=SourceBBox(310, 80, 30, 15)),
+                OCRToken(id="t2", raw_text="100Ω", confidence=0.95, bbox_source_px=SourceBBox(310, 125, 40, 15)),
+                OCRToken(id="t3", raw_text="12 V", confidence=0.95, bbox_source_px=SourceBBox(110, 80, 35, 15)),
+            ],
+            provider="mock_ocr",
+        )
+
+        outcome = grounder.ground(book_ir, cv_candidates, ocr_result, source_width=500, source_height=400)
+        grounded_ir = outcome.grounded_book_ir
+        self.assertEqual(grounded_ir.status, BookIRStatus.READY_TO_COMPILE)
+        self.assertIn("R1_resistance", grounded_ir.parameters)
+        self.assertEqual(grounded_ir.parameters["R1_resistance"].value, 100.0)
+
+        comp_res = self.compiler.compile(grounded_ir)
+        self.assertEqual(comp_res.status, "READY")
+        self.assertIsNotNone(comp_res.scene)
+        self.assertEqual(comp_res.scene["domain"], "circuits")
+        self.assertEqual(comp_res.scene["subtype"], "dc_linear")
+        self.assertEqual(len(comp_res.scene["circuit"]["components"]), 2)
 
     def test_unsupported_mechanics_rejected(self):
         """Unsupported mechanics (e.g. spring, pulley, incline) must remain UNSUPPORTED with scene=null."""
