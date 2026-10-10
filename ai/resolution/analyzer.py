@@ -185,19 +185,27 @@ class ResolutionAnalyzer:
                     else False
                 )
                 if pos is None and req_ent not in ("string", "wire", "nodes", "components"):
-                    issues.append(
-                        ReviewIssue(
-                            id=f"issue_ungrounded_pos_{matched_ent.id}",
-                            issue_type=ReviewIssueType.AMBIGUOUS_GEOMETRY,
-                            entity_id=matched_ent.id,
-                            title=f"Ungrounded position: {req_ent}",
-                            description=f"Entity '{matched_ent.id}' ({req_ent}) lacks authoritative source_px coordinates.",
-                            question=f"Visual coordinates for '{req_ent}' are ungrounded.",
-                            action_type=ResolutionActionType.CHOOSE_OPTION,
-                            is_blocker=True,
-                            target_subtype=spec.subtype,
-                        )
+                    # For circuits: components parameter holds authoritative grounded coordinates
+                    circuit_comps = params.get("components") if spec.domain == "circuits" else None
+                    comps_val = getattr(circuit_comps, "value", circuit_comps) if circuit_comps else None
+                    has_grounded_comps = isinstance(comps_val, list) and any(
+                        isinstance(c, dict) and (c.get("center_source_px") or c.get("bbox_source_px"))
+                        for c in comps_val
                     )
+                    if not (spec.domain == "circuits" and has_grounded_comps):
+                        issues.append(
+                            ReviewIssue(
+                                id=f"issue_ungrounded_pos_{matched_ent.id}",
+                                issue_type=ReviewIssueType.AMBIGUOUS_GEOMETRY,
+                                entity_id=matched_ent.id,
+                                title=f"Ungrounded position: {req_ent}",
+                                description=f"Entity '{matched_ent.id}' ({req_ent}) lacks authoritative source_px coordinates.",
+                                question=f"Visual coordinates for '{req_ent}' are ungrounded.",
+                                action_type=ResolutionActionType.CHOOSE_OPTION,
+                                is_blocker=True,
+                                target_subtype=spec.subtype,
+                            )
+                        )
                 elif is_ambig:
                     issues.append(
                         ReviewIssue(

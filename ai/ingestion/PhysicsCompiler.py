@@ -1370,10 +1370,19 @@ class PhysicsCompiler:
             cid = comp.get("id")
             cval = comp.get("value")
             cunit = comp.get("unit")
+            ctype = comp.get("type", "resistor")
+            comp["editable"] = True
             if cid and cval is not None:
+                is_source = ctype in ("voltage_source", "battery", "dc_source")
+                num_val = float(cval)
                 scene["parameters"][cid] = {
                     "value": cval,
-                    "unit": cunit or "",
+                    "unit": cunit or ("V" if is_source else "Ω"),
+                    "label": comp.get("label") or f"{'Voltage Source' if is_source else 'Resistor'} ({cid})",
+                    "editable": True,
+                    "min": 0 if is_source else 1,
+                    "max": max(100, int(num_val * 2)),
+                    "step": 1,
                     "provenance": "observed",
                 }
 

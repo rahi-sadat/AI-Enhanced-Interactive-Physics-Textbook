@@ -73,6 +73,19 @@ export class CircuitAdapter extends SimulationAdapter {
    * and scene mutation succeed.
    */
   _applyParameterUpdate(address, convertedVal, key, targetId, incomingUnit) {
+    const rawTarget = targetId || address || key;
+    const compId = rawTarget.split('.')[0].replace(/_(resistance|voltage|current)$/, '');
+    const comp = this.scene.circuit?.components?.find(c => c.id === compId || c.id === rawTarget || c.label === rawTarget);
+    if (comp && typeof convertedVal === 'number') {
+      comp.value = convertedVal;
+    }
+    if (this.scene?.parameters?.[compId]) {
+      this.scene.parameters[compId].value = convertedVal;
+    }
+    if (this.scene?.parameters?.[address]) {
+      this.scene.parameters[address].value = convertedVal;
+    }
+
     if (key === 'closed' || key === 'state' || typeof convertedVal === 'boolean') {
       const swId = targetId || address.split('.')[0];
       const sw = this.scene.circuit?.components?.find(c => c.id === swId || (c.type === 'switch' && (!targetId || targetId === c.id)));
@@ -131,7 +144,8 @@ export class CircuitAdapter extends SimulationAdapter {
         segmentLengths: w.segmentLengths,
         cumulativeLengths: w.cumulativeLengths,
         current_A,
-        direction
+        direction,
+        getPointAtDistance: w.getPointAtDistance
       };
     });
 
@@ -149,6 +163,7 @@ export class CircuitAdapter extends SimulationAdapter {
         geometry: c.geometry || {},
         bbox_source_px: c.bbox_source_px || c.geometry?.bbox_source_px,
         center_source_px: c.geometry?.center_source_px,
+        label_bbox_source_px: c.label_bbox_source_px || c.geometry?.label_bbox_source_px,
         terminals: c.terminals || [],
         current_A: cur,
         power_W: power
