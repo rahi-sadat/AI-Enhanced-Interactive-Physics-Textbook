@@ -15,6 +15,7 @@ Rules:
 from __future__ import annotations
 
 import logging
+import re
 import time
 from typing import Any, Dict, List, Optional
 
@@ -248,7 +249,19 @@ class MultiOCRRouter:
                 candidates.append(b_cand)
 
                 # Decision: if Bengali candidate contains actual Bengali characters, resolve to EasyOCR token
-                if is_bengali_text(b_tok.raw_text):
+                # Keep a high-confidence explicit physics expression when a
+                # low-confidence Bengali reading overlaps the same glyphs.
+                # Both readings remain in candidate alternatives for review.
+                primary_explicit_value = bool(re.search(
+                    r"(?:[\u03b8\u0398]|theta|[LlFf])\s*=\s*\d", p_tok.raw_text,
+                    re.IGNORECASE,
+                ))
+                prefer_primary = (
+                    primary_explicit_value
+                    and (p_tok.confidence or 0.0) >= 0.85
+                    and (b_tok.confidence or 0.0) < 0.50
+                )
+                if is_bengali_text(b_tok.raw_text) and not prefer_primary:
                     resolved_token = b_tok
                     resolved_token.candidate_alternatives = list(p_tok.candidate_alternatives)
                     resolved_token.candidate_alternatives.append({

@@ -139,6 +139,20 @@ class ThinLensGrounder:
                     )
                 )
                 grounded_ir.parameters["lens_center"] = lens_center.to_dict()
+                grounded_ir.parameter_provenance["lens_center"] = ProvenanceRecord(
+                    source="diagram_measurement", evidence_refs=[cv_ev_id], confidence=0.9,
+                )
+                grounded_ir.geometry["lens_center"] = lens_center.to_dict()
+                lens_line = cv_candidates.get("lens_line")
+                if lens_line is not None:
+                    aperture = abs(lens_line.end.y - lens_line.start.y)
+                    if aperture >= 10:
+                        grounded_ir.parameters["aperture_height_px"] = PhysicalValue(
+                            value=aperture, unit="px", status="observed",
+                            provenance=ProvenanceRecord(
+                                source="diagram_measurement", evidence_refs=[cv_ev_id], confidence=0.85,
+                            ),
+                        )
             else:
                 lens_ent.position_source_px = None
                 lens_ent.geometry = None
@@ -256,7 +270,7 @@ class ThinLensGrounder:
                 tok_pt = SourcePoint(tok_cx, tok_cy) if (tok_cx is not None and tok_cy is not None) else None
 
                 for cand in val_cands:
-                    if cand.quantity_candidate == "length" and cand.numeric_value is not None:
+                    if cand.quantity_candidate in ("length", "focal_length") and cand.numeric_value is not None:
                         canonical_m = cand.numeric_value
                         if cand.raw_unit == "cm":
                             canonical_m = cand.numeric_value * 0.01

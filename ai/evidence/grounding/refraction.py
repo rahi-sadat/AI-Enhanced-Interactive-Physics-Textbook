@@ -110,8 +110,8 @@ class InterfaceRefractionGrounder:
             },
         )
 
-        bound_ent = next((e for e in grounded_ir.entities if e.type in ("medium_boundary", "boundary", "interface")), None)
-        normal_ent = next((e for e in grounded_ir.entities if e.type in ("normal", "surface_normal")), None)
+        bound_ent = next((e for e in grounded_ir.entities if e.type in ("interface_boundary", "medium_boundary", "boundary", "interface")), None)
+        normal_ent = next((e for e in grounded_ir.entities if e.type in ("normal_line", "normal", "surface_normal")), None)
         inc_ent = next((e for e in grounded_ir.entities if e.type in ("incident_ray", "light_ray")), None)
 
         bound_line = cv_candidates.get("boundary_line")
@@ -122,6 +122,13 @@ class InterfaceRefractionGrounder:
 
         if bound_ent:
             if bound_line:
+                if inc_pt is not None:
+                    bound_ent.position_source_px = inc_pt.to_dict() if hasattr(inc_pt, "to_dict") else inc_pt
+                else:
+                    bound_ent.position_source_px = {
+                        "x": (bound_line.start.x + bound_line.end.x) / 2,
+                        "y": (bound_line.start.y + bound_line.end.y) / 2,
+                    }
                 bound_ent.geometry = {
                     "start": bound_line.start.to_dict() if hasattr(bound_line.start, "to_dict") else bound_line.start,
                     "end": bound_line.end.to_dict() if hasattr(bound_line.end, "to_dict") else bound_line.end,
@@ -149,6 +156,10 @@ class InterfaceRefractionGrounder:
 
         if normal_ent:
             if norm_line:
+                normal_ent.position_source_px = (
+                    inc_pt.to_dict() if inc_pt is not None
+                    else norm_line.midpoint.to_dict()
+                )
                 normal_ent.geometry = {
                     "start": norm_line.start.to_dict() if hasattr(norm_line.start, "to_dict") else norm_line.start,
                     "end": norm_line.end.to_dict() if hasattr(norm_line.end, "to_dict") else norm_line.end,
@@ -203,10 +214,29 @@ class InterfaceRefractionGrounder:
         # Store geometric evidence only if detected
         if cv_candidates.get("bound_y") is not None:
             grounded_ir.parameters["boundary_y"] = float(cv_candidates["bound_y"])
+            grounded_ir.parameter_provenance["boundary_y"] = ProvenanceRecord(
+                source="diagram_measurement", evidence_refs=[cv_ev_id], confidence=0.95)
         if cv_candidates.get("normal_x") is not None:
             grounded_ir.parameters["normal_x"] = float(cv_candidates["normal_x"])
+            grounded_ir.parameter_provenance["normal_x"] = ProvenanceRecord(
+                source="diagram_measurement", evidence_refs=[cv_ev_id], confidence=0.95)
         if inc_pt is not None:
             grounded_ir.parameters["incidence_point"] = inc_pt.to_dict() if hasattr(inc_pt, "to_dict") else inc_pt
+
+        # The visible incident ray supplies an angle relative to the measured
+        # surface normal even if OCR misses its printed angle label.
+        if inc_ray is not None and inc_pt is not None:
+            far = max((inc_ray.start, inc_ray.end), key=lambda point: point.distance_to(inc_pt))
+            dx, dy = abs(far.x - inc_pt.x), abs(far.y - inc_pt.y)
+            if far.y < inc_pt.y and dy > 1 and dx > 1:
+                measured_angle = math.degrees(math.atan2(dx, dy))
+                if 0 < measured_angle < 90:
+                    grounded_ir.parameters["incident_angle"] = PhysicalValue(
+                        value=measured_angle, unit="deg", status="observed",
+                        provenance=ProvenanceRecord(
+                            source="diagram_measurement", evidence_refs=[cv_ev_id], confidence=0.8,
+                        ),
+                    )
 
         # 4. OCR Values & Strict Parameter Association
         if ocr_result and ocr_result.tokens:
@@ -290,8 +320,10 @@ class InterfaceRefractionGrounder:
                     elif cand.quantity_candidate in ("refractive_index", "dimensionless") and cand.numeric_value is not None:
                         is_n2 = any(lbl in text_lower for lbl in ("n2", "n_2", "medium 2", "গ্লাস", "পানি", "জল", "water", "glass"))
                         is_n1 = any(lbl in text_lower for lbl in ("n1", "n_1", "air", "বায়ু"))
-                        if is_n2 or "n =" in text_lower or "n=" in text_lower:
-                            grounded_ir.parameters["n2"] = PhysicalValue(
+                        target_index = "n1" if is_n1 and not is_n2 else (
+                            "n2" if is_n2 or "n =" in text_lower or "n=" in text_lower else None)
+                        if target_index:
+                            grounded_ir.parameters[target_index] = PhysicalValue(
                                 value=cand.numeric_value,
                                 unit="dimensionless",
                                 status="observed",
@@ -299,9 +331,9 @@ class InterfaceRefractionGrounder:
                             )
                             param_associations.append(
                                 ParameterAssociationResult(
-                                    candidate_id=f"assoc_n2_{cand.token_id}",
+                                    candidate_id=f"assoc_{target_index}_{cand.token_id}",
                                     target_entity_id=None,
-                                    target_quantity="n2",
+                                    target_quantity=target_index,
                                     value=cand.numeric_value,
                                     unit="dimensionless",
                                     state=AssociationState.ASSOCIATED,

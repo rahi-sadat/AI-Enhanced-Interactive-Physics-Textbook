@@ -51,7 +51,7 @@ from ai.resolution.evaluator import ReadinessEvaluator
 logger = logging.getLogger(__name__)
 
 
-def parse_and_cluster_circuit_tokens(tokens: List[OCRToken]) -> List[Dict[str, Any]]:
+def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius: float = 220.0) -> List[Dict[str, Any]]:
     """Extract and cluster semantic circuit component tokens into coherent component specifications.
     
     Groups designators (e.g. 'R1', 'V1') with their adjacent physical values (e.g. '100Ω', '24 V').
@@ -63,9 +63,12 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken]) -> List[Dict[str, A
         'fig.', 'figure', 'dc circuit', 'circuit diagram'
     ]
 
+    SUBSCRIPT_MAP = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+
     for tok in tokens:
         raw = tok.raw_text.strip()
-        lower = raw.lower()
+        raw_norm = raw.translate(SUBSCRIPT_MAP)
+        lower = raw_norm.lower()
         if any(ik in lower for ik in ignored_keywords):
             continue
 
@@ -75,56 +78,57 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken]) -> List[Dict[str, A
         cx = b.x + b.width / 2.0
         cy = b.y + b.height / 2.0
 
-        m_v_both = re.search(r'([Vv]\d*)\s*=\s*(\d+(?:\.\d+)?)\s*[vV]?', raw)
-        m_v_desig = re.match(r'^[Vv](\d+)$', raw)
-        m_v_val = re.search(r'(\d+(?:\.\d+)?)\s*(?:[vV]|volt)\b', raw)
-
-        m_r_both = re.search(r'([Rr]\d*)\s*=\s*(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)?', raw)
-        m_r_desig = re.match(r'^[Rr](\d+)$', raw)
-        m_r_val = re.search(r'(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)\b', raw)
-
         ptype = None
         pdesig = None
         pval = None
         punit = None
 
-        if m_v_both:
-            ptype = 'voltage_source'
-            pdesig = m_v_both.group(1).upper() or 'V1'
-            pval = float(m_v_both.group(2))
-            punit = 'V'
-        elif m_r_both and ('=' in raw or 'Ω' in raw or 'ohm' in lower):
+        m_r_desig = re.fullmatch(r'^[Rr](\d+)$', raw_norm)
+        m_v_desig = re.fullmatch(r'^[Vv](\d+)$', raw_norm)
+
+        m_r_comb = re.match(r'^[Rr](\d+?)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
+        m_v_comb = re.match(r'^[Vv](\d*)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
+
+        m_r_val = re.fullmatch(r'^(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
+        m_v_val = re.fullmatch(r'^(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
+
+        if m_r_desig:
             ptype = 'resistor'
-            pdesig = m_r_both.group(1).upper() if m_r_both.group(1) else None
-            pval = float(m_r_both.group(2))
-            punit = 'ohm'
-            if m_r_both.group(3) and 'k' in m_r_both.group(3).lower():
-                pval *= 1000.0
+            pdesig = f"R{m_r_desig.group(1)}"
         elif m_v_desig:
             ptype = 'voltage_source'
-            pdesig = m_v_desig.group(0).upper()
-        elif m_v_val:
-            ptype = 'voltage_source'
-            pval = float(m_v_val.group(1))
-            punit = 'V'
-        elif m_r_desig:
+            pdesig = f"V{m_v_desig.group(1)}"
+        elif m_r_comb:
             ptype = 'resistor'
-            pdesig = m_r_desig.group(0).upper()
+            pdesig = f"R{m_r_comb.group(1)}"
+            pval = float(m_r_comb.group(2))
+            punit = 'ohm'
+            if 'k' in m_r_comb.group(3).lower():
+                pval *= 1000.0
+        elif m_v_comb:
+            ptype = 'voltage_source'
+            pdesig = f"V{m_v_comb.group(1)}" if m_v_comb.group(1) else "V1"
+            pval = float(m_v_comb.group(2))
+            punit = 'V'
         elif m_r_val:
             ptype = 'resistor'
             pval = float(m_r_val.group(1))
             punit = 'ohm'
             if 'k' in m_r_val.group(2).lower():
                 pval *= 1000.0
-        elif raw in ('+', '-'):
+        elif m_v_val:
+            ptype = 'voltage_source'
+            pval = float(m_v_val.group(1))
+            punit = 'V'
+        elif raw in ('+', '-', '十'):
             ptype = 'polarity'
-            pdesig = raw
+            pdesig = '+' if raw in ('+', '十') else '-'
         else:
-            m_num = re.search(r'^(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm|[vV]|volt)?$', raw, re.IGNORECASE)
+            m_num = re.search(r'^(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm|[vV]|volt)?$', raw_norm, re.IGNORECASE)
             if m_num:
                 clean_num = m_num.group(1)
                 unit_part = (m_num.group(2) or '').lower()
-                has_unit = bool(unit_part or ('k' in lower and re.search(r'\d+[kK]', raw)))
+                has_unit = bool(unit_part or ('k' in lower and re.search(r'\d+[kK]', raw_norm)))
                 mult = 1000.0 if 'k' in unit_part or 'k' in lower else 1.0
                 try:
                     pval = float(clean_num) * mult
@@ -184,9 +188,9 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken]) -> List[Dict[str, A
         for j, q in enumerate(parsed):
             if j in used or q['type'] == 'polarity':
                 continue
-            if q['val'] is not None:
+            if q['val'] is not None and q['desig'] is None and q['type'] in (c_type, 'value_only', 'raw_number'):
                 dist = ((p['cx'] - q['cx']) ** 2 + (p['cy'] - q['cy']) ** 2) ** 0.5
-                if dist < 220.0 and dist < min_dist:
+                if dist < association_radius and dist < min_dist:
                     min_dist = dist
                     best_j = j
 
@@ -229,8 +233,7 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken]) -> List[Dict[str, A
         })
 
     # Pass 3: Standalone value tokens without designators
-    r_idx = len([c for c in components if c['type'] == 'resistor']) + 1
-    v_idx = len([c for c in components if c['type'] == 'voltage_source']) + 1
+    existing_ids = {c['id'] for c in components}
     for i, p in enumerate(parsed):
         if i in used or p['type'] == 'polarity':
             continue
@@ -243,11 +246,20 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken]) -> List[Dict[str, A
                 continue
         elif c_type == 'raw_number':
             continue
-        desig = f"V{v_idx}" if c_type == 'voltage_source' else f"R{r_idx}"
-        if c_type == 'voltage_source':
-            v_idx += 1
-        else:
-            r_idx += 1
+
+        if any(c['type'] == c_type and
+               ((p['cx'] - c['cx']) ** 2 + (p['cy'] - c['cy']) ** 2) ** 0.5 < association_radius
+               for c in components):
+            # Standalone OCR values near an identified component are likely
+            # duplicate readings, not extra physical circuit elements.
+            continue
+
+        prefix = "V" if c_type == 'voltage_source' else "R"
+        idx = 1
+        while f"{prefix}{idx}" in existing_ids:
+            idx += 1
+        desig = f"{prefix}{idx}"
+        existing_ids.add(desig)
         used.add(i)
         b = p['tok'].bbox_source_px
         lbl_box = [float(b.x), float(b.y), float(b.width), float(b.height)] if b else None
@@ -264,6 +276,109 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken]) -> List[Dict[str, A
         })
 
     return components
+
+
+def _intermediate_rail_topology(
+    components: List[Dict[str, Any]], branches_x: List[int], rails_y: List[int],
+    edges: Optional[np.ndarray],
+) -> Optional[Dict[str, Dict[str, str]]]:
+    """Resolve nodes where vertical branches are split by an interior rail.
+
+    This handles junctions between two components on the same branch and a
+    cross-branch component. Every rail union must have visible pixel support.
+    """
+    if edges is None or len(branches_x) < 3 or len(rails_y) < 3:
+        return None
+    xs, ys = sorted(branches_x), sorted(rails_y)
+    top, bottom = ys[0], ys[-1]
+    vertical = [c for c in components if abs(c["terminal_2"].y - c["terminal_1"].y) >
+                abs(c["terminal_2"].x - c["terminal_1"].x)]
+    horizontal = [c for c in components if c not in vertical]
+    cross = [c for c in horizontal if top < c["center"][1] < bottom]
+    if not cross:
+        return None
+
+    def supported(axis: str, fixed: int, start: float, stop: float) -> bool:
+        lo, hi = sorted((round(start), round(stop)))
+        if hi - lo < 8:
+            return False
+        if axis == "horizontal":
+            strip = edges[max(0, fixed - 6):min(edges.shape[0], fixed + 7),
+                          max(0, lo):min(edges.shape[1], hi + 1)]
+            occupied = np.count_nonzero(np.any(strip > 0, axis=0)) if strip.size else 0
+        else:
+            strip = edges[max(0, lo):min(edges.shape[0], hi + 1),
+                          max(0, fixed - 6):min(edges.shape[1], fixed + 7)]
+            occupied = np.count_nonzero(np.any(strip > 0, axis=1)) if strip.size else 0
+        return occupied >= (hi - lo) * 0.45
+
+    anchors: Dict[int, Set[int]] = {i: {top, bottom} for i in range(len(xs))}
+    horizontal_links = []
+    for comp in cross:
+        cx, cy = comp["center"]
+        left = max((i for i, x in enumerate(xs) if x < cx), default=None)
+        right = min((i for i, x in enumerate(xs) if x > cx), default=None)
+        mid = min(ys[1:-1], key=lambda y: abs(y - cy))
+        if left is None or right is None or right != left + 1 or abs(mid - cy) > (bottom - top) * 0.12:
+            return None
+        if not (supported("horizontal", mid, xs[left], comp["terminal_1"].x)
+                and supported("horizontal", mid, comp["terminal_2"].x, xs[right])):
+            return None
+        anchors[left].add(mid)
+        anchors[right].add(mid)
+        horizontal_links.append((comp, left, right, mid))
+
+    parent = {(i, y): (i, y) for i, levels in anchors.items() for y in levels}
+
+    def find(key):
+        while parent[key] != key:
+            parent[key] = parent[parent[key]]
+            key = parent[key]
+        return key
+
+    def union(a, b):
+        parent[find(a)] = find(b)
+
+    for i in range(len(xs) - 1):
+        shared_levels = anchors[i] & anchors[i + 1]
+        for y in shared_levels:
+            blocked = any(left == i and right == i + 1 and level == y
+                          for _, left, right, level in horizontal_links)
+            if not blocked and supported("horizontal", y, xs[i], xs[i + 1]):
+                union((i, y), (i + 1, y))
+
+    vertical_links = []
+    for comp in vertical:
+        cx, cy = comp["center"]
+        i = min(range(len(xs)), key=lambda index: abs(xs[index] - cx))
+        levels = sorted(anchors[i])
+        above = max((y for y in levels if y < cy), default=None)
+        below = min((y for y in levels if y > cy), default=None)
+        if above is None or below is None:
+            return None
+        if not (supported("vertical", xs[i], above, comp["terminal_1"].y)
+                and supported("vertical", xs[i], comp["terminal_2"].y, below)):
+            return None
+        vertical_links.append((comp, (i, above), (i, below)))
+
+    for i, levels in anchors.items():
+        ordered = sorted(levels)
+        for above, below in zip(ordered, ordered[1:]):
+            if not any(a == (i, above) and b == (i, below) for _, a, b in vertical_links):
+                if supported("vertical", xs[i], above, below):
+                    union((i, above), (i, below))
+
+    mapping = {root: f"N{index + 1}" for index, root in enumerate(sorted({find(key) for key in parent}))}
+    terminals: Dict[str, Dict[str, str]] = {}
+    for comp, above, below in vertical_links:
+        terminals[comp["id"]] = {"terminal_1": mapping[find(above)],
+                                  "terminal_2": mapping[find(below)]}
+    for comp, left, right, mid in horizontal_links:
+        terminals[comp["id"]] = {"terminal_1": mapping[find((left, mid))],
+                                  "terminal_2": mapping[find((right, mid))]}
+    if len(terminals) != len(components):
+        return None
+    return terminals
 
 
 class CircuitGrounder:
@@ -335,8 +450,16 @@ class CircuitGrounder:
         branches_x: List[int] = cv_candidates.get("branches_x") or []
         edges_img: Optional[np.ndarray] = cv_candidates.get("edges")
 
-        w = int(grounded_ir.geometry.get("width", 800))
-        h = int(grounded_ir.geometry.get("height", 600))
+        w = int((grounded_ir.geometry or {}).get("width") or 0)
+        h = int((grounded_ir.geometry or {}).get("height") or 0)
+        if w <= 0 or h <= 0:
+            grounded_ir.status = BookIRStatus.NEEDS_REVIEW
+            grounded_ir.status_notes = "Native source image dimensions are unavailable."
+            return GroundingOutcome(grounded_book_ir=grounded_ir, diagnostics=diagnostics,
+                                    new_evidence_records=new_evidence,
+                                    candidate_parameters=all_val_candidates,
+                                    parameter_associations=param_associations)
+        image_diagonal = float(np.hypot(w, h))
 
         cv_ev_id = f"ev_cv_circuits_{grounded_ir.source_asset_id or 'anon'}"
         new_evidence[cv_ev_id] = EvidenceRecord(
@@ -415,17 +538,33 @@ class CircuitGrounder:
                 c_toks = []
 
                 for tok, dist, is_match in nearby_toks:
+                    # A nearby label belongs to this component only when its
+                    # designator matches or its physical unit matches the model.
+                    # Otherwise one component can consume the next component's
+                    # value before that component is processed.
+                    other_designator = re.fullmatch(r"[RrVv]\d+", tok.raw_text.strip())
+                    if other_designator and not is_match:
+                        continue
+                    val_cands = parse_physical_value_candidate(tok)
+                    expected_quantity = (
+                        "voltage" if ctype in ("voltage_source", "battery", "dc_source")
+                        else "resistance" if ctype in ("resistor", "bulb", "lamp")
+                        else None
+                    )
+                    matching_value = next(
+                        (vc for vc in val_cands if vc.numeric_value is not None
+                         and vc.quantity_candidate == expected_quantity),
+                        None,
+                    )
+                    if not is_match and matching_value is None:
+                        continue
                     used_tokens.add(tok.id)
                     matched_tok_ids.add(tok.id)
                     c_toks.append(tok)
-                    if val is None:
-                        val_cands = parse_physical_value_candidate(tok)
-                        for vc in val_cands:
-                            if vc.numeric_value is not None:
-                                mult = 1000.0 if (vc.raw_unit and "k" in vc.raw_unit.lower()) else 1.0
-                                val = float(vc.numeric_value) * mult
-                                unit = "V" if vc.quantity_candidate == "voltage" else "ohm"
-                                break
+                    if val is None and matching_value is not None:
+                        mult = 1000.0 if (matching_value.raw_unit and "k" in matching_value.raw_unit.lower()) else 1.0
+                        val = float(matching_value.numeric_value) * mult
+                        unit = "V" if expected_quantity == "voltage" else "ohm"
 
                 lbl_box = None
                 for tok in c_toks:
@@ -447,7 +586,9 @@ class CircuitGrounder:
                     "terminals": c.get("terminals"),
                 })
         else:
-            semantic_clusters = parse_and_cluster_circuit_tokens(parsed_tokens)
+            semantic_clusters = parse_and_cluster_circuit_tokens(
+                parsed_tokens, association_radius=max(30.0, image_diagonal * 0.2),
+            )
             for sc in semantic_clusters:
                 for tok in sc.get("tokens", []):
                     matched_tok_ids.add(tok.id)
@@ -476,10 +617,11 @@ class CircuitGrounder:
             best_ry = min(rails_y, key=lambda ry: abs(cy - ry)) if rails_y else cy
             dist_ry = abs(cy - best_ry) if rails_y else float("inf")
 
-            is_in_rail_span = (y_top - 40 <= cy <= y_bot + 40) if len(rails_y) >= 2 else True
+            is_in_rail_span = (y_top - image_diagonal * 0.04 <= cy <= y_bot + image_diagonal * 0.04) if len(rails_y) >= 2 else True
 
-            # If within vertical span between rails, and closer to branch or within branch proximity (< 160px)
-            if branches_x and is_in_rail_span and (dist_bx < 160 or dist_bx < dist_ry):
+            # A label above a rail may still be close to a branch in absolute
+            # pixels. Orientation follows the nearer measured wire axis.
+            if branches_x and is_in_rail_span and dist_bx < dist_ry:
                 is_vertical = True
             elif edges_img is not None:
                 r = 130
@@ -540,9 +682,27 @@ class CircuitGrounder:
         # -------------------------------------------------------------------
         comp_term_nodes: Dict[str, Dict[str, str]] = {}
         unique_nodes_discovered = 0
+        has_interior_component = (
+            len(rails_y) >= 3 and any(
+                abs(c["terminal_2"].x - c["terminal_1"].x) >
+                abs(c["terminal_2"].y - c["terminal_1"].y)
+                and min(rails_y) < c["center"][1] < max(rails_y)
+                for c in grounded_components
+            )
+        )
+        interior_topology = (_intermediate_rail_topology(
+            grounded_components, branches_x, rails_y, edges_img,
+        ) if has_interior_component else None)
 
         # Planar Rails & Branches Deterministic Topology Resolution
-        if len(rails_y) >= 2 and len(branches_x) >= 2 and len(cv_wires) > 0:
+        if interior_topology is not None:
+            comp_term_nodes = interior_topology
+            unique_nodes_discovered = len({node for pair in comp_term_nodes.values() for node in pair.values()})
+        elif has_interior_component:
+            # Never collapse an unresolved bridge or middle rail into two
+            # apparent parallel nodes.
+            unique_nodes_discovered = 0
+        elif len(rails_y) >= 2 and len(branches_x) >= 2 and len(cv_wires) > 0:
             y_top = min(rails_y)
             y_bot = max(rails_y)
 
@@ -553,9 +713,9 @@ class CircuitGrounder:
 
             for c in grounded_components:
                 cx, cy = c["center"]
-                if abs(cy - y_top) < 35:
+                if abs(cy - y_top) < image_diagonal * 0.035:
                     top_rail_comps.append(c)
-                elif abs(cy - y_bot) < 35:
+                elif abs(cy - y_bot) < image_diagonal * 0.035:
                     bot_rail_comps.append(c)
                 else:
                     branch_comps.append(c)
@@ -620,7 +780,8 @@ class CircuitGrounder:
 
             def _get_node_label(pt: SourcePoint) -> Optional[int]:
                 px, py = int(pt.x), int(pt.y)
-                win = labels[max(0, py - 30):min(h, py + 30), max(0, px - 30):min(w, px + 30)]
+                radius = max(2, round(image_diagonal * 0.03))
+                win = labels[max(0, py - radius):min(h, py + radius), max(0, px - radius):min(w, px + radius)]
                 non_zero = win[win > 0]
                 if len(non_zero) > 0:
                     vals, counts = np.unique(non_zero, return_counts=True)
@@ -638,28 +799,17 @@ class CircuitGrounder:
 
             for comp in grounded_components:
                 cid = comp["id"]
-                n1 = label_to_node.get(raw_nodes[f"{cid}.t1"], "N1")
-                n2 = label_to_node.get(raw_nodes[f"{cid}.t2"], "N2")
-                if n1 == n2:
-                    n2 = f"N{len(used_nids) + 1}"
-                    used_nids.add(n2)
-                comp_term_nodes[cid] = {"terminal_1": n1, "terminal_2": n2}
+                n1 = label_to_node.get(raw_nodes[f"{cid}.t1"])
+                n2 = label_to_node.get(raw_nodes[f"{cid}.t2"])
+                if n1 is not None and n2 is not None:
+                    comp_term_nodes[cid] = {"terminal_1": n1, "terminal_2": n2}
 
             unique_nodes_discovered = len(used_nids)
         elif len(cv_wires) > 0:
-            # Hough line distance clustering fallback
-            term_list = []
-            for comp in grounded_components:
-                term_list.append((comp["id"], "terminal_1", comp["terminal_1"]))
-                term_list.append((comp["id"], "terminal_2", comp["terminal_2"]))
-
-            for idx, (cid, tname, tpt) in enumerate(term_list):
-                comp_term_nodes.setdefault(cid, {})[tname] = f"N{(idx % 2) + 1}"
-            unique_nodes_discovered = 2
+            # Lines without a verified continuity graph cannot establish nodes.
+            unique_nodes_discovered = 0
         else:
             # ZERO wire continuity: Strict anti-fabrication invariant (PR-06)
-            for comp in grounded_components:
-                comp_term_nodes[comp["id"]] = {"terminal_1": "N1", "terminal_2": "N1"}
             unique_nodes_discovered = 0
 
         # Select reference node (ground): negative terminal of primary DC voltage source
@@ -669,7 +819,23 @@ class CircuitGrounder:
                 ref_node = comp_term_nodes.get(comp["id"], {}).get("terminal_2", "N0")
                 break
         if ref_node == "N0" and grounded_components:
-            ref_node = comp_term_nodes.get(grounded_components[0]["id"], {}).get("terminal_1", "N1")
+            ref_node = comp_term_nodes.get(grounded_components[0]["id"], {}).get("terminal_1") or "N0"
+
+        # Ensure unique component IDs across grounded components
+        seen_cids: Set[str] = set()
+        for comp in grounded_components:
+            cid = comp["id"]
+            if cid in seen_cids:
+                prefix = "V" if comp["type"] in ("voltage_source", "battery") else "R"
+                idx = 1
+                while f"{prefix}{idx}" in seen_cids:
+                    idx += 1
+                new_cid = f"{prefix}{idx}"
+                # Migrate node mapping if needed
+                if cid in comp_term_nodes:
+                    comp_term_nodes[new_cid] = comp_term_nodes.pop(cid)
+                comp["id"] = new_cid
+            seen_cids.add(comp["id"])
 
         # -------------------------------------------------------------------
         # 4. Canonical Entities & Parameters Assembly
@@ -684,9 +850,9 @@ class CircuitGrounder:
             b = comp["bbox"]
             t1 = comp["terminal_1"]
             t2 = comp["terminal_2"]
-            n1 = comp_term_nodes.get(cid, {}).get("terminal_1", "N1")
-            n2 = comp_term_nodes.get(cid, {}).get("terminal_2", "N2")
-            c_nodes = [n1, n2] if len(cv_wires) > 0 else []
+            n1 = comp_term_nodes.get(cid, {}).get("terminal_1")
+            n2 = comp_term_nodes.get(cid, {}).get("terminal_2")
+            c_nodes = [n1, n2] if n1 is not None and n2 is not None else []
 
             pos_dict = {
                 "x": cx,
@@ -720,13 +886,13 @@ class CircuitGrounder:
                 "terminals": [
                     {
                         "id": f"{cid}.t1",
-                        "node": n1 if len(c_nodes) > 0 else "N1",
+                        "node": n1,
                         "polarity": "+" if ctype in ("voltage_source", "battery") else None,
                         "source_px": [t1.x, t1.y],
                     },
                     {
                         "id": f"{cid}.t2",
-                        "node": n2 if len(c_nodes) > 1 else "N2",
+                        "node": n2,
                         "polarity": "-" if ctype in ("voltage_source", "battery") else None,
                         "source_px": [t2.x, t2.y],
                     },
@@ -792,7 +958,15 @@ class CircuitGrounder:
                         )
                     )
 
-        grounded_ir.entities = grounded_entities
+        # A semantic switch cannot be erased just because the current CV graph
+        # only grounds resistors and sources. Its state changes connectivity.
+        # Keep it ungrounded so readiness can require review instead of
+        # compiling an apparently closed circuit.
+        semantic_switches = [
+            entity for entity in grounded_ir.entities
+            if entity.type in {"switch", "open_switch", "closed_switch"}
+        ]
+        grounded_ir.entities = grounded_entities + semantic_switches
 
         all_nids = set()
         for c in canonical_components:
@@ -845,7 +1019,7 @@ class CircuitGrounder:
 
             canonical_wires.append({
                 "id": f"wire_{idx+1}",
-                "node": assigned_node or (canonical_nodes[0]["id"] if canonical_nodes else "N1"),
+                "node": assigned_node,
                 "polyline_source_px": [p1, p2],
                 "points": [p1, p2],
                 "length_px": float(np.hypot(p2[0] - p1[0], p2[1] - p1[1])),
@@ -867,8 +1041,20 @@ class CircuitGrounder:
             notes="Derived from wire continuity network."
         )
 
+        has_source = any(
+            comp.get("type") in ("voltage_source", "battery", "dc_source")
+            for comp in canonical_components
+        )
+        has_grounded_components = all(
+            len(comp.get("nodes", [])) == 2
+            and all(node in all_nids for node in comp.get("nodes", []))
+            and (comp.get("type") not in ("voltage_source", "battery", "dc_source")
+                 or comp["nodes"][0] != comp["nodes"][1])
+            for comp in canonical_components
+        )
+        verified_connectivity = len(cv_wires) > 0 and len(canonical_nodes) >= 2 and has_grounded_components
         grounded_ir.geometry["circuit_topology"] = {
-            "verified_connectivity": len(canonical_nodes) >= 2,
+            "verified_connectivity": verified_connectivity,
             "node_count": len(canonical_nodes),
         }
         grounded_ir.evidence.update({k: v.to_dict() for k, v in new_evidence.items()})
@@ -878,11 +1064,11 @@ class CircuitGrounder:
         # -------------------------------------------------------------------
         # 5. Authoritative Readiness Gate (PR-07 / PR-08 Invariant)
         # -------------------------------------------------------------------
-        if len(cv_wires) > 0 and len(canonical_nodes) >= 2:
+        if verified_connectivity and has_source:
             ReadinessEvaluator.evaluate(grounded_ir, mutate_status=True)
         else:
             grounded_ir.status = BookIRStatus.NEEDS_REVIEW
-            grounded_ir.status_notes = "Missing wire continuity: circuit terminals ungrounded."
+            grounded_ir.status_notes = "Circuit source, component values, or wire continuity require review."
 
         return GroundingOutcome(
             grounded_book_ir=grounded_ir,

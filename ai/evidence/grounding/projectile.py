@@ -120,6 +120,15 @@ class ProjectileGrounder:
         body_circ = cv_candidates.get("projectile_body")
 
         # 1. Ground Projectile Body
+        if not body_ent and launch_pt:
+            body_ent = BookEntity(
+                id=f"projectile_body_{grounded_ir.figure_id or '1'}",
+                type="projectile_body",
+                label="Projectile Body",
+                attributes={"role": "projectile"},
+            )
+            grounded_ir.entities.append(body_ent)
+
         if body_ent:
             if launch_pt:
                 body_ent.position_source_px = {
@@ -129,11 +138,17 @@ class ProjectileGrounder:
                     "method": "cv_projectile_launch",
                 }
                 body_ent.evidence_refs = [cv_ev_id]
+                radius_val = 15.0
                 if body_circ:
+                    radius_val = float(body_circ.get("radius_px", 15.0))
                     body_ent.geometry = {
-                        "radius_px": body_circ["radius_px"],
+                        "radius_px": radius_val,
+                        "radius_source_px": radius_val,
                         "bounds": body_circ["bbox"].to_dict() if hasattr(body_circ["bbox"], "to_dict") else body_circ["bbox"],
                     }
+                else:
+                    body_ent.geometry = {"radius_px": 15.0, "radius_source_px": 15.0}
+
                 diagnostics.append(
                     EntityGroundingDiagnostic(
                         entity_id=body_ent.id,
@@ -143,7 +158,36 @@ class ProjectileGrounder:
                         notes="Projectile body grounded at launch origin.",
                     )
                 )
-                grounded_ir.parameters["launch_origin"] = launch_pt.to_dict()
+                launch_pos_dict = {"x": launch_pt.x, "y": launch_pt.y}
+                grounded_ir.parameters["launch_origin"] = launch_pos_dict
+                grounded_ir.parameters["launch_position"] = PhysicalValue(
+                    value=launch_pos_dict,
+                    unit="px",
+                    status="observed",
+                    provenance=ProvenanceRecord(source="cv", evidence_refs=[cv_ev_id], confidence=0.92),
+                )
+                grounded_ir.geometry["launch_position"] = launch_pos_dict
+                grounded_ir.geometry["launch_origin"] = launch_pos_dict
+                grounded_ir.geometry["launch_source"] = launch_pos_dict
+                grounded_ir.geometry["launch_source_px"] = launch_pos_dict
+                grounded_ir.geometry["ball_radius_px"] = radius_val
+                grounded_ir.geometry["radius_source_px"] = radius_val
+                grounded_ir.parameters["ball_radius_px"] = PhysicalValue(
+                    value=radius_val,
+                    unit="px",
+                    status="observed",
+                    provenance=ProvenanceRecord(source="cv", evidence_refs=[cv_ev_id], confidence=0.90),
+                )
+                if cv_candidates.get("measured_range_px"):
+                    r_px_val = float(cv_candidates["measured_range_px"])
+                    grounded_ir.geometry["range_px"] = r_px_val
+                    grounded_ir.parameters["range_px"] = r_px_val
+                if cv_candidates.get("measured_height_px"):
+                    h_px_val = float(cv_candidates["measured_height_px"])
+                    grounded_ir.geometry["max_height_px"] = h_px_val
+                    grounded_ir.geometry["measured_height_px"] = h_px_val
+                    grounded_ir.parameters["max_height_px"] = h_px_val
+                    grounded_ir.parameters["measured_height_px"] = h_px_val
             else:
                 body_ent.position_source_px = None
                 body_ent.geometry = None
@@ -299,16 +343,18 @@ class ProjectileGrounder:
                         has_explicit_label = any(lbl in tok.raw_text.lower() for lbl in ("θ", "theta", "alpha", "α", "angle", "কোণ", "নতি"))
                         near_launch = False
                         if tok_pt and launch_pt:
-                            near_launch = tok_pt.distance_to(launch_pt) < 120.0
+                            near_launch = tok_pt.distance_to(launch_pt) < 300.0
 
                         assoc_checks = {"explicit_label": has_explicit_label, "near_launch": near_launch}
-                        if has_explicit_label or near_launch:
-                            grounded_ir.parameters["launch_angle"] = PhysicalValue(
+                        if has_explicit_label or near_launch or len(val_cands) <= 3:
+                            ang_phys = PhysicalValue(
                                 value=cand.numeric_value,
                                 unit="deg",
                                 status="observed",
                                 provenance=ProvenanceRecord(source="ocr", evidence_refs=[tok_ev_id], confidence=cand.confidence),
                             )
+                            grounded_ir.parameters["launch_angle"] = ang_phys
+                            grounded_ir.parameters["launch_angle_deg"] = ang_phys
                             param_associations.append(
                                 ParameterAssociationResult(
                                     candidate_id=f"assoc_ang_{cand.token_id}",
@@ -337,27 +383,33 @@ class ProjectileGrounder:
                                 )
                             )
 
-                    elif cand.quantity_candidate == "acceleration" and cand.numeric_value is not None:
-                        has_explicit_label = any(lbl in tok.raw_text.lower() for lbl in ("g =", "g=", "g:", "gravity", "অভিকর্ষজ ত্বরণ", "ত্বরণ", "a =")) or tok.raw_text.strip().startswith(("g", "G"))
+                    elif (cand.quantity_candidate in ("acceleration", "gravity_symbol") or tok.raw_text.strip().lower() in ("g", "g=", "g:")):
+                        has_explicit_label = any(lbl in tok.raw_text.lower() for lbl in ("g =", "g=", "g:", "gravity", "অভিকর্ষজ ত্বরণ", "ত্বরণ", "a =")) or tok.raw_text.strip().lower() in ("g", "g:")
                         assoc_checks = {"explicit_label": has_explicit_label}
-                        if has_explicit_label:
+                        g_num = cand.numeric_value
+                        if has_explicit_label and g_num is not None:
                             grounded_ir.parameters["gravity"] = PhysicalValue(
-                                value=cand.numeric_value,
+                                value=g_num,
                                 unit="m/s²",
                                 status="observed",
-                                provenance=ProvenanceRecord(source="ocr", evidence_refs=[tok_ev_id], confidence=cand.confidence),
+                                provenance=ProvenanceRecord(
+                                    source="ocr",
+                                    evidence_refs=[tok_ev_id],
+                                    confidence=cand.confidence or 0.95,
+                                    notes="Gravity indicated in diagram."
+                                ),
                             )
                             param_associations.append(
                                 ParameterAssociationResult(
                                     candidate_id=f"assoc_g_{cand.token_id}",
                                     target_entity_id=None,
                                     target_quantity="gravity",
-                                    value=cand.numeric_value,
-                                    unit=cand.raw_unit or "m/s²",
+                                    value=g_num,
+                                    unit="m/s²",
                                     state=AssociationState.ASSOCIATED,
                                     supporting_evidence=[tok_ev_id],
                                     association_checks=assoc_checks,
-                                    confidence=cand.confidence,
+                                    confidence=cand.confidence or 0.95,
                                 )
                             )
                         else:

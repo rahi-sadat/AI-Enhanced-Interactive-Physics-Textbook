@@ -164,15 +164,25 @@ class TestPR06MultilingualOCR(unittest.TestCase):
         img = Image.new("RGB", (img_w, img_h), color=(255, 255, 255))
         draw = ImageDraw.Draw(img)
 
-        try:
-            font_en = ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 28)
-        except Exception:
-            font_en = ImageFont.load_default()
+        def load_font(paths):
+            for path in paths:
+                try:
+                    return ImageFont.truetype(path, 28)
+                except OSError:
+                    continue
+            return None
 
-        try:
-            font_bn = ImageFont.truetype("C:/Windows/Fonts/Nirmala.ttc", 28)
-        except Exception:
-            font_bn = font_en
+        font_en = load_font([
+            "C:/Windows/Fonts/arial.ttf",
+            "/mnt/c/Windows/Fonts/arial.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        ])
+        font_bn = load_font([
+            "C:/Windows/Fonts/Nirmala.ttc",
+            "/mnt/c/Windows/Fonts/Nirmala.ttc",
+        ])
+        if font_en is None or font_bn is None:
+            self.skipTest("OCR benchmark requires full-size Latin and Bengali fonts")
 
         for item in ground_truth:
             x, y, w, h = item["bbox"]

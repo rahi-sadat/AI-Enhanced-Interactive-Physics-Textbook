@@ -12,6 +12,7 @@ Strict Invariants:
 from __future__ import annotations
 
 import logging
+import cv2
 from typing import Any, Dict, List, Optional
 
 from shared.schemas.evidence import (
@@ -112,6 +113,7 @@ class SphericalMirrorGrounder:
 
         axis_line = cv_candidates.get("principal_axis")
         pole_pt: Optional[SourcePoint] = cv_candidates.get("pole")
+        focus_pt: Optional[SourcePoint] = cv_candidates.get("focus_point")
 
         if mirror_ent:
             if pole_pt:
@@ -131,7 +133,11 @@ class SphericalMirrorGrounder:
                         notes="Mirror vertex / pole grounded.",
                     )
                 )
-                grounded_ir.parameters["pole"] = pole_pt.to_dict()
+                grounded_ir.parameters["pole"] = {
+                    **pole_pt.to_dict(),
+                    "provenance": {"source": "diagram_measurement", "evidence_refs": [cv_ev_id], "confidence": 0.85},
+                }
+                grounded_ir.geometry["pole"] = {"x": pole_pt.x, "y": pole_pt.y}
             else:
                 mirror_ent.position_source_px = None
                 mirror_ent.geometry = None
@@ -141,6 +147,26 @@ class SphericalMirrorGrounder:
                         grounding_state=GroundingState.UNRESOLVED,
                         notes="Mirror pole not detected.",
                     )
+                )
+
+        if pole_pt and focus_pt:
+            focal_px = abs(pole_pt.x - focus_pt.x)
+            if focal_px > 1:
+                grounded_ir.parameters["focal_length_px"] = PhysicalValue(
+                    value=focal_px, unit="px", status="observed",
+                    provenance=ProvenanceRecord(source="diagram_measurement", evidence_refs=[cv_ev_id], confidence=0.8),
+                )
+                grounded_ir.geometry["focus_point"] = {"x": focus_pt.x, "y": focus_pt.y}
+
+        mirror_contour = cv_candidates.get("mirror_contour")
+        aperture_px = cv_candidates.get("aperture_height_px")
+        if aperture_px is None and mirror_contour is not None:
+            _, _, _, aperture_px = cv2.boundingRect(mirror_contour)
+        if aperture_px is not None:
+            if aperture_px >= 10:
+                grounded_ir.parameters["aperture_height_px"] = PhysicalValue(
+                    value=float(aperture_px), unit="px", status="observed",
+                    provenance=ProvenanceRecord(source="diagram_measurement", evidence_refs=[cv_ev_id], confidence=0.8),
                 )
 
         if axis_ent:
@@ -172,6 +198,12 @@ class SphericalMirrorGrounder:
 
         if ocr_result and ocr_result.tokens:
             for tok in ocr_result.tokens:
+                word = tok.raw_text.lower()
+                if "concave" in word or "convex" in word:
+                    grounded_ir.parameters["concavity"] = "concave" if "concave" in word else "convex"
+                    grounded_ir.parameter_provenance["concavity"] = ProvenanceRecord(
+                        source="ocr", evidence_refs=[f"ev_ocr_{tok.id}"], confidence=min(tok.confidence, 0.95),
+                    )
                 tok_ev_id = f"ev_ocr_{tok.id}"
                 new_evidence[tok_ev_id] = EvidenceRecord(
                     id=tok_ev_id,

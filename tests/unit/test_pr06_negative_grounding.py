@@ -137,6 +137,26 @@ class TestPR06NegativeGrounding(unittest.TestCase):
         self.assertNotIn("incidence_point", outcome.grounded_book_ir.parameters)
         self.assertEqual(outcome.grounded_book_ir.status, BookIRStatus.NEEDS_REVIEW)
 
+    def test_refraction_semantic_boundary_and_normal_aliases_use_cv_coordinates(self):
+        book_ir = BookIR(
+            source_asset_id="neutral", domain="optics", subtype="interface_refraction",
+            entities=[BookEntity(id="boundary", type="interface_boundary"),
+                      BookEntity(id="normal", type="normal_line")],
+            parameters={}, status=BookIRStatus.NEEDS_REVIEW,
+        )
+        candidates = {
+            "boundary_line": SourceLine(SourcePoint(30, 175), SourcePoint(470, 175)),
+            "normal_line": SourceLine(SourcePoint(250, 40), SourcePoint(250, 310)),
+            "incidence_point": SourcePoint(250, 175),
+            "bound_y": 175, "normal_x": 250,
+        }
+        grounded = InterfaceRefractionGrounder().ground(
+            book_ir, candidates, source_width=500, source_height=350,
+        ).grounded_book_ir
+        self.assertEqual(grounded.entities[0].position_source_px, {"x": 250.0, "y": 175.0})
+        self.assertEqual(grounded.entities[1].position_source_px, {"x": 250.0, "y": 175.0})
+        self.assertTrue(grounded.entities[0].evidence_refs)
+
     def test_blank_page_spherical_mirror_no_synthetic_pole(self):
         """A blank image must NOT manufacture mirror pole at image center."""
         blank = np.zeros((400, 600, 3), dtype=np.uint8) + 255
@@ -215,7 +235,7 @@ class TestPR06NegativeGrounding(unittest.TestCase):
         )
 
         grounder = CircuitGrounder()
-        outcome = grounder.ground(book_ir, cv_candidates, ocr_result)
+        outcome = grounder.ground(book_ir, cv_candidates, ocr_result, source_width=600, source_height=600)
 
         # R1_resistance should NOT be set because the token is too far and unlabeled
         self.assertNotIn("R1_resistance", outcome.grounded_book_ir.parameters, "Faraway unlabeled token must not be associated to R1")
