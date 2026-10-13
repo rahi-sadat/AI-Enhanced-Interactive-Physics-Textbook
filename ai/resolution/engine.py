@@ -11,7 +11,6 @@ CRITICAL INVARIANTS:
 """
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
@@ -188,7 +187,7 @@ class ResolutionEngine:
         current_val = (book_ir.parameters or {}).get(target_param)
         superseded = None
         if current_val is not None and current_val != norm_val:
-            superseded = current_val
+            superseded = current_val.to_dict() if hasattr(current_val, "to_dict") else current_val
 
         # 4. Construct complete, immutable resolution record with canonical parameter name
         updated_dec = ResolutionDecision(
@@ -212,9 +211,10 @@ class ResolutionEngine:
         # 5. Build explicit ProvenanceRecord
         res_src_val = dec.resolution_source.value if hasattr(dec.resolution_source, "value") else str(dec.resolution_source)
         is_user = res_src_val in ("user_supplied", "user_confirmed", "user_corrected")
+        is_auto_policy = dec.resolved_by == "auto_policy" and res_src_val == ResolutionSource.POLICY_DEFAULT.value
         prov = ProvenanceRecord(
-            source=res_src_val,
-            confidence=1.0 if is_user else 0.99,
+            source="auto_policy" if is_auto_policy else res_src_val,
+            confidence=0.8 if is_auto_policy else (1.0 if is_user else 0.99),
             policy_id=dec.policy_id,
             policy_version=dec.policy_version,
             user_accepted=dec.user_accepted,
@@ -248,6 +248,7 @@ class ResolutionEngine:
             entities=book_ir.entities or [],
             parameters=book_ir.parameters,
             resolutions=book_ir.resolutions,
+            geometry=getattr(book_ir, "geometry", None) or {},
         )
         if calib_data:
             book_ir.calibration = calib_data
@@ -428,3 +429,90 @@ class ResolutionEngine:
 
         # Re-evaluate and mutate status
         return ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+
+    @classmethod
+    def auto_resolve(cls, book_ir: BookIR) -> ReadinessReport:
+        """Derive calibration and apply only policies permitted without opt-in.
+
+        Grounded values may reach readiness automatically. Unverified OCR
+        candidates and opt-in assumptions remain for the review workflow.
+        """
+        subtype = getattr(book_ir, "subtype", None)
+        domain = getattr(book_ir, "domain", None)
+        spec = RequirementRegistry.get_spec(subtype) if subtype else None
+        if not spec:
+            return ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+
+        # 1. Normalize aliases in parameters
+        if book_ir.parameters and spec.parameter_aliases:
+            for alias_k, canon_k in spec.parameter_aliases.items():
+                if alias_k in book_ir.parameters and canon_k not in book_ir.parameters:
+                    book_ir.parameters[canon_k] = book_ir.parameters[alias_k]
+
+        # Grounders promote OCR values only when their spatial association is
+        # verified. Remaining candidates require review: confidence alone does
+        # not identify the target component or constitute user confirmation.
+
+        # 2. Attempt spatial calibration derivation before default scale policies
+        try:
+            calib_data = CalibrationEngine.derive_for_subtype(
+                subtype=subtype,
+                entities=book_ir.entities or [],
+                parameters=book_ir.parameters or {},
+                resolutions=book_ir.resolutions or {},
+                geometry=getattr(book_ir, "geometry", None) or {},
+            )
+            if calib_data:
+                book_ir.calibration = calib_data
+                if "pixels_per_meter" in spec.parameters:
+                    book_ir.parameters["pixels_per_meter"] = calib_data.pixels_per_meter
+        except Exception:
+            pass
+
+        # 3. Apply only policies that explicitly permit automatic use.
+        for p_name, p_req in spec.parameters.items():
+            is_resolved = (book_ir.parameters and p_name in book_ir.parameters) or (book_ir.resolutions and p_name in book_ir.resolutions)
+            policy = PolicyRegistry.get_policy(p_req.default_policy_id) if p_req.default_policy_id else None
+            if not is_resolved and policy and not policy.requires_user_opt_in:
+                try:
+                    cls.apply_policy(book_ir, policy_id=policy.id, parameter_name=p_name, user_accepted=False)
+                except Exception:
+                    pass
+
+        # Also apply standard allowed policies for known domain constants if missing
+        allowed = spec.allowed_policies or []
+        for pol_id in allowed:
+            policy = PolicyRegistry.get_policy(pol_id)
+            if policy and not policy.requires_user_opt_in:
+                p_param = policy.target_parameter
+                is_res = (book_ir.parameters and p_param in book_ir.parameters) or (book_ir.resolutions and p_param in book_ir.resolutions)
+                if not is_res:
+                    try:
+                        cls.apply_policy(book_ir, policy_id=pol_id, parameter_name=p_param, user_accepted=False)
+                    except Exception:
+                        pass
+
+        # 4. Re-check calibration if a permitted policy made it possible.
+        if not getattr(book_ir, "calibration", None):
+            try:
+                calib_data = CalibrationEngine.derive_for_subtype(
+                    subtype=subtype,
+                    entities=book_ir.entities or [],
+                    parameters=book_ir.parameters or {},
+                    resolutions=book_ir.resolutions or {},
+                    geometry=getattr(book_ir, "geometry", None) or {},
+                )
+                if calib_data:
+                    book_ir.calibration = calib_data
+                    if "pixels_per_meter" in spec.parameters:
+                        book_ir.parameters["pixels_per_meter"] = calib_data.pixels_per_meter
+            except Exception:
+                pass
+
+        # 5. Evaluate final readiness and mutate status
+        return ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+
+    @classmethod
+    def auto_resolve_for_simulation(cls, book_ir: BookIR) -> ReadinessReport:
+        """Compatibility entry point: resolve only grounded evidence and permitted policies."""
+        return cls.auto_resolve(book_ir)

@@ -16,6 +16,7 @@ CRITICAL INVARIANTS:
 """
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, List, Optional, Set
 
 from shared.schemas.ingestion import BookIR, BookEntity
@@ -27,6 +28,7 @@ from shared.schemas.resolution import (
 )
 from ai.resolution.policies import PolicyRegistry
 from ai.resolution.requirements import ModelRequirementSpec, RequirementRegistry
+from ai.resolution.units import UnitEngine
 
 
 class ResolutionAnalyzer:
@@ -100,6 +102,26 @@ class ResolutionAnalyzer:
         # 4. Check Required Physical Parameters
         cls._check_parameter_requirements(book_ir, spec, issues, satisfied_reqs, missing_reqs)
 
+        for group in spec.one_of_requirements:
+            value_sources = (book_ir.geometry or {}, book_ir.parameters or {}, book_ir.resolutions or {})
+            aliases = {alias for alias, canonical in spec.parameter_aliases.items() if canonical in group}
+            if not any(source.get(name) is not None
+                       for source in value_sources for name in set(group) | aliases):
+                label = " or ".join(group)
+                issues.append(ReviewIssue(
+                    id=f"issue_missing_one_of_{'_'.join(group)}",
+                    issue_type=ReviewIssueType.MISSING_PARAMETER,
+                    title=f"Missing {label}",
+                    description=f"Simulation requires {label}.",
+                    question=f"Provide or verify {label} before simulation.",
+                    action_type=ResolutionActionType.CHOOSE_OPTION,
+                    target_subtype=subtype,
+                    is_blocker=True,
+                ))
+
+        if domain == "circuits" and subtype == "dc_linear":
+            cls._check_circuit_components(book_ir, issues)
+
         # 5. Check Optional Parameters
         cls._check_optional_parameters(book_ir, spec, issues, satisfied_reqs)
 
@@ -126,6 +148,83 @@ class ResolutionAnalyzer:
         )
 
     @classmethod
+    def _check_circuit_components(cls, book_ir: BookIR, issues: List[ReviewIssue]) -> None:
+        """Keep review readiness aligned with the compiler's DC graph/value gate."""
+        if any(entity.type in {"switch", "open_switch", "closed_switch"}
+               for entity in book_ir.entities):
+            issues.append(ReviewIssue(
+                id="issue_circuit_switch_state_unverified",
+                issue_type=ReviewIssueType.AMBIGUOUS_GEOMETRY,
+                title="Switch state and connections require review",
+                description="A switch is present but its state and connections are not grounded in the circuit graph.",
+                question="Verify the switch state and circuit topology before simulation.",
+                action_type=ResolutionActionType.CHOOSE_OPTION,
+                target_subtype="dc_linear",
+                is_blocker=True,
+            ))
+        params = book_ir.parameters or {}
+        components = params.get("components")
+        nodes = params.get("nodes")
+        components = getattr(components, "value", components)
+        nodes = getattr(nodes, "value", nodes)
+        if not isinstance(components, list) or not isinstance(nodes, list):
+            return  # The generic requirement checks already report missing topology.
+
+        node_ids = {n if isinstance(n, str) else n.get("id")
+                    for n in nodes if isinstance(n, (str, dict))}
+        sources = {"voltage_source", "battery", "dc_source"}
+        if not any(isinstance(c, dict) and c.get("type") in sources for c in components):
+            issues.append(ReviewIssue(
+                id="issue_circuit_missing_source",
+                issue_type=ReviewIssueType.UNGROUNDED_GEOMETRY,
+                title="Missing grounded DC source",
+                description="The circuit graph has no grounded voltage source.",
+                question="Confirm the source symbol, terminals, and voltage before simulation.",
+                action_type=ResolutionActionType.CHOOSE_OPTION,
+                target_subtype="dc_linear",
+                is_blocker=True,
+            ))
+
+        for index, component in enumerate(components):
+            if not isinstance(component, dict):
+                continue
+            cid = component.get("id") or f"component_{index}"
+            terminals = component.get("nodes")
+            if (not isinstance(terminals, list) or len(terminals) != 2
+                    or any(node not in node_ids for node in terminals)
+                    or (component.get("type") in sources and terminals[0] == terminals[1])):
+                issues.append(ReviewIssue(
+                    id=f"issue_circuit_connection_{cid}",
+                    issue_type=ReviewIssueType.UNGROUNDED_GEOMETRY,
+                    title=f"Unverified connection for {cid}",
+                    description=f"Circuit component {cid} has no valid two-node connection.",
+                    question=f"Verify both terminals of {cid} against the diagram.",
+                    action_type=ResolutionActionType.CHOOSE_OPTION,
+                    target_subtype="dc_linear",
+                    is_blocker=True,
+                ))
+
+            if component.get("type") in sources | {"resistor", "bulb", "lamp"}:
+                value = component.get("value")
+                dimension = "voltage" if component.get("type") in sources else "resistance"
+                valid = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+                if valid and dimension == "resistance":
+                    valid = value > 0
+                if valid:
+                    valid = UnitEngine.parse_quantity(value, component.get("unit"), dimension).success
+                if not valid:
+                    issues.append(ReviewIssue(
+                        id=f"issue_circuit_value_{cid}",
+                        issue_type=ReviewIssueType.MISSING_PARAMETER,
+                        title=f"Unverified value for {cid}",
+                        description=f"Circuit component {cid} lacks a valid grounded {dimension} value and unit.",
+                        question=f"Confirm the {dimension} printed for {cid} before simulation.",
+                        action_type=ResolutionActionType.CHOOSE_OPTION,
+                        target_subtype="dc_linear",
+                        is_blocker=True,
+                    ))
+
+    @classmethod
     def _check_geometry_requirements(
         cls, book_ir: BookIR, spec: ModelRequirementSpec, issues: List[ReviewIssue]
     ) -> None:
@@ -145,7 +244,7 @@ class ResolutionAnalyzer:
             "prism_body": ("prism", "prism_body", "triangular_prism"),
             "projectile_body": ("projectile_body", "projectile", "ball", "body"),
             "launch_source": ("launch_source", "cannon", "source", "origin"),
-            "interface_boundary": ("interface_boundary", "boundary", "interface", "surface"),
+            "interface_boundary": ("interface_boundary", "medium_boundary", "boundary", "interface", "surface"),
             "resistor": ("resistor", "component", "circuit"),
         }
 
@@ -232,7 +331,7 @@ class ResolutionAnalyzer:
             "normal_x": ["normalX", "normal_x"],
             "pole": ["mirror_center", "pole", "pole_px", "center"],
             "vertices": ["prismVertices", "vertices"],
-            "launch_position": ["launch_source", "launch_source_px", "launch_position", "launch_pos"],
+            "launch_position": ["launch_source", "launch_source_px", "launch_position", "launch_pos", "launch_origin"],
             "ball_radius_px": ["radius_px", "radius", "radius_source_px", "ball_radius_px"],
             "source_position": ["sourcePosition", "source_position", "ray_source", "ray_origin"],
             "ray_origin": ["rayOrigin", "ray_origin"],
@@ -307,6 +406,13 @@ class ResolutionAnalyzer:
             if not is_resolved and param in parameters and parameters[param] is not None:
                 is_resolved = True
 
+            # Check parameter aliases
+            if not is_resolved and spec.parameter_aliases:
+                for alias_k, canon_k in spec.parameter_aliases.items():
+                    if canon_k == param and alias_k in parameters and parameters[alias_k] is not None:
+                        is_resolved = True
+                        break
+
             # Check if satisfiable from geometry
             p_spec = spec.parameters.get(param)
             if not is_resolved and p_spec and p_spec.can_derive_from_geometry:
@@ -318,14 +424,14 @@ class ResolutionAnalyzer:
                         "bob_position": ["bob_center", "bobCenter", "bob_position"],
                         "bob_center": ["bob_position", "bobCenter", "bob_center"],
                         "string_length_px": ["length_px", "effective_length_px", "string_length_px"],
-                        "bob_radius_px": ["radius_px", "radius", "radius_source_px", "bob_radius_px"],
+                        "bob_radius_px": ["radius_px", "radius", "radius_source_px", "ball_radius_px", "bob_radius_px"],
                         "lens_center": ["optical_center", "center", "lensX", "axisY", "lens_center"],
                         "focal_length_px": ["focalLength", "focal_length", "focal_length_px"],
                         "boundary_y": ["boundaryY", "boundary_y"],
                         "normal_x": ["normalX", "normal_x"],
                         "pole": ["mirror_center", "pole", "pole_px", "center"],
                         "vertices": ["prismVertices", "vertices"],
-                        "launch_position": ["launch_source", "launch_source_px", "launch_pos", "launch_position"],
+                        "launch_position": ["launch_source", "launch_source_px", "launch_pos", "launch_position", "launch_origin"],
                         "ball_radius_px": ["radius_px", "radius", "radius_source_px", "ball_radius_px"],
                         "source_position": ["sourcePosition", "source_position", "ray_source", "ray_origin"],
                         "ray_origin": ["rayOrigin", "ray_origin"],

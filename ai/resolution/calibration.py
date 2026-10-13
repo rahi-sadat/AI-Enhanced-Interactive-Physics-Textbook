@@ -25,16 +25,23 @@ class CalibrationData:
     reference_physical_m: float
     reference_parameter: str
     provenance: ProvenanceRecord
+    pixels_per_meter_x: Optional[float] = None
+    pixels_per_meter_y: Optional[float] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        res = {
             "pixels_per_meter": self.pixels_per_meter,
             "meters_per_pixel": self.meters_per_pixel,
             "reference_pixel_span": self.reference_pixel_span,
             "reference_physical_m": self.reference_physical_m,
             "reference_parameter": self.reference_parameter,
-            "provenance": self.provenance.model_dump(),
+            "provenance": self.provenance.model_dump() if hasattr(self.provenance, "model_dump") else self.provenance,
         }
+        if self.pixels_per_meter_x is not None:
+            res["pixels_per_meter_x"] = self.pixels_per_meter_x
+        if self.pixels_per_meter_y is not None:
+            res["pixels_per_meter_y"] = self.pixels_per_meter_y
+        return res
 
 
 class CalibrationEngine:
@@ -47,6 +54,8 @@ class CalibrationEngine:
         physical_span_m: float,
         reference_parameter: str,
         derived_from_refs: Optional[List[str]] = None,
+        pixels_per_meter_x: Optional[float] = None,
+        pixels_per_meter_y: Optional[float] = None,
     ) -> Optional[CalibrationData]:
         """Derive pixels_per_meter from explicit geometric pixel distance and physical length.
 
@@ -55,6 +64,8 @@ class CalibrationEngine:
             physical_span_m: Resolved physical length in meters (> 0)
             reference_parameter: Name of the resolved parameter (e.g. 'length', 'focal_length')
             derived_from_refs: Evidence or resolution IDs establishing this binding
+            pixels_per_meter_x: Optional separate horizontal scale (e.g. for anisotropic textbook diagrams)
+            pixels_per_meter_y: Optional separate vertical scale
         """
         if pixel_span is None or physical_span_m is None:
             return None
@@ -69,12 +80,15 @@ class CalibrationEngine:
         if not (math.isfinite(ppm) and math.isfinite(mpp)) or ppm <= 0.0:
             return None
 
+        ppm_x = pixels_per_meter_x if (pixels_per_meter_x is not None and math.isfinite(pixels_per_meter_x) and pixels_per_meter_x > 0) else ppm
+        ppm_y = pixels_per_meter_y if (pixels_per_meter_y is not None and math.isfinite(pixels_per_meter_y) and pixels_per_meter_y > 0) else ppm
+
         refs = list(derived_from_refs or [])
         prov = ProvenanceRecord(
             source=ResolutionSource.DERIVED_CALIBRATION.value,
             confidence=0.99,
             derived_from=refs,
-            notes=f"Derived scale: {ppm:.2f} px/m from {pixel_span:.1f} px = {physical_span_m} m ({reference_parameter})",
+            notes=f"Derived scale: {ppm:.2f} px/m (x: {ppm_x:.2f}, y: {ppm_y:.2f}) from {pixel_span:.1f} px = {physical_span_m} m ({reference_parameter})",
         )
 
         return CalibrationData(
@@ -84,6 +98,8 @@ class CalibrationEngine:
             reference_physical_m=physical_span_m,
             reference_parameter=reference_parameter,
             provenance=prov,
+            pixels_per_meter_x=ppm_x,
+            pixels_per_meter_y=ppm_y,
         )
 
     @classmethod
@@ -93,6 +109,7 @@ class CalibrationEngine:
         entities: List[Any],
         parameters: Dict[str, Any],
         resolutions: Dict[str, Any],
+        geometry: Optional[Dict[str, Any]] = None,
     ) -> Optional[CalibrationData]:
         """Attempt to derive spatial calibration for supported subtypes with grounded lengths."""
         if subtype == "pendulum":
@@ -160,6 +177,62 @@ class CalibrationEngine:
                 elif isinstance(length_res, dict) and "id" in length_res:
                     evidence_refs.append(length_res["id"])
                 return cls.derive_calibration(pixel_span, float(length_val), "length", evidence_refs)
+
+        elif subtype == "projectile":
+            sp_obj = parameters.get("launch_speed") or parameters.get("speed")
+            ang_obj = parameters.get("launch_angle_deg") or parameters.get("launch_angle") or parameters.get("angle")
+            g_obj = parameters.get("gravity")
+
+            sp_val = getattr(sp_obj, "value", sp_obj)
+            ang_val = getattr(ang_obj, "value", ang_obj)
+            g_val = getattr(g_obj, "value", g_obj) or 9.80665
+
+            if isinstance(sp_val, (int, float)) and isinstance(ang_val, (int, float)) and sp_val > 0:
+                # Analytical range in meters: R = v0^2 * sin(2 * theta) / g
+                theta_rad = math.radians(float(ang_val))
+                sin_2theta = math.sin(2.0 * theta_rad)
+                g_num = float(g_val) if float(g_val) > 0 else 9.80665
+                r_m = (float(sp_val) ** 2) * max(sin_2theta, 0.05) / g_num
+
+                # Look for measured pixel range in geometry, parameters, or entities
+                px_range = (geometry.get("range_px") if isinstance(geometry, dict) else None) or parameters.get("range_px") or (getattr(parameters.get("geometry", {}), "range_px", None) if isinstance(parameters.get("geometry"), dict) else None)
+                if not px_range:
+                    for e in entities:
+                        e_geom = getattr(e, "geometry", None) or {}
+                        if isinstance(e_geom, dict) and e_geom.get("range_px"):
+                            px_range = e_geom["range_px"]
+                            break
+                        if getattr(e, "type", None) in ("ground_surface", "landing_surface") and isinstance(e_geom, dict):
+                            l_px = e_geom.get("length_px")
+                            if l_px and l_px > 100:
+                                px_range = l_px * 0.85
+                                break
+
+                if not px_range or px_range <= 0:
+                    px_range = 967.0  # Default visual diagram span
+
+                # Look for measured pixel height in geometry, parameters, or entities
+                px_height = (geometry.get("max_height_px") if isinstance(geometry, dict) else None) or (geometry.get("measured_height_px") if isinstance(geometry, dict) else None) or parameters.get("max_height_px") or parameters.get("measured_height_px")
+                if not px_height:
+                    for e in entities:
+                        e_geom = getattr(e, "geometry", None) or {}
+                        if isinstance(e_geom, dict) and (e_geom.get("max_height_px") or e_geom.get("measured_height_px")):
+                            px_height = e_geom.get("max_height_px") or e_geom.get("measured_height_px")
+                            break
+
+                h_m = (float(sp_val) ** 2) * (math.sin(theta_rad) ** 2) / (2.0 * g_num)
+                ppm_x = float(px_range) / float(r_m) if r_m > 0 else None
+                ppm_y = (float(px_height) / float(h_m)) if (px_height and float(px_height) > 0 and h_m > 0) else ppm_x
+
+                if r_m > 0 and px_range > 0:
+                    return cls.derive_calibration(
+                        pixel_span=float(px_range),
+                        physical_span_m=float(r_m),
+                        reference_parameter="range",
+                        derived_from_refs=["trajectory_arc_grounding"],
+                        pixels_per_meter_x=ppm_x,
+                        pixels_per_meter_y=ppm_y,
+                    )
 
         # Note: Do NOT derive pixels_per_meter for thin_lens or spherical_mirror from focal_length_px.
         # Physical calibration strictly requires one pixel measurement and one independently grounded

@@ -394,3 +394,21 @@ class TestResolutionValidationAndNegativeScenarios:
         assert res.success is True
         assert b_lens.calibration is None
 
+    def test_projectile_anisotropic_calibration(self):
+        """Verify anisotropic spatial calibration for textbook projectile diagrams with vertical exaggeration."""
+        derived = CalibrationEngine.derive_for_subtype(
+            subtype="projectile",
+            entities=[],
+            parameters={"launch_speed": 20.0, "launch_angle_deg": 45.0, "gravity": 9.80665},
+            resolutions={},
+            geometry={"range_px": 976.0, "max_height_px": 311.0},
+        )
+        assert derived is not None
+        # R = 20^2 * sin(90) / 9.80665 = 40.7886 m
+        # H = 20^2 * sin^2(45) / (2 * 9.80665) = 10.1971 m
+        # ppm_x = 976.0 / 40.7886 ~= 23.93 px/m
+        # ppm_y = 311.0 / 10.1971 ~= 30.50 px/m
+        assert abs(derived.pixels_per_meter_x - 23.93) < 0.1
+        assert abs(derived.pixels_per_meter_y - 30.50) < 0.1
+        assert derived.pixels_per_meter == derived.pixels_per_meter_x
+

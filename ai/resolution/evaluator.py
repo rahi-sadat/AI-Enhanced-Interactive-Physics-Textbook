@@ -15,6 +15,7 @@ from shared.schemas.ingestion import BookIR, BookIRStatus
 from shared.schemas.resolution import ReadinessReport, ReviewState
 from ai.resolution.analyzer import ResolutionAnalyzer
 from ai.resolution.requirements import RequirementRegistry
+from ai.resolution.policies import PolicyRegistry
 from ai.resolution.units import UnitEngine
 
 
@@ -65,6 +66,33 @@ class ReadinessEvaluator:
         parameters = book_ir.parameters or {}
         parameter_provenance = book_ir.parameter_provenance or {}
 
+        # A reviewed decision and the value consumed by the compiler must
+        # agree. Otherwise a later edit could leave a valid-looking resolution
+        # attached to a different physical value.
+        for param, resolution in resolutions.items():
+            res_data = resolution if isinstance(resolution, dict) else (
+                resolution.model_dump() if hasattr(resolution, "model_dump") else {}
+            )
+            resolved_value = res_data.get("resolvedValue", res_data.get("resolved_value"))
+            if param in parameters and resolved_value is not None:
+                current = parameters[param]
+                if isinstance(current, dict) and "value" in current:
+                    current = current["value"]
+                if isinstance(current, (int, float)) and not isinstance(current, bool) and isinstance(resolved_value, (int, float)) and not isinstance(resolved_value, bool):
+                    agrees = math.isfinite(current) and math.isfinite(resolved_value) and math.isclose(current, resolved_value, rel_tol=1e-9, abs_tol=1e-12)
+                else:
+                    agrees = current == resolved_value
+                if not agrees:
+                    blockers.append(f"Parameter '{param}' conflicts with its recorded resolution.")
+
+            policy_id = res_data.get("policyId", res_data.get("policy_id"))
+            if policy_id:
+                policy = PolicyRegistry.get_policy(policy_id)
+                accepted = res_data.get("userAccepted", res_data.get("user_accepted", False))
+                auto_applied = res_data.get("resolvedBy", res_data.get("resolved_by")) == "auto_policy"
+                if policy is None or (policy.requires_user_opt_in and accepted is not True and not auto_applied):
+                    blockers.append(f"Policy resolution for '{param}' lacks a valid, accepted policy.")
+
         # Verify provenance and range constraints for every resolved parameter
         if spec:
             for param in spec.required_parameters:
@@ -100,9 +128,24 @@ class ReadinessEvaluator:
                     continue
 
                 if val is not None:
+                    raw_value = val.get("value") if isinstance(val, dict) and "value" in val else val
+                    raw_unit = val.get("unit") if isinstance(val, dict) else None
+                    if hasattr(raw_value, "value"):
+                        raw_unit = getattr(raw_value, "unit", raw_unit)
+                        raw_value = raw_value.value
+                    if p_req and p_req.dimension.value not in ("point_2d", "polygon_points", "categorical", "topology_nodes", "topology_components"):
+                        expected_dimension = p_req.dimension.value
+                        if expected_dimension == "damping" and str(raw_unit).lower() == "hz":
+                            raw_unit = "1/s"
+                        parsed = UnitEngine.parse_quantity(raw_value, raw_unit, expected_dimension)
+                        if not parsed.success:
+                            blockers.append(f"Parameter '{param}' has invalid units or value: {parsed.error}")
+                        else:
+                            raw_value = parsed.canonical_value
+
                     # Categorical constraint check
                     if p_req and p_req.allowed_categories:
-                        val_str = str(val).lower().strip()
+                        val_str = str(raw_value).lower().strip()
                         allowed_lower = [c.lower().strip() for c in p_req.allowed_categories]
                         if val_str not in allowed_lower:
                             blockers.append(
@@ -110,13 +153,13 @@ class ReadinessEvaluator:
                             )
 
                     # Numeric finite and range constraint check
-                    if isinstance(val, (int, float)) and not isinstance(val, bool):
-                        if not math.isfinite(val):
-                            blockers.append(f"Parameter '{param}' has non-finite numeric value: {val}")
+                    if isinstance(raw_value, (int, float)) and not isinstance(raw_value, bool):
+                        if not math.isfinite(raw_value):
+                            blockers.append(f"Parameter '{param}' has non-finite numeric value: {raw_value}")
                         elif p_req:
                             must_pos = (p_req.min_value is not None and p_req.min_value > 0 and not p_req.allow_zero)
                             range_err = UnitEngine.validate_range(
-                                val,
+                                raw_value,
                                 min_value=p_req.min_value,
                                 max_value=p_req.max_value,
                                 must_be_positive=must_pos,
@@ -194,7 +237,14 @@ class ReadinessEvaluator:
 
         is_ready = (len(blockers) == 0 and len(unresolved_ambiguities) == 0 and len(review_state.missing_requirements) == 0)
 
-        new_status = BookIRStatus.READY_TO_COMPILE if is_ready else BookIRStatus.NEEDS_REVIEW
+        if is_ready:
+            new_status = BookIRStatus.READY_TO_COMPILE
+        elif not book_ir.domain or not book_ir.subtype or book_ir.isPhysics is False:
+            classification = (book_ir.provenance or {}).get("classification")
+            new_status = (BookIRStatus.UNSUPPORTED if classification == "unsupported_physics"
+                          else BookIRStatus.UNRESOLVED)
+        else:
+            new_status = BookIRStatus.NEEDS_REVIEW
         if mutate_status:
             book_ir.status = new_status
 
