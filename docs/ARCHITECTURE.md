@@ -1,5 +1,7 @@
 # System Architecture & Layer Boundaries
 
+> **Verified implementation boundary (2026-10-11):** This file describes architectural intent as well as implemented modules. The current automatic path accepts one cropped physics figure and uses a semantic classifier followed by classical CV/OCR grounding, evidence resolution, strict readiness evaluation, canonical compilation, and a domain runtime. Missing or ambiguous required values must remain in review; the VLM cannot supply physical constants or authoritative coordinates. The named models are pendulum, projectile, thin lens, spherical mirror, interface refraction, prism, and DC linear circuits. The full seven-model browser acceptance matrix and arbitrary-diagram reliability are not yet verified. Current measurements are in `docs/reports/PHASE2_BASELINE.md`, `docs/reports/PHASE3_REPAIR_VERIFICATION.md`, and `docs/reports/PHASE4_PROGRESS.md`.
+
 The **AugmentedPhysics** platform transforms static physics textbook pages into embedded, interactive, and grounded learning experiences.
 
 The repository is organized into strict architectural layers to prevent code collisions, support independent development across multiple contributors, and allow product features to evolve without destabilizing the physics runtime.
