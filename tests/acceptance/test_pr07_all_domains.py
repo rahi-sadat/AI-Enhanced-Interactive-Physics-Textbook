@@ -20,12 +20,44 @@ Flow for each:
       ↓
   PhysicsCompiler produces runnable Canonical PhysicsScene (status: READY)
 """
+from copy import deepcopy
+
 import pytest
 from ai.resolution.analyzer import ResolutionAnalyzer
 from ai.resolution.engine import ResolutionEngine
 from ai.resolution.evaluator import ReadinessEvaluator
 from ai.ingestion.PhysicsCompiler import PhysicsCompiler
 from shared.schemas.ingestion import BookIR, BookEntity, BookIRStatus, ProvenanceRecord
+
+
+def assert_ambiguous_entity_blocks_compilation(book_ir: BookIR) -> None:
+    """A cached ready status must not override missing or ambiguous evidence."""
+    missing_parameter = {
+        "pendulum": "mass",
+        "projectile": "launch_speed",
+        "thin_lens": "focal_length_px",
+        "spherical_mirror": "concavity",
+        "interface_refraction": "n2",
+        "prism": "n",
+        "dc_linear": "components",
+    }[book_ir.subtype]
+    missing_ir = deepcopy(book_ir)
+    missing_ir.parameters.pop(missing_parameter, None)
+    missing_ir.resolutions.pop(missing_parameter, None)
+    assert not ReadinessEvaluator.evaluate(missing_ir).ready
+    missing_result = PhysicsCompiler().compile(missing_ir)
+    assert missing_result.status == "NEEDS_REVIEW"
+    assert missing_result.scene is None
+
+    required_type = "projectile_body" if book_ir.subtype == "projectile" else book_ir.entities[0].type
+    required_entity = next(entity for entity in book_ir.entities if entity.type == required_type)
+    required_entity.attributes["is_ambiguous"] = True
+    assert book_ir.status == BookIRStatus.READY_TO_COMPILE
+    assert not ReadinessEvaluator.evaluate(book_ir).ready
+    result = PhysicsCompiler().compile(book_ir)
+    assert result.status == "NEEDS_REVIEW"
+    assert result.scene is None
+    assert any(issue["code"] == "READINESS_REVOKED" for issue in result.issues)
 
 
 class TestAllDomainsResolutionAndCompilation:
@@ -74,6 +106,7 @@ class TestAllDomainsResolutionAndCompilation:
         assert res.status == "READY"
         assert res.scene is not None
         assert res.scene["subtype"] == "pendulum"
+        assert_ambiguous_entity_blocks_compilation(b)
 
     def test_domain_projectile(self):
         b = BookIR(
@@ -123,6 +156,7 @@ class TestAllDomainsResolutionAndCompilation:
         assert res.status == "READY"
         assert res.scene is not None
         assert res.scene["subtype"] == "projectile"
+        assert_ambiguous_entity_blocks_compilation(b)
 
     def test_domain_thin_lens(self):
         b = BookIR(
@@ -158,6 +192,7 @@ class TestAllDomainsResolutionAndCompilation:
         assert res.status == "READY"
         assert res.scene is not None
         assert res.scene["subtype"] == "thin_lens"
+        assert_ambiguous_entity_blocks_compilation(b)
 
     def test_domain_spherical_mirror(self):
         b = BookIR(
@@ -197,6 +232,7 @@ class TestAllDomainsResolutionAndCompilation:
         assert res.status == "READY"
         assert res.scene is not None
         assert res.scene["subtype"] == "spherical_mirror"
+        assert_ambiguous_entity_blocks_compilation(b)
 
     def test_domain_interface_refraction(self):
         b = BookIR(
@@ -229,6 +265,7 @@ class TestAllDomainsResolutionAndCompilation:
         assert res.status == "READY"
         assert res.scene is not None
         assert res.scene["subtype"] == "interface_refraction"
+        assert_ambiguous_entity_blocks_compilation(b)
 
     def test_domain_prism(self):
         b = BookIR(
@@ -261,6 +298,7 @@ class TestAllDomainsResolutionAndCompilation:
         assert res.status == "READY"
         assert res.scene is not None
         assert res.scene["subtype"] == "prism"
+        assert_ambiguous_entity_blocks_compilation(b)
 
     def test_domain_circuits_dc_linear(self):
         b = BookIR(
@@ -299,6 +337,7 @@ class TestAllDomainsResolutionAndCompilation:
         assert res.scene is not None
         assert res.scene["domain"] == "circuits"
         assert res.scene["subtype"] == "dc_linear"
+        assert_ambiguous_entity_blocks_compilation(b)
 
     def test_projectile_with_zero_values_compiles_successfully(self):
         """Verify 0.0 is accepted for launch_speed (drop from rest), launch_angle_deg (horizontal throw), and zero gravity."""

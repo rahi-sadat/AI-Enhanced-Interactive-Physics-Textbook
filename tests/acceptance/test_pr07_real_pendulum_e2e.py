@@ -200,7 +200,7 @@ class TestPR07RealPendulumE2E:
         # Step 6: Compilation Readiness Invariant
         # -------------------------------------------------------------------
         readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
-        assert readiness.ready is True
+        assert readiness.ready is True, readiness.blockers
         assert book_ir.status == BookIRStatus.READY_TO_COMPILE
         assert len(readiness.blockers) == 0
 

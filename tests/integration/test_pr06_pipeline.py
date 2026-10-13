@@ -242,8 +242,10 @@ class TestPR06PipelineIntegration(unittest.TestCase):
             self.assertEqual(data["domain"], "mechanics")
             self.assertEqual(data["scenario"], "pendulum")
 
-            # Invariant: scene must remain null (no fabricated simulation)
-            self.assertIsNone(data["scene"])
+            # A grounded pendulum may compile with explicit model assumptions.
+            self.assertIsNotNone(data["scene"])
+            self.assertEqual(data["scene"]["coordinateSpace"]["width"], 300.0)
+            self.assertTrue(data["scene"]["assumptions"])
 
             # Verify entities inside book_ir are grounded
             entities = data["book_ir"]["entities"]

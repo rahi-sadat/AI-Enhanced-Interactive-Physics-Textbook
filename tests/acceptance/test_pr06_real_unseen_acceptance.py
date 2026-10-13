@@ -317,7 +317,7 @@ class TestPR06RealUnseenAcceptance(unittest.TestCase):
         self.assertEqual(grounded_ir.status, BookIRStatus.NEEDS_REVIEW)
 
         # Wire and topology checks
-        self.assertIn("circuit_topology", grounded_ir.parameters)
+        self.assertIn("circuit_topology", grounded_ir.geometry)
         compile_res = self.compiler.compile(grounded_ir)
         self.assertIsNone(compile_res.scene)
 

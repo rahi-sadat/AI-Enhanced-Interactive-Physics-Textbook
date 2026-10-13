@@ -209,18 +209,18 @@ def health_check():
 @app.post("/api/upload-diagram")
 async def upload_diagram(file: UploadFile = File(...)):
     try:
+        content = await file.read()
+        img = cv2.imdecode(np.frombuffer(content, dtype=np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
+            raise HTTPException(status_code=422, detail="Uploaded image could not be decoded.")
+        h, w = img.shape[:2]
         ext = Path(file.filename).suffix.lower() or ".png"
         unique_name = f"diagram_{uuid.uuid4().hex[:8]}{ext}"
         saved_path = UPLOADS_DIR / unique_name
         frontend_path = FRONTEND_UPLOADS / unique_name
 
-        content = await file.read()
         saved_path.write_bytes(content)
         shutil.copy2(saved_path, frontend_path)
-
-        # Read dimensions
-        img = cv2.imread(str(saved_path))
-        h, w = (img.shape[0], img.shape[1]) if img is not None else (600, 800)
 
         return {
             "success": True,
@@ -229,6 +229,8 @@ async def upload_diagram(file: UploadFile = File(...)):
             "width": w,
             "height": h,
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1637,6 +1639,13 @@ async def ingest_diagram(file: UploadFile = File(...)):
             book_ir=book_ir,
         )
 
+        # SourceAsset is the only authority for native image dimensions.
+        from ai.ingestion.source_dimensions import SourceDimensionMismatch, enforce_source_dimensions
+        try:
+            enforce_source_dimensions(grounded_book_ir, asset)
+        except SourceDimensionMismatch as mismatch:
+            raise HTTPException(status_code=422, detail=str(mismatch)) from mismatch
+
         # Generate debug overlay artifact if explicitly enabled (never pollutes uploads)
         debug_overlay_url = None
         evidence_debug_enabled = os.getenv("EVIDENCE_DEBUG", "false").lower() in ("true", "1", "yes")
@@ -1651,8 +1660,31 @@ async def ingest_diagram(file: UploadFile = File(...)):
             except Exception as _dbg_err:
                 print(f"[Backend] Debug overlay generation skipped: {_dbg_err}")
 
-        # 6. PhysicsCompiler
-        compiler_result = compiler.compile(grounded_book_ir)
+        # 6. Apply named model assumptions only after CV/OCR has grounded the
+        # figure. This stage never manufactures diagram coordinates or topology.
+        from ai.resolution.auto import AutoResolutionEngine
+        auto_result = await asyncio.to_thread(AutoResolutionEngine.resolve, grounded_book_ir)
+
+        # 7. PhysicsCompiler (may run circuit matrix work).
+        compiler_result = await asyncio.to_thread(compiler.compile, grounded_book_ir)
+        failure_category = None
+        if compiler_result.status != "READY":
+            failure_category = (auto_result.failures[0]["code"] if auto_result.failures
+                                else "SCENE_VALIDATION_FAILED")
+        debug_trace = {
+            "id": asset.id,
+            "source": {"width": asset.width_px, "height": asset.height_px,
+                       "coordinateSpace": "source_px"},
+            "classification": {"domain": grounded_book_ir.domain,
+                               "subtype": grounded_book_ir.subtype,
+                               "confidence": grounded_book_ir.confidence},
+            "grounding": grounded_book_ir.provenance.get("grounding_diagnostics", []),
+            "assumptions": auto_result.assumptions,
+            "automaticFailures": auto_result.failures,
+            "readiness": auto_result.readiness.to_dict() if auto_result.readiness else None,
+            "compilation": {"status": compiler_result.status,
+                            "issues": compiler_result.issues},
+        }
 
         return {
             "success": True,
@@ -1665,6 +1697,11 @@ async def ingest_diagram(file: UploadFile = File(...)):
             "compiler": compiler_result.to_dict(),
             "evidence": grounded_book_ir.evidence,
             "grounding": grounded_book_ir.provenance.get("grounding_diagnostics", []),
+            "assumptions": auto_result.assumptions,
+            "auto_failures": auto_result.failures,
+            "failure_category": failure_category,
+            "debugId": asset.id,
+            "debugTrace": debug_trace,
             # Convenience top-level fields matching existing frontend expectations
             "status": compiler_result.status.lower().replace("_", "-"),
             "domain": grounded_book_ir.domain,
@@ -1833,6 +1870,11 @@ async def review_book_ir(req: ReviewRequest):
     """PR-07: Analyze grounded BookIR and generate structured review issues/blockers."""
     try:
         book_ir = BookIR.from_dict(req.book_ir)
+        # Auto-resolve candidates, default policies and calibrations
+        try:
+            ResolutionEngine.auto_resolve(book_ir)
+        except Exception as _ar_err:
+            print(f"[Backend] Auto-resolve in review note: {_ar_err}")
         review_state = ResolutionAnalyzer.analyze(book_ir)
         return {
             "success": True,
@@ -1840,6 +1882,7 @@ async def review_book_ir(req: ReviewRequest):
             "ready_to_compile": review_state.ready_to_compile,
             "blockers_count": review_state.blockers_count,
             "warnings_count": review_state.warnings_count,
+            "book_ir": book_ir.to_dict(),
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Review analysis failed: {e}")
@@ -1916,7 +1959,24 @@ async def compile_resolved(req: CompileResolvedRequest):
     """PR-07: Compile legitimately resolved BookIR into Canonical PhysicsScene."""
     try:
         book_ir = BookIR.from_dict(req.book_ir)
+
+        # Normalize aliases on BookIR parameters
+        subtype = getattr(book_ir, "subtype", None)
+        if subtype:
+            spec = RequirementRegistry.get_spec(subtype)
+            if spec and spec.parameter_aliases and book_ir.parameters:
+                for alias_k, canon_k in spec.parameter_aliases.items():
+                    if alias_k in book_ir.parameters and canon_k not in book_ir.parameters:
+                        book_ir.parameters[canon_k] = book_ir.parameters[alias_k]
+
         readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+
+        if not readiness.ready:
+            try:
+                ResolutionEngine.auto_resolve(book_ir)
+                readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+            except Exception as _ar_err:
+                print(f"[Backend] Auto-resolve in compile note: {_ar_err}")
 
         if not readiness.ready:
             raise HTTPException(
