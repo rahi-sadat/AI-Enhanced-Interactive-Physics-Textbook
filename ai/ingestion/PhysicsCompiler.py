@@ -18,6 +18,7 @@ Rules:
 from __future__ import annotations
 
 import math
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
 from shared.schemas.ingestion import (
@@ -26,6 +27,7 @@ from shared.schemas.ingestion import (
     BookIRStatus,
     PhysicsCompilerResult,
 )
+from ai.resolution.units import UnitEngine
 
 # Supported (domain, subtype) pairs for which a real solver exists.
 # Circuit fixture labels (circuit1..4) are strictly removed; only canonical dc_linear is supported.
@@ -473,6 +475,24 @@ class PhysicsCompiler:
                 book_ir_status=book_ir.status,
             )
 
+        # A stored status can become stale when evidence or a resolution is
+        # edited. Re-evaluate the current BookIR without mutating it so that
+        # compilation enforces the same requirements as the review workflow.
+        from ai.resolution.evaluator import ReadinessEvaluator
+
+        readiness = ReadinessEvaluator.evaluate(book_ir)
+        if not readiness.ready:
+            reasons = dict.fromkeys(
+                readiness.blockers + readiness.missing_requirements + readiness.unresolved_ambiguities
+            )
+            return PhysicsCompilerResult(
+                status="NEEDS_REVIEW",
+                scene=None,
+                issues=[{"code": "READINESS_REVOKED", "message": reason} for reason in reasons]
+                or [{"code": "READINESS_REVOKED", "message": "Current evidence no longer satisfies model requirements."}],
+                book_ir_status=book_ir.status,
+            )
+
         # 6. Build Canonical PhysicsScene
         try:
             scene = self._build_canonical_scene(book_ir, domain, subtype)
@@ -555,22 +575,6 @@ class PhysicsCompiler:
             meta.get("height"),
             meta.get("image_height_px"),
         )
-
-        if (w is None or h is None) and book_ir.source_asset_id:
-            try:
-                import glob
-                import os
-                from PIL import Image
-                asset_id = str(book_ir.source_asset_id).strip()
-                matches = glob.glob(f"storage/uploads/*{asset_id[:8]}*") + glob.glob(f"storage/uploads/*{asset_id}*")
-                for m in matches:
-                    if os.path.isfile(m):
-                        with Image.open(m) as im:
-                            w = w or float(im.width)
-                            h = h or float(im.height)
-                            break
-            except Exception as e:
-                logger.debug(f"[PhysicsCompiler] Could not infer dimensions from asset file: {e}")
 
         try:
             w_val = float(w) if w is not None else None
@@ -684,12 +688,12 @@ class PhysicsCompiler:
 
         elif domain == "mechanics" and subtype == "projectile":
             # 1. Launch Position
-            launch_pos = self._extract_point(_first_not_none(params.get("launch_position"), geom.get("launch_source"), geom.get("launch_source_px")))
+            launch_pos = self._extract_point(_first_not_none(params.get("launch_position"), params.get("launch_origin"), geom.get("launch_position"), geom.get("launch_source"), geom.get("launch_source_px")))
             if not launch_pos:
                 issues.append({"code": "MISSING_LAUNCH_POSITION", "message": "Launch position is required."})
 
             # 2. Launch Speed (unit-checked)
-            sp_raw = _first_not_none(params.get("launch_speed"), params.get("speed"))
+            sp_raw = _first_not_none(params.get("launch_speed"), params.get("speed"), params.get("u"), params.get("v0"))
             val, unit = _extract_val_and_unit(sp_raw)
             if val is None:
                 issues.append({"code": "MISSING_LAUNCH_SPEED", "message": "Launch speed is required."})
@@ -721,7 +725,11 @@ class PhysicsCompiler:
                     issues.append(err)
 
             # 5. Calibration PPM (STRICT: NO 100.0 DEFAULT)
-            ppm_raw = _first_not_none(params.get("pixels_per_meter"), geom.get("pixels_per_meter"), (book_ir.confidence or {}).get("pixels_per_meter"))
+            ppm_raw = _first_not_none(
+                params.get("pixels_per_meter"),
+                geom.get("pixels_per_meter"),
+                getattr(getattr(book_ir, "calibration", None), "pixels_per_meter", None),
+            )
             val, _ = _extract_val_and_unit(ppm_raw)
             if val is None:
                 issues.append({
@@ -777,10 +785,16 @@ class PhysicsCompiler:
                 elif ap_val is None or ap_val <= 0:
                     issues.append({"code": "INVALID_APERTURE_HEIGHT_PX", "message": "Aperture height must be positive."})
 
-            # 4. If optical object present: require object_height_px (STRICT: NO 80.0 DEFAULT)
-            obj_pos = self._extract_point(_first_not_none(params.get("object_position"), geom.get("object_position"))) or params.get("objectDistance")
-            if obj_pos is not None:
-                h_raw = _first_not_none(params.get("object_height_px"), params.get("objectHeight"), geom.get("object_height_px"))
+            # 4. An optical object requires grounded position/distance and height.
+            obj_entity = self._find_entity(book_ir, ("object", "optical_object", "arrow", "object_arrow"))
+            obj_pos = self._extract_point(_first_not_none(params.get("object_position"), geom.get("object_position")))
+            if obj_pos is None and obj_entity:
+                obj_pos = self._extract_point(obj_entity.position_source_px or (obj_entity.geometry or {}).get("start"))
+            obj_dist = _first_not_none(params.get("objectDistance"), params.get("object_distance_px"))
+            if obj_entity or obj_pos is not None or obj_dist is not None:
+                if obj_pos is None and obj_dist is None:
+                    issues.append({"code": "MISSING_OBJECT_POSITION", "message": "Optical object position or distance must be grounded."})
+                h_raw = _first_not_none(params.get("object_height_px"), params.get("objectHeight"), geom.get("object_height_px"), (obj_entity.geometry or {}).get("height_px") if obj_entity else None)
                 val, unit = _extract_val_and_unit(h_raw)
                 if val is None:
                     issues.append({"code": "MISSING_OBJECT_HEIGHT_PX", "message": "Optical object is present, but object_height_px is missing (cannot fabricate default 80.0)."})
@@ -824,12 +838,17 @@ class PhysicsCompiler:
 
             # 5. Incident Ray Source
             src_pos = self._extract_point(_first_not_none(params.get("source_position"), geom.get("sourcePosition"), geom.get("source_position")))
-            theta1 = params.get("theta1")
+            theta1 = _first_not_none(params.get("theta1"), params.get("incident_angle"))
             if src_pos is None and theta1 is None:
                 issues.append({
                     "code": "MISSING_INCIDENT_RAY",
                     "message": "Refraction simulation requires source_position or incident angle theta1.",
                 })
+            if theta1 is not None:
+                angle_value, angle_unit = _extract_val_and_unit(theta1)
+                _, angle_error = _validate_and_convert_unit("theta1", angle_value, angle_unit, "angle_deg")
+                if angle_error:
+                    issues.append(angle_error)
 
         elif domain == "optics" and subtype in ("mirror", "spherical_mirror"):
             # 1. Pole
@@ -871,7 +890,7 @@ class PhysicsCompiler:
                 issues.append({"code": "MISSING_PRISM_VERTICES", "message": "Prism vertices array of at least 3 points is required."})
 
             # 2. Refractive Index n
-            n_raw = self._extract_raw_val(_first_not_none(params.get("n"), params.get("refractiveIndex")))
+            n_raw = self._extract_raw_val(_first_not_none(params.get("n"), params.get("refractiveIndex"), params.get("refractive_index")))
             if n_raw is None:
                 issues.append({"code": "MISSING_PRISM_REFRACTIVE_INDEX", "message": "Prism refractive index is required."})
             else:
@@ -882,7 +901,14 @@ class PhysicsCompiler:
                     issues.append({"code": "INVALID_PRISM_REFRACTIVE_INDEX", "message": f"Refractive index must be numeric: {n_raw}"})
 
             # 3. Apex Angle (STRICT: NO 60.0 DEFAULT)
-            apex_raw = _first_not_none(params.get("apex_angle_deg"), geom.get("apex_angle_deg"))
+            apex_raw = _first_not_none(
+                params.get("apex_angle_deg"),
+                params.get("apex_angle"),
+                params.get("apexAngle"),
+                geom.get("apex_angle_deg"),
+                geom.get("apex_angle"),
+                geom.get("apexAngle"),
+            )
             val, unit = _extract_val_and_unit(apex_raw)
             if val is None:
                 issues.append({
@@ -895,8 +921,8 @@ class PhysicsCompiler:
                     issues.append(err)
 
             # 4. Ray Origin & Direction
-            ray_org = self._extract_point(_first_not_none(geom.get("rayOrigin"), params.get("ray_origin")))
-            ray_dir = self._extract_point(_first_not_none(geom.get("rayDirection"), params.get("ray_direction")))
+            ray_org = self._extract_point(_first_not_none(geom.get("rayOrigin"), geom.get("ray_origin"), params.get("ray_origin"), params.get("rayOrigin")))
+            ray_dir = self._extract_point(_first_not_none(geom.get("rayDirection"), geom.get("ray_direction"), params.get("ray_direction"), params.get("rayDirection")))
             if not ray_org or not ray_dir:
                 issues.append({"code": "MISSING_PRISM_INCIDENT_RAY", "message": "Prism simulation requires rayOrigin and rayDirection."})
 
@@ -907,6 +933,36 @@ class PhysicsCompiler:
                 issues.append({"code": "MISSING_CIRCUIT_COMPONENTS", "message": "At least one circuit component is required."})
             if not isinstance(nodes, list) or len(nodes) == 0:
                 issues.append({"code": "MISSING_CIRCUIT_NODES", "message": "Circuit node topology is required."})
+            if isinstance(comps, list) and isinstance(nodes, list):
+                node_ids = {
+                    node if isinstance(node, str) else node.get("id")
+                    for node in nodes if isinstance(node, (str, dict))
+                }
+                sources = {"voltage_source", "battery", "dc_source"}
+                if not any(isinstance(comp, dict) and comp.get("type") in sources for comp in comps):
+                    issues.append({"code": "MISSING_CIRCUIT_SOURCE", "message": "A DC circuit simulation requires a grounded voltage source."})
+                for comp in comps:
+                    if not isinstance(comp, dict):
+                        issues.append({"code": "INVALID_CIRCUIT_COMPONENT", "message": "Circuit components must be objects."})
+                        continue
+                    cid = comp.get("id") or "<unknown>"
+                    terminals = comp.get("nodes")
+                    if (not isinstance(terminals, list) or len(terminals) != 2
+                            or any(node not in node_ids for node in terminals)):
+                        issues.append({"code": "INVALID_CIRCUIT_CONNECTION", "message": f"Component {cid} must connect two declared nodes."})
+                    elif terminals[0] == terminals[1] and comp.get("type") in sources:
+                        issues.append({"code": "SHORTED_CIRCUIT_SOURCE", "message": f"Voltage source {cid} is shorted to one node."})
+                    if comp.get("type") in sources | {"resistor", "bulb", "lamp"}:
+                        value = comp.get("value")
+                        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+                            issues.append({"code": "MISSING_CIRCUIT_VALUE", "message": f"Component {cid} requires a finite grounded value."})
+                        elif comp.get("type") in {"resistor", "bulb", "lamp"} and value <= 0:
+                            issues.append({"code": "INVALID_CIRCUIT_RESISTANCE", "message": f"Resistance of {cid} must be positive."})
+                        else:
+                            dimension = "voltage" if comp.get("type") in sources else "resistance"
+                            quantity = UnitEngine.parse_quantity(value, comp.get("unit"), dimension)
+                            if not quantity.success:
+                                issues.append({"code": "INCOMPATIBLE_CIRCUIT_UNIT", "message": f"Component {cid}: {quantity.error}"})
 
         return issues
 
@@ -936,14 +992,27 @@ class PhysicsCompiler:
                 "figure_id": book_ir.figure_id,
                 "width": w,
                 "height": h,
+                "image_width_px": w,
+                "image_height_px": h,
             },
             "coordinateSpace": {
                 "type": "source_px",
                 "width": w,
                 "height": h,
+                "image_width_px": w,
+                "image_height_px": h,
+                "unit": "px",
+            },
+            "coordinateSystem": {
+                "type": "source_px",
+                "width": w,
+                "height": h,
+                "image_width_px": w,
+                "image_height_px": h,
                 "unit": "px",
             },
             "parameters": {},
+            "assumptions": list(book_ir.assumptions or []),
             "geometry": dict(book_ir.geometry or {}),
             "objects": [],
             "render": {"coordinate_space": "source_px"},
@@ -971,7 +1040,49 @@ class PhysicsCompiler:
         else:
             raise PhysicsCompilerError(f"No canonical builder for {domain}/{subtype}")
 
+        self._preserve_parameter_provenance(scene, book_ir, subtype)
+
         return scene
+
+    @staticmethod
+    def _preserve_parameter_provenance(scene: Dict[str, Any], book_ir: BookIR, subtype: str) -> None:
+        """Carry the actual evidence source into emitted simulation parameters."""
+        source_keys = {
+            "pendulum": {"length": "length", "gravity": "gravity", "mass": "mass", "damping": "damping"},
+            "projectile": {"speed": "launch_speed", "angle": "launch_angle_deg", "gravity": "gravity"},
+            "thin_lens": {"focalLength": "focal_length_px", "objectDistance": "objectDistance", "objectHeight": "object_height_px"},
+            "concave_lens": {"focalLength": "focal_length_px", "objectDistance": "objectDistance", "objectHeight": "object_height_px"},
+            "mirror": {"focalLength": "focal_length_px", "mirrorType": "concavity"},
+            "spherical_mirror": {"focalLength": "focal_length_px", "mirrorType": "concavity",
+                                 "objectDistance": "objectDistance", "objectHeight": "object_height_px"},
+            "interface_refraction": {"n1": "n1", "n2": "n2", "theta1": "incident_angle"},
+            "prism": {"refractiveIndex": "n", "apexAngle": "apex_angle_deg"},
+        }.get(subtype, {})
+        for scene_key, emitted in scene.get("parameters", {}).items():
+            source_key = source_keys.get(scene_key, scene_key if subtype == "dc_linear" else None)
+            if source_key is None:
+                continue
+            record = (book_ir.parameter_provenance or {}).get(source_key)
+            if record is None:
+                raw = (book_ir.parameters or {}).get(source_key)
+                record = raw.get("provenance") if isinstance(raw, dict) else getattr(raw, "provenance", None)
+            if record is None and subtype == "interface_refraction" and scene_key == "theta1":
+                raw = (book_ir.parameters or {}).get("theta1")
+                record = (book_ir.parameter_provenance or {}).get("theta1") or (
+                    raw.get("provenance") if isinstance(raw, dict) else getattr(raw, "provenance", None)
+                )
+            if record is None and subtype in {"thin_lens", "concave_lens"} and scene_key == "objectDistance":
+                record = (book_ir.parameter_provenance or {}).get("object_position")
+            if record is None:
+                record = (book_ir.provenance or {}).get(source_key)
+            if record is None and subtype == "dc_linear":
+                record = (book_ir.parameter_provenance or {}).get("components")
+            if record is None:
+                continue
+            data = record.to_dict() if hasattr(record, "to_dict") else record
+            if isinstance(data, dict) and data.get("source"):
+                emitted["provenance"] = data["source"]
+                emitted["evidenceProvenance"] = data
 
     # -----------------------------------------------------------------------
     # Domain Scene Population Helpers (Preserving Entity Identity & Evidence)
@@ -1069,11 +1180,14 @@ class PhysicsCompiler:
         params = book_ir.parameters
         geom = book_ir.geometry or {}
 
-        launch_pos = self._extract_point(_first_not_none(params.get("launch_position"), geom.get("launch_source"), geom.get("launch_source_px")))
-        sp_val, _ = _validate_and_convert_unit("launch_speed", *(_extract_val_and_unit(_first_not_none(params.get("launch_speed"), params.get("speed")))), category="velocity")
+        launch_pos = self._extract_point(_first_not_none(params.get("launch_position"), params.get("launch_origin"), geom.get("launch_position"), geom.get("launch_source"), geom.get("launch_source_px")))
+        sp_val, _ = _validate_and_convert_unit("launch_speed", *(_extract_val_and_unit(_first_not_none(params.get("launch_speed"), params.get("speed"), params.get("u"), params.get("v0")))), category="velocity")
         ang_val, _ = _validate_and_convert_unit("launch_angle", *(_extract_val_and_unit(_first_not_none(params.get("launch_angle_deg"), params.get("angle"), params.get("launch_angle")))), category="angle_deg")
         g_val, _ = _validate_and_convert_unit("gravity", *(_extract_val_and_unit(_first_not_none(params.get("gravity"), params.get("gravity_m_s2")))), category="acceleration")
-        ppm_val = float(self._extract_raw_val(_first_not_none(params.get("pixels_per_meter"), geom.get("pixels_per_meter"))))
+        calib = getattr(book_ir, "calibration", None)
+        ppm_val = float(self._extract_raw_val(_first_not_none(params.get("pixels_per_meter"), geom.get("pixels_per_meter"), getattr(calib, "pixels_per_meter", None))))
+        ppm_x = float(self._extract_raw_val(_first_not_none(params.get("pixels_per_meter_x"), geom.get("pixels_per_meter_x"), getattr(calib, "pixels_per_meter_x", None), ppm_val)))
+        ppm_y = float(self._extract_raw_val(_first_not_none(params.get("pixels_per_meter_y"), geom.get("pixels_per_meter_y"), getattr(calib, "pixels_per_meter_y", None), ppm_val)))
         r_val = float(self._extract_raw_val(_first_not_none(params.get("ball_radius_px"), geom.get("ball_radius_px"), geom.get("radius_source_px"), geom.get("radius_px"), params.get("radius"))))
 
         entity = self._find_entity(book_ir, ("projectile", "ball", "projectile_ball", "circle", "projectile_body"))
@@ -1086,6 +1200,8 @@ class PhysicsCompiler:
         }
         scene["calibration"] = {
             "pixels_per_meter": ppm_val,
+            "pixels_per_meter_x": ppm_x,
+            "pixels_per_meter_y": ppm_y,
         }
         scene["geometry"].update({
             "launch_source": launch_pos,
@@ -1168,16 +1284,15 @@ class PhysicsCompiler:
             obj_entity.geometry.get("height_px") if (obj_entity and obj_entity.geometry) else None,
         )
 
-        if obj_pos is not None or obj_dist_raw is not None or (obj_entity and obj_entity.geometry):
-            obj_h = float(self._extract_raw_val(obj_h_raw)) if obj_h_raw is not None else (aperture * 0.35)
+        if obj_pos is not None or obj_dist_raw is not None or obj_entity:
+            obj_h = float(self._extract_raw_val(obj_h_raw))
             if obj_pos is None and obj_dist_raw is not None:
                 u_px = float(self._extract_raw_val(obj_dist_raw))
                 obj_pos = {"x": center["x"] - u_px, "y": center["y"]}
             elif obj_pos is not None:
                 u_px = abs(center["x"] - obj_pos["x"])
             else:
-                u_px = 1.5 * focal_px
-                obj_pos = {"x": center["x"] - u_px, "y": center["y"]}
+                raise PhysicsCompilerError("Optical object position or distance is ungrounded.")
             prov = "observed"
 
             obj_id = obj_entity.id if obj_entity else "object_arrow_1"
@@ -1211,7 +1326,7 @@ class PhysicsCompiler:
         n2 = float(self._extract_raw_val(params.get("n2")))
 
         src_pos = self._extract_point(_first_not_none(params.get("source_position"), geom.get("sourcePosition"), geom.get("source_position")))
-        theta1_raw = params.get("theta1")
+        theta1_raw = _first_not_none(params.get("theta1"), params.get("incident_angle"))
 
         boundary_entity = self._find_entity(book_ir, ("interface_boundary", "boundary", "interface"))
         bound_id = boundary_entity.id if boundary_entity else "element_boundary"
@@ -1221,7 +1336,8 @@ class PhysicsCompiler:
             "n2": {"value": n2, "unit": "", "provenance": "observed"},
         }
         if theta1_raw is not None:
-            scene["parameters"]["theta1"] = {"value": float(self._extract_raw_val(theta1_raw)), "unit": "deg", "provenance": "observed"}
+            theta1, _ = _validate_and_convert_unit("theta1", *_extract_val_and_unit(theta1_raw), "angle_deg")
+            scene["parameters"]["theta1"] = {"value": theta1, "unit": "deg", "provenance": "observed"}
 
         scene["geometry"].update({
             "boundaryY": bound_y,
@@ -1279,6 +1395,15 @@ class PhysicsCompiler:
             "focalLength": {"value": focal_px, "unit": "px", "provenance": "observed"},
             "mirrorType": {"value": concavity, "unit": "", "provenance": "observed"},
         }
+        object_distance = params.get("objectDistance")
+        object_height = params.get("object_height_px")
+        if object_distance is not None and object_height is not None:
+            scene["parameters"]["objectDistance"] = {
+                "value": float(self._extract_raw_val(object_distance)), "unit": "px", "provenance": "observed",
+            }
+            scene["parameters"]["objectHeight"] = {
+                "value": -abs(float(self._extract_raw_val(object_height))), "unit": "px", "provenance": "observed",
+            }
         scene["geometry"].update({
             "mirrorX": pole["x"],
             "axisY": pole["y"],
@@ -1307,10 +1432,17 @@ class PhysicsCompiler:
         geom = book_ir.geometry or {}
 
         v_raw = self._extract_raw_val(_first_not_none(params.get("vertices"), geom.get("prismVertices"), geom.get("vertices")))
-        n = float(self._extract_raw_val(_first_not_none(params.get("n"), params.get("refractiveIndex"))))
-        apex_angle = float(self._extract_raw_val(_first_not_none(params.get("apex_angle_deg"), geom.get("apex_angle_deg"))))
-        ray_org = self._extract_point(_first_not_none(geom.get("rayOrigin"), params.get("ray_origin")))
-        ray_dir = self._extract_point(_first_not_none(geom.get("rayDirection"), params.get("ray_direction")))
+        n = float(self._extract_raw_val(_first_not_none(params.get("n"), params.get("refractiveIndex"), params.get("refractive_index"))))
+        apex_angle, _ = _validate_and_convert_unit("apex_angle_deg", *_extract_val_and_unit(_first_not_none(
+            params.get("apex_angle_deg"),
+            params.get("apex_angle"),
+            params.get("apexAngle"),
+            geom.get("apex_angle_deg"),
+            geom.get("apex_angle"),
+            geom.get("apexAngle"),
+        )), "angle_deg")
+        ray_org = self._extract_point(_first_not_none(geom.get("rayOrigin"), geom.get("ray_origin"), params.get("ray_origin"), params.get("rayOrigin")))
+        ray_dir = self._extract_point(_first_not_none(geom.get("rayDirection"), geom.get("ray_direction"), params.get("ray_direction"), params.get("rayDirection")))
 
         prism_entity = self._find_entity(book_ir, ("prism", "triangular_prism"))
         prism_id = prism_entity.id if prism_entity else "element_prism"
@@ -1353,10 +1485,19 @@ class PhysicsCompiler:
 
     def _populate_canonical_circuits(self, scene: Dict[str, Any], book_ir: BookIR):
         params = book_ir.parameters
-        components = self._extract_raw_val(params.get("components"))
+        components = deepcopy(self._extract_raw_val(params.get("components")))
         nodes = self._extract_raw_val(params.get("nodes"))
         wires = self._extract_raw_val(params.get("wires") or [])
         ref_node = self._extract_raw_val(params.get("reference_node")) or (nodes[0] if isinstance(nodes[0], str) else nodes[0].get("id"))
+
+        sources = {"voltage_source", "battery", "dc_source"}
+        for component in components:
+            kind = component.get("type")
+            if kind in sources | {"resistor", "bulb", "lamp"}:
+                dimension = "voltage" if kind in sources else "resistance"
+                quantity = UnitEngine.parse_quantity(component["value"], component.get("unit"), dimension)
+                component["value"] = quantity.canonical_value
+                component["unit"] = quantity.canonical_unit
 
         scene["circuit"] = {
             "reference_node": ref_node,
@@ -1365,12 +1506,28 @@ class PhysicsCompiler:
             "wires": wires,
         }
 
-        # Populate canonical parameters for circuit components
+        # Populate canonical parameters for circuit components with defensive ID de-duplication
+        seen_cids = set()
         for comp in components:
             cid = comp.get("id")
+            ctype = comp.get("type", "resistor")
+            if not cid or cid in seen_cids:
+                prefix = "V" if ctype in ("voltage_source", "battery", "dc_source") else "R"
+                idx = 1
+                while f"{prefix}{idx}" in seen_cids:
+                    idx += 1
+                new_cid = f"{prefix}{idx}"
+                # Migrate terminal IDs if they used old cid
+                if cid:
+                    for t in comp.get("terminals", []):
+                        if t.get("id", "").startswith(f"{cid}."):
+                            t["id"] = t["id"].replace(f"{cid}.", f"{new_cid}.")
+                comp["id"] = new_cid
+                cid = new_cid
+            seen_cids.add(cid)
+
             cval = comp.get("value")
             cunit = comp.get("unit")
-            ctype = comp.get("type", "resistor")
             comp["editable"] = True
             if cid and cval is not None:
                 is_source = ctype in ("voltage_source", "battery", "dc_source")

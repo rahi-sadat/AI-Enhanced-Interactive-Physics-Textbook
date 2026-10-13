@@ -158,6 +158,8 @@ class TestPR05PipelineIntegration(unittest.TestCase):
             self.assertIn("book_ir", data)
             self.assertIn("compiler", data)
             self.assertIn("page_ir", data)
+            self.assertEqual(data["book_ir"]["geometry"]["width"], data["source_asset"]["width_px"])
+            self.assertEqual(data["book_ir"]["geometry"]["height"], data["source_asset"]["height_px"])
             self.assertIn("source_asset", data)
 
             # Domain & scenario populated from semantic analysis

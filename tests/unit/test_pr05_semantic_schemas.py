@@ -35,10 +35,32 @@ from shared.schemas.semantic import (
     SemanticVisibleLabel,
     validate_semantic_payload,
 )
+from ai.ingestion.vision.gemini_provider import _discard_dangling_relationships
 
 
 class TestPR05SemanticSchemas(unittest.TestCase):
     """Test suite for PR-05 semantic schemas and validation rules."""
+
+    def test_gemini_dangling_relationship_is_discarded_without_creating_entity(self):
+        payload = {
+            "classification": "supported", "isPhysics": True,
+            "domain": "optics", "subtype": "spherical_mirror",
+            "confidence": {"isPhysics": 0.9, "domain": 0.9, "subtype": 0.9},
+            "entities": [
+                {"temporaryId": "mirror_1", "role": "mirror"},
+                {"temporaryId": "pole_1", "role": "pole"},
+            ],
+            "relationships": [
+                {"type": "contains", "from": "mirror_1", "to": "pole_1"},
+                {"type": "aligned_with", "from": "pole_1", "to": "optical_axis"},
+            ],
+        }
+        clean = _discard_dangling_relationships(payload)
+        result = validate_semantic_payload(clean)
+        self.assertEqual(result.subtype, "spherical_mirror")
+        self.assertEqual(len(result.entities), 2)
+        self.assertEqual(len(result.relationships), 1)
+        self.assertEqual(clean["metadata"]["debug"]["discardedDanglingRelationshipCount"], 1)
 
     def test_valid_structured_json_passes(self):
         payload = {
