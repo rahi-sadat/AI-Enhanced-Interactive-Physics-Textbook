@@ -111,6 +111,10 @@ export class ProjectileKernel {
     return (2.0 * this.vy0) / this.g;
   }
 
+  get timeToApex() {
+    return this.vy0 / this.g;
+  }
+
   get maxHeightM() {
     return (this.vy0 * this.vy0) / (2.0 * this.g);
   }

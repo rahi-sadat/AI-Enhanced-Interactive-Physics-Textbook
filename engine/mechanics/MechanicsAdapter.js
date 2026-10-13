@@ -205,6 +205,8 @@ export class MechanicsAdapter extends SimulationAdapter {
         pivot,
         stringLengthPx,
         bobRadiusPx,
+        renderContext: options.renderContext,
+        viewport: options.viewport,
         onInteract: (action) => {
           this.updateParameter(action);
         }
@@ -327,12 +329,19 @@ export class MechanicsAdapter extends SimulationAdapter {
       gravity_m_s2: gravityMS2
     };
 
+    const ppmX = Number(scene.calibration?.pixels_per_meter_x) || ppm;
+    const ppmY = Number(scene.calibration?.pixels_per_meter_y) || ppm;
+
     if (container && typeof document !== 'undefined') {
       this.sim = new ProjectileSimulation(container, adaptedScene, {
         kernel: this.physicsKernel,
         ppm,
+        ppmX,
+        ppmY,
         ballRadiusPx: radiusSourcePx,
         launchSource: launchPos,
+        renderContext: options.renderContext,
+        viewport: options.viewport,
         onInteract: (action) => {
           this.updateParameter(action);
         }
@@ -367,6 +376,19 @@ export class MechanicsAdapter extends SimulationAdapter {
       this.sim.reset();
     }
     this.notifyStateChange(this.getState());
+  }
+
+  resize(coordinateMapperOrW, h = null, renderContext = null) {
+    if (this.sim?.resize) {
+      if (typeof coordinateMapperOrW === 'object' && coordinateMapperOrW !== null) {
+        const cm = coordinateMapperOrW.mapper || coordinateMapperOrW;
+        const w = cm.viewW || cm.renderedW || cm.width;
+        const hVal = cm.viewH || cm.renderedH || cm.height;
+        this.sim.resize(w, hVal, coordinateMapperOrW);
+      } else {
+        this.sim.resize(coordinateMapperOrW, h, renderContext);
+      }
+    }
   }
 
   step(dt = 1 / 60) {
