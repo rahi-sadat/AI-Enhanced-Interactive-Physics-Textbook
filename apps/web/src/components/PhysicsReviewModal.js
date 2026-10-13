@@ -42,6 +42,31 @@ export const PARAMETER_LABELS = {
   current: 'Current (I)',
 };
 
+export const INTERNAL_GEOMETRY_PARAMS = new Set([
+  'launch_position',
+  'launch_origin',
+  'ball_radius_px',
+  'pixels_per_meter',
+  'focal_length_px',
+  'object_distance_px',
+  'curvature_radius_px',
+  'nodes',
+  'components',
+  'wire_segments',
+  'vertices',
+  'prismVertices',
+  'ray_origin',
+  'ray_direction',
+  'rayOrigin',
+  'rayDirection',
+  'polygon',
+  'polygon_points',
+  'point_2d',
+  'vector_2d',
+  'bounds',
+  'points',
+]);
+
 export const DEFAULT_UNITS = {
   length: ['m', 'cm', 'mm'],
   gravity: ['m/s²'],
@@ -219,10 +244,8 @@ export class PhysicsReviewModal {
   }
 
   _handleOrchestratorChange(state, ctx) {
-    // Automatically open modal when review is required
-    if (state === OrchestratorState.NEEDS_REVIEW && !this.isOpen) {
-      this.open();
-    }
+    // Review modal does not auto-interrupt the student; system auto-resolves appropriate defaults.
+    // Modal will render if opened explicitly by user clicking "Review Setup".
     if (this.isOpen) {
       this.render();
     }
@@ -301,10 +324,12 @@ export class PhysicsReviewModal {
     // 5. Unresolved Issues Section
     const issues = reviewState?.issues || [];
     const unresolvedIssues = issues.filter((iss) => {
-      // If already resolved in BookIR parameters, skip from unresolved list
       const pName = iss.parameterName || iss.parameter_name;
-      if (!pName) return true;
-      const isResolved = bookIR?.parameters && bookIR.parameters[pName] !== undefined;
+      if (!pName) return false;
+      // Never interrogate student for internal geometric coordinates or spatial scale
+      if (INTERNAL_GEOMETRY_PARAMS.has(pName)) return false;
+      const isResolved =
+        bookIR?.parameters && (bookIR.parameters[pName] !== undefined || (bookIR.resolutions && bookIR.resolutions[pName] !== undefined));
       return !isResolved;
     });
 

@@ -3,7 +3,7 @@ import './style.css';
 import { loadScene }        from '@engine/core/sceneLoader.js';
 import { createLegacySimulation } from './features/simulations/legacy/legacySceneRouter.js';
 import { OverlayStage }     from './features/simulations/core/overlayStage.js';
-import { uploadDiagramFile, analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
+import { analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
 import { InteractiveFigure } from './components/InteractiveFigure.js';
 // PR-04: Real image ingestion pipeline
 import { UploadService }    from './features/simulations/core/UploadService.js';
@@ -111,7 +111,9 @@ export const reviewModal = new PhysicsReviewModal(document.body, orchestrator, {
     closeModal();
     setPlatformMode('runtime');
     if (activeFigure) {
-      activeFigure.load(scene);
+      activeFigure.load(scene)
+        .then(() => activeFigure.play())
+        .catch((error) => console.error('[Simulation] Could not start the compiled scene:', error));
     }
   },
   onClose: () => {
@@ -119,10 +121,36 @@ export const reviewModal = new PhysicsReviewModal(document.body, orchestrator, {
   }
 });
 
+// PR-04: IR Debug Panel (development/debug-only — guarded from students)
+function isDevOrDebugMode() {
+  if (typeof window === 'undefined') return false;
+  if (window.__AUGMENTED_PHYSICS_DEBUG__ === true) return true;
+  if (new URLSearchParams(window.location.search).get('debug') === 'true') return true;
+  if (localStorage.getItem('augmented_physics_debug') === 'true') return true;
+  if (import.meta.env && import.meta.env.DEV) return true;
+  return false;
+}
+
+const irDebugHost = document.getElementById('ir-debug-panel');
+const irDebugSection = document.getElementById('ir-debug-section');
+let irDebugPanel = null;
+if (irDebugHost) {
+  irDebugPanel = new IRDebugPanel(irDebugHost);
+  const _origUpdate = irDebugPanel.update.bind(irDebugPanel);
+  irDebugPanel.update = (result) => {
+    _origUpdate(result);
+    // Explicit safeguard: only reveal debug section in dev or debug mode
+    if (irDebugSection && isDevOrDebugMode()) {
+      irDebugSection.style.display = 'block';
+    }
+  };
+}
+
 // Dev & Testing inspection handles
 if (typeof window !== 'undefined') {
   window.__orchestrator = orchestrator;
   window.__reviewModal = reviewModal;
+  window.__irDebugPanel = irDebugPanel;
 }
 
 const dropzone = document.getElementById('dropzone');
@@ -286,7 +314,7 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       domainSelect.value = 'mechanics';
       if (scenarioSelect) scenarioSelect.value = 'projectile';
     } else if (preset === 'prism') {
-      setPreview('prism_diagram.png', '/scenes/optics/prism_scene.json', 800, 600);
+      setPreview('prism_diagram.png', '/uploads/prism_diagram.png', 800, 600);
       domainSelect.value = 'optics';
       if (scenarioSelect) scenarioSelect.value = 'prism';
     } else if (preset === 'spring') {
@@ -346,20 +374,36 @@ btnGenerateSim?.addEventListener('click', async () => {
       }
 
       if (orchestrator.state === OrchestratorState.READY_TO_SIMULATE) {
+        updateProgress('Building simulation...', 95);
+        if (!activeFigure || !orchestrator.compiledScene) {
+          throw new Error('The compiled simulation is unavailable.');
+        }
+        await activeFigure.load(orchestrator.compiledScene);
+        orchestrator.startSimulation();
+        activeFigure.play();
+        closeModal();
+        setPlatformMode('runtime');
         updateProgress('Simulation ready!', 100);
-        setTimeout(() => {
+      } else if (orchestrator.state === OrchestratorState.READY_TO_COMPILE) {
+        updateProgress('Compiling simulation with resolved textbook defaults...', 90);
+        try {
+          await orchestrator.compile();
+          if (!activeFigure || !orchestrator.compiledScene) {
+            throw new Error('The compiled simulation is unavailable.');
+          }
+          await activeFigure.load(orchestrator.compiledScene);
+          orchestrator.startSimulation();
+          activeFigure.play();
           closeModal();
           setPlatformMode('runtime');
-          if (activeFigure) {
-            activeFigure.load(orchestrator.compiledScene);
-          }
-        }, 300);
+        } catch (compErr) {
+          console.warn('[Main] Auto-compile note:', compErr);
+          btnGenerateSim.disabled = false;
+          progressStatus.textContent = 'Could not reliably interpret this diagram.';
+        }
       } else if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
-        updateProgress('Textbook evidence requires review...', 100);
-        setTimeout(() => {
-          closeModal();
-          reviewModal.open();
-        }, 200);
+        btnGenerateSim.disabled = false;
+        progressStatus.textContent = 'Could not reliably interpret this diagram.';
       } else if (orchestrator.state === OrchestratorState.UNSUPPORTED || orchestrator.state === OrchestratorState.ERROR) {
         btnGenerateSim.disabled = false;
         progressStatus.textContent = ctx.currentError || 'Analysis could not proceed.';
@@ -370,16 +414,7 @@ btnGenerateSim?.addEventListener('click', async () => {
     // ---------------------------------------------------------------
     // LEGACY PATH: pre-compiled preset scenes (no uploaded file)
     // ---------------------------------------------------------------
-    let finalImageUrl = uploadedImageUrl;
-
-    // If actual file was uploaded, upload it to the backend
-    if (uploadedFile) {
-      updateProgress('Uploading diagram to backend...', 20);
-      const upRes = await uploadDiagramFile(uploadedFile);
-      if (upRes.success && upRes.image_url) {
-        finalImageUrl = upRes.image_url;
-      }
-    }
+    const finalImageUrl = uploadedImageUrl;
 
     // Check if selecting a pre-compiled textbook scene without custom file upload
     const PRESET_SCENES = {
@@ -391,6 +426,11 @@ btnGenerateSim?.addEventListener('click', async () => {
       series_parallel: { domain: 'circuits', url: '/scenes/circuits/series_parallel_scene.json' },
       newtons_cradle: { domain: 'mechanics', url: '/scenes/kinematics/newtons_cradle_scene.json' },
       incline: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
+      prism: { domain: 'optics', url: '/scenes/optics/prism_scene.json' },
+      mirror: { domain: 'optics', url: '/scenes/optics/mirror_scene.json' },
+      thin_lens: { domain: 'optics', url: '/scenes/optics/thin_lens_scene.json' },
+      interface_refraction: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
+      projectile: { domain: 'mechanics', url: '/scenes/canonical/projectile_figure.json' },
     };
 
     const scenarioChoice = scenarioSelect?.value || 'auto';
@@ -402,7 +442,7 @@ btnGenerateSim?.addEventListener('click', async () => {
       const pScene = await pRes.json();
       setTimeout(() => {
         closeModal();
-        if (activeFigure && (presetInfo.domain === 'optics' || presetInfo.domain === 'circuits')) {
+        if (activeFigure) {
           setPlatformMode('runtime');
           activeFigure.load(pScene);
         } else {
@@ -499,30 +539,6 @@ if (figureHost) {
   activeFigure.load('/scenes/canonical/pendulum_figure.json');
 }
 
-// PR-04: IR Debug Panel (development/debug-only — guarded from students)
-function isDevOrDebugMode() {
-  if (typeof window === 'undefined') return false;
-  if (window.__AUGMENTED_PHYSICS_DEBUG__ === true) return true;
-  if (new URLSearchParams(window.location.search).get('debug') === 'true') return true;
-  if (localStorage.getItem('augmented_physics_debug') === 'true') return true;
-  if (import.meta.env && import.meta.env.DEV) return true;
-  return false;
-}
-
-const irDebugHost = document.getElementById('ir-debug-panel');
-const irDebugSection = document.getElementById('ir-debug-section');
-let irDebugPanel = null;
-if (irDebugHost) {
-  irDebugPanel = new IRDebugPanel(irDebugHost);
-  const _origUpdate = irDebugPanel.update.bind(irDebugPanel);
-  irDebugPanel.update = (result) => {
-    _origUpdate(result);
-    // Explicit safeguard: only reveal debug section in dev or debug mode
-    if (irDebugSection && isDevOrDebugMode()) {
-      irDebugSection.style.display = 'block';
-    }
-  };
-}
 
 
 const btnModeRuntime = document.getElementById('view-mode-runtime');

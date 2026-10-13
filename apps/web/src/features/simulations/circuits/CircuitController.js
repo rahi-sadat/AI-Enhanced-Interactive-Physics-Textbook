@@ -86,8 +86,18 @@ export class CircuitController {
     const bgUrl = this.scene.visual?.background_url ||
                   this.scene.source?.image ||
                   '/scenes/circuits/textbook_circuit_diagram.svg';
-    const sw = this.scene.geometry?.source_width || this.scene.source?.image_width_px || 800;
-    const sh = this.scene.geometry?.source_height || this.scene.source?.image_height_px || 500;
+    const sw = this.scene.coordinateSpace?.width ||
+                  this.scene.coordinateSystem?.width ||
+                  this.scene.geometry?.source_width ||
+                  this.scene.source?.width ||
+                  this.scene.source?.image_width_px ||
+                  800;
+    const sh = this.scene.coordinateSpace?.height ||
+                  this.scene.coordinateSystem?.height ||
+                  this.scene.geometry?.source_height ||
+                  this.scene.source?.height ||
+                  this.scene.source?.image_height_px ||
+                  500;
     this.overlayStage.setBackground(bgUrl, sw, sh);
   }
 

@@ -245,7 +245,9 @@ export class SimulationOrchestrator {
     try {
       const revRes = await this.api.review(this.bookIR);
       if (opId !== this._operationId) return;
-
+      if (revRes.book_ir || revRes.bookIR) {
+        this.bookIR = revRes.book_ir || revRes.bookIR;
+      }
       this.reviewState = revRes.reviewState;
       this._metrics.reviewIssuesCount = this.reviewState.issues?.length || 0;
 
@@ -452,6 +454,9 @@ export class SimulationOrchestrator {
       const revRes = await this.api.review(this.bookIR);
       if (opId !== this._operationId) return;
 
+      if (revRes.book_ir || revRes.bookIR) {
+        this.bookIR = revRes.book_ir || revRes.bookIR;
+      }
       this.reviewState = revRes.reviewState;
       const isReady = revRes.readyToCompile || hintCanCompile;
 

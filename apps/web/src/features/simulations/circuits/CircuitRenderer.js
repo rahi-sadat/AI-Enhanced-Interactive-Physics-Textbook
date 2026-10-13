@@ -450,22 +450,25 @@ export class CircuitRenderer extends SimulationRenderer {
         const [lx, ly, lw, lh] = lblBox;
 
         // 1. In-diagram seamless whiteout patch covering static textbook text
+        const effLh = Math.min(lh, 46);
+        const effLy = lh > 65 ? (ly + lh / 2 - effLh / 2) : ly;
         const patch = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         patch.setAttribute('x', String(lx - 3));
-        patch.setAttribute('y', String(ly - 2));
+        patch.setAttribute('y', String(effLy - 2));
         patch.setAttribute('width', String(lw + 6));
-        patch.setAttribute('height', String(lh + 4));
-        patch.setAttribute('rx', '3');
+        patch.setAttribute('height', String(effLh + 4));
+        patch.setAttribute('rx', '4');
         patch.setAttribute('fill', '#ffffff');
-        patch.setAttribute('fill-opacity', '0.98');
-        patch.setAttribute('stroke', 'none');
+        patch.setAttribute('fill-opacity', '0.96');
+        patch.setAttribute('stroke', '#cbd5e1');
+        patch.setAttribute('stroke-width', '1');
         g.appendChild(patch);
 
         // 2. Textbook style math typography matching textbook print
-        const fontSize = Math.max(16, Math.min(32, lh * 0.72));
+        const fontSize = Math.max(16, Math.min(26, effLh * 0.65));
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text.setAttribute('x', String(lx + lw / 2));
-        text.setAttribute('y', String(ly + lh * 0.68));
+        text.setAttribute('y', String(effLy + effLh * 0.68));
         text.setAttribute('text-anchor', 'middle');
         text.setAttribute('fill', '#0f172a');
         text.setAttribute('font-family', 'Cambria, "Times New Roman", STIXGeneral, serif');

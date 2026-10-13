@@ -59,6 +59,9 @@ export class SimulationApi {
     }
 
     if (!res.ok) {
+      if (res.status === 502 || res.status === 504) {
+        throw new Error('Backend server is offline or restarting (port 8000). Please ensure the FastAPI backend is running.');
+      }
       let detail = `Server returned HTTP ${res.status}`;
       try {
         const errBody = await res.json();
