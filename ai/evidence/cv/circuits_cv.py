@@ -94,20 +94,13 @@ class CircuitCVCandidateExtractor:
                 valid_rails_y.append(ry)
 
         if len(valid_rails_y) >= 2 and len(branches_x) >= 2:
-            y_top = min(valid_rails_y)
-            y_bot = max(valid_rails_y)
-            x_min = min(branches_x)
-            x_max = max(branches_x)
-
-            top_rail = SourceLine(start=SourcePoint(float(x_min), float(y_top)), end=SourcePoint(float(x_max), float(y_top)))
-            bot_rail = SourceLine(start=SourcePoint(float(x_min), float(y_bot)), end=SourcePoint(float(x_max), float(y_bot)))
-            merged_wires.append(top_rail)
-            merged_wires.append(bot_rail)
-
-            # Check for intermediate horizontal rails (e.g. in multi-stage / series-parallel circuits)
-            mid_rails = [ry for ry in valid_rails_y if y_top + 30 < ry < y_bot - 30]
-            for mry in mid_rails:
-                merged_wires.append(SourceLine(start=SourcePoint(float(x_min), float(mry)), end=SourcePoint(float(x_max), float(mry))))
+            # Generate rail segments between adjacent branches only where edges actually exist
+            for ry in valid_rails_y:
+                for i in range(len(branches_x) - 1):
+                    bx1, bx2 = branches_x[i], branches_x[i + 1]
+                    region = edges[max(0, ry - 14):min(h, ry + 14), bx1 + 15:bx2 - 15]
+                    if np.sum(region > 0) > 10:
+                        merged_wires.append(SourceLine(start=SourcePoint(float(bx1), float(ry)), end=SourcePoint(float(bx2), float(ry))))
 
         # 2b. Detect Component Bodies (rectangular contours or symbols)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

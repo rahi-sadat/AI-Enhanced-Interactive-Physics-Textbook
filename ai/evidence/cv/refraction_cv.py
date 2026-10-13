@@ -97,6 +97,14 @@ class InterfaceRefractionCVCandidateExtractor:
                     elif mid_y > bound_y and not refracted_ray:
                         refracted_ray = l
 
+        if incident_ray is None and incidence_point is not None and ocr_boxes:
+            raw = self.extract(image_bgr, source_width=source_width,
+                               source_height=source_height, ocr_boxes=None)
+            raw_point = raw.get("incidence_point")
+            if (raw.get("incident_ray") is not None and raw_point is not None
+                    and raw_point.distance_to(incidence_point) <= min(w, h) * 0.04):
+                incident_ray = raw["incident_ray"]
+
         return {
             "boundary_line": boundary_line,
             "normal_line": normal_line,
