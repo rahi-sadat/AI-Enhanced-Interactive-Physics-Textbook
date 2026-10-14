@@ -83,3 +83,25 @@ from .resolution import (
     ReviewState,
     ReadinessReport,
 )
+
+from .visual_reconstruction import (
+    ObservedGeometry,
+    VisualConstraint,
+    DynamicVisualAsset,
+    RegistrationMetric,
+    RegistrationReport,
+    RegistrationStatus,
+    VisualReadiness,
+    VisualReconstruction,
+)
+
+__all__ += [
+    "ObservedGeometry",
+    "VisualConstraint",
+    "DynamicVisualAsset",
+    "RegistrationMetric",
+    "RegistrationReport",
+    "RegistrationStatus",
+    "VisualReadiness",
+    "VisualReconstruction",
+]

@@ -20,6 +20,8 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .visual_reconstruction import VisualReconstruction
+
 
 # ---------------------------------------------------------------------------
 # SourceAsset
@@ -271,9 +273,13 @@ class BookEntity:
 # BookIR status constants
 class BookIRStatus:
     UNRESOLVED = "UNRESOLVED"          # not enough information
-    NEEDS_REVIEW = "NEEDS_REVIEW"      # partially understood
     UNSUPPORTED = "UNSUPPORTED"        # understood but no solver
+    SUPPORTED_NEEDS_GROUNDING = "SUPPORTED_NEEDS_GROUNDING"  # domain/subtype recognized, reconstruction in progress
+    NEEDS_REVIEW = "NEEDS_REVIEW"      # partially understood
+    NEEDS_VISUAL_REVIEW = "NEEDS_VISUAL_REVIEW"  # small genuine visual ambiguity remains
     READY_TO_COMPILE = "READY_TO_COMPILE"  # sufficient for PhysicsCompiler
+    AUTO_VISUAL = "AUTO_VISUAL"        # visual simulation ready (normalized/pixel physics)
+    PHYSICS_VERIFIED = "PHYSICS_VERIFIED"  # physical quantities grounded in real SI units
 
 
 @dataclass
@@ -311,6 +317,7 @@ class BookIR:
     calibration: Optional[Any] = None
     id: Optional[str] = None
     isPhysics: Optional[bool] = None
+    visual_reconstruction: Optional[VisualReconstruction] = None
 
     def __post_init__(self):
         if self.id is None:
@@ -320,9 +327,45 @@ class BookIR:
                 self.id = "book_ir"
         if self.isPhysics is None:
             self.isPhysics = self.domain is not None and self.subtype is not None
+        self._validate_visual_reconstruction()
+
+    def _validate_visual_reconstruction(self):
+        if self.visual_reconstruction is None:
+            return
+        if isinstance(self.visual_reconstruction, dict):
+            self.visual_reconstruction = VisualReconstruction.from_dict(self.visual_reconstruction)
+        if not isinstance(self.visual_reconstruction, VisualReconstruction):
+            raise ValueError("visual_reconstruction must be a VisualReconstruction record")
+        visual = self.visual_reconstruction
+        visual.__post_init__()
+        visual.validate_entity_refs({entity.id for entity in self.entities})
+        visual.validate_evidence_refs(self.evidence, self.source_asset_id, self.figure_id)
+        observed = visual.observed_geometry
+        # Check every supplied native dimension; never rescale to hide disagreement.
+        for name, container in (("geometry", self.geometry), ("provenance", self.provenance),
+                                ("parameters", self.parameters)):
+            if not isinstance(container, dict):
+                continue
+            for keys, expected in ((("source_width", "sourceWidth"), observed.source_width),
+                                   (("source_height", "sourceHeight"), observed.source_height)):
+                # Only geometry uses bare dimensions; a physical height may have SI units.
+                if name == "geometry":
+                    keys = (*keys, "width" if keys[0] == "source_width" else "height")
+                for key in keys:
+                    if key not in container:
+                        continue
+                    value = container[key]
+                    value = value.get("value") if isinstance(value, dict) else getattr(value, "value", value)
+                    if type(value) not in (int, float) or value != expected:
+                        raise ValueError("Reconstruction dimensions disagree with BookIR source dimensions")
+        for mask in observed.masks.values():
+            if mask.source_asset_id is not None and mask.source_asset_id != self.source_asset_id:
+                raise ValueError("Reconstruction mask belongs to a different source asset")
+            if mask.figure_id is not None and mask.figure_id != self.figure_id:
+                raise ValueError("Reconstruction mask belongs to a different figure")
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             "version": self.version,
             "sourceAssetId": self.source_asset_id,
             "pageIRVersion": self.page_ir_version,
@@ -355,6 +398,11 @@ class BookIR:
             "id": self.id,
             "isPhysics": self.isPhysics,
         }
+        # Omit the optional addition for legacy payloads; solver readiness is unchanged.
+        if self.visual_reconstruction is not None:
+            self._validate_visual_reconstruction()
+            result["visualReconstruction"] = self.visual_reconstruction.to_dict()
+        return result
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "BookIR":
@@ -385,6 +433,7 @@ class BookIR:
             calibration=data.get("calibration"),
             id=data.get("id"),
             isPhysics=data.get("isPhysics"),
+            visual_reconstruction=data.get("visualReconstruction", data.get("visual_reconstruction")),
         )
 
 

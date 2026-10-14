@@ -294,22 +294,26 @@ class ProjectileGrounder:
                 tok_pt = SourcePoint(tok_cx, tok_cy) if (tok_cx is not None and tok_cy is not None) else None
 
                 for cand in val_cands:
-                    if cand.quantity_candidate == "velocity" and cand.numeric_value is not None:
-                        has_explicit_label = any(lbl in tok.raw_text.lower() for lbl in ("v =", "v=", "v0", "v_0", "u =", "u=", "speed", "বেগ", "velocity")) or tok.raw_text.strip().startswith(("v", "V", "u", "U"))
+                    if cand.quantity_candidate == "velocity" and cand.numeric_value is not None and cand.numeric_value > 0:
+                        has_explicit_label = any(lbl in tok.raw_text.lower() for lbl in ("v0", "v_0", "u0", "u_0", "v =", "v=", "u =", "u=", "speed", "বেগ", "velocity")) or tok.raw_text.strip().startswith(("v", "V", "u", "U"))
                         near_launch = False
                         if tok_pt and launch_pt:
-                            near_launch = tok_pt.distance_to(launch_pt) < 120.0
+                            near_launch = tok_pt.distance_to(launch_pt) < 180.0
 
                         assoc_checks = {"explicit_label": has_explicit_label, "near_launch": near_launch}
-                        if has_explicit_label or near_launch:
+                        existing_speed = grounded_ir.parameters.get("launch_speed")
+                        existing_near = getattr(existing_speed, "provenance", None) and getattr(existing_speed.provenance, "notes", "") == "near_launch"
+
+                        if (has_explicit_label or near_launch) and not (existing_near and not near_launch):
                             canonical_m_s = cand.numeric_value
                             if cand.raw_unit in ("km/h", "kph"):
                                 canonical_m_s = cand.numeric_value / 3.6
+                            notes = "near_launch" if near_launch else "labeled"
                             grounded_ir.parameters["launch_speed"] = PhysicalValue(
                                 value=canonical_m_s,
                                 unit="m/s",
                                 status="observed",
-                                provenance=ProvenanceRecord(source="ocr", evidence_refs=[tok_ev_id], confidence=cand.confidence),
+                                provenance=ProvenanceRecord(source="ocr", evidence_refs=[tok_ev_id], confidence=cand.confidence, notes=notes),
                             )
                             param_associations.append(
                                 ParameterAssociationResult(

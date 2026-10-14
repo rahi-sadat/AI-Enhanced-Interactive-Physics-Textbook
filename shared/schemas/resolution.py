@@ -316,6 +316,7 @@ class ReadinessReport:
     policy_assumptions: List[Dict[str, Any]] = field(default_factory=list)
     unresolved_ambiguities: List[str] = field(default_factory=list)
     calibration_status: Optional[Dict[str, Any]] = None
+    readiness_mode: Optional[str] = None
 
     def __post_init__(self):
         if self.status is not None:
@@ -332,6 +333,8 @@ class ReadinessReport:
             "ready": self.ready,
             "bookIRStatus": self.book_ir_status,
             "status": self.status,
+            "readinessMode": self.readiness_mode,
+            "readiness_mode": self.readiness_mode,
             "bookIrId": self.book_ir_id,
             "subtype": self.subtype,
             "blockers": self.blockers,

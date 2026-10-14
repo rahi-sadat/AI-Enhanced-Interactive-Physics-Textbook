@@ -161,10 +161,29 @@ class PrismGrounder:
             dy = float(inc_ray.end.y) - float(inc_ray.start.y)
             mag = math.hypot(dx, dy) or 1.0
             r_dir = [round(dx / mag, 4), round(dy / mag, 4)]
-            grounded_ir.geometry["ray_origin"] = {"x": r_orig[0], "y": r_orig[1]}
-            grounded_ir.geometry["rayOrigin"] = grounded_ir.geometry["ray_origin"]
-            grounded_ir.geometry["ray_direction"] = {"x": r_dir[0], "y": r_dir[1]}
-            grounded_ir.geometry["rayDirection"] = grounded_ir.geometry["ray_direction"]
+            ray_orig_pt = {"x": r_orig[0], "y": r_orig[1]}
+            ray_dir_pt = {"x": r_dir[0], "y": r_dir[1]}
+            grounded_ir.geometry["ray_origin"] = ray_orig_pt
+            grounded_ir.geometry["rayOrigin"] = ray_orig_pt
+            grounded_ir.geometry["ray_direction"] = ray_dir_pt
+            grounded_ir.geometry["rayDirection"] = ray_dir_pt
+
+            ray_prov = ProvenanceRecord(
+                source="cv",
+                confidence=0.88,
+                evidence_refs=[cv_ev_id],
+                notes="Printed incident ray grounded from classical CV.",
+            )
+            grounded_ir.parameters["ray_origin"] = PhysicalValue(
+                value=ray_orig_pt, unit="px", status="observed", provenance=ray_prov,
+            )
+            grounded_ir.parameters["ray_direction"] = PhysicalValue(
+                value=ray_dir_pt, unit=None, status="observed", provenance=ray_prov,
+            )
+            if grounded_ir.parameter_provenance is None:
+                grounded_ir.parameter_provenance = {}
+            grounded_ir.parameter_provenance["ray_origin"] = ray_prov
+            grounded_ir.parameter_provenance["ray_direction"] = ray_prov
 
         if ocr_result and ocr_result.tokens:
             for tok in ocr_result.tokens:

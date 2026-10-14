@@ -399,14 +399,23 @@ btnGenerateSim?.addEventListener('click', async () => {
         } catch (compErr) {
           console.warn('[Main] Auto-compile note:', compErr);
           btnGenerateSim.disabled = false;
-          progressStatus.textContent = 'Could not reliably interpret this diagram.';
+          if (orchestrator.reviewState?.issues?.length > 0) {
+            closeModal();
+            reviewModal.open();
+          } else {
+            const domainName = ctx.bookIR?.subtype || ctx.bookIR?.domain || 'Diagram';
+            progressStatus.textContent = `${domainName} detected, but compilation requires review: ${compErr.message || compErr}`;
+          }
         }
       } else if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
         btnGenerateSim.disabled = false;
-        progressStatus.textContent = 'Could not reliably interpret this diagram.';
+        closeModal();
+        reviewModal.open();
       } else if (orchestrator.state === OrchestratorState.UNSUPPORTED || orchestrator.state === OrchestratorState.ERROR) {
         btnGenerateSim.disabled = false;
-        progressStatus.textContent = ctx.currentError || 'Analysis could not proceed.';
+        const domainName = ctx.bookIR?.subtype || ctx.bookIR?.domain;
+        const msg = ctx.currentError || (domainName ? `${domainName} analysis could not proceed.` : 'Analysis could not proceed.');
+        progressStatus.textContent = msg;
       }
       return; // STOP! Complete path for user-uploaded file.
     }

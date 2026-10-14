@@ -1559,9 +1559,13 @@ def _get_ingestion_pipeline():
             storage_dir=UPLOADS_DIR,
             public_dir=FRONTEND_UPLOADS,
         )
+    if _PAGE_IR_BUILDER is None:
         _PAGE_IR_BUILDER = PageIRBuilder()
+    if _BOOK_PIPELINE is None:
         _BOOK_PIPELINE = BookUnderstandingPipeline()
+    if _EVIDENCE_PIPELINE is None:
         _EVIDENCE_PIPELINE = EvidenceExtractionPipeline()
+    if _PHYSICS_COMPILER is None:
         _PHYSICS_COMPILER = PhysicsCompiler()
     return _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _EVIDENCE_PIPELINE, _PHYSICS_COMPILER
 

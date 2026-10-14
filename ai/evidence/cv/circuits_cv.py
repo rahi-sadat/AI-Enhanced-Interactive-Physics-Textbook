@@ -87,10 +87,25 @@ class CircuitCVCandidateExtractor:
             branches_x = sorted(_cluster_1d(sorted(branches_x)))
 
         valid_rails_y = []
-        min_spans = 2 if len(branches_x) >= 2 else 1
         for ry in rails_y:
-            span_count = sum(1 for bx in branches_x if np.any(edges[max(0, ry - 14):min(h, ry + 14), max(0, bx - 18):min(w, bx + 18)] > 0))
-            if span_count >= min_spans:
+            # A valid rail must have significant horizontal edge occupancy across at least one inter-branch span
+            has_wire_span = False
+            if len(branches_x) >= 2:
+                for i in range(len(branches_x) - 1):
+                    bx1, bx2 = branches_x[i], branches_x[i + 1]
+                    span_w = bx2 - bx1
+                    if span_w > 20:
+                        strip = edges[max(0, ry - 10):min(h, ry + 11), bx1 + 15:bx2 - 15]
+                        occ = np.count_nonzero(np.any(strip > 0, axis=0)) if strip.size else 0
+                        if occ >= (span_w - 30) * 0.18:
+                            has_wire_span = True
+                            break
+            else:
+                strip = edges[max(0, ry - 10):min(h, ry + 11), :]
+                occ = np.count_nonzero(np.any(strip > 0, axis=0)) if strip.size else 0
+                has_wire_span = occ >= w * 0.15
+
+            if has_wire_span:
                 valid_rails_y.append(ry)
 
         if len(valid_rails_y) >= 2 and len(branches_x) >= 2:

@@ -150,25 +150,50 @@ class ResolutionAnalyzer:
     @classmethod
     def _check_circuit_components(cls, book_ir: BookIR, issues: List[ReviewIssue]) -> None:
         """Keep review readiness aligned with the compiler's DC graph/value gate."""
-        if any(entity.type in {"switch", "open_switch", "closed_switch"}
-               for entity in book_ir.entities):
-            issues.append(ReviewIssue(
-                id="issue_circuit_switch_state_unverified",
-                issue_type=ReviewIssueType.AMBIGUOUS_GEOMETRY,
-                title="Switch state and connections require review",
-                description="A switch is present but its state and connections are not grounded in the circuit graph.",
-                question="Verify the switch state and circuit topology before simulation.",
-                action_type=ResolutionActionType.CHOOSE_OPTION,
-                target_subtype="dc_linear",
-                is_blocker=True,
-            ))
         params = book_ir.parameters or {}
         components = params.get("components")
         nodes = params.get("nodes")
         components = getattr(components, "value", components)
         nodes = getattr(nodes, "value", nodes)
         if not isinstance(components, list) or not isinstance(nodes, list):
+            if any(entity.type in {"switch", "open_switch", "closed_switch"} for entity in book_ir.entities or []):
+                issues.append(ReviewIssue(
+                    id="issue_circuit_switch_state_unverified",
+                    issue_type=ReviewIssueType.AMBIGUOUS_GEOMETRY,
+                    title="Switch state and connections require review",
+                    description="A switch is present but its state and connections are not grounded in the circuit graph.",
+                    question="Verify the switch state and circuit topology before simulation.",
+                    action_type=ResolutionActionType.CHOOSE_OPTION,
+                    target_subtype="dc_linear",
+                    is_blocker=True,
+                ))
             return  # The generic requirement checks already report missing topology.
+
+        node_ids = {n if isinstance(n, str) else n.get("id")
+                    for n in nodes if isinstance(n, (str, dict))}
+
+        # Switches require grounded connection and defined state
+        for entity in book_ir.entities or []:
+            if entity.type in {"switch", "open_switch", "closed_switch"}:
+                comp = next((c for c in components if isinstance(c, dict) and (c.get("id") == entity.id or c.get("type") in {"switch", "open_switch", "closed_switch"})), None)
+                is_grounded = False
+                if comp:
+                    terminals = comp.get("nodes")
+                    has_nodes = isinstance(terminals, list) and len(terminals) == 2 and all(n in node_ids for n in terminals)
+                    has_state = comp.get("state") in {"open", "closed"} or comp.get("closed") in {True, False} or comp.get("type") in {"open_switch", "closed_switch"}
+                    if has_nodes and has_state:
+                        is_grounded = True
+                if not is_grounded:
+                    issues.append(ReviewIssue(
+                        id=f"issue_circuit_switch_state_unverified_{entity.id}",
+                        issue_type=ReviewIssueType.AMBIGUOUS_GEOMETRY,
+                        title="Switch state and connections require review",
+                        description=f"Switch {entity.id} is present but its state and connections are not grounded in the circuit graph.",
+                        question="Verify the switch state and circuit topology before simulation.",
+                        action_type=ResolutionActionType.CHOOSE_OPTION,
+                        target_subtype="dc_linear",
+                        is_blocker=True,
+                    ))
 
         node_ids = {n if isinstance(n, str) else n.get("id")
                     for n in nodes if isinstance(n, (str, dict))}

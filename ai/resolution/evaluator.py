@@ -17,6 +17,7 @@ from ai.resolution.analyzer import ResolutionAnalyzer
 from ai.resolution.requirements import RequirementRegistry
 from ai.resolution.policies import PolicyRegistry
 from ai.resolution.units import UnitEngine
+from ai.resolution.assumptions import automatic_visual_blockers
 
 
 class ReadinessEvaluator:
@@ -35,6 +36,7 @@ class ReadinessEvaluator:
         spec = RequirementRegistry.get_spec(subtype) if subtype else None
 
         blockers: List[str] = [iss.description for iss in review_state.issues if iss.is_blocker]
+        blockers.extend(automatic_visual_blockers(book_ir))
         warnings: List[str] = [iss.description for iss in review_state.issues if not iss.is_blocker]
         unresolved_ambiguities: List[str] = [
             iss.description
@@ -237,16 +239,34 @@ class ReadinessEvaluator:
 
         is_ready = (len(blockers) == 0 and len(unresolved_ambiguities) == 0 and len(review_state.missing_requirements) == 0)
 
+        readiness_mode = None
         if is_ready:
             new_status = BookIRStatus.READY_TO_COMPILE
+            has_si_calibration = False
+            calib = getattr(book_ir, "calibration", None)
+            if calib and getattr(calib, "verified", False):
+                has_si_calibration = True
+            elif hasattr(book_ir, "parameters") and book_ir.parameters:
+                ppm_prov = (book_ir.parameter_provenance or {}).get("pixels_per_meter")
+                if ppm_prov and getattr(ppm_prov, "source", None) in ("ocr", "author_override", "user_confirmed"):
+                    has_si_calibration = True
+            readiness_mode = "PHYSICS_VERIFIED" if has_si_calibration else "AUTO_VISUAL"
         elif not book_ir.domain or not book_ir.subtype or book_ir.isPhysics is False:
             classification = (book_ir.provenance or {}).get("classification")
             new_status = (BookIRStatus.UNSUPPORTED if classification == "unsupported_physics"
                           else BookIRStatus.UNRESOLVED)
+            readiness_mode = "UNSUPPORTED"
+        elif len(unresolved_ambiguities) > 0 or len(blockers) > 0:
+            new_status = BookIRStatus.NEEDS_REVIEW
+            readiness_mode = "NEEDS_VISUAL_REVIEW"
         else:
             new_status = BookIRStatus.NEEDS_REVIEW
+            readiness_mode = "SUPPORTED_NEEDS_GROUNDING"
+
         if mutate_status:
             book_ir.status = new_status
+            if hasattr(book_ir, "metadata") and isinstance(book_ir.metadata, dict):
+                book_ir.metadata["readiness_mode"] = readiness_mode
 
         return ReadinessReport(
             ready=is_ready,
@@ -260,4 +280,5 @@ class ReadinessEvaluator:
             policy_assumptions=policy_assumptions,
             unresolved_ambiguities=unresolved_ambiguities,
             calibration_status=calibration_info,
+            readiness_mode=readiness_mode,
         )

@@ -204,20 +204,18 @@ class EvidenceExtractionPipeline:
         extractor = self.cv_extractors.get(subtype_key)
         if extractor:
             try:
-                if hasattr(extractor, "extract_candidates"):
-                    cv_candidates = extractor.extract_candidates(
-                        img_bgr,
-                        source_width=src_w,
-                        source_height=src_h,
-                        ocr_boxes=ocr_boxes,
-                    )
-                else:
-                    cv_candidates = extractor.extract(
-                        img_bgr,
-                        source_width=src_w,
-                        source_height=src_h,
-                        ocr_boxes=ocr_boxes,
-                    )
+                tokens_list = ocr_result.tokens if ocr_result else []
+                call_fn = extractor.extract_candidates if hasattr(extractor, "extract_candidates") else extractor.extract
+                import inspect
+                sig = inspect.signature(call_fn)
+                kwargs = {
+                    "source_width": src_w,
+                    "source_height": src_h,
+                    "ocr_boxes": ocr_boxes,
+                }
+                if "ocr_tokens" in sig.parameters:
+                    kwargs["ocr_tokens"] = tokens_list
+                cv_candidates = call_fn(img_bgr, **kwargs)
             except Exception as e:
                 logger.warning("[EvidenceExtractionPipeline] CV candidate extraction error for %s: %s", subtype_key, e)
                 cv_candidates = {"error": str(e), "best_proposal": None}

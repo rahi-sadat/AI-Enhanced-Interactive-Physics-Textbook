@@ -362,14 +362,77 @@ class ThinLensGrounder:
                                 )
                             )
 
+        # 5. Store Fitted Parameters & Optical Landmarks
+        fitted = cv_candidates.get("fitted_parameters") or {}
+        if fitted.get("focal_length_px") and "focal_length_px" not in grounded_ir.parameters:
+            f_val = fitted["focal_length_px"]
+            prov = ProvenanceRecord(
+                source="inverse_fit",
+                evidence_refs=[cv_ev_id],
+                confidence=0.88,
+                notes="Focal length fitted from ray/image geometry via inverse calibration.",
+            )
+            grounded_ir.parameters["focal_length_px"] = PhysicalValue(
+                value=f_val,
+                unit="px",
+                status="derived",
+                provenance=prov,
+            )
+            grounded_ir.parameter_provenance["focal_length_px"] = prov
+
+        if fitted.get("object_distance_px") and "objectDistance" not in grounded_ir.parameters:
+            u_val = fitted["object_distance_px"]
+            prov_u = ProvenanceRecord(
+                source="diagram_measurement",
+                evidence_refs=[cv_ev_id],
+                confidence=0.88,
+                notes="Object distance derived from horizontal displacement between object and lens center.",
+            )
+            grounded_ir.parameters["objectDistance"] = PhysicalValue(
+                value=u_val,
+                unit="px",
+                status="derived",
+                provenance=prov_u,
+            )
+            grounded_ir.parameter_provenance["objectDistance"] = prov_u
+
+        if fitted.get("object_height_px") and "object_height_px" not in grounded_ir.parameters:
+            h_val = fitted["object_height_px"]
+            prov_h = ProvenanceRecord(
+                source="diagram_measurement",
+                evidence_refs=[cv_ev_id],
+                confidence=0.88,
+                notes="Object height derived from measured object arrow length in source pixels.",
+            )
+            grounded_ir.parameters["object_height_px"] = PhysicalValue(
+                value=h_val,
+                unit="px",
+                status="derived",
+                provenance=prov_h,
+            )
+            grounded_ir.parameter_provenance["object_height_px"] = prov_h
+
+        f1 = cv_candidates.get("focal_F1")
+        f2 = cv_candidates.get("focal_F2")
+        if f1 is not None:
+            grounded_ir.geometry["focal_F1"] = f1.to_dict() if hasattr(f1, "to_dict") else f1
+        if f2 is not None:
+            grounded_ir.geometry["focal_F2"] = f2.to_dict() if hasattr(f2, "to_dict") else f2
+
+        rays = cv_candidates.get("principal_rays") or {}
+        if rays:
+            grounded_ir.geometry["principal_rays"] = {
+                k: (v.to_dict() if hasattr(v, "to_dict") else v) for k, v in rays.items()
+            }
+
         grounded_ir.evidence.update({k: v.to_dict() for k, v in new_evidence.items()})
         grounded_ir.provenance["grounding_diagnostics"] = [d.to_dict() for d in diagnostics]
         grounded_ir.provenance["candidate_parameters"] = [c.to_dict() for c in all_val_candidates]
 
         # Status Invariant: Grounders extract and associate; status remains NEEDS_REVIEW for compiler verification
         grounded_ir.status = BookIRStatus.NEEDS_REVIEW
-        has_focal_length = "focal_length" in grounded_ir.parameters
-        has_object_dist = "object_distance" in grounded_ir.parameters
+        has_focal_length = "focal_length" in grounded_ir.parameters or "focal_length_px" in grounded_ir.parameters
+        has_object_dist = "object_distance" in grounded_ir.parameters or "objectDistance" in grounded_ir.parameters
 
         if has_focal_length and has_object_dist and lens_center:
             grounded_ir.status_notes = "Grounded thin lens focal length and object geometry; pending compiler verification."

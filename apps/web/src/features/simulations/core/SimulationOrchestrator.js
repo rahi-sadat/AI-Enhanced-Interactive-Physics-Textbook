@@ -176,7 +176,7 @@ export class SimulationOrchestrator {
       }
 
       // 3. Immediately ready with compiled scene from backend
-      if (status === 'READY' && ingestData.scene) {
+      if ((status === 'READY' || status === 'AUTO_VISUAL' || status === 'PHYSICS_VERIFIED') && ingestData.scene) {
         this.compiledScene = this._normalizeSceneBackground(ingestData.scene);
         this._metrics.timeToReadyMs = Date.now() - this._metrics.startTime;
         this._setState(OrchestratorState.READY_TO_SIMULATE);
@@ -184,14 +184,16 @@ export class SimulationOrchestrator {
       }
 
       // 4. Ingestion returned ready status but no scene -> trigger explicit compile
-      if (status === 'READY_TO_COMPILE' || this.bookIR?.status === 'READY_TO_COMPILE') {
+      if (status === 'READY_TO_COMPILE' || status === 'AUTO_VISUAL' || status === 'PHYSICS_VERIFIED' ||
+          this.bookIR?.status === 'READY_TO_COMPILE' || this.bookIR?.status === 'AUTO_VISUAL' || this.bookIR?.status === 'PHYSICS_VERIFIED') {
         this._setState(OrchestratorState.READY_TO_COMPILE);
         await this.compile();
         return;
       }
 
-      // 5. Normal student path: NEEDS_REVIEW
-      if (status === 'NEEDS_REVIEW' || this.bookIR?.status === 'NEEDS_REVIEW' || status === 'UNRESOLVED') {
+      // 5. Normal student path: NEEDS_REVIEW / NEEDS_VISUAL_REVIEW
+      if (status === 'NEEDS_REVIEW' || status === 'NEEDS_VISUAL_REVIEW' || status === 'SUPPORTED_NEEDS_GROUNDING' ||
+          this.bookIR?.status === 'NEEDS_REVIEW' || this.bookIR?.status === 'NEEDS_VISUAL_REVIEW' || status === 'UNRESOLVED') {
         await this._fetchReviewAnalysis(opId);
       } else {
         this._setState(

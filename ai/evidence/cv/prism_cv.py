@@ -170,6 +170,16 @@ class PrismCVCandidateExtractor:
                     end=SourcePoint(best[2], best[3]),
                 )
 
+        if incident_ray is None and ocr_boxes:
+            unmasked = self.extract(
+                image_bgr,
+                source_width=source_width,
+                source_height=source_height,
+                ocr_boxes=None,
+            )
+            if unmasked.get("incident_ray"):
+                incident_ray = unmasked["incident_ray"]
+
         return {
             "prism_polygon": prism_poly,
             "apex": apex,

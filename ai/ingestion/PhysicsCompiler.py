@@ -438,7 +438,14 @@ class PhysicsCompiler:
             )
 
         # 3. BookIR not ready to compile → NEEDS_REVIEW
-        if book_ir.status != BookIRStatus.READY_TO_COMPILE:
+        if book_ir.status not in (
+            BookIRStatus.READY_TO_COMPILE,
+            BookIRStatus.AUTO_VISUAL,
+            BookIRStatus.PHYSICS_VERIFIED,
+            "READY_TO_COMPILE",
+            "AUTO_VISUAL",
+            "PHYSICS_VERIFIED",
+        ):
             return PhysicsCompilerResult(
                 status="NEEDS_REVIEW",
                 scene=None,
@@ -1018,6 +1025,22 @@ class PhysicsCompiler:
             "render": {"coordinate_space": "source_px"},
         }
 
+        # Wire visual reconstruction dynamic visuals and clean background into scene render
+        recon = getattr(book_ir, "visual_reconstruction", None)
+        if recon is not None:
+            dyn_list = []
+            clean_bg = None
+            for dva in getattr(recon, "dynamic_visuals", []):
+                dva_dict = dva.to_dict() if hasattr(dva, "to_dict") else dict(dva)
+                dyn_list.append(dva_dict)
+                if not clean_bg:
+                    clean_bg = dva_dict.get("cleanBackgroundUrl") or dva_dict.get("clean_background_url")
+            if dyn_list:
+                scene["render"]["dynamicVisuals"] = dyn_list
+            if clean_bg:
+                scene["render"]["cleanBackgroundUrl"] = clean_bg
+                scene["source"]["clean_background_url"] = clean_bg
+
         # Delegate to domain-specific builders
         if domain == "mechanics" and subtype == "pendulum":
             self._populate_canonical_pendulum(scene, book_ir)
@@ -1276,7 +1299,7 @@ class PhysicsCompiler:
             }
         ]
 
-        # Handle object arrow (observed from diagram)
+        # Handle object arrow (observed from diagram or exploration)
         obj_h_raw = _first_not_none(
             params.get("object_height_px"),
             params.get("objectHeight"),
@@ -1284,17 +1307,18 @@ class PhysicsCompiler:
             obj_entity.geometry.get("height_px") if (obj_entity and obj_entity.geometry) else None,
         )
 
+        obj_h = float(self._extract_raw_val(obj_h_raw)) if obj_h_raw is not None else max(15.0, min(aperture * 0.35, 60.0))
+
         if obj_pos is not None or obj_dist_raw is not None or obj_entity:
-            obj_h = float(self._extract_raw_val(obj_h_raw))
             if obj_pos is None and obj_dist_raw is not None:
                 u_px = float(self._extract_raw_val(obj_dist_raw))
                 obj_pos = {"x": center["x"] - u_px, "y": center["y"]}
             elif obj_pos is not None:
                 u_px = abs(center["x"] - obj_pos["x"])
             else:
-                raise PhysicsCompilerError("Optical object position or distance is ungrounded.")
-            prov = "observed"
-
+                u_px = min(focal_px * 1.5, center["x"] * 0.7)
+                obj_pos = {"x": center["x"] - u_px, "y": center["y"]}
+            prov = "observed" if (obj_dist_raw is not None or obj_pos is not None) else "assumed"
             obj_id = obj_entity.id if obj_entity else "object_arrow_1"
 
             scene["parameters"]["objectDistance"] = {"value": u_px, "unit": "px", "provenance": prov}
@@ -1306,6 +1330,26 @@ class PhysicsCompiler:
                 "role": "object",
                 "label": obj_entity.label if obj_entity else "Optical Object",
                 "evidence_refs": obj_entity.evidence_refs if obj_entity else [],
+                "optics": {
+                    "model": "optical_object",
+                    "base": obj_pos,
+                    "tip": {"x": obj_pos["x"], "y": obj_pos["y"] - obj_h},
+                    "height_px": obj_h,
+                },
+            })
+        else:
+            u_px = min(focal_px * 1.5, center["x"] * 0.7)
+            obj_pos = {"x": center["x"] - u_px, "y": center["y"]}
+            prov = "assumed"
+            obj_id = "object_arrow_1"
+            scene["parameters"]["objectDistance"] = {"value": u_px, "unit": "px", "provenance": prov}
+            scene["parameters"]["objectHeight"] = {"value": -abs(obj_h), "unit": "px", "provenance": prov}
+            objects.append({
+                "id": obj_id,
+                "type": "optical_object",
+                "role": "object",
+                "label": "Optical Object",
+                "evidence_refs": [],
                 "optics": {
                     "model": "optical_object",
                     "base": obj_pos,
@@ -1505,6 +1549,27 @@ class PhysicsCompiler:
             "components": components,
             "wires": wires,
         }
+
+        switches_list = []
+        for comp in components:
+            if comp.get("type") in {"switch", "open_switch", "closed_switch"}:
+                sw_id = comp.get("id")
+                is_closed = comp.get("closed", comp.get("state") == "closed" or comp.get("type") == "closed_switch")
+                sw_entry = {
+                    "id": sw_id,
+                    "state": "closed" if is_closed else "open",
+                    "closed": bool(is_closed),
+                    "nodes": comp.get("nodes", []),
+                }
+                if "terminals" in comp:
+                    sw_entry["terminals"] = comp["terminals"]
+                if "geometry" in comp:
+                    sw_entry["geometry"] = comp["geometry"]
+                switches_list.append(sw_entry)
+        if switches_list:
+            if "geometry" not in scene:
+                scene["geometry"] = {}
+            scene["geometry"]["switches"] = switches_list
 
         # Populate canonical parameters for circuit components with defensive ID de-duplication
         seen_cids = set()

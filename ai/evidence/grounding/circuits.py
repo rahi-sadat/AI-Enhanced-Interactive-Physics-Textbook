@@ -63,11 +63,18 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
         'fig.', 'figure', 'dc circuit', 'circuit diagram'
     ]
 
-    SUBSCRIPT_MAP = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+    DIGIT_MAP = str.maketrans("₀₁₂₃₄₅₆₇₈₉০১২৩৪৫৬৭৮৯", "01234567890123456789")
 
     for tok in tokens:
         raw = tok.raw_text.strip()
-        raw_norm = raw.translate(SUBSCRIPT_MAP)
+        raw_norm = raw.translate(DIGIT_MAP)
+        raw_norm = (
+            raw_norm
+            .replace("ওহম", "ohm")
+            .replace("ভোল্ট", "V")
+            .replace("রেধ", "R")
+            .replace("রোধ", "R")
+        )
         lower = raw_norm.lower()
         if any(ik in lower for ik in ignored_keywords):
             continue
@@ -85,8 +92,9 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
 
         m_r_desig = re.fullmatch(r'^[Rr](\d+)$', raw_norm)
         m_v_desig = re.fullmatch(r'^[Vv](\d+)$', raw_norm)
+        m_s_desig = re.fullmatch(r'^[SsKk](\d*)$|^[Ss][Ww](\d*)$', raw_norm)
 
-        m_r_comb = re.match(r'^[Rr](\d+?)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
+        m_r_comb = re.match(r'^[Rr](\d*?)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
         m_v_comb = re.match(r'^[Vv](\d*)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
 
         m_r_val = re.fullmatch(r'^(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
@@ -98,9 +106,14 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
         elif m_v_desig:
             ptype = 'voltage_source'
             pdesig = f"V{m_v_desig.group(1)}"
+        elif m_s_desig:
+            ptype = 'switch'
+            sw_idx = m_s_desig.group(1) or m_s_desig.group(2) or "1"
+            pdesig = f"S{sw_idx}"
+            punit = 'ohm'
         elif m_r_comb:
             ptype = 'resistor'
-            pdesig = f"R{m_r_comb.group(1)}"
+            pdesig = f"R{m_r_comb.group(1)}" if m_r_comb.group(1) else "R1"
             pval = float(m_r_comb.group(2))
             punit = 'ohm'
             if 'k' in m_r_comb.group(3).lower():
@@ -154,17 +167,17 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
     components = []
     used: Set[int] = set()
 
-    # Pass 1: Tokens with both designator and value (e.g. "R1 = 10 Ω", "V=6 V")
+    # Pass 1: Tokens with both designator and value (e.g. "R1 = 10 Ω", "V=6 V") or switches
     for i, p in enumerate(parsed):
-        if p['type'] in ('voltage_source', 'resistor') and p['desig'] and p['val'] is not None:
+        if (p['type'] in ('voltage_source', 'resistor') and p['desig'] and p['val'] is not None) or p['type'] == 'switch':
             used.add(i)
             b = p['tok'].bbox_source_px
             lbl_box = [float(b.x), float(b.y), float(b.width), float(b.height)] if b else None
             components.append({
-                'id': p['desig'],
+                'id': p['desig'] or 'S1',
                 'type': p['type'],
                 'val': p['val'],
-                'unit': p['unit'],
+                'unit': p['unit'] or 'ohm',
                 'tokens': [p['tok']],
                 'cx': p['cx'],
                 'cy': p['cy'],
@@ -505,73 +518,50 @@ class CircuitGrounder:
         used_tokens: Set[str] = set()
         matched_tok_ids: Set[str] = set()
 
+        # Extract semantic component clusters from OCR tokens
+        ocr_clusters = parse_and_cluster_circuit_tokens(
+            parsed_tokens, association_radius=max(30.0, image_diagonal * 0.2),
+        )
+
+        semantic_clusters = []
+        matched_ocr_indices = set()
+
         if cv_comps:
-            semantic_clusters = []
             for c_idx, c in enumerate(cv_comps):
                 box = c.get("bbox") or c.get("box") or SourceBBox(100, 100, 50, 50)
                 center = c.get("center") or SourcePoint(box.x + box.width / 2.0, box.y + box.height / 2.0)
-                ctype = c.get("type", "resistor")
-                desig = c.get("id") or (f"V{c_idx+1}" if ctype in ("voltage_source", "battery") else f"R{c_idx+1}")
-                if c.get("id") and c["id"].startswith("cv_comp_"):
-                    desig = f"V{c_idx+1}" if ctype in ("voltage_source", "battery") else f"R{c_idx+1}"
 
-                # Look for nearby unused OCR tokens
-                best_tok = None
-                best_cand = None
-                # Collect all nearby unused OCR tokens (within 220px or matching designator)
-                nearby_toks = []
-                for tok in parsed_tokens:
-                    if tok.id in used_tokens:
+                # Find best matching OCR cluster within 180 px
+                best_ocr_idx = None
+                min_dist = float("inf")
+                for o_idx, oc in enumerate(ocr_clusters):
+                    if o_idx in matched_ocr_indices:
                         continue
-                    b = tok.bbox_source_px
-                    tc = SourcePoint(b.x + b.width / 2.0, b.y + b.height / 2.0) if b else None
-                    dist = center.distance_to(tc) if tc else float("inf")
-                    is_match = bool(re.search(rf"\b{re.escape(desig)}\b", tok.raw_text, re.IGNORECASE))
-                    if dist < 220.0 or is_match:
-                        nearby_toks.append((tok, dist, is_match))
+                    d = center.distance_to(SourcePoint(oc["cx"], oc["cy"]))
+                    if d < 180.0 and d < min_dist:
+                        min_dist = d
+                        best_ocr_idx = o_idx
 
-                # Sort by distance
-                nearby_toks.sort(key=lambda item: item[1])
-
-                val = c.get("value")
-                unit = c.get("unit") or ("V" if ctype in ("voltage_source", "battery") else "ohm")
-                c_toks = []
-
-                for tok, dist, is_match in nearby_toks:
-                    # A nearby label belongs to this component only when its
-                    # designator matches or its physical unit matches the model.
-                    # Otherwise one component can consume the next component's
-                    # value before that component is processed.
-                    other_designator = re.fullmatch(r"[RrVv]\d+", tok.raw_text.strip())
-                    if other_designator and not is_match:
-                        continue
-                    val_cands = parse_physical_value_candidate(tok)
-                    expected_quantity = (
-                        "voltage" if ctype in ("voltage_source", "battery", "dc_source")
-                        else "resistance" if ctype in ("resistor", "bulb", "lamp")
-                        else None
-                    )
-                    matching_value = next(
-                        (vc for vc in val_cands if vc.numeric_value is not None
-                         and vc.quantity_candidate == expected_quantity),
-                        None,
-                    )
-                    if not is_match and matching_value is None:
-                        continue
-                    used_tokens.add(tok.id)
-                    matched_tok_ids.add(tok.id)
-                    c_toks.append(tok)
-                    if val is None and matching_value is not None:
-                        mult = 1000.0 if (matching_value.raw_unit and "k" in matching_value.raw_unit.lower()) else 1.0
-                        val = float(matching_value.numeric_value) * mult
-                        unit = "V" if expected_quantity == "voltage" else "ohm"
-
-                lbl_box = None
-                for tok in c_toks:
-                    if tok.bbox_source_px:
-                        b = tok.bbox_source_px
-                        lbl_box = [float(b.x), float(b.y), float(b.width), float(b.height)]
-                        break
+                if best_ocr_idx is not None:
+                    matched_ocr_indices.add(best_ocr_idx)
+                    oc = ocr_clusters[best_ocr_idx]
+                    ctype = oc["type"]
+                    desig = oc["id"]
+                    val = oc["val"] if oc["val"] is not None else c.get("value")
+                    unit = oc["unit"]
+                    c_toks = oc.get("tokens", [])
+                    lbl_box = oc.get("label_bbox")
+                    for tok in c_toks:
+                        matched_tok_ids.add(tok.id)
+                else:
+                    ctype = c.get("type", "resistor")
+                    desig = c.get("id") or (f"V{c_idx+1}" if ctype in ("voltage_source", "battery") else f"R{c_idx+1}")
+                    if c.get("id") and c["id"].startswith("cv_comp_"):
+                        desig = f"V{c_idx+1}" if ctype in ("voltage_source", "battery") else f"R{c_idx+1}"
+                    val = c.get("value")
+                    unit = c.get("unit") or ("V" if ctype in ("voltage_source", "battery") else "ohm")
+                    c_toks = []
+                    lbl_box = None
 
                 semantic_clusters.append({
                     "id": desig,
@@ -585,13 +575,17 @@ class CircuitGrounder:
                     "label_bbox": lbl_box,
                     "terminals": c.get("terminals"),
                 })
-        else:
-            semantic_clusters = parse_and_cluster_circuit_tokens(
-                parsed_tokens, association_radius=max(30.0, image_diagonal * 0.2),
-            )
-            for sc in semantic_clusters:
-                for tok in sc.get("tokens", []):
-                    matched_tok_ids.add(tok.id)
+
+        # Add any remaining OCR clusters that were not matched to a CV contour
+        for o_idx, oc in enumerate(ocr_clusters):
+            if o_idx in matched_ocr_indices:
+                continue
+            # Ensure not a duplicate of an existing semantic cluster
+            if any(np.hypot(oc["cx"] - sc["cx"], oc["cy"] - sc["cy"]) < 50.0 for sc in semantic_clusters):
+                continue
+            for tok in oc.get("tokens", []):
+                matched_tok_ids.add(tok.id)
+            semantic_clusters.append(oc)
 
         # -------------------------------------------------------------------
         # 2. Physical Symbol Positioning & Terminal Grounding
@@ -613,15 +607,22 @@ class CircuitGrounder:
             y_top = min(rails_y) if rails_y else 0
             y_bot = max(rails_y) if rails_y else h
             best_bx = min(branches_x, key=lambda bx: abs(cx - bx)) if branches_x else cx
+            is_vertical = False
+
+            # Check geometric proximity to discovered vertical branches vs horizontal rails
+            y_top = min(rails_y) if rails_y else 0
+            y_bot = max(rails_y) if rails_y else h
+            best_bx = min(branches_x, key=lambda bx: abs(cx - bx)) if branches_x else cx
             dist_bx = abs(cx - best_bx) if branches_x else float("inf")
             best_ry = min(rails_y, key=lambda ry: abs(cy - ry)) if rails_y else cy
             dist_ry = abs(cy - best_ry) if rails_y else float("inf")
 
             is_in_rail_span = (y_top - image_diagonal * 0.04 <= cy <= y_bot + image_diagonal * 0.04) if len(rails_y) >= 2 else True
 
-            # A label above a rail may still be close to a branch in absolute
-            # pixels. Orientation follows the nearer measured wire axis.
-            if branches_x and is_in_rail_span and dist_bx < dist_ry:
+            # If near a vertical branch and between the top/bottom rails:
+            if branches_x and (y_top + 25 <= cy <= y_bot - 25) and (dist_bx < 160 and dist_bx < dist_ry * 1.5):
+                is_vertical = True
+            elif branches_x and is_in_rail_span and dist_bx < dist_ry:
                 is_vertical = True
             elif edges_img is not None:
                 r = 130
@@ -657,6 +658,31 @@ class CircuitGrounder:
             bx2 = min(w, int(wire_x + half_w))
             by2 = min(h, int(wire_y + half_h))
 
+            # Detect switch state (open vs closed)
+            sw_state = comp.get("state", "closed")
+            sw_closed = comp.get("closed", sw_state != "open")
+            if ctype in ("switch", "open_switch", "closed_switch"):
+                if ctype == "open_switch":
+                    sw_state = "open"
+                    sw_closed = False
+                elif edges_img is not None:
+                    scx, scy = int(wire_x), int(wire_y)
+                    r_patch = 35
+                    patch = edges_img[max(0, scy - r_patch):min(h, scy + r_patch), max(0, scx - r_patch):min(w, scx + r_patch)]
+                    lines = cv2.HoughLinesP(patch, 1, np.pi / 180, 8, minLineLength=8, maxLineGap=4)
+                    if lines is not None:
+                        for l in lines:
+                            lx1, ly1, lx2, ly2 = l[0]
+                            ang = float(np.degrees(np.arctan2(abs(ly2 - ly1), abs(lx2 - lx1))))
+                            if 15.0 <= ang <= 75.0:
+                                sw_state = "open"
+                                sw_closed = False
+                                break
+                comp["state"] = sw_state
+                comp["closed"] = sw_closed
+                comp["val"] = 0.001 if sw_closed else 1e9
+                comp["unit"] = "ohm"
+
             if cut_mask is not None:
                 cut_mask[by1:by2, bx1:bx2] = 0
 
@@ -669,6 +695,8 @@ class CircuitGrounder:
                 "type": ctype,
                 "value": comp["val"],
                 "unit": comp["unit"],
+                "state": sw_state if ctype in ("switch", "open_switch", "closed_switch") else None,
+                "closed": sw_closed if ctype in ("switch", "open_switch", "closed_switch") else None,
                 "center": (float(wire_x), float(wire_y)),
                 "bbox": [float(bx1), float(by1), float(bx2 - bx1), float(by2 - by1)],
                 "label_bbox": comp.get("label_bbox"),
@@ -699,12 +727,12 @@ class CircuitGrounder:
             comp_term_nodes = interior_topology
             unique_nodes_discovered = len({node for pair in comp_term_nodes.values() for node in pair.values()})
         elif has_interior_component:
-            # Never collapse an unresolved bridge or middle rail into two
-            # apparent parallel nodes.
             unique_nodes_discovered = 0
         elif len(rails_y) >= 2 and len(branches_x) >= 2 and len(cv_wires) > 0:
             y_top = min(rails_y)
             y_bot = max(rails_y)
+            bx_left = min(branches_x)
+            bx_right = max(branches_x)
 
             # 1. Classify components: rail components vs branch components
             top_rail_comps = []
@@ -713,15 +741,23 @@ class CircuitGrounder:
 
             for c in grounded_components:
                 cx, cy = c["center"]
-                if abs(cy - y_top) < image_diagonal * 0.035:
+                dist_left = abs(cx - bx_left)
+                dist_right = abs(cx - bx_right)
+                dist_top = abs(cy - y_top)
+                dist_bot = abs(cy - y_bot)
+
+                if (dist_left < 70 or dist_right < 70) and (y_top + 30 <= cy <= y_bot - 30):
+                    branch_comps.append(c)
+                elif dist_top <= dist_bot and dist_top < max(45.0, (y_bot - y_top) * 0.35):
                     top_rail_comps.append(c)
-                elif abs(cy - y_bot) < image_diagonal * 0.035:
+                elif dist_bot < max(45.0, (y_bot - y_top) * 0.35):
                     bot_rail_comps.append(c)
                 else:
                     branch_comps.append(c)
 
             top_rail_comps.sort(key=lambda c: c["center"][0])
             bot_rail_comps.sort(key=lambda c: c["center"][0])
+            branch_comps.sort(key=lambda c: c["center"][0])
 
             # 2. Partition top rail into node segments
             node_counter = 1
@@ -731,6 +767,8 @@ class CircuitGrounder:
                 top_rail_nodes.append(f"N{node_counter}")
 
             def _get_top_node(x: float) -> str:
+                if not top_rail_comps:
+                    return top_rail_nodes[0]
                 for idx, rc in enumerate(top_rail_comps):
                     if x < rc["center"][0]:
                         return top_rail_nodes[idx]
@@ -750,6 +788,8 @@ class CircuitGrounder:
                 bot_rail_nodes.append(f"N{node_counter}")
 
             def _get_bot_node(x: float) -> str:
+                if not bot_rail_comps:
+                    return bot_rail_nodes[0]
                 for idx, rc in enumerate(bot_rail_comps):
                     if x < rc["center"][0]:
                         return bot_rail_nodes[idx]
@@ -768,6 +808,19 @@ class CircuitGrounder:
                     "terminal_1": _get_top_node(cx),
                     "terminal_2": _get_bot_node(cx),
                 }
+
+            # 5. Connect outer branch empty wires (if an outer branch has no component)
+            for bx in (bx_left, bx_right):
+                has_comp_on_bx = any(abs(c["center"][0] - bx) < 70 and (y_top + 25 <= c["center"][1] <= y_bot - 25) for c in branch_comps)
+                if not has_comp_on_bx:
+                    n_top = _get_top_node(bx)
+                    n_bot = _get_bot_node(bx)
+                    if n_top != n_bot:
+                        for cid, terms in comp_term_nodes.items():
+                            if terms["terminal_1"] == n_top:
+                                terms["terminal_1"] = n_bot
+                            if terms["terminal_2"] == n_top:
+                                terms["terminal_2"] = n_bot
 
             used_nids = set()
             for tn in comp_term_nodes.values():
@@ -876,9 +929,15 @@ class CircuitGrounder:
             )
             grounded_entities.append(ent)
 
+            is_sw = ctype in ("switch", "open_switch", "closed_switch")
+            sw_state = comp.get("state", "closed") if is_sw else None
+            sw_closed = comp.get("closed", sw_state != "open") if is_sw else None
+
             canonical_components.append({
                 "id": cid,
                 "type": ctype,
+                "state": sw_state,
+                "closed": sw_closed,
                 "nodes": c_nodes,
                 "value": comp["value"],
                 "unit": comp["unit"],
@@ -901,6 +960,7 @@ class CircuitGrounder:
                     "bbox_source_px": [b[0], b[1], b[0] + b[2], b[1] + b[3]],
                     "center_source_px": [cx, cy],
                     "label_bbox_source_px": comp.get("label_bbox"),
+                    "hit_region": {"x": b[0], "y": b[1], "width": b[2], "height": b[3]} if is_sw else None,
                 },
             })
 
@@ -1029,6 +1089,11 @@ class CircuitGrounder:
         grounded_ir.parameters["nodes"] = canonical_nodes
         grounded_ir.parameters["wires"] = canonical_wires
         grounded_ir.parameters["reference_node"] = ref_node
+
+        switches_list = [c for c in canonical_components if c.get("type") in ("switch", "open_switch", "closed_switch")]
+        if switches_list:
+            grounded_ir.parameters["switches"] = switches_list
+            grounded_ir.geometry["switches"] = switches_list
 
         if grounded_ir.parameter_provenance is None:
             grounded_ir.parameter_provenance = {}
