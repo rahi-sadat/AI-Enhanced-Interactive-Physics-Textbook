@@ -200,6 +200,50 @@ GEMINI_RESPONSE_SCHEMA = {
 }
 
 
+def _discard_dangling_relationships(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep VLM relationship IDs strict without losing a valid classification.
+
+    A relationship to an undeclared entity is unusable semantic evidence. Drop
+    only that relationship, record the loss, and let the canonical validator
+    enforce every remaining schema invariant. Never create a missing entity.
+    """
+    entities = payload.get("entities")
+    relationships = payload.get("relationships")
+    if not isinstance(entities, list) or not isinstance(relationships, list):
+        return payload
+    ids = {
+        str(entity.get("temporaryId") or entity.get("temporary_id") or f"entity_{index + 1}")
+        for index, entity in enumerate(entities) if isinstance(entity, dict)
+    }
+    kept = []
+    dropped = 0
+    for relationship in relationships:
+        if not isinstance(relationship, dict):
+            kept.append(relationship)
+            continue
+        source = str(relationship.get("from", relationship.get("source_id", "")))
+        target = str(relationship.get("to", relationship.get("target_id", "")))
+        if source in ids and target in ids:
+            kept.append(relationship)
+        else:
+            dropped += 1
+    if dropped:
+        payload["relationships"] = kept
+        notes = payload.get("notes")
+        if isinstance(notes, list):
+            notes.append(f"Discarded {dropped} semantic relationship(s) with undeclared entity IDs.")
+        metadata = payload.get("metadata")
+        if not isinstance(metadata, dict):
+            metadata = {}
+            payload["metadata"] = metadata
+        debug = metadata.get("debug")
+        if not isinstance(debug, dict):
+            debug = {}
+            metadata["debug"] = debug
+        debug["discardedDanglingRelationshipCount"] = dropped
+    return payload
+
+
 class GeminiVisionProvider(VisionProvider):
     """Multimodal vision provider implementing Google Gemini via google-genai SDK."""
 
@@ -217,6 +261,13 @@ class GeminiVisionProvider(VisionProvider):
             or "gemini-3.1-flash-lite"
         )
         self._client = None
+
+    @property
+    def name(self) -> str:
+        return "gemini"
+
+    def available(self) -> bool:
+        return bool(self.api_key)
 
     def _get_client(self):
         """Lazily initialize google-genai Client."""
@@ -325,7 +376,7 @@ class GeminiVisionProvider(VisionProvider):
                 raise VisionProviderError(f"Failed to parse Gemini output as JSON: {je}. Raw output: {raw_text[:200]}")
 
             # Validate against PR-05 schema
-            result = validate_semantic_payload(data)
+            result = validate_semantic_payload(_discard_dangling_relationships(data))
 
             # Attach metadata
             result.provider = "gemini"

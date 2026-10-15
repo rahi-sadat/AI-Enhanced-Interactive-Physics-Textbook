@@ -48,6 +48,7 @@ from shared.schemas.ingestion import (
 from ai.ingestion.PageIRBuilder import PageIRBuilder
 from ai.ingestion.BookUnderstandingPipeline import BookUnderstandingPipeline
 from ai.ingestion.PhysicsCompiler import PhysicsCompiler
+from ai.resolution.requirements import RequirementRegistry
 
 
 # ---------------------------------------------------------------------------
@@ -202,6 +203,16 @@ section("3. PhysicsCompiler — UNRESOLVED BookIR")
 
 compiler = PhysicsCompiler()
 
+
+def mark_reviewed_fixture(book_ir: BookIR) -> BookIR:
+    """Give synthetic ready fixtures explicit review provenance for PR-07."""
+    spec = RequirementRegistry.get_spec(book_ir.subtype, domain=book_ir.domain)
+    book_ir.parameter_provenance = {
+        name: ProvenanceRecord(source="author_override", notes="Reviewed synthetic test fixture")
+        for name in spec.required_parameters
+    }
+    return book_ir
+
 unresolved_ir = BookIR(
     domain=None,
     subtype=None,
@@ -281,14 +292,18 @@ complete_pendulum_ir = BookIR(
         "damping": {"value": 0.05, "status": "assumed", "unit": "1/s"},
     },
     entities=[
+        BookEntity(id="pivot_1", type="pivot", position_source_px={"x": 200.0, "y": 50.0}),
+        BookEntity(id="string_1", type="string", position_source_px={"x": 200.0, "y": 50.0}),
         BookEntity(
             id="pendulum_bob_1",
-            type="pendulum",
+            type="bob",
             label="Simple Pendulum System",
+            position_source_px={"x": 150.0, "y": 280.0},
             evidence_refs=["region_001"],
         )
     ],
 )
+mark_reviewed_fixture(complete_pendulum_ir)
 result = compiler.compile(complete_pendulum_ir)
 test("Complete pendulum → READY", result.status == "READY", f"got: {result.status} issues={result.issues}")
 test("READY → scene present", result.scene is not None, "scene is None")
@@ -338,10 +353,12 @@ complete_lens_ir = BookIR(
             id="lens_001",
             type="thin_lens",
             label="Biconvex Lens",
+            position_source_px={"x": 400.0, "y": 300.0},
             evidence_refs=["region_001"],
         )
     ],
 )
+mark_reviewed_fixture(complete_lens_ir)
 result = compiler.compile(complete_lens_ir)
 test("Complete thin_lens → READY", result.status == "READY", f"got: {result.status} issues={result.issues}")
 test("Lens scene has elements", result.scene and "elements" in result.scene)
@@ -670,6 +687,8 @@ proj_kmh = BookIR(
         "ball_radius_px": {"value": 15.0, "unit": "px"},
     }
 )
+proj_kmh.entities = [BookEntity(id="projectile_1", type="projectile_body", position_source_px={"x": 100, "y": 400})]
+mark_reviewed_fixture(proj_kmh)
 res = compiler.compile(proj_kmh)
 test("Valid velocity unit km/h → READY", res.status == "READY", f"issues: {res.issues}")
 if res.scene:
@@ -713,6 +732,8 @@ canonical_c_ir = BookIR(
         "reference_node": "N0"
     }
 )
+canonical_c_ir.entities = [BookEntity(id="R1", type="resistor", position_source_px={"x": 400, "y": 300})]
+mark_reviewed_fixture(canonical_c_ir)
 res = compiler.compile(canonical_c_ir)
 test("Canonical subtype 'dc_linear' → READY", res.status == "READY", f"issues: {res.issues}")
 if res.scene:

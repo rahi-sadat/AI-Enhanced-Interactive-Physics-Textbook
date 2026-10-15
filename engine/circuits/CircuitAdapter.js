@@ -73,6 +73,19 @@ export class CircuitAdapter extends SimulationAdapter {
    * and scene mutation succeed.
    */
   _applyParameterUpdate(address, convertedVal, key, targetId, incomingUnit) {
+    const rawTarget = targetId || address || key;
+    const compId = rawTarget.split('.')[0].replace(/_(resistance|voltage|current)$/, '');
+    const comp = this.scene.circuit?.components?.find(c => c.id === compId || c.id === rawTarget || c.label === rawTarget);
+    if (comp && typeof convertedVal === 'number') {
+      comp.value = convertedVal;
+    }
+    if (this.scene?.parameters?.[compId]) {
+      this.scene.parameters[compId].value = convertedVal;
+    }
+    if (this.scene?.parameters?.[address]) {
+      this.scene.parameters[address].value = convertedVal;
+    }
+
     if (key === 'closed' || key === 'state' || typeof convertedVal === 'boolean') {
       const swId = targetId || address.split('.')[0];
       const sw = this.scene.circuit?.components?.find(c => c.id === swId || (c.type === 'switch' && (!targetId || targetId === c.id)));
@@ -101,25 +114,7 @@ export class CircuitAdapter extends SimulationAdapter {
 
     // Map compiled wires with topology-aware directional branch current
     const wires = (model.wires || []).map(w => {
-      let current_A = 0.0;
-      let direction = 'none';
-
-      // 1. Authoritative structural currentReference (from scene or compiler)
-      if (w.currentReference?.componentId && state.branchCurrents) {
-        const refCur = state.branchCurrents[w.currentReference.componentId];
-        if (refCur !== undefined) {
-          const sign = w.currentReference.sign ?? 1;
-          current_A = refCur * sign;
-        }
-      }
-
-      // If cannot be mapped confidently, return direction: "none" rather than inventing current flow
-      if (Math.abs(current_A) > 1e-6) {
-        direction = current_A > 0 ? 'forward' : 'backward';
-      } else {
-        current_A = 0.0;
-        direction = 'none';
-      }
+      const flow = this._resolveWireFlow(w, model, state);
 
       return {
         id: w.id,
@@ -130,8 +125,9 @@ export class CircuitAdapter extends SimulationAdapter {
         totalLength: w.totalLength,
         segmentLengths: w.segmentLengths,
         cumulativeLengths: w.cumulativeLengths,
-        current_A,
-        direction
+        current_A: flow.current_A,
+        direction: flow.direction,
+        getPointAtDistance: w.getPointAtDistance
       };
     });
 
@@ -149,6 +145,7 @@ export class CircuitAdapter extends SimulationAdapter {
         geometry: c.geometry || {},
         bbox_source_px: c.bbox_source_px || c.geometry?.bbox_source_px,
         center_source_px: c.geometry?.center_source_px,
+        label_bbox_source_px: c.label_bbox_source_px || c.geometry?.label_bbox_source_px,
         terminals: c.terminals || [],
         current_A: cur,
         power_W: power
@@ -202,6 +199,186 @@ export class CircuitAdapter extends SimulationAdapter {
       events: [],
       editableParameters: this.getParameters()
     };
+  }
+
+  /**
+   * Resolves physical current magnitude and flow direction for a wire polyline.
+   * Accounts for node potentials, terminal locations, and charge conservation.
+   * @private
+   */
+  _resolveWireFlow(w, model, state) {
+    const pts = w.points || [];
+    if (pts.length < 2) {
+      return { current_A: 0.0, direction: 'none' };
+    }
+
+    const node = w.node;
+    const nodeVoltages = state.nodeVoltages || {};
+    const branchCurrents = state.branchCurrents || state.componentCurrents || {};
+
+    // 1. Authoritative explicit from/to terminals
+    if (w.from && w.to && model.terminalById) {
+      const fromId = typeof w.from === 'object' ? w.from.terminalId : w.from;
+      const toId = typeof w.to === 'object' ? w.to.terminalId : w.to;
+      const tFrom = model.terminalById.get(fromId);
+      const tTo = model.terminalById.get(toId);
+
+      if (tFrom && tTo && tFrom.node !== tTo.node) {
+        const vFrom = nodeVoltages[tFrom.node] ?? 0.0;
+        const vTo = nodeVoltages[tTo.node] ?? 0.0;
+        if (Math.abs(vFrom - vTo) > 1e-5) {
+          const dir = vFrom > vTo ? 'forward' : 'backward';
+          let cur = Math.abs(state.primaryCurrent || 0.0);
+          if (w.currentReference?.componentId && branchCurrents[w.currentReference.componentId] !== undefined) {
+            cur = Math.abs(branchCurrents[w.currentReference.componentId]);
+          }
+          return { current_A: cur, direction: dir };
+        }
+      }
+
+      if (w.currentReference?.componentId && branchCurrents[w.currentReference.componentId] !== undefined) {
+        const refCur = branchCurrents[w.currentReference.componentId];
+        const sign = w.currentReference.sign ?? 1;
+        const signedCur = refCur * sign;
+        if (Math.abs(signedCur) > 1e-6) {
+          return {
+            current_A: Math.abs(signedCur),
+            direction: signedCur > 0 ? 'forward' : 'backward'
+          };
+        }
+      }
+    }
+
+    // 2. Intra-node or unanchored wire: determine flow direction from node terminals
+    const terminalsOnNode = [];
+    const components = Array.from(model.componentById?.values() || []);
+
+    for (const c of components) {
+      const isSource = (c.type === 'voltage_source' || c.type === 'battery' || c.type === 'dc_source');
+      const terms = c.terminals || [];
+      for (let idx = 0; idx < terms.length; idx++) {
+        const t = terms[idx];
+        const tNode = t.node || c.nodes?.[idx];
+        if (tNode === node) {
+          let tPos = null;
+          if (t.source_px && Array.isArray(t.source_px) && t.source_px.length >= 2) {
+            tPos = { x: t.source_px[0], y: t.source_px[1] };
+          } else if (c.geometry?.center_source_px) {
+            tPos = { x: c.geometry.center_source_px[0], y: c.geometry.center_source_px[1] };
+          }
+
+          let inj = 0.0;
+          if (isSource) {
+            const rawCur = branchCurrents[c.id] ?? 0.0;
+            const iDelivered = -rawCur;
+            const isPos = (t.polarity === '+' || t.nodeIndex === 0 || idx === 0);
+            inj = isPos ? iDelivered : -iDelivered;
+          } else if (c.type === 'resistor') {
+            const otherNode = (c.nodes || []).find(n => n !== node) || node;
+            const vOther = nodeVoltages[otherNode] ?? 0.0;
+            const vThis = nodeVoltages[node] ?? 0.0;
+            const rVal = c.value || 10.0;
+            inj = (vOther - vThis) / rVal;
+          } else if (c.type === 'switch') {
+            if (c.state !== 'open') {
+              const iBranch = branchCurrents[c.id] ?? 0.0;
+              inj = (idx === 1) ? iBranch : -iBranch;
+            }
+          }
+
+          if (tPos) {
+            terminalsOnNode.push({
+              id: t.id || `${c.id}.t${idx}`,
+              componentId: c.id,
+              componentType: c.type,
+              pos: tPos,
+              inj,
+              branchCurrent: Math.abs(branchCurrents[c.id] ?? 0.0)
+            });
+          }
+        }
+      }
+    }
+
+    if (terminalsOnNode.length === 0) {
+      if (w.currentReference?.componentId && branchCurrents) {
+        const refCur = branchCurrents[w.currentReference.componentId];
+        if (refCur !== undefined) {
+          const cur = Math.abs(refCur);
+          const dir = refCur > 0 ? 'forward' : (refCur < 0 ? 'backward' : 'none');
+          return { current_A: cur, direction: dir };
+        }
+      }
+      return { current_A: 0.0, direction: 'none' };
+    }
+
+    const p0 = { x: pts[0][0], y: pts[0][1] };
+    const pEnd = { x: pts[pts.length - 1][0], y: pts[pts.length - 1][1] };
+    const dx = pEnd.x - p0.x;
+    const dy = pEnd.y - p0.y;
+
+    // Find nearest terminal to wire endpoints
+    let nearestTerm = terminalsOnNode[0];
+    let minD = Infinity;
+    for (const t of terminalsOnNode) {
+      const d0 = Math.hypot(p0.x - t.pos.x, p0.y - t.pos.y);
+      const d1 = Math.hypot(pEnd.x - t.pos.x, pEnd.y - t.pos.y);
+      const d = Math.min(d0, d1);
+      if (d < minD) {
+        minD = d;
+        nearestTerm = t;
+      }
+    }
+
+    let curMagnitude = nearestTerm.branchCurrent;
+    const spanX = Math.abs(dx);
+    if (spanX > 250) {
+      curMagnitude = Math.max(...terminalsOnNode.map(t => t.branchCurrent));
+    }
+    if ((w.from || w.to) && w.currentReference?.componentId && branchCurrents[w.currentReference.componentId] !== undefined) {
+      curMagnitude = Math.abs(branchCurrents[w.currentReference.componentId]);
+    }
+
+    if (curMagnitude < 1e-6) {
+      return { current_A: 0.0, direction: 'none' };
+    }
+
+    let direction = 'forward';
+    const isHorizontal = Math.abs(dx) >= Math.abs(dy);
+
+    if (isHorizontal) {
+      let posWeightX = 0, sumPos = 0;
+      let negWeightX = 0, sumNeg = 0;
+      for (const t of terminalsOnNode) {
+        if (t.inj > 1e-5) {
+          posWeightX += t.pos.x * t.inj;
+          sumPos += t.inj;
+        } else if (t.inj < -1e-5) {
+          negWeightX += t.pos.x * Math.abs(t.inj);
+          sumNeg += Math.abs(t.inj);
+        }
+      }
+
+      if (sumPos > 1e-5 && sumNeg > 1e-5) {
+        const xIn = posWeightX / sumPos;
+        const xOut = negWeightX / sumNeg;
+        const flowDirX = Math.sign(xOut - xIn);
+        const wireDirX = Math.sign(dx);
+        direction = (wireDirX === flowDirX) ? 'forward' : 'backward';
+      }
+    } else {
+      const d0 = Math.hypot(p0.x - nearestTerm.pos.x, p0.y - nearestTerm.pos.y);
+      const d1 = Math.hypot(pEnd.x - nearestTerm.pos.x, pEnd.y - nearestTerm.pos.y);
+      const pNearIsP0 = d0 < d1;
+
+      if (nearestTerm.inj > 1e-5) {
+        direction = pNearIsP0 ? 'forward' : 'backward';
+      } else if (nearestTerm.inj < -1e-5) {
+        direction = pNearIsP0 ? 'backward' : 'forward';
+      }
+    }
+
+    return { current_A: curMagnitude, direction };
   }
 
   getState() {

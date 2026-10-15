@@ -20,6 +20,8 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .visual_reconstruction import VisualReconstruction
+
 
 # ---------------------------------------------------------------------------
 # SourceAsset
@@ -176,18 +178,42 @@ class PageIR:
 @dataclass
 class ProvenanceRecord:
     """Traces where a value came from."""
-    source: str                # "ocr" | "cv" | "vlm" | "derived" | "assumed" | "student" | "author_override"
+    source: str                # "ocr" | "cv" | "vlm" | "derived" | "assumed" | "student" | "author_override" | "user_supplied" | "user_confirmed" | "user_corrected" | "policy_default" | "derived_calibration"
     evidence_refs: List[str] = field(default_factory=list)   # e.g. ["text_11", "region_19"]
     confidence: float = 0.0
     notes: str = ""
+    policy_id: Optional[str] = None
+    policy_version: Optional[str] = None
+    user_accepted: Optional[bool] = None
+    superseded_value: Optional[Any] = None
+    derived_from: Optional[List[str]] = None
+
+    def __post_init__(self):
+        if self.derived_from and not self.evidence_refs:
+            self.evidence_refs = list(self.derived_from)
+        elif self.evidence_refs and not self.derived_from:
+            self.derived_from = list(self.evidence_refs)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d: Dict[str, Any] = {
             "source": self.source,
             "evidenceRefs": self.evidence_refs,
+            "derivedFrom": self.derived_from or self.evidence_refs,
             "confidence": self.confidence,
             "notes": self.notes,
         }
+        if self.policy_id is not None:
+            d["policyId"] = self.policy_id
+        if self.policy_version is not None:
+            d["policyVersion"] = self.policy_version
+        if self.user_accepted is not None:
+            d["userAccepted"] = self.user_accepted
+        if self.superseded_value is not None:
+            d["supersededValue"] = self.superseded_value
+        return d
+
+    def model_dump(self) -> Dict[str, Any]:
+        return self.to_dict()
 
 
 @dataclass
@@ -231,13 +257,29 @@ class BookEntity:
             "evidenceRefs": self.evidence_refs,
         }
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "BookEntity":
+        return cls(
+            id=data.get("id", ""),
+            type=data.get("type", data.get("role", "")),
+            label=data.get("label"),
+            position_source_px=data.get("positionSourcePx", data.get("position_source_px")),
+            geometry=data.get("geometry"),
+            attributes=data.get("attributes", {}),
+            evidence_refs=data.get("evidenceRefs", data.get("evidence_refs", [])),
+        )
+
 
 # BookIR status constants
 class BookIRStatus:
     UNRESOLVED = "UNRESOLVED"          # not enough information
-    NEEDS_REVIEW = "NEEDS_REVIEW"      # partially understood
     UNSUPPORTED = "UNSUPPORTED"        # understood but no solver
+    SUPPORTED_NEEDS_GROUNDING = "SUPPORTED_NEEDS_GROUNDING"  # domain/subtype recognized, reconstruction in progress
+    NEEDS_REVIEW = "NEEDS_REVIEW"      # partially understood
+    NEEDS_VISUAL_REVIEW = "NEEDS_VISUAL_REVIEW"  # small genuine visual ambiguity remains
     READY_TO_COMPILE = "READY_TO_COMPILE"  # sufficient for PhysicsCompiler
+    AUTO_VISUAL = "AUTO_VISUAL"        # visual simulation ready (normalized/pixel physics)
+    PHYSICS_VERIFIED = "PHYSICS_VERIFIED"  # physical quantities grounded in real SI units
 
 
 @dataclass
@@ -263,13 +305,67 @@ class BookIR:
 
     assumptions: List[Dict[str, Any]] = field(default_factory=list)
     provenance: Dict[str, Any] = field(default_factory=dict)
+    evidence: Dict[str, Any] = field(default_factory=dict)
     confidence: Dict[str, Any] = field(default_factory=dict)
 
     status: str = BookIRStatus.UNRESOLVED
     status_notes: str = ""
 
+    resolutions: Dict[str, Any] = field(default_factory=dict)
+    review_issues: List[Dict[str, Any]] = field(default_factory=list)
+    parameter_provenance: Dict[str, Any] = field(default_factory=dict)
+    calibration: Optional[Any] = None
+    id: Optional[str] = None
+    isPhysics: Optional[bool] = None
+    visual_reconstruction: Optional[VisualReconstruction] = None
+
+    def __post_init__(self):
+        if self.id is None:
+            if self.source_asset_id and self.figure_id:
+                self.id = f"{self.source_asset_id}_{self.figure_id}"
+            else:
+                self.id = "book_ir"
+        if self.isPhysics is None:
+            self.isPhysics = self.domain is not None and self.subtype is not None
+        self._validate_visual_reconstruction()
+
+    def _validate_visual_reconstruction(self):
+        if self.visual_reconstruction is None:
+            return
+        if isinstance(self.visual_reconstruction, dict):
+            self.visual_reconstruction = VisualReconstruction.from_dict(self.visual_reconstruction)
+        if not isinstance(self.visual_reconstruction, VisualReconstruction):
+            raise ValueError("visual_reconstruction must be a VisualReconstruction record")
+        visual = self.visual_reconstruction
+        visual.__post_init__()
+        visual.validate_entity_refs({entity.id for entity in self.entities})
+        visual.validate_evidence_refs(self.evidence, self.source_asset_id, self.figure_id)
+        observed = visual.observed_geometry
+        # Check every supplied native dimension; never rescale to hide disagreement.
+        for name, container in (("geometry", self.geometry), ("provenance", self.provenance),
+                                ("parameters", self.parameters)):
+            if not isinstance(container, dict):
+                continue
+            for keys, expected in ((("source_width", "sourceWidth"), observed.source_width),
+                                   (("source_height", "sourceHeight"), observed.source_height)):
+                # Only geometry uses bare dimensions; a physical height may have SI units.
+                if name == "geometry":
+                    keys = (*keys, "width" if keys[0] == "source_width" else "height")
+                for key in keys:
+                    if key not in container:
+                        continue
+                    value = container[key]
+                    value = value.get("value") if isinstance(value, dict) else getattr(value, "value", value)
+                    if type(value) not in (int, float) or value != expected:
+                        raise ValueError("Reconstruction dimensions disagree with BookIR source dimensions")
+        for mask in observed.masks.values():
+            if mask.source_asset_id is not None and mask.source_asset_id != self.source_asset_id:
+                raise ValueError("Reconstruction mask belongs to a different source asset")
+            if mask.figure_id is not None and mask.figure_id != self.figure_id:
+                raise ValueError("Reconstruction mask belongs to a different figure")
+
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             "version": self.version,
             "sourceAssetId": self.source_asset_id,
             "pageIRVersion": self.page_ir_version,
@@ -278,14 +374,67 @@ class BookIR:
             "subtype": self.subtype,
             "entities": [e.to_dict() for e in self.entities],
             "relationships": self.relationships,
-            "parameters": self.parameters,
-            "geometry": self.geometry,
+            "parameters": {
+                k: (v.to_dict() if hasattr(v, "to_dict") else v)
+                for k, v in self.parameters.items()
+            } if isinstance(self.parameters, dict) else self.parameters,
+            "geometry": {
+                k: (v.to_dict() if hasattr(v, "to_dict") else v)
+                for k, v in self.geometry.items()
+            } if isinstance(self.geometry, dict) else self.geometry,
             "assumptions": self.assumptions,
             "provenance": self.provenance,
+            "evidence": {k: (v.to_dict() if hasattr(v, "to_dict") else v) for k, v in self.evidence.items()},
             "confidence": self.confidence,
             "status": self.status,
             "statusNotes": self.status_notes,
+            "resolutions": self.resolutions,
+            "reviewIssues": self.review_issues,
+            "parameterProvenance": {
+                k: (v.to_dict() if hasattr(v, "to_dict") else v)
+                for k, v in self.parameter_provenance.items()
+            },
+            "calibration": self.calibration.to_dict() if hasattr(self.calibration, "to_dict") else self.calibration,
+            "id": self.id,
+            "isPhysics": self.isPhysics,
         }
+        # Omit the optional addition for legacy payloads; solver readiness is unchanged.
+        if self.visual_reconstruction is not None:
+            self._validate_visual_reconstruction()
+            result["visualReconstruction"] = self.visual_reconstruction.to_dict()
+        return result
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "BookIR":
+        entities = [
+            BookEntity.from_dict(ed) if isinstance(ed, dict) else ed
+            for ed in data.get("entities", [])
+        ]
+        return cls(
+            version=data.get("version", "1.0"),
+            source_asset_id=data.get("sourceAssetId", data.get("source_asset_id")),
+            page_ir_version=data.get("pageIRVersion", data.get("page_ir_version")),
+            figure_id=data.get("figureId", data.get("figure_id")),
+            domain=data.get("domain"),
+            subtype=data.get("subtype"),
+            entities=entities,
+            relationships=data.get("relationships", []),
+            parameters=data.get("parameters", {}),
+            geometry=data.get("geometry", {}),
+            assumptions=data.get("assumptions", []),
+            provenance=data.get("provenance", {}),
+            evidence=data.get("evidence", {}),
+            confidence=data.get("confidence", {}),
+            status=data.get("status", BookIRStatus.UNRESOLVED),
+            status_notes=data.get("statusNotes", data.get("status_notes", "")),
+            resolutions=data.get("resolutions", {}),
+            review_issues=data.get("reviewIssues", data.get("review_issues", [])),
+            parameter_provenance=data.get("parameterProvenance", data.get("parameter_provenance", {})),
+            calibration=data.get("calibration"),
+            id=data.get("id"),
+            isPhysics=data.get("isPhysics"),
+            visual_reconstruction=data.get("visualReconstruction", data.get("visual_reconstruction")),
+        )
 
 
 # ---------------------------------------------------------------------------

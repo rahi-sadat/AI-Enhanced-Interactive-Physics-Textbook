@@ -12,6 +12,12 @@ import {
   rayToBounds,
 } from './rayGeometry.js';
 
+function _normPt(p) {
+  if (!p) return { x: 0, y: 0 };
+  if (Array.isArray(p)) return { x: Number(p[0]), y: Number(p[1]) };
+  return { x: Number(p.x ?? 0), y: Number(p.y ?? 0) };
+}
+
 export function solvePrismRefraction({
   prismVertices,
   refractiveIndex = 1.52,
@@ -19,6 +25,10 @@ export function solvePrismRefraction({
   rayDirection,
   bounds = {},
 }) {
+  const normVerts = (prismVertices || []).map(_normPt);
+  const ro = _normPt(rayOrigin);
+  const rd = _normPt(rayDirection);
+
   const boundBox = {
     minX: bounds.minX ?? 0,
     minY: bounds.minY ?? 0,
@@ -27,18 +37,18 @@ export function solvePrismRefraction({
   };
   const nAir = 1.0;
   const nGlass = refractiveIndex;
-  const I0 = normalize(rayDirection);
+  const I0 = normalize(rd);
 
   // Compute centroid of prism to orient surface normals outward
   let cx = 0, cy = 0;
-  const nVerts = prismVertices.length;
-  prismVertices.forEach(v => { cx += v.x; cy += v.y; });
-  const centroid = { x: cx / nVerts, y: cy / nVerts };
+  const nVerts = normVerts.length;
+  normVerts.forEach(v => { cx += v.x; cy += v.y; });
+  const centroid = { x: cx / (nVerts || 1), y: cy / (nVerts || 1) };
 
   const edges = [];
   for (let i = 0; i < nVerts; i++) {
-    const A = prismVertices[i];
-    const B = prismVertices[(i + 1) % nVerts];
+    const A = normVerts[i];
+    const B = normVerts[(i + 1) % nVerts];
     edges.push({ A, B, normal: getEdgeNormal(A, B, centroid) });
   }
 
@@ -48,7 +58,7 @@ export function solvePrismRefraction({
   let hitEdge1 = null;
 
   for (const edge of edges) {
-    const hit = raySegmentIntersection(rayOrigin, I0, edge.A, edge.B);
+    const hit = raySegmentIntersection(ro, I0, edge.A, edge.B);
     if (hit && hit.distance < minT1) {
       minT1 = hit.distance;
       hit1 = hit.point;
@@ -58,10 +68,11 @@ export function solvePrismRefraction({
 
   if (!hit1) {
     // Ray misses prism completely
-    const exitPt = rayToBounds(rayOrigin, I0, boundBox);
+    const exitPt = rayToBounds(ro, I0, boundBox);
     return {
       hitPrism: false,
-      segments: [{ type: 'incident', start: rayOrigin, end: exitPt }],
+      prismVertices: normVerts,
+      segments: [{ type: 'incident', start: ro, end: exitPt }],
       normals: [],
       angles: null,
       tir: false
@@ -134,6 +145,7 @@ export function solvePrismRefraction({
 
   return {
     hitPrism: true,
+    prismVertices: normVerts,
     tir: isTir,
     hit1,
     hit2,
@@ -142,7 +154,7 @@ export function solvePrismRefraction({
     I0,
     I_internal,
     segments: [
-      { type: 'incident', start: rayOrigin, end: hit1 },
+      { type: 'incident', start: ro, end: hit1 },
       { type: 'internal', start: hit1, end: hit2 },
       { type: isTir ? 'tir_reflected' : 'emergent', start: hit2, end: endPoint }
     ],

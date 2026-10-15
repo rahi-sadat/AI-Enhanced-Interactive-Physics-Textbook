@@ -10,6 +10,7 @@
 import './interactiveFigure.css';
 import { PhysicsRuntime } from '@engine/core/PhysicsRuntime.js';
 import { FigureViewport } from './FigureViewport.js';
+import { calibrationAnchorsFromScene } from './calibrationAnchors.js';
 import { defaultRendererRegistry } from '../features/simulations/core/RendererRegistry.js';
 
 export class InteractiveFigure {
@@ -78,6 +79,9 @@ export class InteractiveFigure {
           <h3 class="if-title" data-el="title">Interactive Simulation</h3>
         </div>
         <div class="if-header-right">
+          <button class="if-btn if-btn-secondary" data-el="btnReviewSetup" title="Reopen evidence review and modeling setup" style="padding:4px 10px; font-size:0.76rem;">
+            ✎ Review Setup
+          </button>
           <button class="if-btn if-btn-secondary" data-el="btnToggleAnchors" title="Toggle sub-pixel alignment reticles" style="padding:4px 10px; font-size:0.76rem;">
             🎯 Anchors (0px)
           </button>
@@ -105,6 +109,10 @@ export class InteractiveFigure {
           <div>
             <div class="if-section-title">Parameters &amp; Evidence</div>
             <div class="if-parameters-list" data-el="paramsList"></div>
+            <details data-el="assumptionsPanel" style="display:none; margin-top:12px;">
+              <summary data-el="assumptionsSummary">Model assumptions</summary>
+              <ul data-el="assumptionsList"></ul>
+            </details>
           </div>
 
           <!-- Live Telemetry -->
@@ -142,9 +150,13 @@ export class InteractiveFigure {
     this.dom.sidebar = root.querySelector('[data-el="sidebar"]');
     this.dom.btnPlayPause = root.querySelector('[data-el="btnPlayPause"]');
     this.dom.btnReset = root.querySelector('[data-el="btnReset"]');
+    this.dom.btnReviewSetup = root.querySelector('[data-el="btnReviewSetup"]');
     this.dom.btnToggleSidebar = root.querySelector('[data-el="btnToggleSidebar"]');
     this.dom.btnToggleAnchors = root.querySelector('[data-el="btnToggleAnchors"]');
     this.dom.paramsList = root.querySelector('[data-el="paramsList"]');
+    this.dom.assumptionsPanel = root.querySelector('[data-el="assumptionsPanel"]');
+    this.dom.assumptionsSummary = root.querySelector('[data-el="assumptionsSummary"]');
+    this.dom.assumptionsList = root.querySelector('[data-el="assumptionsList"]');
     this.dom.telemetryGrid = root.querySelector('[data-el="telemetryGrid"]');
     this.dom.curriculumTag = root.querySelector('[data-el="curriculumTag"]');
     this.dom.engineTag = root.querySelector('[data-el="engineTag"]');
@@ -185,6 +197,11 @@ export class InteractiveFigure {
       this.dom.btnToggleAnchors.classList.toggle('if-btn-primary', active);
       this.dom.btnToggleAnchors.classList.toggle('if-btn-secondary', !active);
     });
+
+    // Bind review setup opener
+    this.dom.btnReviewSetup?.addEventListener('click', () => {
+      this.options.onOpenReview?.();
+    });
   }
 
   toggleSidebar() {
@@ -208,6 +225,7 @@ export class InteractiveFigure {
     }
 
     this.scene = scene;
+    this._sourceScene = JSON.parse(JSON.stringify(scene));
     const domain = scene.domain || scene.simulation?.domain || (scene.simulation_type === 'kinematics' ? 'mechanics' : scene.simulation_type || 'mechanics');
     this.currentDomain = domain;
 
@@ -229,6 +247,16 @@ export class InteractiveFigure {
     this._sourceSize = this._getSceneSourceSize(scene);
     await this.viewport.setBackground(bgUrl, this._sourceSize.width, this._sourceSize.height);
 
+    const assumptions = Array.isArray(scene.assumptions) ? scene.assumptions : [];
+    this.dom.assumptionsPanel.style.display = assumptions.length ? '' : 'none';
+    this.dom.assumptionsSummary.textContent = `Model assumptions (${assumptions.length})`;
+    this.dom.assumptionsList.replaceChildren();
+    for (const assumption of assumptions) {
+      const item = document.createElement('li');
+      item.textContent = `${assumption.reason || assumption.parameter}: ${assumption.value ?? ''} ${assumption.unit || ''}`.trim();
+      this.dom.assumptionsList.appendChild(item);
+    }
+
     // 3. Configure calibration alignment anchors for inspection
     this._setupSceneCalibrationAnchors(scene);
 
@@ -239,9 +267,13 @@ export class InteractiveFigure {
       this.dom.curriculumTag.textContent = `Canonical Scene v1 (${domain})`;
     }
 
-    // 5. Clear previous overlay canvas and mount into FigureViewport overlay container
+    // 5. Clear previous overlay canvas, parameters and telemetry from previous domain
     const overlayContainer = this.viewport.getOverlayContainer();
     overlayContainer.innerHTML = '';
+    this.dom.paramsList.innerHTML = '<div style="font-size:0.8rem;color:#64748b;">Loading parameters...</div>';
+    if (this.dom.telemetryList) {
+      this.dom.telemetryList.innerHTML = '';
+    }
 
     if (this.renderer) {
       this.renderer.dispose();
@@ -302,38 +334,21 @@ export class InteractiveFigure {
   }
 
   _setupSceneCalibrationAnchors(scene) {
-    const domain = this.currentDomain;
-    const anchors = [];
-
-    if (domain === 'mechanics') {
-      const pObj = scene.objects?.find(o => o.type === 'pendulum') || scene;
-      const pivot = pObj.geometry?.pivot || scene.geometry?.pivot || { x: 468.0, y: 99.7 };
-      const bob = scene.geometry?.bob_center || { x: 246.58, y: 527.56 };
-      anchors.push({ id: 'pivot', label: 'Pivot', x: pivot.x, y: pivot.y, color: '#38bdf8' });
-      anchors.push({ id: 'bob', label: 'Bob Initial', x: bob.x, y: bob.y, color: '#f59e0b' });
-    } else if (domain === 'optics') {
-      const lx = scene.geometry?.lensX || 400;
-      const ay = scene.geometry?.axisY || 300;
-      const f = Number(scene.parameters?.focalLength?.value ?? 130);
-      anchors.push({ id: 'lens_center', label: 'Optical Center O', x: lx, y: ay, color: '#38bdf8' });
-      anchors.push({ id: 'f1', label: 'F₁ Focus', x: lx - f, y: ay, color: '#34d399' });
-      anchors.push({ id: 'f2', label: 'F₂ Focus', x: lx + f, y: ay, color: '#34d399' });
-    } else if (domain === 'circuits') {
-      anchors.push({ id: 'v1', label: 'Battery V₁', x: 140, y: 250, color: '#ef4444' });
-      anchors.push({ id: 's1', label: 'Key S₁', x: 230, y: 120, color: '#f59e0b' });
-      anchors.push({ id: 'r1', label: 'Resistor R₁', x: 400, y: 120, color: '#38bdf8' });
-      anchors.push({ id: 'r2', label: 'Resistor R₂', x: 660, y: 250, color: '#38bdf8' });
-    }
-
-    this.viewport.setCalibrationAnchors(anchors);
+    this.viewport.setCalibrationAnchors(calibrationAnchorsFromScene(scene));
   }
 
   _getSceneSourceSize(scene) {
-    const source = scene.source || {};
-    const coordinateSystem = scene.coordinateSystem || {};
+    const source = scene?.source || {};
+    const coordinateSpace = scene?.coordinateSpace || scene?.coordinateSystem || {};
+    const hasImage = Boolean(source.image || scene?.visual?.background_url);
+    const width = Number(coordinateSpace.width || coordinateSpace.image_width_px || source.width || source.image_width_px || scene?.geometry?.source_width);
+    const height = Number(coordinateSpace.height || coordinateSpace.image_height_px || source.height || source.image_height_px || scene?.geometry?.source_height);
+    if (hasImage && (!Number.isInteger(width) || width <= 0 || !Number.isInteger(height) || height <= 0)) {
+      throw new Error('[InteractiveFigure] Source image dimensions are required for an image-backed scene.');
+    }
     return {
-      width: Number(coordinateSystem.width || source.width || source.image_width_px || scene.geometry?.source_width || 800),
-      height: Number(coordinateSystem.height || source.height || source.image_height_px || scene.geometry?.source_height || 600)
+      width: hasImage ? width : (width || 800),
+      height: hasImage ? height : (height || 600)
     };
   }
 
@@ -544,6 +559,21 @@ export class InteractiveFigure {
       addMetric('Speed v', `${state.speed ?? 0} m/s`);
       addMetric('Length L', `${state.length ?? 1} m`);
       addMetric('Total Energy', `${state.totalEnergy ?? 0} J`);
+    } else if (state.domain === 'optics' && (state.subtype === 'prism' || state.type === 'prism')) {
+      const i1 = state.incidenceAngle_deg ?? state.solution?.angles?.i1Deg;
+      const r1 = state.refractedAngle_deg ?? state.solution?.angles?.r1Deg;
+      const dev = state.deviationAngle_deg ?? state.solution?.angles?.deviationDeg;
+      const nVal = state.refractiveIndex ?? state.solution?.refractiveIndex ?? 1.52;
+      const crit = state.criticalAngle_deg ?? state.solution?.angles?.criticalAngleDeg;
+
+      addMetric('Incident Angle (i)', i1 !== undefined && i1 !== null ? `${Number(i1).toFixed(1)}°` : '—', true);
+      addMetric('Refracted Angle (r₁)', r1 !== undefined && r1 !== null ? `${Number(r1).toFixed(1)}°` : '—');
+      addMetric('Deviation Angle (δ)', dev !== undefined && dev !== null ? `${Number(dev).toFixed(1)}°` : '—', true);
+      addMetric('Refractive Index (n)', `${Number(nVal).toFixed(2)}`);
+      if (crit !== undefined && crit !== null) {
+        addMetric('Critical Angle (θc)', `${Number(crit).toFixed(1)}°`);
+      }
+      addMetric('Ray Status', state.tir ? 'Total Internal Reflection' : 'Refracted & Emerged');
     } else if (state.domain === 'optics') {
       addMetric('Object dist (u)', `${state.u ?? 0} px`);
       addMetric('Image dist (v)', `${state.v ?? 0} px`, true);
@@ -552,16 +582,31 @@ export class InteractiveFigure {
       addMetric('Image Type', state.imageType || 'real');
       addMetric('Real / Inverted', `${state.isReal ? 'Real' : 'Virtual'} • ${state.isInverted ? 'Inverted' : 'Upright'}`);
     } else if (state.domain === 'circuits') {
-      addMetric('Total Power', `${state.totalPower ?? 0} W`, true);
+      const formatCurrent = (a) => {
+        if (a === undefined || a === null || isNaN(a)) return '0 A';
+        const abs = Math.abs(a);
+        if (abs >= 1.0) return `${abs.toFixed(2)} A`;
+        if (abs >= 0.001) return `${(abs * 1000).toFixed(1)} mA`;
+        if (abs >= 1e-6) return `${(abs * 1e6).toFixed(1)} µA`;
+        return '0 A';
+      };
+
+      addMetric('Total Power', `${Number((state.totalPower ?? 0).toFixed(2))} W`, true);
+      const totalI = state.totalDeliveredSourceCurrent_A ?? state.totalCurrent_A;
+      if (totalI !== undefined && !isNaN(totalI)) {
+        addMetric('Total Current (I)', formatCurrent(totalI), true);
+      }
       if (state.nodeVoltages) {
         for (const [node, v] of Object.entries(state.nodeVoltages)) {
-          addMetric(`Voltage ${node}`, `${v} V`);
+          const vNum = Number(v);
+          addMetric(`Voltage ${node}`, `${vNum >= 0 ? '+' : ''}${vNum.toFixed(2)} V`);
         }
       }
       if (state.branchCurrents) {
         for (const [branch, i] of Object.entries(state.branchCurrents)) {
           if (!branch.endsWith('.branch')) {
-            addMetric(`Current ${branch}`, `${i} mA`);
+            const delivered = state.sourceCurrents?.[branch] ?? Math.abs(i);
+            addMetric(`Current ${branch}`, formatCurrent(delivered));
           }
         }
       }
@@ -583,6 +628,16 @@ export class InteractiveFigure {
   }
 
   reset() {
+    // Restore initial textbook parameters if they were experimentally changed
+    if (this._sourceScene?.parameters) {
+      for (const [key, param] of Object.entries(this._sourceScene.parameters)) {
+        if (param?.value !== undefined) {
+          try {
+            this.runtime.updateParameter(key, param.value);
+          } catch (_) {}
+        }
+      }
+    }
     this.runtime.reset();
     const output = this.runtime.getOutput();
     if (this.renderer && output) {

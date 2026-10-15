@@ -34,10 +34,18 @@ class TextFragment:
 def bind_parameters_to_components(
     components: list[Component],
     text_fragments: list[TextFragment],
-    image_width: int = 800,
-    image_height: int = 600,
+    image_width: int,
+    image_height: int,
 ) -> list[Component]:
-    """Binds text parameter fragments to the most compatible component."""
+    """Binds text parameter fragments to the most compatible component.
+
+    image_width and image_height must be positive native source_px dimensions.
+    No hardcoded 800x600 defaults are permitted.
+    """
+    if not isinstance(image_width, (int, float)) or not isinstance(image_height, (int, float)):
+        raise TypeError(f"image_width and image_height must be numbers, got {type(image_width)}, {type(image_height)}")
+    if image_width <= 0 or image_height <= 0:
+        raise ValueError(f"image_width and image_height must be positive, got {image_width}x{image_height}")
     diag = math.hypot(image_width, image_height)
 
     for frag in text_fragments:

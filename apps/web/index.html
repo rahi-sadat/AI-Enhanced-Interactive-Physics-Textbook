@@ -34,7 +34,7 @@
                 &#9889; Circuits
               </button>
             </nav>
-            <button id="btn-open-upload" class="upload-trigger-btn" title="Upload any physics diagram to generate an interactive simulation">
+            <button id="btn-open-upload" class="upload-trigger-btn" title="Upload one cropped diagram for analysis and possible simulation">
               <span class="upload-icon">&#128247;</span> Upload Diagram
             </button>
           </div>
@@ -258,7 +258,7 @@
         <div class="modal-header">
           <div class="modal-title-group">
             <h2 class="modal-title">&#128247; Upload Physics Diagram</h2>
-            <p class="modal-subtitle">Upload any Kinematics or Optics textbook diagram to generate an interactive simulation</p>
+            <p class="modal-subtitle">Upload one cropped physics diagram. Full textbook pages with multiple figures are not supported yet.</p>
           </div>
           <button id="btn-close-modal" class="modal-close-btn" aria-label="Close modal">&times;</button>
         </div>
@@ -270,7 +270,7 @@
             <div id="dropzone-prompt" class="dropzone-prompt">
               <div class="dropzone-icon">&#128229;</div>
               <p class="dropzone-text"><strong>Drag &amp; drop textbook diagram here</strong>, or <span class="dropzone-browse">browse files</span></p>
-              <p class="dropzone-sub">Supports PNG, JPG, WebP (Kinematics slopes/balls or Optics lenses/prisms/mirrors)</p>
+              <p class="dropzone-sub">PNG, JPG, or WebP. Supported models include pendulum, projectile, lens, mirror, refraction, prism, and simple DC resistor circuits; missing values may need review.</p>
             </div>
             <div id="dropzone-preview" class="dropzone-preview" style="display: none;">
               <img id="preview-image" src="" alt="Uploaded diagram preview" />

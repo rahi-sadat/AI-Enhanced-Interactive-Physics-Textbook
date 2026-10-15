@@ -1,5 +1,7 @@
 # AI-Enhanced Interactive NCTB Physics Textbook: Complete Project Knowledge Base & Context
 
+> **Current verification note (2026-10-11):** This document includes historical goals and prototype claims. The active platform is book-agnostic. The currently named physical models are pendulum, projectile, thin lens, spherical mirror, interface refraction, prism, and DC linear circuits. Uploaded input is one cropped figure. The 21-image offline benchmark, with semantic labels supplied by `MockVisionProvider`, produced 2 automatic scenes and 2 reviewed scenes. After explicit user authorization, a live Gemini check classified 7/7 supplied images into the expected domain/subtype and produced no false-ready scenes in local compilation; this small sample does not establish arbitrary-diagram accuracy. Phase 4 browser acceptance is in progress: full student flows have been verified for a pendulum and a parallel DC circuit, while four compiled real-image scenes have passed post-compilation image/overlay rectangle checks. Read `context.md`, `docs/reports/PHASE4_PROGRESS.md`, and `docs/reports/PHASE5_RELEASE_READINESS.md` for current limits.
+
 > **Project Name**: AugmentedPhysics  
 > **Target**: Multimodal NCTB Physics Diagram Understanding, Physics Simulation, and Bangla Intelligent Tutoring  
 > **Repository**: [rahi-sadat/AI-Enhanced-Interactive-Physics-Textbook](https://github.com/rahi-sadat/AI-Enhanced-Interactive-Physics-Textbook)  

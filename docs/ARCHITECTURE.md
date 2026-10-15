@@ -1,5 +1,7 @@
 # System Architecture & Layer Boundaries
 
+> **Verified implementation boundary (2026-10-11):** This file describes architectural intent as well as implemented modules. The current automatic path accepts one cropped physics figure and uses a semantic classifier followed by classical CV/OCR grounding, evidence resolution, strict readiness evaluation, canonical compilation, and a domain runtime. Missing or ambiguous required values must remain in review; the VLM cannot supply physical constants or authoritative coordinates. The named models are pendulum, projectile, thin lens, spherical mirror, interface refraction, prism, and DC linear circuits. The full seven-model browser acceptance matrix and arbitrary-diagram reliability are not yet verified. Current measurements are in `docs/reports/PHASE2_BASELINE.md`, `docs/reports/PHASE3_REPAIR_VERIFICATION.md`, and `docs/reports/PHASE4_PROGRESS.md`.
+
 The **AugmentedPhysics** platform transforms static physics textbook pages into embedded, interactive, and grounded learning experiences.
 
 The repository is organized into strict architectural layers to prevent code collisions, support independent development across multiple contributors, and allow product features to evolve without destabilizing the physics runtime.
@@ -57,6 +59,8 @@ Code in `apps/` bootstraps and runs applications that end users interact with.
   - `src/app/`: Application shell, routing, global providers, and layouts.
   - `src/features/`: Feature-driven product modules:
     - `simulations/`: Stage controller, diagram overlay, and HUDs for Mechanics, Optics, and Circuits.
+      - `core/SimulationApi.js`: Strongly-typed HTTP client for `/api/ingest` and `/api/resolution/*`.
+      - `core/SimulationOrchestrator.js`: Explicit 12-state lifecycle controller managing ingest → review → resolution → evaluation → compilation → simulation activation.
     - `book/`: [Future] Interactive textbook reader, page navigator, and chapter viewer.
     - `tutor/`: [Future] AI Tutor chat interface and voice explanation panel.
     - `exams/`: [Future] Mock exam and formal assessment engine.
@@ -113,13 +117,23 @@ Contains multimodal perception, computer vision, document intelligence, and peda
   - `ocr/`: Circuit text OCR.
   - `parsing/`: Case-sensitive value parsers, parameter binders, and focal length inference.
   - `[Future boundaries]`: Ingestion (PDF/image/DOCX), layout analysis, and caption association.
+- **`ai/resolution/`**:
+  - `requirements.py`: Machine-readable `ModelRequirementSpec` catalog for compiler parameter requirements across supported subtypes.
+  - `policies.py`: `PolicyRegistry` for auditable, named modeling defaults and assumptions (e.g. `policy_earth_gravity`, `policy_zero_damping`).
+  - `units.py`: `UnitEngine` for dimensional verification and SI conversion without string arithmetic.
+  - `calibration.py`: `CalibrationEngine` for evidence-based spatial scale derivation (`pixels_per_meter`) preserving native `source_px`.
+  - `analyzer.py`: Non-mutating `ResolutionAnalyzer` identifying satisfied requirements, review issues, candidates, and blockers.
+  - `engine.py`: `ResolutionEngine` applying user input, candidate confirmations/corrections, and explicit policies.
+  - `evaluator.py`: Strict `ReadinessEvaluator` enforcing the `READY_TO_COMPILE` invariant.
 - **`ai/scene_compiler/`**:
   - Compiles perception and extracted parameters into canonical `PhysicsScene` JSON contracts.
 - **`ai/tutor/`**:
   - Context grounding, curriculum alignment, and explanation synthesis.
 
 ### `shared/` — Canonical Schemas & Contracts
-- **`shared/schemas/`**: Canonical schemas defining the boundary between perception and simulation:
+- **`shared/schemas/`**: Canonical schemas defining the boundary between perception, resolution, and simulation:
+  - `resolution.py`: Strongly-typed dataclass schemas for review issues, user resolutions, explicit policy defaults, and readiness reports.
+  - `ingestion.py`: `SourceAsset`, `PageIR`, `BookIR` schemas with parameter provenance records and resolution state.
   - `physics_scene.json`: Multi-domain simulator compatibility schema.
   - `physics_scene_full.json`: Canonical visual perception contract.
   - `circuit_models.py`: Strongly-typed dataclass schemas for electrical networks.
