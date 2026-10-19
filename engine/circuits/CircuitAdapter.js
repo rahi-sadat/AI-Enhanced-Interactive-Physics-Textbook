@@ -177,6 +177,7 @@ export class CircuitAdapter extends SimulationAdapter {
         state: s.state || 'closed',
         closed: s.state !== 'open',
         terminals: s.terminals || [],
+        geometry: s.geometry || {},
         hitTarget
       };
     });
@@ -464,7 +465,8 @@ export class CircuitAdapter extends SimulationAdapter {
               label: comp.label || `${comp.id} (Switch)`,
               type: 'boolean',
               editable: true,
-              provenance: comp.provenance || 'observed',
+              provenance: comp.provenance?.source || comp.provenance?.method || comp.provenance || 'observed',
+              evidenceProvenance: comp.provenance,
               control: comp.control || { type: 'toggle' }
             };
           } else if (comp.value !== undefined) {
@@ -476,7 +478,8 @@ export class CircuitAdapter extends SimulationAdapter {
               unit,
               label: comp.label || `${comp.id} (${key})`,
               editable: true,
-              provenance: comp.provenance || pMeta.provenance || 'observed',
+              provenance: comp.value_provenance?.source || comp.provenance?.source || comp.provenance?.method || comp.provenance || pMeta.provenance || 'observed',
+              evidenceProvenance: comp.value_provenance || comp.provenance,
               ...(pMeta.min !== undefined ? { min: pMeta.min } : {}),
               ...(pMeta.max !== undefined ? { max: pMeta.max } : {}),
               ...(pMeta.step !== undefined ? { step: pMeta.step } : {}),

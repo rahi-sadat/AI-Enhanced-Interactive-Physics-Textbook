@@ -244,6 +244,14 @@ export class CircuitRenderer extends SimulationRenderer {
         lever.setAttribute('y2', String(tB[1]));
         lever.setAttribute('stroke', '#10b981');
         lever.setAttribute('stroke-width', '4');
+      } else if (s.geometry?.arm_source_px?.length === 2) {
+        const [root, tip] = s.geometry.arm_source_px;
+        lever.setAttribute('x1', String(root[0]));
+        lever.setAttribute('y1', String(root[1]));
+        lever.setAttribute('x2', String(tip[0]));
+        lever.setAttribute('y2', String(tip[1]));
+        lever.setAttribute('stroke', '#ef4444');
+        lever.setAttribute('stroke-width', '3.5');
       } else {
         // Lever open at ~35 degree angle
         const dx = tB[0] - tA[0];
@@ -477,7 +485,7 @@ export class CircuitRenderer extends SimulationRenderer {
 
         const isVolt = (c.type === 'voltage_source' || c.type === 'battery' || c.type === 'dc_source');
         const desigLetter = isVolt ? 'V' : 'R';
-        const subIndex = c.id.replace(/^[a-zA-Z]+/, '');
+        const subIndex = String(c.label || c.id).match(/\d+$/)?.[0] || '';
 
         const tspanVar = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
         tspanVar.setAttribute('font-style', 'italic');

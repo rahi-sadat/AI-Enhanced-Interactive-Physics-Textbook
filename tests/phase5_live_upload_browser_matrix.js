@@ -23,8 +23,10 @@ const socket = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((resolve, reject) => { socket.onopen = resolve; socket.onerror = reject; });
 let nextId = 1;
 const pending = new Map();
+let loadedResolve;
 socket.onmessage = ({ data }) => {
   const message = JSON.parse(data);
+  if (message.method === 'Page.loadEventFired') loadedResolve?.();
   if (!message.id || !pending.has(message.id)) return;
   const { resolve, reject } = pending.get(message.id);
   pending.delete(message.id);
@@ -52,7 +54,16 @@ const waitFor = async (expression, limitMs = 220000) => {
 const results = [];
 try {
   await send('Runtime.enable');
+  await send('Page.enable');
+  // Wait for the new document: a ready old window can disappear between the
+  // first readiness poll and reset() immediately after Page.reload.
+  let loadTimeout;
+  const loaded = new Promise((resolve, reject) => {
+    loadedResolve = () => { clearTimeout(loadTimeout); resolve(); };
+    loadTimeout = setTimeout(() => reject(new Error('Browser reload timed out')), 20000);
+  });
   await send('Page.reload', { ignoreCache: true });
+  await loaded;
   await waitFor('Boolean(window.__orchestrator && window.__activeFigure)', 20000);
   for (const [index, row] of rows.entries()) {
     const fixture = path.join(root, 'tests/fixtures/unseen', row.path);
@@ -92,6 +103,12 @@ try {
         issues: orch.reviewState?.issues?.length || 0
       };
     })()`);
+    // Preserve the real UI failure before a domain assertion obscures it.
+    if (actual.state === 'ERROR' || actual.domain !== row.domain) {
+      console.error(JSON.stringify({ id: row.id, ...actual }));
+      const screenshot = await send('Page.captureScreenshot', { format: 'png' });
+      fs.writeFileSync(path.join(root, 'storage/generated/last_upload_failure.png'), Buffer.from(screenshot.data, 'base64'));
+    }
     assert.equal(actual.domain, row.domain, `${row.id}: wrong live domain`);
     assert.equal(actual.subtype, row.subtype, `${row.id}: wrong live subtype`);
     if (row.scene_created) {

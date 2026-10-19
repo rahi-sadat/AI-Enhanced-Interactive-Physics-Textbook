@@ -27,6 +27,21 @@ console.log('  RUNNING PR-08 SIMULATION ORCHESTRATOR TESTS');
 console.log('==============================================\n');
 
 async function runTests() {
+  // A provider outage is retryable infrastructure failure, not a bad diagram.
+  const providerOutage = new SimulationOrchestrator({ api: {
+    ingest: async () => ({ status: 'unresolved', book_ir: {
+      status: 'UNRESOLVED', domain: null, subtype: null,
+      provenance: { error_type: 'VisionProviderError', error: '503 UNAVAILABLE' },
+    } }),
+  } });
+  providerOutage.reviewState = { issues: [{ parameterName: 'previous_figure' }] };
+  await providerOutage.startWithFile({ name: 'neutral.jpg' });
+  assert(providerOutage.state === OrchestratorState.ERROR, 'Provider outage does not produce a simulation');
+  assert(providerOutage.currentError.includes('temporarily unavailable'), 'Provider outage is explained honestly');
+  assert(providerOutage.currentError.includes('retry'), 'Retry is offered with the current image');
+  assert(providerOutage.reviewState === null, 'Previous figure review is cleared on a new upload');
+  assert(providerOutage.compiledScene === null, 'No canned scene replaces a failed provider');
+
   // Test 1: Initial State is IDLE
   console.log('[1/8] Verifying initial orchestrator state');
   const orch = new SimulationOrchestrator();

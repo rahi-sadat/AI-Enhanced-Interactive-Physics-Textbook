@@ -202,8 +202,11 @@ export class PhysicsReviewModal {
     this.dom.btnClose.addEventListener('click', () => this.close());
     this.dom.btnCancel.addEventListener('click', () => this.close());
 
-    this.dom.btnStartSim.addEventListener('click', () => {
+    this.dom.btnStartSim.addEventListener('click', async () => {
       try {
+        if (!this.orchestrator.compiledScene) {
+          await this.orchestrator.compile();
+        }
         const scene = this.orchestrator.startSimulation();
         this.close();
         this.options.onStartSimulation?.(scene);
@@ -280,10 +283,23 @@ export class PhysicsReviewModal {
       this.dom.body.appendChild(errDiv);
     }
 
-    // 4. Ready Hero Banner if ready to simulate
+    // 4. Calculate Unresolved Issues
+    const issues = reviewState?.issues || [];
+    const unresolvedIssues = issues.filter((iss) => {
+      const pName = iss.parameterName || iss.parameter_name;
+      if (!pName) return false;
+      // Never interrogate student for internal geometric coordinates or spatial scale
+      if (INTERNAL_GEOMETRY_PARAMS.has(pName)) return false;
+      const isResolved =
+        bookIR?.parameters && (bookIR.parameters[pName] !== undefined || (bookIR.resolutions && bookIR.resolutions[pName] !== undefined));
+      return !isResolved;
+    });
+
+    // 5. Ready Hero Banner if ready to simulate
     const isReady =
       state === OrchestratorState.READY_TO_SIMULATE ||
       state === OrchestratorState.READY_TO_COMPILE ||
+      unresolvedIssues.length === 0 ||
       (ctx.compiledScene !== null && reviewState?.readyToCompile);
 
     if (isReady) {
@@ -302,8 +318,11 @@ export class PhysicsReviewModal {
           ▶ Start Simulation
         </button>
       `;
-      readyBanner.querySelector('[data-action="start-sim-banner"]').addEventListener('click', () => {
+      readyBanner.querySelector('[data-action="start-sim-banner"]').addEventListener('click', async () => {
         try {
+          if (!this.orchestrator.compiledScene) {
+            await this.orchestrator.compile();
+          }
           const scene = this.orchestrator.startSimulation();
           this.close();
           this.options.onStartSimulation?.(scene);
@@ -320,18 +339,6 @@ export class PhysicsReviewModal {
     } else {
       this.dom.btnStartSim.style.display = 'none';
     }
-
-    // 5. Unresolved Issues Section
-    const issues = reviewState?.issues || [];
-    const unresolvedIssues = issues.filter((iss) => {
-      const pName = iss.parameterName || iss.parameter_name;
-      if (!pName) return false;
-      // Never interrogate student for internal geometric coordinates or spatial scale
-      if (INTERNAL_GEOMETRY_PARAMS.has(pName)) return false;
-      const isResolved =
-        bookIR?.parameters && (bookIR.parameters[pName] !== undefined || (bookIR.resolutions && bookIR.resolutions[pName] !== undefined));
-      return !isResolved;
-    });
 
     if (unresolvedIssues.length > 0) {
       const sectionTitle = document.createElement('div');

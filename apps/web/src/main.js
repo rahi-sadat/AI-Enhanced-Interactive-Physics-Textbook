@@ -180,9 +180,12 @@ function closeModal() {
   resetUploadState();
 }
 
+let selectedPreset = null;
+
 function resetUploadState() {
   uploadedFile = null;
   uploadedImageUrl = null;
+  selectedPreset = null;
   if (fileInput) fileInput.value = '';
   dropzonePrompt.style.display = 'block';
   dropzonePreview.style.display = 'none';
@@ -273,6 +276,7 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
     uploadedFile = null; // Clear real uploaded file so presets use legacy path
     if (fileInput) fileInput.value = '';
     const preset = pill.dataset.preset;
+    selectedPreset = preset;
     if (preset === 'circuit1') {
       setPreview('circuit1.png', '/uploads/circuit1.png', 484, 399);
       domainSelect.value = 'circuits';
@@ -353,6 +357,7 @@ btnGenerateSim?.addEventListener('click', async () => {
         console.error('[PR-08] Ingestion failed:', ingestErr);
         btnGenerateSim.disabled = false;
         progressStatus.textContent = `Upload / analysis failed: ${ingestErr.message || ingestErr}`;
+        progressStatus.scrollIntoView({ block: 'nearest' });
         return;
       }
 
@@ -402,11 +407,28 @@ btnGenerateSim?.addEventListener('click', async () => {
           progressStatus.textContent = 'Could not reliably interpret this diagram.';
         }
       } else if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
+        updateProgress('Compiling direct simulation...', 90);
+        try {
+          await orchestrator.compile();
+          if (activeFigure && orchestrator.compiledScene) {
+            await activeFigure.load(orchestrator.compiledScene);
+            orchestrator.startSimulation();
+            activeFigure.play();
+            closeModal();
+            setPlatformMode('runtime');
+            updateProgress('Simulation ready!', 100);
+            return;
+          }
+        } catch (compErr) {
+          console.warn('[Main] Direct compile note:', compErr);
+        }
         btnGenerateSim.disabled = false;
-        progressStatus.textContent = 'Could not reliably interpret this diagram.';
+        progressStatus.textContent = ctx.currentError || 'Could not compile a direct simulation for this diagram. Please verify diagram features.';
+        progressStatus.scrollIntoView({ block: 'nearest' });
       } else if (orchestrator.state === OrchestratorState.UNSUPPORTED || orchestrator.state === OrchestratorState.ERROR) {
         btnGenerateSim.disabled = false;
         progressStatus.textContent = ctx.currentError || 'Analysis could not proceed.';
+        progressStatus.scrollIntoView({ block: 'nearest' });
       }
       return; // STOP! Complete path for user-uploaded file.
     }
@@ -428,12 +450,18 @@ btnGenerateSim?.addEventListener('click', async () => {
       incline: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
       prism: { domain: 'optics', url: '/scenes/optics/prism_scene.json' },
       mirror: { domain: 'optics', url: '/scenes/optics/mirror_scene.json' },
+      mirror_cff: { domain: 'optics', url: '/scenes/optics/mirror_scene.json' },
       thin_lens: { domain: 'optics', url: '/scenes/optics/thin_lens_scene.json' },
+      lens_cece: { domain: 'optics', url: '/scenes/optics/thin_lens_scene.json' },
       interface_refraction: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
+      snell: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
+      snell_water: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
       projectile: { domain: 'mechanics', url: '/scenes/canonical/projectile_figure.json' },
+      projectile_test: { domain: 'mechanics', url: '/scenes/canonical/projectile_figure.json' },
+      spring: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
     };
 
-    const scenarioChoice = scenarioSelect?.value || 'auto';
+    const scenarioChoice = selectedPreset || scenarioSelect?.value || 'auto';
 
     if (!uploadedFile && PRESET_SCENES[scenarioChoice]) {
       updateProgress('Loading pre-compiled textbook scenario...', 80);
@@ -444,7 +472,9 @@ btnGenerateSim?.addEventListener('click', async () => {
         closeModal();
         if (activeFigure) {
           setPlatformMode('runtime');
-          activeFigure.load(pScene);
+          activeFigure.load(pScene).then(() => {
+            activeFigure.play();
+          });
         } else {
           bootstrap(presetInfo.domain, pScene);
         }
@@ -503,7 +533,9 @@ btnGenerateSim?.addEventListener('click', async () => {
       }
       if (activeFigure && (result.domain === 'optics' || result.domain === 'circuits')) {
         setPlatformMode('runtime');
-        activeFigure.load(result.scene);
+        activeFigure.load(result.scene).then(() => {
+          activeFigure.play();
+        });
       } else {
         bootstrap(result.domain, result.scene);
       }

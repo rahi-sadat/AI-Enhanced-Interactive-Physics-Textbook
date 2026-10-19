@@ -89,7 +89,7 @@ async function runTests() {
   orch2.bookIR = { status: 'NEEDS_REVIEW' };
 
   await orch2.compile();
-  assert(orch2.state === OrchestratorState.ERROR, 'State is ERROR on compilation failure');
+  assert(orch2.state === OrchestratorState.NEEDS_REVIEW, 'Gating refusal returns to NEEDS_REVIEW');
   assert(orch2.compiledScene === null, 'CRITICAL: No canned scene substituted on error');
   assert(orch2.currentError.includes('not ready yet'), 'Honest gating error message displayed');
 
@@ -149,6 +149,19 @@ async function runTests() {
   await orch5.confirmCandidate('length', { numericValue: 80, rawUnit: 'cm' });
   assert(orch5.state === OrchestratorState.NEEDS_REVIEW, 'State remains NEEDS_REVIEW when backend says not ready');
   assert(orch5.bookIR.status === 'NEEDS_REVIEW', 'BookIR status remains NEEDS_REVIEW');
+
+  // An older resolution hint must not override a later negative review.
+  const orchStale = new SimulationOrchestrator({ api: {
+    ...mockApiStayUnready,
+    confirmCandidate: async () => ({success:true, canCompile:true,
+      bookIR:{status:'READY_TO_COMPILE',parameters:{}}}),
+    compile: async () => { throw new Error('Stale hint must not invoke compilation'); },
+  }});
+  orchStale.bookIR={status:'NEEDS_REVIEW'};
+  orchStale.state=OrchestratorState.NEEDS_REVIEW;
+  await orchStale.confirmCandidate('length', {numericValue:80,rawUnit:'cm'});
+  assert(orchStale.state===OrchestratorState.NEEDS_REVIEW, 'Latest negative review overrides stale canCompile hint');
+  assert(orchStale.compiledScene===null, 'Stale readiness creates no scene');
 }
 
 runTests().then(() => {

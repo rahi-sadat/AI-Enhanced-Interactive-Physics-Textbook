@@ -128,6 +128,10 @@ export class SimulationOrchestrator {
     this.compiledScene = null;
     this.resolutionHistory = [];
 
+    // A new upload must not inherit review details from a previous figure.
+    this.reviewState = null;
+    this.readinessReport = null;
+
     this._setState(OrchestratorState.UPLOADING);
 
     try {
@@ -168,9 +172,15 @@ export class SimulationOrchestrator {
 
       // 2. Unresolved without understanding
       if (status === 'UNRESOLVED' && (!this.bookIR?.domain || !this.bookIR?.subtype)) {
+        const providerError = this.bookIR?.provenance?.error_type;
+        const analysisMessage = providerError === 'VLMConfigurationError'
+          ? 'Diagram analysis is not configured on the server. Check the vision provider settings and try again.'
+          : providerError === 'VisionProviderError'
+            ? 'The diagram analysis service is temporarily unavailable. Your image is still selected; click Generate Simulation to retry.'
+            : "We couldn't reliably analyze this diagram. Try a clearer image or review the detected diagram region.";
         this._setState(
           OrchestratorState.ERROR,
-          "We couldn't reliably analyze this diagram. Try a clearer image or review the detected diagram region."
+          analysisMessage
         );
         return;
       }
@@ -458,7 +468,9 @@ export class SimulationOrchestrator {
         this.bookIR = revRes.book_ir || revRes.bookIR;
       }
       this.reviewState = revRes.reviewState;
-      const isReady = revRes.readyToCompile || hintCanCompile;
+      // The newest backend review supersedes earlier resolution hints.
+      const isReady = revRes.readyToCompile === true
+        && this.bookIR?.status !== 'NEEDS_REVIEW';
 
       if (isReady) {
         if (!this._metrics.timeToReadyMs && this._metrics.startTime) {
@@ -503,7 +515,7 @@ export class SimulationOrchestrator {
       this.compiledScene = null;
       if (err instanceof CompilationGatingError) {
         this._setState(
-          OrchestratorState.ERROR,
+          OrchestratorState.NEEDS_REVIEW,
           `The simulation is not ready yet: ${err.message}`
         );
       } else {
