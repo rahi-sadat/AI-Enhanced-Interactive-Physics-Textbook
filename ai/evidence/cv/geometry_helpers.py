@@ -163,14 +163,23 @@ def merge_collinear_lines(
     angle_thresh_deg: float = 6.0,
     dist_tol_px: Optional[float] = None,
 ) -> List[Any]:
-    """Merge nearly collinear and close line segments (supports SourceLine or tuple)."""
+    """Deduplicate contained collinear segments without losing independent extents.
+
+    This helper cannot authorize bridging a gap without raster evidence. Partial
+    overlaps and disjoint segments remain available to domain-specific tracing.
+    """
     if not lines:
         return []
     tol = dist_tol_px if dist_tol_px is not None else dist_thresh
     is_source_line = hasattr(lines[0], "start") and hasattr(lines[0], "end")
 
     merged: List[Any] = []
-    for l in lines:
+    def length(line):
+        if hasattr(line, "start"):
+            return line.length_px
+        return math.hypot(line[2]-line[0], line[3]-line[1])
+
+    for l in sorted(lines, key=length, reverse=True):
         if is_source_line:
             x1, y1 = float(l.start.x), float(l.start.y)
             x2, y2 = float(l.end.x), float(l.end.y)
@@ -194,7 +203,10 @@ def merge_collinear_lines(
             if diff_deg > angle_thresh_deg:
                 continue
 
-            d = point_to_segment_distance((mid_x, mid_y), (mx1, my1), (mx2, my2))
+            # Midpoint proximity alone used to discard longer or adjacent
+            # geometry. Both endpoints must actually lie within the retained span.
+            d = max(point_to_segment_distance((x1, y1), (mx1, my1), (mx2, my2)),
+                    point_to_segment_distance((x2, y2), (mx1, my1), (mx2, my2)))
             if d < tol:
                 covered = True
                 break

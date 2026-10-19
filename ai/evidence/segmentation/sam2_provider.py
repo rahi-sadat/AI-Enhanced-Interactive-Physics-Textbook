@@ -15,6 +15,9 @@ import logging
 import os
 import sys
 import time
+import hashlib
+import json
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -38,7 +41,9 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 # Global singletons for model caching across pipeline calls
 _CACHED_SAM2_MODEL = None
 _CACHED_SAM2_PREDICTOR = None
+_CACHED_SAM2_KEY = None
 _CACHED_IMAGE_SIG = None
+_PREDICTOR_LOCK = threading.RLock()
 
 
 class SAM2SegmentationProvider:
@@ -91,8 +96,9 @@ class SAM2SegmentationProvider:
 
     def _get_predictor(self):
         """Lazily initialize SAM 2 model and predictor with singleton caching."""
-        global _CACHED_SAM2_MODEL, _CACHED_SAM2_PREDICTOR
-        if _CACHED_SAM2_PREDICTOR is not None:
+        global _CACHED_SAM2_MODEL, _CACHED_SAM2_PREDICTOR, _CACHED_SAM2_KEY
+        key=(str(Path(self.checkpoint_path).resolve()),self.config_path,self.device_name)
+        if _CACHED_SAM2_PREDICTOR is not None and _CACHED_SAM2_KEY==key:
             self._model = _CACHED_SAM2_MODEL
             self._predictor = _CACHED_SAM2_PREDICTOR
             return self._predictor
@@ -118,10 +124,20 @@ class SAM2SegmentationProvider:
             self._predictor = SAM2ImagePredictor(self._model)
             _CACHED_SAM2_MODEL = self._model
             _CACHED_SAM2_PREDICTOR = self._predictor
+            _CACHED_SAM2_KEY = key
 
         return self._predictor
 
     def segment(
+        self, image_bgr, prompt, *, source_width, source_height, entity_id=None,
+    ) -> SegmentationResult:
+        # Shared predictors store mutable image embeddings. Keep set_image and
+        # predict atomic across concurrently offloaded FastAPI requests.
+        with _PREDICTOR_LOCK:
+            return self._segment_locked(image_bgr, prompt, source_width=source_width,
+                                        source_height=source_height, entity_id=entity_id)
+
+    def _segment_locked(
         self,
         image_bgr: np.ndarray,
         prompt: SegmentationPrompt,
@@ -146,7 +162,7 @@ class SAM2SegmentationProvider:
             predictor = self._get_predictor()
 
             # Reuse image embedding if identical image array is already loaded in predictor
-            current_sig = (id(image_bgr), image_bgr.shape, int(image_bgr[0, 0, 0]), int(image_bgr[-1, -1, -1]))
+            current_sig = (id(predictor),image_bgr.shape,hashlib.sha256(image_bgr.tobytes()).digest())
             if _CACHED_IMAGE_SIG != current_sig:
                 img_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
                 predictor.set_image(img_rgb)
@@ -262,6 +278,7 @@ class SAM2SegmentationProvider:
             bbox_source_px=bbox,
             centroid_source_px=centroid,
             area_px=area,
+            rle_counts=json.dumps(_encode_mask_runs(best_mask)),
             polygon_approx=polygon,
             confidence=best_score,
             provider=self.name,
@@ -269,6 +286,10 @@ class SAM2SegmentationProvider:
             prompt_provenance={
                 "has_box": prompt.box is not None,
                 "has_points": len(prompt.points) > 0,
+                "entity_candidate_id": entity_id,
+                "source_bbox": prompt.box.to_dict() if prompt.box else None,
+                "prompt_points": prompt.points,
+                "prompt_labels": prompt.labels,
             },
             verified=False,
         )
@@ -281,3 +302,11 @@ class SAM2SegmentationProvider:
             model="sam2.1_hiera_tiny",
             latency_ms=latency,
         )
+
+
+def _encode_mask_runs(mask):
+    """Row-major alternating background/foreground counts, beginning with background."""
+    flat = mask.ravel().astype(np.uint8)
+    changes = np.flatnonzero(np.diff(flat)) + 1
+    counts = np.diff(np.r_[0, changes, len(flat)]).tolist()
+    return ([0] if len(flat) and flat[0] else []) + counts

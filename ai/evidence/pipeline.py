@@ -263,6 +263,14 @@ class EvidenceExtractionPipeline:
                     error="Segmentation provider unavailable.",
                 )
 
+        if book_ir.domain == "circuits":
+            from ai.evidence.segmentation.circuit_prompts import segment_circuit_candidates
+            from ai.evidence.cv.circuit_geometry_validator import CircuitGeometryValidator
+            seg_result = segment_circuit_candidates(self.segmentation_provider, img_bgr, cv_candidates, asset)
+            cv_candidates = CircuitGeometryValidator().validate(
+                img_bgr, cv_candidates, source_asset_id=asset.id, figure_id=book_ir.figure_id,
+            )
+
         # 5. Fuse evidence via Subtype Grounder
         outcome = grounder.ground(
             book_ir=book_ir,
@@ -274,6 +282,8 @@ class EvidenceExtractionPipeline:
         )
 
         grounded_ir = outcome.grounded_book_ir
+        if book_ir.domain == "circuits":
+            grounded_ir.provenance["circuit_segmentation"] = cv_candidates.get("segmentation_diagnostics", [])
         if grounded_ir.geometry is None:
             grounded_ir.geometry = {}
         if src_w and not grounded_ir.geometry.get("width"):

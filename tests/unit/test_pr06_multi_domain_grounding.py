@@ -261,8 +261,8 @@ class TestPR06MultiDomainGrounding(unittest.TestCase):
         self.assertEqual(comp_res.status, "NEEDS_REVIEW")
         self.assertIsNone(comp_res.scene)
 
-    def test_circuits_grounder_authentic_e2e(self):
-        """Valid wire continuity and authentic OCR tokens compile to runnable PhysicsScene."""
+    def test_circuits_unverified_rail_fixture_requires_review(self):
+        """Coordinates and OCR alone do not prove raster geometry or connectivity."""
         grounder = self.registry.find_grounder("circuits", "dc_linear")
         self.assertIsNotNone(grounder)
 
@@ -303,16 +303,13 @@ class TestPR06MultiDomainGrounding(unittest.TestCase):
 
         outcome = grounder.ground(book_ir, cv_candidates, ocr_result, source_width=500, source_height=400)
         grounded_ir = outcome.grounded_book_ir
-        self.assertEqual(grounded_ir.status, BookIRStatus.READY_TO_COMPILE)
-        self.assertIn("R1_resistance", grounded_ir.parameters)
-        self.assertEqual(grounded_ir.parameters["R1_resistance"].value, 100.0)
+        self.assertEqual(grounded_ir.status, BookIRStatus.NEEDS_REVIEW)
+        self.assertEqual(grounded_ir.parameters['components'], [])
+        self.assertEqual(grounded_ir.parameters['nodes'], [])
 
         comp_res = self.compiler.compile(grounded_ir)
-        self.assertEqual(comp_res.status, "READY")
-        self.assertIsNotNone(comp_res.scene)
-        self.assertEqual(comp_res.scene["domain"], "circuits")
-        self.assertEqual(comp_res.scene["subtype"], "dc_linear")
-        self.assertEqual(len(comp_res.scene["circuit"]["components"]), 2)
+        self.assertEqual(comp_res.status, "NEEDS_REVIEW")
+        self.assertIsNone(comp_res.scene)
 
     def test_unsupported_mechanics_rejected(self):
         """Unsupported mechanics (e.g. spring, pulley, incline) must remain UNSUPPORTED with scene=null."""
