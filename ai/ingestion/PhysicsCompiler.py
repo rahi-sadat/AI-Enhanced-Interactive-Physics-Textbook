@@ -927,6 +927,11 @@ class PhysicsCompiler:
                 issues.append({"code": "MISSING_PRISM_INCIDENT_RAY", "message": "Prism simulation requires rayOrigin and rayDirection."})
 
         elif domain == "circuits" and subtype == "dc_linear":
+            from ai.evidence.grounding.circuit_integrity import validate_circuit_integrity
+            integrity_issues = validate_circuit_integrity(book_ir)
+            issues.extend(integrity_issues)
+            if any(issue['code']=='INVALID_CIRCUIT_STRUCTURE' for issue in integrity_issues):
+                return issues
             comps = self._extract_raw_val(params.get("components"))
             nodes = self._extract_raw_val(params.get("nodes"))
             if not isinstance(comps, list) or len(comps) == 0:
@@ -1506,26 +1511,11 @@ class PhysicsCompiler:
             "wires": wires,
         }
 
-        # Populate canonical parameters for circuit components with defensive ID de-duplication
-        seen_cids = set()
+        # Identity was validated before construction; never rename duplicate IDs
+        # here, because doing so would orphan semantic and evidence references.
         for comp in components:
-            cid = comp.get("id")
-            ctype = comp.get("type", "resistor")
-            if not cid or cid in seen_cids:
-                prefix = "V" if ctype in ("voltage_source", "battery", "dc_source") else "R"
-                idx = 1
-                while f"{prefix}{idx}" in seen_cids:
-                    idx += 1
-                new_cid = f"{prefix}{idx}"
-                # Migrate terminal IDs if they used old cid
-                if cid:
-                    for t in comp.get("terminals", []):
-                        if t.get("id", "").startswith(f"{cid}."):
-                            t["id"] = t["id"].replace(f"{cid}.", f"{new_cid}.")
-                comp["id"] = new_cid
-                cid = new_cid
-            seen_cids.add(cid)
-
+            cid = comp["id"]
+            ctype = comp["type"]
             cval = comp.get("value")
             cunit = comp.get("unit")
             comp["editable"] = True

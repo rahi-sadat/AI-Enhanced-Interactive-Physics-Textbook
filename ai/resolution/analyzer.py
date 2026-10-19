@@ -150,18 +150,20 @@ class ResolutionAnalyzer:
     @classmethod
     def _check_circuit_components(cls, book_ir: BookIR, issues: List[ReviewIssue]) -> None:
         """Keep review readiness aligned with the compiler's DC graph/value gate."""
-        if any(entity.type in {"switch", "open_switch", "closed_switch"}
-               for entity in book_ir.entities):
+        from ai.evidence.grounding.circuit_integrity import validate_circuit_integrity
+        integrity_issues=validate_circuit_integrity(book_ir)
+        for index, failure in enumerate(integrity_issues):
             issues.append(ReviewIssue(
-                id="issue_circuit_switch_state_unverified",
-                issue_type=ReviewIssueType.AMBIGUOUS_GEOMETRY,
-                title="Switch state and connections require review",
-                description="A switch is present but its state and connections are not grounded in the circuit graph.",
-                question="Verify the switch state and circuit topology before simulation.",
+                id=f"issue_circuit_integrity_{index}_{failure['code']}",
+                issue_type=ReviewIssueType.UNGROUNDED_GEOMETRY,
+                title="Circuit evidence requires review",
+                description=failure['message'], question=failure['message'],
+                entity_id=failure.get('entity_id'),
                 action_type=ResolutionActionType.CHOOSE_OPTION,
-                target_subtype="dc_linear",
-                is_blocker=True,
+                target_subtype="dc_linear", is_blocker=True,
             ))
+        if any(issue['code']=='INVALID_CIRCUIT_STRUCTURE' for issue in integrity_issues):
+            return
         params = book_ir.parameters or {}
         components = params.get("components")
         nodes = params.get("nodes")

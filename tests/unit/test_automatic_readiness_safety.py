@@ -267,13 +267,17 @@ def _ready_circuit():
         domain="circuits",
         subtype="dc_linear",
         status=BookIRStatus.READY_TO_COMPILE,
-        entities=[BookEntity(id="R1", type="resistor", position_source_px={"x": 50, "y": 50})],
+        entities=[BookEntity(id="R1", type="resistor", position_source_px={"x": 50, "y": 50}),
+                  BookEntity(id="V1", type="voltage_source", position_source_px={"x": 20, "y": 50})],
         geometry={"width": 100, "height": 100},
         parameters={
             "nodes": ["N0", "N1"],
+            "reference_node": "N0",
             "components": [
-                {"id": "V1", "type": "voltage_source", "nodes": ["N1", "N0"], "value": 12.0, "unit": "V"},
-                {"id": "R1", "type": "resistor", "nodes": ["N1", "N0"], "value": 1.0, "unit": "kΩ"},
+                {"id": "V1", "type": "voltage_source", "nodes": ["N1", "N0"], "value": 12.0, "unit": "V",
+                 "terminals": [{"id":"V1.t1","node":"N1"},{"id":"V1.t2","node":"N0"}]},
+                {"id": "R1", "type": "resistor", "nodes": ["N1", "N0"], "value": 1.0, "unit": "kΩ",
+                 "terminals": [{"id":"R1.t1","node":"N1"},{"id":"R1.t2","node":"N0"}]},
             ],
         },
         parameter_provenance={

@@ -1663,7 +1663,12 @@ async def ingest_diagram(file: UploadFile = File(...)):
         # 6. Apply named model assumptions only after CV/OCR has grounded the
         # figure. This stage never manufactures diagram coordinates or topology.
         from ai.resolution.auto import AutoResolutionEngine
+        from ai.resolution.engine import ResolutionEngine
         auto_result = await asyncio.to_thread(AutoResolutionEngine.resolve, grounded_book_ir)
+        try:
+            await asyncio.to_thread(ResolutionEngine.auto_resolve, grounded_book_ir)
+        except Exception as _ar_e:
+            print(f"[Backend] Auto-resolve in ingest note: {_ar_e}")
 
         # 7. PhysicsCompiler (may run circuit matrix work).
         compiler_result = await asyncio.to_thread(compiler.compile, grounded_book_ir)

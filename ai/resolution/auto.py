@@ -286,9 +286,7 @@ class AutoResolutionEngine:
         components = (book_ir.parameters or {}).get("components")
         nodes = (book_ir.parameters or {}).get("nodes")
         if (topology.get("verified_connectivity") is not True
-                or not isinstance(components, list) or not isinstance(nodes, list)
-                or any(entity.type in {"switch", "open_switch", "closed_switch"}
-                       for entity in book_ir.entities)):
+                or not isinstance(components, list) or not isinstance(nodes, list)):
             result.failures.append({"code": "TOPOLOGY_INVALID", "message": "Circuit continuity is not grounded."})
             return
         node_ids = {n if isinstance(n, str) else n.get("id") for n in nodes if isinstance(n, (str, dict))}
@@ -311,29 +309,18 @@ class AutoResolutionEngine:
                 result.failures.append({"code": "TOPOLOGY_INVALID", "message": f"Unverified terminals for {comp.get('id')}."})
                 return
         for comp in components:
+            if not isinstance(comp, dict):
+                continue
+            if comp.get("type") == "switch" and (
+                    comp.get("state") not in {"open", "closed"} or not comp.get("state_verified")):
+                result.failures.append({"code": "SWITCH_STATE_UNVERIFIED",
+                                        "message": f"Verify the visible state of {comp.get('id')}."})
+                return
             if comp.get("value") is not None:
                 continue
-            ctype = comp.get("type")
-            policy_id = ("policy_standard_dc_voltage" if ctype in sources
-                         else "policy_standard_dc_resistance" if ctype in {"resistor", "bulb", "lamp"}
-                         else None)
-            policy = PolicyRegistry.get_policy(policy_id) if policy_id else None
-            if policy is None:
-                continue
-            comp["value"] = policy.value
-            comp["unit"] = "V" if ctype in sources else "ohm"
-            comp["provenance"] = {"source": "auto_policy", "policyId": policy.id,
-                                  "policyVersion": policy.version, "confidence": 0.8}
-            book_ir.parameter_provenance[comp["id"]] = ProvenanceRecord(
-                source="auto_policy", confidence=0.8,
-                policy_id=policy.id, policy_version=policy.version,
-                user_accepted=False,
-                notes=f"Normalized circuit model value: {policy.description}",
-            )
-            result.assumptions.append({"parameter": comp.get("id"), "policyId": policy.id,
-                                       "policyVersion": policy.version, "value": policy.value,
-                                       "unit": comp["unit"], "reason": policy.description,
-                                       "provenance": "auto_policy", "confidence": 0.8})
+            if comp.get("type") in sources | {"resistor", "bulb", "lamp"}:
+                result.failures.append({"code":"MISSING_COMPONENT_VALUE",
+                    "message":f"Associate a measured value or explicitly resolve {comp.get('id')} before compilation."})
 
     @classmethod
     def resolve(cls, book_ir: BookIR) -> AutoResolutionResult:

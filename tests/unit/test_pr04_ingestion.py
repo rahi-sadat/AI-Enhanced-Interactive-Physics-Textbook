@@ -732,7 +732,11 @@ canonical_c_ir = BookIR(
         "reference_node": "N0"
     }
 )
-canonical_c_ir.entities = [BookEntity(id="R1", type="resistor", position_source_px={"x": 400, "y": 300})]
+canonical_c_ir.entities = [BookEntity(id="R1", type="resistor", position_source_px={"x": 400, "y": 300}),
+                          BookEntity(id="V1", type="voltage_source", position_source_px={"x": 200, "y": 300})]
+for component in canonical_c_ir.parameters['components']:
+    component['terminals']=[{'id':f'{component["id"]}.t{i+1}','node':node}
+                           for i,node in enumerate(component['nodes'])]
 mark_reviewed_fixture(canonical_c_ir)
 res = compiler.compile(canonical_c_ir)
 test("Canonical subtype 'dc_linear' → READY", res.status == "READY", f"issues: {res.issues}")

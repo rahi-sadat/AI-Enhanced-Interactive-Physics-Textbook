@@ -65,12 +65,13 @@ def test_out_of_bounds_landmark_cannot_be_policy_resolved():
     assert result.assumptions == []
 
 
-def test_unlabelled_grounded_circuit_gets_normalized_values_only():
+def test_unlabelled_grounded_circuit_requires_explicit_values():
     book = BookIR(source_asset_id="asset_circuit", figure_id="figure_1",
                   domain="circuits", subtype="dc_linear", status="NEEDS_REVIEW",
                   geometry={"width": 500, "height": 400,
                             "circuit_topology": {"verified_connectivity": True, "node_count": 2}},
-                  entities=[BookEntity(id="r1", type="resistor", position_source_px={"x": 200, "y": 100})],
+                  entities=[BookEntity(id="R1", type="resistor", position_source_px={"x": 300, "y": 200}),
+                            BookEntity(id="V1", type="voltage_source", position_source_px={"x": 100, "y": 200})],
                   parameters={"nodes": [{"id": "N0"}, {"id": "N1"}],
                               "components": [
                                   {"id": "V1", "type": "voltage_source", "nodes": ["N0", "N1"],
@@ -80,14 +81,18 @@ def test_unlabelled_grounded_circuit_gets_normalized_values_only():
                               ]},
                   parameter_provenance={"nodes": {"source": "cv"},
                                         "components": {"source": "cv"}})
+    book.parameters['reference_node']='N0'
+    for component in book.parameters['components']:
+        component['terminals']=[{'id':f'{component["id"]}.t{i+1}','node':node}
+                                for i,node in enumerate(component['nodes'])]
     result = AutoResolutionEngine.resolve(book)
-    assert not result.failures
-    assert {a["parameter"] for a in result.assumptions} == {"V1", "R1"}
-    assert [comp["value"] for comp in book.parameters["components"]] == [10, 100]
-    assert all(comp["provenance"]["source"] == "auto_policy" for comp in book.parameters["components"])
+    assert {f['code'] for f in result.failures}=={'MISSING_COMPONENT_VALUE'}
+    assert result.assumptions==[]
+    assert [comp["value"] for comp in book.parameters["components"]] == [None, None]
+    assert book.status=='NEEDS_REVIEW'
     compiled = PhysicsCompiler().compile(book)
-    assert compiled.status == "READY", compiled.issues
-    assert compiled.scene["parameters"]["V1"]["provenance"] == "auto_policy"
+    assert compiled.status == "NEEDS_REVIEW"
+    assert compiled.scene is None
 
 
 def test_circuit_without_grounded_topology_stays_unresolved():

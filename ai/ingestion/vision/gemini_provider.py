@@ -347,14 +347,15 @@ class GeminiVisionProvider(VisionProvider):
                     except Exception as call_err:
                         last_err = call_err
                         err_str = str(call_err)
-                        if (
-                            "429" in err_str
-                            or "RESOURCE_EXHAUSTED" in err_str
-                            or "503" in err_str
-                            or "404" in err_str
-                            or "UNAVAILABLE" in err_str
-                        ):
+                        # Retry a transient outage once before switching models.
+                        # Quota exhaustion and missing models need a different
+                        # model, not another identical request. Never retry auth
+                        # failures or substitute canned semantic classifications.
+                        transient = any(code in err_str for code in ("503", "UNAVAILABLE", "502", "504"))
+                        if transient and attempt == 0:
                             time.sleep(1.0)
+                            continue
+                        if transient or any(code in err_str for code in ("429", "RESOURCE_EXHAUSTED", "404")):
                             break
                         raise
                 if response is not None:
