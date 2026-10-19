@@ -51,11 +51,42 @@ class BookUnderstandingPipeline:
         self.analyzer = analyzer
 
     def _get_analyzer(self) -> PhysicsVisionAnalyzer:
-        """Lazily build default analyzer with GeminiVisionProvider if none supplied."""
+        """Lazily build default analyzer with GeminiVisionProvider if none supplied, or MockVisionProvider when USE_MOCK_VISION is set."""
         if self.analyzer is None:
-            from ai.ingestion.vision.gemini_provider import GeminiVisionProvider
-            provider = GeminiVisionProvider()
-            self.analyzer = PhysicsVisionAnalyzer(provider=provider)
+            import os
+            if os.getenv("USE_MOCK_VISION", "").lower() in ("true", "1", "yes"):
+                from ai.ingestion.vision.mock_provider import MockVisionProvider
+                from shared.schemas.semantic import (
+                    SemanticAnalysisResult,
+                    SemanticConfidence,
+                    SemanticEntity,
+                    SemanticRelationship,
+                    SemanticVisibleLabel,
+                )
+                mock_semantic = SemanticAnalysisResult(
+                    classification="supported",
+                    is_physics=True,
+                    domain="mechanics",
+                    subtype="pendulum",
+                    confidence=SemanticConfidence(overall=0.94, is_physics=0.98, domain=0.95, subtype=0.92),
+                    entities=[
+                        SemanticEntity(temporary_id="ent_pivot", role="pivot", confidence=0.90),
+                        SemanticEntity(temporary_id="ent_bob", role="bob", confidence=0.92),
+                        SemanticEntity(temporary_id="ent_string", role="string", confidence=0.88),
+                    ],
+                    relationships=[
+                        SemanticRelationship(type="suspends", source_id="ent_pivot", target_id="ent_string"),
+                        SemanticRelationship(type="attaches", source_id="ent_string", target_id="ent_bob"),
+                    ],
+                    visible_labels=[
+                        SemanticVisibleLabel(text="Pivot", confidence=0.85, verified=False),
+                    ],
+                )
+                self.analyzer = PhysicsVisionAnalyzer(provider=MockVisionProvider(default_result=mock_semantic))
+            else:
+                from ai.ingestion.vision.gemini_provider import GeminiVisionProvider
+                provider = GeminiVisionProvider()
+                self.analyzer = PhysicsVisionAnalyzer(provider=provider)
         return self.analyzer
 
     def analyze(

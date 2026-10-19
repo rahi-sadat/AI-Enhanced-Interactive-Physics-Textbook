@@ -111,10 +111,61 @@ export class PendulumSimulation {
     this.canvas.height = Math.round(height * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const sourceW = renderContext?.sourceWidth || this.scene.coordinateSystem?.width || this.scene.source?.width || this.scene.source?.image_width_px || this.geometry?.bob_center?.x * 2 || 800;
-    const sourceH = renderContext?.sourceHeight || this.scene.coordinateSystem?.height || this.scene.source?.height || this.scene.source?.image_height_px || this.geometry?.bob_center?.y * 1.5 || 600;
+    const sourceW = renderContext?.sourceWidth ||
+      this.scene.coordinateSpace?.width ||
+      this.scene.coordinateSystem?.width ||
+      this.scene.source?.width ||
+      this.scene.source?.image_width_px ||
+      this.scene.geometry?.source_width ||
+      this.geometry?.bob_center?.x * 2 ||
+      800;
+    const sourceH = renderContext?.sourceHeight ||
+      this.scene.coordinateSpace?.height ||
+      this.scene.coordinateSystem?.height ||
+      this.scene.source?.height ||
+      this.scene.source?.image_height_px ||
+      this.scene.geometry?.source_height ||
+      this.geometry?.bob_center?.y * 1.5 ||
+      600;
 
-    this.mapper = new CoordinateMapper(sourceW, sourceH, width, height, dpr);
+    const isContained = Boolean(this.container?.classList?.contains?.('figure-viewport-overlay'));
+    if (isContained) {
+      const scaleX = width / sourceW;
+      const scaleY = height / sourceH;
+      this.mapper = {
+        scale: scaleX,
+        scaleX,
+        scaleY,
+        offsetX: 0,
+        offsetY: 0,
+        sourceW,
+        sourceH,
+        viewW: width,
+        viewH: height,
+        sourceToView: (x, y) => {
+          let px = x;
+          let py = y;
+          if (typeof x === 'object' && x !== null) {
+            px = x.x ?? x.left ?? x[0];
+            py = x.y ?? x.top ?? x[1];
+          }
+          return { x: Number(px) * scaleX, y: Number(py) * scaleY };
+        },
+        viewToSource: (x, y) => {
+          let px = x;
+          let py = y;
+          if (typeof x === 'object' && x !== null) {
+            px = x.x ?? x.left ?? x[0];
+            py = x.y ?? x.top ?? x[1];
+          }
+          return { x: Number(px) / scaleX, y: Number(py) / scaleY };
+        },
+        sourceLengthToView: (len) => Number(len) * scaleX,
+        viewLengthToSource: (len) => Number(len) / scaleX,
+      };
+    } else {
+      this.mapper = new CoordinateMapper(sourceW, sourceH, width, height, dpr);
+    }
     this.viewWidth = width;
     this.viewHeight = height;
   }

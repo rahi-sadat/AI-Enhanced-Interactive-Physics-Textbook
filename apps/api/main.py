@@ -15,7 +15,7 @@ import shutil
 import sys
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional, Union
 
 from dotenv import load_dotenv
 
@@ -93,14 +93,17 @@ app.add_middleware(
 # Upload and debug directories
 UPLOADS_DIR = _PROJECT_ROOT / "storage" / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+ARTIFACTS_DIR = _PROJECT_ROOT / "storage" / "artifacts"
+ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 FRONTEND_PUBLIC = _PROJECT_ROOT / "apps" / "web" / "public"
 FRONTEND_UPLOADS = FRONTEND_PUBLIC / "uploads"
 FRONTEND_UPLOADS.mkdir(parents=True, exist_ok=True)
 FRONTEND_SPRITES = FRONTEND_PUBLIC / "sprites"
 FRONTEND_SPRITES.mkdir(parents=True, exist_ok=True)
 
-# Mount static files so diagrams and uploads are served directly
+# Mount static files so diagrams, artifacts, and uploads are served directly
 app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+app.mount("/artifacts", StaticFiles(directory=str(ARTIFACTS_DIR)), name="artifacts")
 
 # Global model cache
 _SAM2_PREDICTOR = None
@@ -206,18 +209,18 @@ def health_check():
 @app.post("/api/upload-diagram")
 async def upload_diagram(file: UploadFile = File(...)):
     try:
+        content = await file.read()
+        img = cv2.imdecode(np.frombuffer(content, dtype=np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
+            raise HTTPException(status_code=422, detail="Uploaded image could not be decoded.")
+        h, w = img.shape[:2]
         ext = Path(file.filename).suffix.lower() or ".png"
         unique_name = f"diagram_{uuid.uuid4().hex[:8]}{ext}"
         saved_path = UPLOADS_DIR / unique_name
         frontend_path = FRONTEND_UPLOADS / unique_name
 
-        content = await file.read()
         saved_path.write_bytes(content)
         shutil.copy2(saved_path, frontend_path)
-
-        # Read dimensions
-        img = cv2.imread(str(saved_path))
-        h, w = (img.shape[0], img.shape[1]) if img is not None else (600, 800)
 
         return {
             "success": True,
@@ -226,6 +229,8 @@ async def upload_diagram(file: UploadFile = File(...)):
             "width": w,
             "height": h,
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1527,25 +1532,27 @@ try:
         BookUnderstandingPipeline,
         PhysicsCompiler,
     )
+    from ai.evidence import EvidenceExtractionPipeline
     _INGESTION_AVAILABLE = True
 except Exception as _ingestion_err:
     _INGESTION_AVAILABLE = False
-    print(f"[Backend] PR-04 ingestion imports unavailable: {_ingestion_err}")
+    print(f"[Backend] Ingestion imports unavailable: {_ingestion_err}")
 
 # Singletons for the ingestion pipeline
 _UPLOAD_SERVICE: "UploadService | None" = None
 _PAGE_IR_BUILDER: "PageIRBuilder | None" = None
 _BOOK_PIPELINE: "BookUnderstandingPipeline | None" = None
+_EVIDENCE_PIPELINE: "EvidenceExtractionPipeline | None" = None
 _PHYSICS_COMPILER: "PhysicsCompiler | None" = None
 
 
 def _get_ingestion_pipeline():
-    """Lazily initialise the PR-04 ingestion pipeline singletons."""
-    global _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _PHYSICS_COMPILER
+    """Lazily initialise the ingestion pipeline singletons."""
+    global _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _EVIDENCE_PIPELINE, _PHYSICS_COMPILER
     if not _INGESTION_AVAILABLE:
         raise HTTPException(
             status_code=503,
-            detail="PR-04 ingestion pipeline not available (missing dependencies).",
+            detail="Ingestion pipeline not available (missing dependencies).",
         )
     if _UPLOAD_SERVICE is None:
         _UPLOAD_SERVICE = UploadService(
@@ -1554,27 +1561,29 @@ def _get_ingestion_pipeline():
         )
         _PAGE_IR_BUILDER = PageIRBuilder()
         _BOOK_PIPELINE = BookUnderstandingPipeline()
+        _EVIDENCE_PIPELINE = EvidenceExtractionPipeline()
         _PHYSICS_COMPILER = PhysicsCompiler()
-    return _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _PHYSICS_COMPILER
+    return _UPLOAD_SERVICE, _PAGE_IR_BUILDER, _BOOK_PIPELINE, _EVIDENCE_PIPELINE, _PHYSICS_COMPILER
 
 
 @app.post("/api/ingest")
 async def ingest_diagram(file: UploadFile = File(...)):
-    """PR-04 Real Image Ingestion endpoint.
+    """PR-06 Real Image Ingestion endpoint.
 
     Accepts an arbitrary image file via multipart/form-data and runs it
-    through the full ingestion pipeline:
+    through the full ingestion and evidence extraction pipeline:
 
         raw bytes
             → UploadService  (validate, store, SourceAsset)
             → PageIRBuilder  (PageIR in source_px)
-            → BookUnderstandingPipeline (BookIR — honest UNRESOLVED for PR-04)
+            → BookUnderstandingPipeline (BookIR — PR-05 semantic understanding)
+            → EvidenceExtractionPipeline (Grounded BookIR — PR-06 OCR, CV, SAM 2, Fusion)
             → PhysicsCompiler (PhysicsScene or non-ready result)
 
     Returns a JSON envelope with:
         source_asset:  SourceAsset identity (no filename-based routing)
         page_ir:       PageIR (source_px geometry, regions, figures)
-        book_ir:       BookIR (domain/subtype/entities/parameters)
+        book_ir:       Grounded BookIR (domain/subtype/entities/parameters/evidence)
         compiler:      PhysicsCompilerResult (READY/NEEDS_REVIEW/UNSUPPORTED/UNRESOLVED)
         image_url:     Frontend-accessible URL for the uploaded image
 
@@ -1584,7 +1593,7 @@ async def ingest_diagram(file: UploadFile = File(...)):
         - An unknown image always returns UNRESOLVED, not a fallback simulation
     """
     try:
-        upload_svc, page_ir_builder, book_pipeline, compiler = _get_ingestion_pipeline()
+        upload_svc, page_ir_builder, book_pipeline, evidence_pipeline, compiler = _get_ingestion_pipeline()
 
         # 1. Read bytes with streaming size limit (do not buffer oversized uploads into RAM)
         CHUNK_SIZE = 64 * 1024
@@ -1622,21 +1631,86 @@ async def ingest_diagram(file: UploadFile = File(...)):
         # Execute blocking VLM network operations off the async event loop to prevent starvation
         book_ir = await asyncio.to_thread(book_pipeline.analyze, page_ir, asset=asset)
 
-        # 5. PhysicsCompiler
-        compiler_result = compiler.compile(book_ir)
+        # 5. EvidenceExtractionPipeline → Grounded BookIR (PR-06 visual evidence, OCR, CV, segmentation & fusion)
+        grounded_book_ir = await asyncio.to_thread(
+            evidence_pipeline.extract_and_fuse,
+            asset=asset,
+            page_ir=page_ir,
+            book_ir=book_ir,
+        )
+
+        # SourceAsset is the only authority for native image dimensions.
+        from ai.ingestion.source_dimensions import SourceDimensionMismatch, enforce_source_dimensions
+        try:
+            enforce_source_dimensions(grounded_book_ir, asset)
+        except SourceDimensionMismatch as mismatch:
+            raise HTTPException(status_code=422, detail=str(mismatch)) from mismatch
+
+        # Generate debug overlay artifact if explicitly enabled (never pollutes uploads)
+        debug_overlay_url = None
+        evidence_debug_enabled = os.getenv("EVIDENCE_DEBUG", "false").lower() in ("true", "1", "yes")
+        if evidence_debug_enabled:
+            try:
+                from ai.evidence.debug import generate_evidence_overlay
+                debug_img_path = ARTIFACTS_DIR / f"{asset.id}_evidence_debug.png"
+                img_bgr = cv2.imread(asset.storage_path)
+                if img_bgr is not None:
+                    generate_evidence_overlay(img_bgr, grounded_book_ir, output_path=debug_img_path)
+                    debug_overlay_url = f"/artifacts/{asset.id}_evidence_debug.png"
+            except Exception as _dbg_err:
+                print(f"[Backend] Debug overlay generation skipped: {_dbg_err}")
+
+        # 6. Apply named model assumptions only after CV/OCR has grounded the
+        # figure. This stage never manufactures diagram coordinates or topology.
+        from ai.resolution.auto import AutoResolutionEngine
+        from ai.resolution.engine import ResolutionEngine
+        auto_result = await asyncio.to_thread(AutoResolutionEngine.resolve, grounded_book_ir)
+        try:
+            await asyncio.to_thread(ResolutionEngine.auto_resolve, grounded_book_ir)
+        except Exception as _ar_e:
+            print(f"[Backend] Auto-resolve in ingest note: {_ar_e}")
+
+        # 7. PhysicsCompiler (may run circuit matrix work).
+        compiler_result = await asyncio.to_thread(compiler.compile, grounded_book_ir)
+        failure_category = None
+        if compiler_result.status != "READY":
+            failure_category = (auto_result.failures[0]["code"] if auto_result.failures
+                                else "SCENE_VALIDATION_FAILED")
+        debug_trace = {
+            "id": asset.id,
+            "source": {"width": asset.width_px, "height": asset.height_px,
+                       "coordinateSpace": "source_px"},
+            "classification": {"domain": grounded_book_ir.domain,
+                               "subtype": grounded_book_ir.subtype,
+                               "confidence": grounded_book_ir.confidence},
+            "grounding": grounded_book_ir.provenance.get("grounding_diagnostics", []),
+            "assumptions": auto_result.assumptions,
+            "automaticFailures": auto_result.failures,
+            "readiness": auto_result.readiness.to_dict() if auto_result.readiness else None,
+            "compilation": {"status": compiler_result.status,
+                            "issues": compiler_result.issues},
+        }
 
         return {
             "success": True,
-            "pipeline": "PR-05",
+            "pipeline": "PR-06",
             "image_url": public_url,
+            "debug_overlay_url": debug_overlay_url,
             "source_asset": asset.to_dict(),
             "page_ir": page_ir.to_dict(),
-            "book_ir": book_ir.to_dict(),
+            "book_ir": grounded_book_ir.to_dict(),
             "compiler": compiler_result.to_dict(),
+            "evidence": grounded_book_ir.evidence,
+            "grounding": grounded_book_ir.provenance.get("grounding_diagnostics", []),
+            "assumptions": auto_result.assumptions,
+            "auto_failures": auto_result.failures,
+            "failure_category": failure_category,
+            "debugId": asset.id,
+            "debugTrace": debug_trace,
             # Convenience top-level fields matching existing frontend expectations
             "status": compiler_result.status.lower().replace("_", "-"),
-            "domain": book_ir.domain,
-            "scenario": book_ir.subtype,
+            "domain": grounded_book_ir.domain,
+            "scenario": grounded_book_ir.subtype,
             "scene": compiler_result.scene,
             "issues": compiler_result.issues,
             "width": asset.width_px,
@@ -1651,12 +1725,298 @@ async def ingest_diagram(file: UploadFile = File(...)):
 
 @app.get("/api/ingest/health")
 def ingest_health():
-    """Check PR-05 ingestion pipeline availability."""
-    return {
-        "available": _INGESTION_AVAILABLE,
-        "pipeline": "PR-05",
-        "note": "Use POST /api/ingest with multipart/form-data file upload.",
-    }
+    """Check PR-06 ingestion pipeline capability and runtime health."""
+    if not _INGESTION_AVAILABLE:
+        return {
+            "pipeline": "PR-06",
+            "available": False,
+            "error": "Ingestion pipeline dependencies unavailable",
+        }
+    try:
+        upload_svc, page_ir_builder, book_pipeline, evidence_pipeline, compiler = _get_ingestion_pipeline()
+
+        # Semantic (VLM)
+        semantic_avail = False
+        semantic_prov = "unknown"
+        if hasattr(book_pipeline, "_get_analyzer"):
+            try:
+                analyzer = book_pipeline._get_analyzer()
+                prov = getattr(analyzer, "provider", None)
+                if prov:
+                    semantic_avail = prov.available()
+                    semantic_prov = getattr(prov, "name", "vlm")
+            except Exception:
+                pass
+        elif hasattr(book_pipeline, "vision_provider") and book_pipeline.vision_provider:
+            semantic_avail = book_pipeline.vision_provider.available()
+            semantic_prov = getattr(book_pipeline.vision_provider, "name", "vlm")
+
+        # OCR
+        ocr_router = evidence_pipeline.ocr_provider
+        ocr_default = getattr(ocr_router, "name", "ocr")
+        eng_avail = getattr(ocr_router, "primary", ocr_router).available() if hasattr(ocr_router, "primary") else ocr_router.available()
+        bn_avail = getattr(ocr_router, "bangla", None).available() if hasattr(ocr_router, "bangla") else False
+        resolver = getattr(ocr_router, "symbol_resolver", getattr(ocr_router, "symbol_engine", None))
+        symbol_res_avail = resolver.available() if resolver else False
+        greek_avail = getattr(ocr_router, "greek", None).available() if hasattr(ocr_router, "greek") else False
+        formula_avail = getattr(ocr_router, "formula", None).available() if hasattr(ocr_router, "formula") else False
+
+        # Segmentation
+        seg_prov = evidence_pipeline.segmentation_provider
+        seg_avail = seg_prov.available() if seg_prov else False
+        seg_name = getattr(seg_prov, "name", "none")
+
+        # Device observability
+        ocr_dev = getattr(getattr(ocr_router, "bangla", None), "device_name", "cpu")
+        sam_dev = getattr(seg_prov, "device_name", "cpu")
+
+        # Grounders - Verified capability mapping (all 7 supported PhysicsCompiler subtypes implemented & tested)
+        grounders = {
+            "mechanics/pendulum": "implemented",
+            "mechanics/projectile": "implemented",
+            "optics/thin_lens": "implemented",
+            "optics/spherical_mirror": "implemented",
+            "optics/interface_refraction": "implemented",
+            "optics/prism": "implemented",
+            "circuits/dc_linear": "implemented",
+        }
+
+        from ai.resolution import PolicyRegistry, RequirementRegistry
+
+        return {
+            "pipeline": "PR-07",
+            "available": True,
+            "semantic": {
+                "available": semantic_avail,
+                "provider": semantic_prov,
+            },
+            "ocr": {
+                "default": ocr_default,
+                "english": eng_avail,
+                "bangla": bn_avail,
+                "greekRecognition": greek_avail,
+                "physicsSymbolCandidateResolution": symbol_res_avail,
+                "device": ocr_dev,
+            },
+            "formulaRecognition": {
+                "available": formula_avail,
+            },
+            "classicalCV": {
+                "available": True,
+            },
+            "segmentation": {
+                "available": seg_avail,
+                "provider": seg_name,
+                "device": sam_dev,
+            },
+            "grounders": grounders,
+            "resolution": {
+                "available": True,
+                "resolutionEngine": True,
+                "unitEngine": True,
+                "policyRegistry": True,
+                "readinessEvaluator": True,
+                "policies": [p.id for p in PolicyRegistry().list_all()],
+                "supportedSubtypes": list(grounders.keys()),
+            },
+        }
+    except Exception as e:
+        return {
+            "pipeline": "PR-07",
+            "available": False,
+            "error": str(e),
+        }
+
+
+# ===========================================================================
+# PR-07: Evidence Resolution & Compilation Readiness Endpoints
+# ===========================================================================
+
+from shared.schemas.ingestion import BookIR, BookEntity, BookIRStatus
+from ai.resolution import (
+    ResolutionAnalyzer,
+    ReadinessEvaluator,
+    ResolutionEngine,
+    PolicyRegistry,
+    RequirementRegistry,
+    UnitEngine,
+)
+
+
+class ReviewRequest(BaseModel):
+    book_ir: Dict[str, Any]
+
+
+class ResolveRequest(BaseModel):
+    book_ir: Dict[str, Any]
+    resolution: Optional[Dict[str, Any]] = None
+    policy_id: Optional[str] = None
+    confirm_candidate: Optional[Dict[str, Any]] = None
+    parameter_name: Optional[str] = None
+    remove_parameter: Optional[str] = None
+
+
+class EvaluateRequest(BaseModel):
+    book_ir: Dict[str, Any]
+
+
+class CompileResolvedRequest(BaseModel):
+    book_ir: Dict[str, Any]
+
+
+ReviewRequest.model_rebuild()
+ResolveRequest.model_rebuild()
+EvaluateRequest.model_rebuild()
+CompileResolvedRequest.model_rebuild()
+
+
+@app.post("/api/resolution/review")
+async def review_book_ir(req: ReviewRequest):
+    """PR-07: Analyze grounded BookIR and generate structured review issues/blockers."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+        # Auto-resolve candidates, default policies and calibrations
+        try:
+            ResolutionEngine.auto_resolve(book_ir)
+        except Exception as _ar_err:
+            print(f"[Backend] Auto-resolve in review note: {_ar_err}")
+        review_state = ResolutionAnalyzer.analyze(book_ir)
+        return {
+            "success": True,
+            "review_state": review_state.to_dict(),
+            "ready_to_compile": review_state.ready_to_compile,
+            "blockers_count": review_state.blockers_count,
+            "warnings_count": review_state.warnings_count,
+            "book_ir": book_ir.to_dict(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Review analysis failed: {e}")
+
+
+@app.post("/api/resolution/resolve")
+async def resolve_parameter(req: ResolveRequest):
+    """PR-07: Apply user input, candidate confirmation, or explicit policy default."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+
+        # Removal / reversal
+        if req.remove_parameter:
+            readiness = ResolutionEngine.remove_resolution(book_ir, req.remove_parameter)
+            return {
+                "success": True,
+                "action": "removed",
+                "parameter_name": req.remove_parameter,
+                "readiness_report": readiness.to_dict(),
+                "book_ir": book_ir.to_dict(),
+                "can_compile": readiness.ready,
+            }
+
+        # Explicit policy application
+        if req.policy_id:
+            res = ResolutionEngine.apply_policy(
+                book_ir,
+                policy_id=req.policy_id,
+                parameter_name=req.parameter_name,
+            )
+        # Candidate confirmation
+        elif req.confirm_candidate:
+            if not req.parameter_name:
+                raise HTTPException(status_code=400, detail="parameter_name is required to confirm candidate.")
+            res = ResolutionEngine.confirm_candidate(
+                book_ir,
+                parameter_name=req.parameter_name,
+                candidate=req.confirm_candidate,
+            )
+        # Direct resolution decision
+        elif req.resolution:
+            res = ResolutionEngine.apply_resolution(book_ir, req.resolution)
+        else:
+            raise HTTPException(status_code=400, detail="No resolution, policy_id, or candidate provided.")
+
+        out = res.to_dict()
+        out["book_ir"] = book_ir.to_dict()
+        out["can_compile"] = res.readiness_report.ready if res.readiness_report else False
+        return out
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Resolution application failed: {e}")
+
+
+@app.post("/api/resolution/evaluate")
+async def evaluate_readiness(req: EvaluateRequest):
+    """PR-07: Deterministically evaluate BookIR compilation readiness invariant."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+        readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+        return {
+            "success": True,
+            "readiness_report": readiness.to_dict(),
+            "book_ir": book_ir.to_dict(),
+            "can_compile": readiness.ready,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Readiness evaluation failed: {e}")
+
+
+@app.post("/api/resolution/compile")
+async def compile_resolved(req: CompileResolvedRequest):
+    """PR-07: Compile legitimately resolved BookIR into Canonical PhysicsScene."""
+    try:
+        book_ir = BookIR.from_dict(req.book_ir)
+
+        # Normalize aliases on BookIR parameters
+        subtype = getattr(book_ir, "subtype", None)
+        if subtype:
+            spec = RequirementRegistry.get_spec(subtype)
+            if spec and spec.parameter_aliases and book_ir.parameters:
+                for alias_k, canon_k in spec.parameter_aliases.items():
+                    if alias_k in book_ir.parameters and canon_k not in book_ir.parameters:
+                        book_ir.parameters[canon_k] = book_ir.parameters[alias_k]
+
+        readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+
+        if not readiness.ready:
+            try:
+                ResolutionEngine.auto_resolve(book_ir)
+                readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
+            except Exception as _ar_err:
+                print(f"[Backend] Auto-resolve in compile note: {_ar_err}")
+
+        if not readiness.ready:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": "BookIR is not ready to compile.",
+                    "blockers": readiness.blockers,
+                    "status": book_ir.status,
+                },
+            )
+
+        compiler = PhysicsCompiler()
+        compiled = compiler.compile(book_ir)
+
+        if compiled.status != "READY" or not compiled.scene:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "message": "Compilation failed: scene could not be generated.",
+                    "blockers": [i.get("message", i.get("code")) for i in compiled.issues],
+                    "status": compiled.status,
+                    "issues": compiled.issues,
+                },
+            )
+
+        return {
+            "success": True,
+            "compiler": compiled.to_dict(),
+            "scene": compiled.scene,
+            "book_ir": book_ir.to_dict(),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Compilation failed: {e}")
 
 
 if __name__ == "__main__":

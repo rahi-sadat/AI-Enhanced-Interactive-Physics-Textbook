@@ -154,10 +154,12 @@ class TestPR05PipelineIntegration(unittest.TestCase):
             data = res.json()
 
             self.assertTrue(data["success"])
-            self.assertEqual(data["pipeline"], "PR-05")
+            self.assertIn(data["pipeline"], ("PR-05", "PR-06"))
             self.assertIn("book_ir", data)
             self.assertIn("compiler", data)
             self.assertIn("page_ir", data)
+            self.assertEqual(data["book_ir"]["geometry"]["width"], data["source_asset"]["width_px"])
+            self.assertEqual(data["book_ir"]["geometry"]["height"], data["source_asset"]["height_px"])
             self.assertIn("source_asset", data)
 
             # Domain & scenario populated from semantic analysis

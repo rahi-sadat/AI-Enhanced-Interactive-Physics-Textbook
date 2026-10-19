@@ -51,6 +51,8 @@ legacy/frontend-v1/*.png
 storage/outputs/
 storage/generated/
 storage/cache/
+storage/artifacts/
+storage/test_pr06/
 storage/uploads/*
 !storage/uploads/.gitkeep
 !storage/uploads/circuit1.png
@@ -78,3 +80,4 @@ storage/uploads/*
 # Root uploads and temporary frontend directories
 uploads/
 simulation_frontend/
+manual_pr06_results/

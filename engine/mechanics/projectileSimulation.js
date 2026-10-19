@@ -36,6 +36,8 @@ export class ProjectileSimulation {
     });
 
     this.ppm = options.ppm || Number(scene.calibration?.pixels_per_meter) || 50.0;
+    this.ppmX = options.ppmX || Number(scene.calibration?.pixels_per_meter_x) || this.ppm;
+    this.ppmY = options.ppmY || Number(scene.calibration?.pixels_per_meter_y) || this.ppm;
     const initPos = options.launchSource || ballObj?.geometry?.launch_source_px || ballObj?.initial_position || { x: 120, y: 450 };
     this.launchSource = { x: Number(initPos.x) || 120, y: Number(initPos.y) || 450 };
     this.ballRadiusPx = options.ballRadiusPx || Number(ballObj?.geometry?.radius_source_px || ballObj?.radius) || 18.0;
@@ -84,6 +86,7 @@ export class ProjectileSimulation {
   get vx0() { return this.kernel.vx0; }
   get vy0() { return this.kernel.vy0; }
   get flightTime() { return this.kernel.flightTime; }
+  get timeToApex() { return this.kernel.timeToApex; }
   get maxHeightM() { return this.kernel.maxHeightM; }
   get rangeM() { return this.kernel.rangeM; }
 
@@ -91,19 +94,68 @@ export class ProjectileSimulation {
     // Kept for backward compatibility; properties are handled directly by this.kernel
   }
 
-  resize() {
-    const width = this.container.clientWidth || 800;
-    const height = this.container.clientHeight || 600;
-    const dpr = window.devicePixelRatio || 1;
+  resize(w = null, h = null, renderContext = null) {
+    const width = Math.round(w || this.container.clientWidth || 800);
+    const height = Math.round(h || this.container.clientHeight || 600);
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
 
     this.canvas.width = Math.round(width * dpr);
     this.canvas.height = Math.round(height * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const sourceW = this.scene.source?.image_width_px || 800;
-    const sourceH = this.scene.source?.image_height_px || 600;
+    const sourceW = renderContext?.sourceWidth ||
+      this.scene.coordinateSpace?.width ||
+      this.scene.coordinateSystem?.width ||
+      this.scene.source?.width ||
+      this.scene.source?.image_width_px ||
+      this.scene.geometry?.source_width ||
+      800;
+    const sourceH = renderContext?.sourceHeight ||
+      this.scene.coordinateSpace?.height ||
+      this.scene.coordinateSystem?.height ||
+      this.scene.source?.height ||
+      this.scene.source?.image_height_px ||
+      this.scene.geometry?.source_height ||
+      600;
 
-    this.mapper = new CoordinateMapper(sourceW, sourceH, width, height, dpr);
+    const isContained = Boolean(this.container?.classList?.contains?.('figure-viewport-overlay'));
+    if (isContained) {
+      const scaleX = width / sourceW;
+      const scaleY = height / sourceH;
+      this.mapper = {
+        scale: scaleX,
+        scaleX,
+        scaleY,
+        offsetX: 0,
+        offsetY: 0,
+        sourceW,
+        sourceH,
+        viewW: width,
+        viewH: height,
+        sourceToView: (x, y) => {
+          let px = x;
+          let py = y;
+          if (typeof x === 'object' && x !== null) {
+            px = x.x ?? x.left ?? x[0];
+            py = x.y ?? x.top ?? x[1];
+          }
+          return { x: Number(px) * scaleX, y: Number(py) * scaleY };
+        },
+        viewToSource: (x, y) => {
+          let px = x;
+          let py = y;
+          if (typeof x === 'object' && x !== null) {
+            px = x.x ?? x.left ?? x[0];
+            py = x.y ?? x.top ?? x[1];
+          }
+          return { x: Number(px) / scaleX, y: Number(py) / scaleY };
+        },
+        sourceLengthToView: (len) => Number(len) * scaleX,
+        viewLengthToSource: (len) => Number(len) / scaleX,
+      };
+    } else {
+      this.mapper = new CoordinateMapper(sourceW, sourceH, width, height, dpr);
+    }
     this.viewWidth = width;
     this.viewHeight = height;
   }
@@ -122,8 +174,8 @@ export class ProjectileSimulation {
     const pos = this.getPositionMeters(t);
     // Physics Y is UP (+), Image Y is DOWN (+)
     return {
-      x: this.launchSource.x + pos.xM * this.ppm,
-      y: this.launchSource.y - pos.yM * this.ppm,
+      x: this.launchSource.x + pos.xM * this.ppmX,
+      y: this.launchSource.y - pos.yM * this.ppmY,
       vx: pos.vx,
       vy: pos.vy,
       hasLanded: pos.hasLanded,
