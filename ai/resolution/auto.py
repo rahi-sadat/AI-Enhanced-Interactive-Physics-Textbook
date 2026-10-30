@@ -73,6 +73,18 @@ def _inside_source(point: Any, width: float, height: float) -> bool:
         return False
 
 
+def _model_quantity(book_ir: BookIR, name: str):
+    """Read both serialized values and in-memory PhysicalValues with provenance."""
+    raw = book_ir.parameters.get(name)
+    value = raw.get("value", raw) if isinstance(raw, dict) else getattr(raw, "value", raw)
+    provenance = (raw.get("provenance") if isinstance(raw, dict) else getattr(raw, "provenance", None))
+    provenance = provenance or book_ir.parameter_provenance.get(name)
+    if not provenance:
+        return None, []
+    refs = provenance.get("evidence_refs", []) if isinstance(provenance, dict) else provenance.evidence_refs
+    return value, refs
+
+
 @dataclass
 class AutoResolutionResult:
     book_ir: BookIR
@@ -83,19 +95,88 @@ class AutoResolutionResult:
 
 class AutoResolutionEngine:
     @staticmethod
+    def fill_missing_values(book_ir: BookIR) -> AutoResolutionResult:
+        """Prepare editable model values without inventing source observations.
+
+        Defaults are application assumptions; they never claim user confirmation.
+        Existing values, OCR candidates, coordinates and graph connections stay intact.
+        """
+        result = AutoResolutionResult(book_ir=book_ir)
+        spec = RequirementRegistry.get_spec(book_ir.subtype, book_ir.domain)
+        if not spec or spec.domain != book_ir.domain or book_ir.isPhysics is False:
+            return result
+        targets = []
+        if book_ir.subtype == "dc_linear":
+            from ai.evidence.grounding.circuit_integrity import validate_circuit_integrity
+            from ai.resolution.circuit_values import value_spec
+            if (not (book_ir.geometry or {}).get("circuit_topology", {}).get("verified_connectivity")
+                    or validate_circuit_integrity(book_ir)):
+                return result
+            for component in book_ir.parameters.get("components", []):
+                if component.get("verification_status") != "VERIFIED":
+                    continue
+                for field_name in ("value", "initial_voltage"):
+                    definition = value_spec(component, field_name)
+                    if definition and component.get(field_name) is None:
+                        targets.append((f"component.{component['id']}.{field_name}", definition[2]))
+        else:
+            for name, requirement in spec.parameters.items():
+                if _grounded_value(book_ir, name) is not None or book_ir.parameters.get(name) is not None:
+                    continue
+                if any(name in group and any(_grounded_value(book_ir, other) is not None
+                       for other in group if other != name) for group in spec.one_of_requirements):
+                    continue
+                policies = PolicyRegistry.get_policies_for_subtype(book_ir.subtype, book_ir.domain)
+                policy = next((p for p in policies if p.id in spec.allowed_policies
+                               and p.target_parameter == name
+                               and p.unit not in {"ratio", "aperture_ratio"}), None)
+                if policy:
+                    targets.append((name, policy.id))
+        for parameter, policy_id in targets:
+            policy = PolicyRegistry.get_policy(policy_id)
+            if not policy or policy_id not in spec.allowed_policies:
+                continue
+            decision = ResolutionDecision(
+                id=f"auto_{parameter}_{policy_id}", parameter_name=parameter,
+                target_subtype=book_ir.subtype, resolution_source=ResolutionSource.POLICY_DEFAULT,
+                resolved_value=policy.value, canonical_unit=policy.unit,
+                policy_id=policy.id, policy_version=policy.version,
+                user_accepted=False, resolved_by="auto_policy",
+                notes=f"Assumed for simulation: {policy.description}",
+            )
+            applied = ResolutionEngine.apply_resolution(book_ir, decision)
+            if not applied.success:
+                result.failures.append({"code": "AUTO_RESOLUTION_FAILED", "message": applied.error or policy_id})
+                continue
+            assumption = {"parameter": parameter, "policyId": policy.id,
+                          "policyVersion": policy.version, "value": applied.resolved_value,
+                          "unit": applied.canonical_unit, "reason": policy.description,
+                          "provenance": "auto_policy", "confidence": 0.8}
+            # Reapplying a removed/defaulted value replaces its old disclosure.
+            book_ir.assumptions = [a for a in book_ir.assumptions if a.get("parameter") != parameter]
+            book_ir.assumptions.append(assumption)
+            result.assumptions.append(assumption)
+        exploration = AutoResolutionResult(book_ir=book_ir)
+        if book_ir.subtype == "thin_lens":
+            AutoResolutionEngine._normalize_lens_exploration_object(book_ir, exploration)
+        elif book_ir.subtype == "spherical_mirror":
+            AutoResolutionEngine._normalize_mirror_exploration_object(book_ir, exploration)
+        book_ir.assumptions.extend(exploration.assumptions)
+        result.assumptions.extend(exploration.assumptions)
+        return result
+
+    @staticmethod
     def _normalize_lens_exploration_object(book_ir: BookIR, result: AutoResolutionResult) -> None:
         params = book_ir.parameters
         if params.get("object_position") is not None or params.get("objectDistance") is not None:
             return
         center = (book_ir.geometry or {}).get("lens_center")
-        focal = params.get("focal_length_px")
-        aperture = params.get("aperture_height_px")
-        if not _inside_source(center, book_ir.geometry["width"], book_ir.geometry["height"]):
-            return
-        if not getattr(focal, "provenance", None) or not getattr(aperture, "provenance", None):
+        focal, focal_refs = _model_quantity(book_ir, "focal_length_px")
+        aperture, aperture_refs = _model_quantity(book_ir, "aperture_height_px")
+        if not _inside_source(center, (book_ir.geometry or {}).get("width", 0), (book_ir.geometry or {}).get("height", 0)):
             return
         try:
-            focal_px, aperture_px = float(focal.value), float(aperture.value)
+            focal_px, aperture_px = float(focal), float(aperture)
         except (TypeError, ValueError):
             return
         if not all(math.isfinite(value) and value > 0 for value in (focal_px, aperture_px)):
@@ -109,8 +190,8 @@ class AutoResolutionEngine:
         if distance <= 1 or height <= 1:
             return
         for name, value, policy, refs in (
-            ("objectDistance", distance, policy_distance, focal.provenance.evidence_refs),
-            ("object_height_px", height, policy_height, aperture.provenance.evidence_refs),
+            ("objectDistance", distance, policy_distance, focal_refs),
+            ("object_height_px", height, policy_height, aperture_refs),
         ):
             provenance = ProvenanceRecord(
                 source="auto_policy", evidence_refs=refs, confidence=0.7,
@@ -132,14 +213,12 @@ class AutoResolutionEngine:
             return
         geom = book_ir.geometry or {}
         pole = geom.get("pole")
-        focal = params.get("focal_length_px")
-        aperture = params.get("aperture_height_px")
-        if not _inside_source(pole, geom["width"], geom["height"]):
-            return
-        if not getattr(focal, "provenance", None) or not getattr(aperture, "provenance", None):
+        focal, focal_refs = _model_quantity(book_ir, "focal_length_px")
+        aperture, aperture_refs = _model_quantity(book_ir, "aperture_height_px")
+        if not _inside_source(pole, geom.get("width", 0), geom.get("height", 0)):
             return
         try:
-            focal_px, aperture_px = float(focal.value), float(aperture.value)
+            focal_px, aperture_px = float(focal), float(aperture)
         except (TypeError, ValueError):
             return
         if not all(math.isfinite(value) and value > 0 for value in (focal_px, aperture_px)):
@@ -153,8 +232,8 @@ class AutoResolutionEngine:
         if distance <= 1 or height <= 1:
             return
         for name, value, policy, refs in (
-            ("objectDistance", distance, distance_policy, focal.provenance.evidence_refs),
-            ("object_height_px", height, height_policy, aperture.provenance.evidence_refs),
+            ("objectDistance", distance, distance_policy, focal_refs),
+            ("object_height_px", height, height_policy, aperture_refs),
         ):
             provenance = ProvenanceRecord(
                 source="auto_policy", evidence_refs=refs, confidence=0.7,
@@ -364,8 +443,10 @@ class AutoResolutionEngine:
             return result
 
         if subtype == "dc_linear":
+            defaults = cls.fill_missing_values(book_ir)
+            result.assumptions.extend(defaults.assumptions)
+            result.failures.extend(defaults.failures)
             cls._normalize_grounded_circuit(book_ir, result)
-            book_ir.assumptions.extend(result.assumptions)
             result.readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
             if result.failures:
                 book_ir.status = BookIRStatus.NEEDS_REVIEW
@@ -417,5 +498,8 @@ class AutoResolutionEngine:
                 result.failures.append({"code": "AUTO_RESOLUTION_FAILED", "message": applied.error or policy.id})
 
         book_ir.assumptions.extend(result.assumptions)
+        defaults = cls.fill_missing_values(book_ir)
+        result.assumptions.extend(defaults.assumptions)
+        result.failures.extend(defaults.failures)
         result.readiness = ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
         return result

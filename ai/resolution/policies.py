@@ -149,6 +149,24 @@ class PolicyRegistry:
         return res
 
     def _register_default_policies(self) -> None:
+        # Display focal distances are disclosed exploration assumptions, never
+        # measurements of the uploaded image or claims about its optical power.
+        for subtype in ("thin_lens", "spherical_mirror"):
+            self.register(ResolutionPolicy(
+                id=f"policy_example_{subtype}_focal_length",
+                name="Example Focal Distance",
+                description="Use 100 source pixels as an editable exploration focal distance when no focal value is available.",
+                domain="optics", target_subtype=subtype,
+                target_parameter="focal_length_px", value=100.0, unit="px",
+                educational_rationale="An example display distance, not a measured focal length or a physical standard.",
+            ))
+        self.register(ResolutionPolicy(
+            id="policy_example_incident_angle", name="Example Incident Angle",
+            description="Use a 45 degree incident ray when no incident angle is available.",
+            domain="optics", target_subtype="interface_refraction",
+            target_parameter="theta1", value=45.0, unit="deg",
+            educational_rationale="An editable exploration angle, not a measurement from the image.",
+        ))
         # 1. Earth Gravity Policy
         self.register(
             ResolutionPolicy(
@@ -420,6 +438,19 @@ class PolicyRegistry:
                 educational_rationale="Standard 100 Ohm load resistor for manageable branch currents.",
             )
         )
+
+        self.register(ResolutionPolicy(
+            id="policy_standard_capacitance", name="Example Capacitance",
+            description="Use 1000 µF only when capacitance is missing.",
+            domain="circuits", target_subtype="dc_linear", target_parameter="capacitance",
+            value=0.001, unit="F",
+            educational_rationale="An explicit example value for observing RC charging; not measured from the image."))
+        self.register(ResolutionPolicy(
+            id="policy_uncharged_capacitor", name="Initially Uncharged",
+            description="Start this capacitor at 0 V.",
+            domain="circuits", target_subtype="dc_linear", target_parameter="initial_voltage",
+            value=0.0, unit="V",
+            educational_rationale="Choose an initially uncharged capacitor, or enter its initial voltage to study discharge."))
 
         # 15. Standard Pendulum Length Policy
         self.register(

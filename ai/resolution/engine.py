@@ -94,6 +94,8 @@ class ResolutionEngine:
                 dec_dict["target_subtype"] = dec_dict.pop("targetSubtype")
             if "resolvedBy" in dec_dict:
                 dec_dict["resolved_by"] = dec_dict.pop("resolvedBy")
+            if "userAccepted" in dec_dict:
+                dec_dict["user_accepted"] = dec_dict.pop("userAccepted")
             p_name = dec_dict.get("parameter_name", "param")
             if "id" not in dec_dict or not dec_dict["id"]:
                 dec_dict["id"] = f"res_{p_name}"
@@ -102,6 +104,9 @@ class ResolutionEngine:
             dec = decision
 
         param_name = dec.parameter_name
+        if book_ir.subtype == "dc_linear" and param_name.startswith("component."):
+            from .circuit_values import resolve_component_value
+            return resolve_component_value(book_ir, dec)
         domain = getattr(book_ir, "domain", None)
         subtype = getattr(book_ir, "subtype", None)
         spec = RequirementRegistry.get_spec(subtype) if subtype else None
@@ -340,6 +345,14 @@ class ResolutionEngine:
             else:
                 target_param = policy.target_parameter
 
+        if subtype == "dc_linear" and target_param.startswith("component."):
+            from .circuit_values import resolve_component_value
+            return resolve_component_value(book_ir, ResolutionDecision(
+                id=f"res_{target_param}_{policy_id}", parameter_name=target_param,
+                resolution_source=ResolutionSource.POLICY_DEFAULT,
+                policy_id=policy_id, user_accepted=user_accepted,
+                resolved_value=policy.value, canonical_unit=policy.unit))
+
         canonical_target = spec.canonicalize_parameter(target_param)
         if canonical_target not in spec.parameters and target_param not in spec.parameters:
             return ResolutionResult(
@@ -405,6 +418,9 @@ class ResolutionEngine:
 
         Transitions status back to NEEDS_REVIEW if a required parameter is now missing.
         """
+        if book_ir.subtype == "dc_linear" and parameter_name.startswith("component."):
+            from .circuit_values import remove_component_value
+            return remove_component_value(book_ir, parameter_name)
         subtype = getattr(book_ir, "subtype", None)
         spec = RequirementRegistry.get_spec(subtype) if subtype else None
         canonical_param = spec.canonicalize_parameter(parameter_name) if spec else parameter_name
@@ -431,11 +447,12 @@ class ResolutionEngine:
         return ReadinessEvaluator.evaluate(book_ir, mutate_status=True)
 
     @classmethod
-    def auto_resolve(cls, book_ir: BookIR) -> ReadinessReport:
-        """Derive calibration and apply only policies permitted without opt-in.
+    def auto_resolve(cls, book_ir: BookIR, *, assume_missing: bool = True) -> ReadinessReport:
+        """Derive calibration and prepare missing simulation values.
 
-        Grounded values may reach readiness automatically. Unverified OCR
-        candidates and opt-in assumptions remain for the review workflow.
+        The default application flow uses disclosed model assumptions. Call with
+        assume_missing=False for evidence-only review without these assumptions.
+        Unverified OCR is retained and never promoted to an observed value.
         """
         subtype = getattr(book_ir, "subtype", None)
         domain = getattr(book_ir, "domain", None)
@@ -508,6 +525,10 @@ class ResolutionEngine:
                         book_ir.parameters["pixels_per_meter"] = calib_data.pixels_per_meter
             except Exception:
                 pass
+
+        if assume_missing:
+            from ai.resolution.auto import AutoResolutionEngine
+            AutoResolutionEngine.fill_missing_values(book_ir)
 
         # 5. Evaluate final readiness and mutate status
         return ReadinessEvaluator.evaluate(book_ir, mutate_status=True)

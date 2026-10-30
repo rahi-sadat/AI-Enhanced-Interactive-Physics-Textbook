@@ -74,8 +74,14 @@ class ReadinessEvaluator:
                 resolution.model_dump() if hasattr(resolution, "model_dump") else {}
             )
             resolved_value = res_data.get("resolvedValue", res_data.get("resolved_value"))
-            if param in parameters and resolved_value is not None:
-                current = parameters[param]
+            component = None
+            if subtype == "dc_linear" and param.startswith("component."):
+                from .circuit_values import component_target
+                component = component_target(book_ir, param)
+                if component is None:
+                    blockers.append(f"Component resolution '{param}' has no unique target.")
+            if (param in parameters or component is not None) and resolved_value is not None:
+                current = component.get(param.rsplit('.',1)[-1]) if component is not None else parameters[param]
                 if isinstance(current, dict) and "value" in current:
                     current = current["value"]
                 if isinstance(current, (int, float)) and not isinstance(current, bool) and isinstance(resolved_value, (int, float)) and not isinstance(resolved_value, bool):

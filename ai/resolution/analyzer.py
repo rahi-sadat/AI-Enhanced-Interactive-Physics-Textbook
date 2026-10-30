@@ -175,7 +175,7 @@ class ResolutionAnalyzer:
         node_ids = {n if isinstance(n, str) else n.get("id")
                     for n in nodes if isinstance(n, (str, dict))}
         sources = {"voltage_source", "battery", "dc_source"}
-        if not any(isinstance(c, dict) and c.get("type") in sources for c in components):
+        if not any(isinstance(c, dict) and c.get("type") in sources | {"capacitor"} for c in components):
             issues.append(ReviewIssue(
                 id="issue_circuit_missing_source",
                 issue_type=ReviewIssueType.UNGROUNDED_GEOMETRY,
@@ -206,22 +206,40 @@ class ResolutionAnalyzer:
                     is_blocker=True,
                 ))
 
-            if component.get("type") in sources | {"resistor", "bulb", "lamp"}:
+            if component.get("type")=="capacitor":
+                initial=component.get("initial_voltage")
+                if isinstance(initial,bool) or not isinstance(initial,(int,float)) or not math.isfinite(initial):
+                    issues.append(ReviewIssue(
+                        id=f"issue_capacitor_initial_{cid}", parameter_name=f"component.{cid}.initial_voltage",
+                        entity_id=cid, issue_type=ReviewIssueType.MISSING_PARAMETER,
+                        title=f"Initial capacitor voltage: {component.get('label') or cid}",
+                        description="Charging and discharging require a known initial voltage.",
+                        question="Start uncharged at 0 V, or enter the initial voltage (terminal 1 relative to terminal 2).",
+                        action_type=ResolutionActionType.ENTER_VALUE, default_policy_id="policy_uncharged_capacitor" if initial is None else None,
+                        allowed_units=["V"], target_unit="V", target_subtype="dc_linear", is_blocker=True))
+            if component.get("type") in sources | {"resistor", "bulb", "lamp", "capacitor"}:
                 value = component.get("value")
-                dimension = "voltage" if component.get("type") in sources else "resistance"
+                from .circuit_values import value_spec
+                dimension, target_unit, policy_id = value_spec(component)
                 valid = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
-                if valid and dimension == "resistance":
+                if valid and dimension in {"resistance","capacitance"}:
                     valid = value > 0
                 if valid:
                     valid = UnitEngine.parse_quantity(value, component.get("unit"), dimension).success
                 if not valid:
                     issues.append(ReviewIssue(
                         id=f"issue_circuit_value_{cid}",
+                        parameter_name=f"component.{cid}.value",
+                        entity_id=cid,
                         issue_type=ReviewIssueType.MISSING_PARAMETER,
                         title=f"Unverified value for {cid}",
                         description=f"Circuit component {cid} lacks a valid grounded {dimension} value and unit.",
-                        question=f"Confirm the {dimension} printed for {cid} before simulation.",
-                        action_type=ResolutionActionType.CHOOSE_OPTION,
+                        question=f"Enter the {dimension} for {component.get('label') or cid}, or choose the suggested default if no value is printed.",
+                        action_type=ResolutionActionType.ENTER_VALUE,
+                        default_policy_id=policy_id if value is None else None,
+                        allowed_units=(["F","µF","nF","pF"] if dimension=="capacitance" else
+                                       ["V", "mV"] if dimension=="voltage" else ["Ω", "kΩ", "MΩ"]),
+                        target_unit=target_unit,
                         target_subtype="dc_linear",
                         is_blocker=True,
                     ))

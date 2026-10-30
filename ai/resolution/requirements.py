@@ -307,7 +307,7 @@ PROJECTILE_SPEC = ModelRequirementSpec(
             prompt_question="Projectile radius in source pixels.",
         ),
     },
-    allowed_policies=["policy_earth_gravity", "policy_standard_ball_radius", "policy_standard_projectile_scale", "policy_standard_projectile_speed"],
+    allowed_policies=["policy_earth_gravity", "policy_standard_ball_radius", "policy_standard_projectile_scale", "policy_standard_projectile_speed", "policy_standard_projectile_angle"],
     parameter_aliases={
         "launch_angle": "launch_angle_deg",
         "angle": "launch_angle_deg",
@@ -379,7 +379,7 @@ THIN_LENS_SPEC = ModelRequirementSpec(
             prompt_question_bn="লেন্সটি উত্তল (convex) নাকি অবতল (concave)?",
         ),
     },
-    allowed_policies=["policy_standard_lens_aperture", "policy_normalized_lens_focal_ratio",
+    allowed_policies=["policy_standard_lens_aperture", "policy_example_thin_lens_focal_length", "policy_normalized_lens_focal_ratio",
                       "policy_normalized_lens_object_distance", "policy_normalized_lens_object_height"],
     parameter_aliases={
         "focal_length": "focal_length_px",
@@ -440,7 +440,7 @@ SPHERICAL_MIRROR_SPEC = ModelRequirementSpec(
             prompt_question="Mirror aperture height in source pixels.",
         ),
     },
-    allowed_policies=["policy_standard_mirror_aperture", "policy_normalized_mirror_object_distance",
+    allowed_policies=["policy_standard_mirror_aperture", "policy_example_spherical_mirror_focal_length", "policy_mirror_concave", "policy_normalized_mirror_object_distance",
                       "policy_normalized_mirror_object_height"],
     parameter_aliases={
         "focal_length": "focal_length_px",
@@ -521,7 +521,7 @@ INTERFACE_REFRACTION_SPEC = ModelRequirementSpec(
         ),
     },
     one_of_requirements=[["theta1", "source_position"]],
-    allowed_policies=["policy_air_refractive_index", "policy_water_refractive_index", "policy_crown_glass_refractive_index"],
+    allowed_policies=["policy_air_refractive_index", "policy_water_refractive_index", "policy_crown_glass_refractive_index", "policy_example_incident_angle"],
     parameter_aliases={
         "boundaryY": "boundary_y",
         "normalX": "normal_x",
@@ -587,6 +587,8 @@ CIRCUITS_DC_LINEAR_SPEC = ModelRequirementSpec(
     subtype="dc_linear",
     required_entities=["resistor"],
     required_geometry=[],
+    allowed_policies=["policy_standard_dc_voltage", "policy_standard_dc_resistance",
+                      "policy_standard_capacitance", "policy_uncharged_capacitor"],
     parameters={
         "nodes": ParameterRequirement(
             id="req_circuits_nodes",
