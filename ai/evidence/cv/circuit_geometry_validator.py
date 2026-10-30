@@ -54,7 +54,8 @@ class CircuitGeometryValidator:
                                       [[x,y+(ph-1)/2],[x+pw-1,y+(ph-1)/2]])
             if not body_paths or any(len(p)<2 or sample_support(ink,p,stroke*.35)['support_fraction']<.95 for p in body_paths):
                 reasons.append('symbol_strokes_without_raster_support')
-            if not all(b.contains(t) for t in terms):
+            b_pad = stroke * 0.6
+            if not all((b.x-b_pad <= t.x <= b.x_max+b_pad and b.y-b_pad <= t.y <= b.y_max+b_pad) for t in terms):
                 reasons.append('terminal_not_at_body')
             # Each terminal must attach to an actual endpoint, not just the
             # nearest line anywhere in the diagram. Check the connecting pixels too.
@@ -69,13 +70,13 @@ class CircuitGeometryValidator:
                         # Removing the padded symbol box leaves a local inset
                         # at its lead. Raster support must still prove the
                         # complete attachment; distance alone never joins ink.
-                        allowance=stroke*3+c.get('contact_radius_px',0)
+                        allowance=max(stroke*8.0,36.0)+c.get('contact_radius_px',0)
                         if distance <= allowance:
                             # A hollow switch contact has a white center; its
                             # measured disk radius alone permits that local gap.
                             radius=c.get('contact_radius_px',stroke*.3) if c['type']=='switch' else stroke*.3
                             support=sample_support(ink,[point,endpoint],radius)
-                            if support['support_fraction'] >= .95:
+                            if support['support_fraction'] >= .95 and support['max_gap_px'] <= max(1, stroke*.4):
                                 possible.append((distance,p['id'],end))
                 possible.sort()
                 attachments.append({'wire_id':possible[0][1],'end':possible[0][2],

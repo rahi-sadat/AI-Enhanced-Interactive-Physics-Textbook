@@ -254,7 +254,10 @@ def test_sam_cache_uses_full_pixels_and_retains_mask_encoding(monkeypatch):
 
 
 def test_recorded_source_replay_when_available():
-    from tests.acceptance.circuit_repair_replay import load_recorded,TRACE
+    try:
+        from tests.acceptance.circuit_repair_replay import load_recorded, TRACE
+    except ImportError:
+        pytest.skip('Original recorded source replay module is not installed')
     if not (TRACE/'00_source/original.jpg').exists(): pytest.skip('Original recorded source is not installed')
     image,asset,book,tokens=load_recorded()
     h,w=image.shape[:2]

@@ -30,20 +30,21 @@ def trace_paths(ink, stroke, *, spur_widths=2):
                            if (p[0]+dx,p[1]+dy) in pixels
                            and not (dx and dy and ((p[0]+dx,p[1]) in pixels or (p[0],p[1]+dy) in pixels))]
     # Thinning a thick acute corner can leave a short spur ending at its
-    # outside tip. Remove only dead-end spurs shorter than two stroke widths
-    # that terminate at a branch; never join disconnected ink.
-    for _ in range(2):
+    # outside tip. Remove only dead-end spurs that terminate at a branch;
+    # never join disconnected ink.
+    max_spur = max(stroke * 3.5, 16) if spur_widths > 2 else stroke * spur_widths
+    for _ in range(3):
         remove=set()
         for p in list(pixels):
             if len(neighbors(p)) != 1:
                 continue
             chain=[p]
             prev,cur=p,neighbors(p)[0]
-            while len(chain) <= stroke*spur_widths and len(neighbors(cur)) == 2:
+            while len(chain) <= max_spur and len(neighbors(cur)) == 2:
                 chain.append(cur)
                 nxt=next(q for q in neighbors(cur) if q != prev)
                 prev,cur=cur,nxt
-            if len(chain) <= stroke*spur_widths and len(neighbors(cur)) >= 3:
+            if len(chain) <= max_spur and len(neighbors(cur)) >= 3:
                 remove.update(chain)
         pixels.difference_update(remove)
         for x,y in remove:

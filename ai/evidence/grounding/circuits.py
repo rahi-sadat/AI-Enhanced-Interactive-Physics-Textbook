@@ -361,7 +361,7 @@ class CircuitGrounder:
                 elif sum(normalize(x.type)==normalize(e.type) for x in semantics)==1 and sum(x['type']==c['type'] for x in verified)==1:
                     costs[i,j]=.2
         assigned={}
-        if semantics:
+        if semantics and verified:
             rows,cols=linear_sum_assignment(costs)
             optimum=costs[rows,cols].sum()
             for i,j in zip(rows,cols):
