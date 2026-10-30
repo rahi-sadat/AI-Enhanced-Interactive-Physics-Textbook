@@ -1,0 +1,110 @@
+{
+  "schema_version": "synthetic-circuits-1.0",
+  "total_images": 600,
+  "train_images": 480,
+  "val_images": 120,
+  "total_objects": 3393,
+  "class_counts": {
+    "voltage_source": 634,
+    "switch": 523,
+    "resistor": 1438,
+    "capacitor": 798
+  },
+  "split_class_counts": {
+    "train": {
+      "voltage_source": 506,
+      "switch": 420,
+      "resistor": 1159,
+      "capacitor": 638
+    },
+    "val": {
+      "voltage_source": 128,
+      "resistor": 279,
+      "switch": 103,
+      "capacitor": 160
+    }
+  },
+  "topology_distribution": {
+    "series": 60,
+    "parallel_resistors": 60,
+    "rc_series": 60,
+    "rc_parallel": 60,
+    "open_switch": 60,
+    "closed_switch": 60,
+    "many_rc": 60,
+    "series_parallel": 60,
+    "multi_branch": 60,
+    "mixed_rc": 60
+  },
+  "symbol_style_distribution": {
+    "cell_1": 221,
+    "battery_2": 208,
+    "closed_contacts": 255,
+    "iec_rectangle": 746,
+    "ansi_zigzag": 692,
+    "dc_circle": 205,
+    "polarized_parallel": 250,
+    "parallel_plates": 299,
+    "open_contacts": 268,
+    "polarized_curved": 249
+  },
+  "resolution_distribution": {
+    "720x960": 54,
+    "960x720": 50,
+    "1024x768": 64,
+    "960x960": 99,
+    "960x1280": 46,
+    "864x1152": 49,
+    "640x768": 24,
+    "1280x960": 52,
+    "1152x864": 59,
+    "768x1024": 58,
+    "768x640": 45
+  },
+  "components_per_image": {
+    "5": 152,
+    "7": 128,
+    "6": 146,
+    "8": 51,
+    "3": 21,
+    "4": 93,
+    "2": 9
+  },
+  "label_mode_distribution": {
+    "unlabelled": 100,
+    "values_and_designators": 325,
+    "designators_only": 175
+  },
+  "duplicate_count": 0,
+  "duplicate_groups": [],
+  "duplicate_file_count": 0,
+  "invalid_annotation_count": 0,
+  "validation_passed": true,
+  "bounding_box_validation_passed": true,
+  "terminal_validation_passed": true,
+  "seed": 20261030,
+  "generator_version": "synthetic-circuits-1.0",
+  "environment": {
+    "python": "3.13.5",
+    "schemdraw": "0.23",
+    "matplotlib": "3.11.1",
+    "pillow": "12.3.0",
+    "numpy": "2.5.2"
+  },
+  "errors": [],
+  "limitations": [
+    "All images and validation examples are synthetic; no claim of accuracy on real textbooks.",
+    "Four target classes only; no handwritten, page-layout, or real-photo coverage.",
+    "No detector was trained or production recognition pipeline modified."
+  ],
+  "rejected_layout_attempts": 55,
+  "rejection_reasons": {
+    "No readable text placement for R5": 1,
+    "Native polarity mark overlaps another symbol, wire or label": 47,
+    "No readable text placement for R3": 1,
+    "No readable text placement for R4": 1,
+    "No readable text placement for R2": 1,
+    "No readable text placement for V1": 2,
+    "No readable text placement for C1": 2
+  }
+}

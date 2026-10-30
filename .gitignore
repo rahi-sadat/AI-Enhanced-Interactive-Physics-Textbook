@@ -83,10 +83,6 @@ uploads/
 simulation_frontend/
 manual_pr06_results/
 
-# Locally generated synthetic training datasets (regenerate with scripts/)
-datasets/circuits_v1/synthetic_v*/
-datasets/**/*.cache
-datasets/**/*.npy
 
 # Local circuit detector training outputs
 runs/augmented_physics/
