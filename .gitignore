@@ -14,6 +14,7 @@ __pycache__/
 # PyTorch & SAM 2 Model Checkpoints (large binary weights)
 checkpoints/
 *.pt
+!runs/augmented_physics/circuits_synthetic_v1/weights/best.pt
 *.pth
 *.bin
 *.onnx
@@ -85,4 +86,9 @@ manual_pr06_results/
 
 
 # Local circuit detector training outputs
-runs/augmented_physics/
+runs/augmented_physics/*
+!runs/augmented_physics/circuits_synthetic_v1/
+runs/augmented_physics/circuits_synthetic_v1/*
+!runs/augmented_physics/circuits_synthetic_v1/weights/
+runs/augmented_physics/circuits_synthetic_v1/weights/*
+!runs/augmented_physics/circuits_synthetic_v1/weights/best.pt
