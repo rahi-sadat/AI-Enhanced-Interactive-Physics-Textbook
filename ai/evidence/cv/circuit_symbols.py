@@ -24,8 +24,32 @@ def proposal(kind, points, terminals, stroke, **extra):
                 symbol_path=pts.tolist(), uncertainty_px=float(stroke), **extra)
 
 
-def detect_symbols(ink, stroke):
-    paths, _, _, _ = trace_paths(ink,stroke)
+def positive_terminal_from_marker(ink, terminals, plate_length, stroke):
+    """Resolve unconventional plate groups only from a nearby isolated + mark."""
+    count, _, stats, centers = cv2.connectedComponentsWithStats(ink)
+    matches = set()
+    for i in range(1,count):
+        x,y,w,h,area = stats[i]
+        if not (.65 < w/max(h,1) < 1.5 and stroke*2 < min(w,h) < stroke*9):
+            continue
+        patch = ink[y:y+h,x:x+w] > 0
+        # Both full crossbars, with white corners; rejects dots and letter loops.
+        if patch.sum(axis=0).max() < h*.85 or patch.sum(axis=1).max() < w*.85:
+            continue
+        if not .15 < area/(w*h) < .65:
+            continue
+        distances = [np.linalg.norm(centers[i]-t) for t in terminals]
+        nearest = int(np.argmin(distances))
+        if distances[nearest] < plate_length and abs(distances[0]-distances[1]) > stroke*2:
+            matches.add(nearest)
+    return next(iter(matches)) if len(matches)==1 else None
+
+
+def detect_symbols(ink, stroke, *, polarity_ink=None, include_switches=True):
+    # Acute, thick zigzags leave medial-axis corner spurs longer than ordinary
+    # line corners. Prune these only for symbol recognition; conductor tracing
+    # retains its stricter threshold.
+    paths, _, _, _ = trace_paths(ink,stroke,spur_widths=3)
     components, rejected = [], []
     # A zigzag is an alternating, repeated transverse displacement along one
     # monotonic axis, bounded by collinear straight leads. A bend alone is not a resistor.
@@ -57,7 +81,7 @@ def detect_symbols(ink, stroke):
                 lead1,lead2 = d[a-1],d[b]
                 if abs(lead1[1-axis]) > stroke or abs(lead2[1-axis]) > stroke:
                     continue
-                if abs(body[0,1-axis]-body[-1,1-axis]) > stroke*1.5:
+                if abs(body[0,1-axis]-body[-1,1-axis]) > stroke*2:
                     continue
                 components.append(proposal('resistor',body,[body[0],body[-1]],stroke,notation='zigzag'))
     contours, hierarchy = cv2.findContours(ink,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -89,7 +113,7 @@ def detect_symbols(ink, stroke):
     # enclosed white contour alone would miss these ordinary contact symbols.
     circles = cv2.HoughCircles(ink,cv2.HOUGH_GRADIENT,1,max(3,stroke*3),
                               param1=80,param2=9,minRadius=max(2,int(stroke)),
-                              maxRadius=max(3,int(stroke*4)))
+                              maxRadius=max(3,int(stroke*4))) if include_switches else None
     if circles is not None:
         angles=np.linspace(0,2*np.pi,64,endpoint=False)
         for x,y,r in circles[0]:
@@ -99,10 +123,18 @@ def detect_symbols(ink, stroke):
                 ring=np.column_stack((x+radius*np.cos(angles),y+radius*np.sin(angles)))
                 samples=[sample_support(ink,[p,p],stroke*.35)['support_fraction'] for p in ring]
                 support=max(support,float(np.mean(samples)))
-            if support>=.85 and not any(np.linalg.norm(center-c)<stroke*2 for c,_ in contacts):
+            # A filled junction dot is not a hollow switch contact.
+            inner_ink = 1.0
+            for fraction in (.25,.4,.55,.7):
+                inner = np.column_stack((x+r*fraction*np.cos(angles),y+r*fraction*np.sin(angles)))
+                inner_ink = min(inner_ink, np.mean([ink[int(np.clip(py,0,ink.shape[0]-1)),
+                                      int(np.clip(px,0,ink.shape[1]-1))]>0 for px,py in inner]))
+            if support>=.85 and inner_ink < .95 and not any(np.linalg.norm(center-c)<stroke*2 for c,_ in contacts):
                 contacts.append((center,float(r)))
     # Contact pairs define a possible switch. The movable arm must be measured
     # from a straight path beginning at a contact; an empty gap alone is insufficient.
+    if not include_switches:
+        contacts=[]
     for i,(a,ra) in enumerate(contacts):
         for b,rb in contacts[i+1:]:
             gap = np.linalg.norm(b-a)
@@ -146,7 +178,7 @@ def detect_symbols(ink, stroke):
         for j in range(1,n):
             x,y,w,h,area = stats[j]
             length,thickness = (h,w) if axis == 0 else (w,h)
-            if stroke*4 < length < stroke*35 and thickness < stroke*3:
+            if stroke*4 < length < stroke*35 and thickness <= stroke*3.5:
                 plates.append(dict(center=centroids[j],length=float(length),bbox=[x,y,w,h]))
         plates.sort(key=lambda p:p['center'][axis])
         used=set()
@@ -160,10 +192,14 @@ def detect_symbols(ink, stroke):
                 if (abs(q['center'][1-axis]-p['center'][1-axis]) <= stroke*1.5
                         and stroke*1.5 < sep < max(q['length'],prev['length'])*.9):
                     group.append((j,q))
-            if len(group)<2 or len(group)%2:
+            if len(group)<2:
                 continue
             lengths=np.array([p['length'] for _,p in group])
-            if not (np.all(lengths[::2]>lengths[1::2]*1.3) or np.all(lengths[1::2]>lengths[::2]*1.3)):
+            ratios=lengths[1:]/lengths[:-1]
+            capacitor=len(group)==2 and .85 <= ratios[0] <= 1/.85
+            battery=(np.all((ratios>1.3)|(ratios<1/1.3)) and
+                     np.all(np.sign(ratios[1:]-1) != np.sign(ratios[:-1]-1)))
+            if not (capacitor or battery):
                 continue
             direction=np.eye(2)[axis]
             t1,t2=group[0][1]['center'],group[-1][1]['center']
@@ -175,9 +211,18 @@ def detect_symbols(ink, stroke):
                 x,y,w,h=p['bbox']
                 points.extend([[x,y],[x+w-1,y+h-1]])
                 used.add(j)
-            terms=[t1,t2] if lengths[0]>lengths[1] else [t2,t1]
+            if capacitor:
+                # Equal parallel plates with supported outward leads; no
+                # polarity inferred from their drawing orientation.
+                components.append(proposal('capacitor',points,[t1,t2],stroke,
+                    notation='parallel_plates',plates=[p['bbox'] for _,p in group]))
+                continue
+            positive = (0 if lengths[0]>lengths[-1] else 1) if len(group)%2==0 else \
+                positive_terminal_from_marker(ink if polarity_ink is None else polarity_ink,
+                                              [t1,t2],float(max(lengths)),stroke)
+            terms=[t1,t2] if positive in (0,None) else [t2,t1]
             components.append(proposal('voltage_source',points,terms,stroke,notation='battery',
-                                       plates=[p['bbox'] for _,p in group],polarity_verified=True))
+                                       plates=[p['bbox'] for _,p in group],polarity_verified=positive is not None))
     unique=[]
     for c in components:
         if any(c['bbox'].iou(other['bbox']) > .5 for other in unique):

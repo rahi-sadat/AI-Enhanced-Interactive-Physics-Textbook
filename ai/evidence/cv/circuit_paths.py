@@ -21,7 +21,7 @@ def raster(image):
     return gray, ink, stroke
 
 
-def trace_paths(ink, stroke):
+def trace_paths(ink, stroke, *, spur_widths=2):
     sk = skeletonize(ink > 0).astype(np.uint8)
     ys, xs = np.where(sk)
     pixels = set(zip(xs.tolist(), ys.tolist()))
@@ -39,11 +39,11 @@ def trace_paths(ink, stroke):
                 continue
             chain=[p]
             prev,cur=p,neighbors(p)[0]
-            while len(chain) <= stroke*2 and len(neighbors(cur)) == 2:
+            while len(chain) <= stroke*spur_widths and len(neighbors(cur)) == 2:
                 chain.append(cur)
                 nxt=next(q for q in neighbors(cur) if q != prev)
                 prev,cur=cur,nxt
-            if len(chain) <= stroke*2 and len(neighbors(cur)) >= 3:
+            if len(chain) <= stroke*spur_widths and len(neighbors(cur)) >= 3:
                 remove.update(chain)
         pixels.difference_update(remove)
         for x,y in remove:
@@ -118,14 +118,25 @@ def trace_paths(ink, stroke):
 
 def sample_support(ink, points, radius=0):
     """Support and longest unsupported run along the actual proposed polyline."""
+    # Restrict dilation to the sampled region. Thousands of contact-ring probes
+    # previously allocated a full-image mask each time.
+    offset = np.zeros(2, dtype=int)
     if radius:
         r = int(np.ceil(radius))
+        xy = np.asarray(points, float)
+        h,w = ink.shape
+        lo = np.maximum(0, np.floor(xy.min(axis=0)).astype(int)-r-1)
+        hi = np.minimum([w,h], np.ceil(xy.max(axis=0)).astype(int)+r+2)
+        if np.any(hi <= lo):
+            return {'support_fraction':0.0,'max_gap_px':1}
+        ink = ink[lo[1]:hi[1],lo[0]:hi[0]]
+        offset = lo
         ink = cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*r+1,2*r+1)))
     samples = []
     h,w = ink.shape
     for a,b in zip(points,points[1:]):
         n = max(2,int(np.ceil(np.linalg.norm(np.subtract(b,a))))+1)
-        xy = np.rint(np.linspace(a,b,n)).astype(int)
+        xy = np.rint(np.linspace(a,b,n)).astype(int)-offset
         inside = (xy[:,0]>=0)&(xy[:,0]<w)&(xy[:,1]>=0)&(xy[:,1]<h)
         values = np.zeros(n,dtype=bool)
         values[inside] = ink[xy[inside,1],xy[inside,0]] > 0

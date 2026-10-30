@@ -39,7 +39,7 @@ class CircuitGeometryValidator:
             reasons=[]
             if not (0<=b.x<b.x_max<=w and 0<=b.y<b.y_max<=h):
                 reasons.append('out_of_source_bounds')
-            if not c.get('symbol_path') or c.get('type') not in {'resistor','voltage_source','switch'}:
+            if not c.get('symbol_path') or c.get('type') not in {'resistor','voltage_source','switch','capacitor'}:
                 reasons.append('missing_symbol_identity_evidence')
             body_paths=[]
             if c.get('type')=='resistor':
@@ -48,7 +48,7 @@ class CircuitGeometryValidator:
                 body_paths=[body]
             elif c.get('type')=='switch':
                 body_paths=[c.get('arm_source_px',[])]
-            elif c.get('type')=='voltage_source':
+            elif c.get('type') in {'voltage_source','capacitor'}:
                 for x,y,pw,ph in c.get('plates',[]):
                     body_paths.append([[x+(pw-1)/2,y],[x+(pw-1)/2,y+ph-1]] if ph>pw else
                                       [[x,y+(ph-1)/2],[x+pw-1,y+(ph-1)/2]])
@@ -66,7 +66,10 @@ class CircuitGeometryValidator:
                     for end in (0,-1):
                         endpoint=p['points'][end]
                         distance=float(np.linalg.norm(np.subtract(endpoint,point)))
-                        allowance=stroke*2+c.get('contact_radius_px',0)
+                        # Removing the padded symbol box leaves a local inset
+                        # at its lead. Raster support must still prove the
+                        # complete attachment; distance alone never joins ink.
+                        allowance=stroke*3+c.get('contact_radius_px',0)
                         if distance <= allowance:
                             # A hollow switch contact has a white center; its
                             # measured disk radius alone permits that local gap.

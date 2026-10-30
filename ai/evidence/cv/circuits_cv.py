@@ -26,12 +26,37 @@ class CircuitCVCandidateExtractor:
             raise ValueError("Circuit CV requires the decoded native source frame.")
         gray,ink,stroke=raster(image_bgr)
         clean=ink.copy()
+        suppressed=np.zeros_like(ink)
         # OCR boxes exclude text only; never use their centers as symbol anchors.
         # No expansion: a broad OCR mask can erase a nearby real terminal.
         for b in ocr_boxes or []:
+            suppressed[max(0,int(b.y)):min(h,int(np.ceil(b.y_max))),
+                  max(0,int(b.x)):min(w,int(np.ceil(b.x_max)))]=1
             clean[max(0,int(b.y)):min(h,int(np.ceil(b.y_max))),
                   max(0,int(b.x)):min(w,int(np.ceil(b.x_max)))]=0
-        components,rejected=detect_symbols(clean,stroke)
+        # OCR also reads zigzags as letters and battery plates as punctuation.
+        # Protect connected ink of independently detected resistor/battery
+        # hypotheses. This restores observed pixels only, never closes a gap.
+        # Contact/arm hypotheses in text are too ambiguous for this rescue.
+        protected=[]
+        if suppressed.any():
+            raw_symbols,_=detect_symbols(ink,stroke,polarity_ink=ink,include_switches=False)
+            _,labels=cv2.connectedComponents(ink.astype(np.uint8),connectivity=8)
+            for candidate in raw_symbols:
+                if candidate['type'] not in {'resistor','voltage_source','capacitor'}:
+                    continue
+                box=candidate['bbox']
+                y0,y1=max(0,int(box.y)),min(h,int(np.ceil(box.y_max))+1)
+                x0,x1=max(0,int(box.x)),min(w,int(np.ceil(box.x_max))+1)
+                if not np.any(suppressed[y0:y1,x0:x1] & ink[y0:y1,x0:x1]):
+                    continue
+                identities=np.unique(labels[y0:y1,x0:x1])
+                identities=identities[identities!=0]
+                restore=np.isin(labels,identities) & (suppressed!=0)
+                clean[restore]=ink[restore]
+                protected.append(dict(type=candidate['type'],bbox=box.to_dict(),
+                                      restored_ink_pixels=int(np.count_nonzero(ink[restore]))))
+        components,rejected=detect_symbols(clean,stroke,polarity_ink=ink)
         conductor=clean.copy()
         for c in components:
             b=c['bbox']
@@ -56,4 +81,5 @@ class CircuitCVCandidateExtractor:
                     gray=gray,edges=cv2.Canny(gray,50,150),ink=clean,
                     conductor_mask=conductor,skeleton=skeleton,stroke_width_px=stroke,
                     raw_candidates=components,rejected_candidates=rejected,
+                    ocr_symbol_conflicts=protected,
                     source_width=w,source_height=h,coordinate_space='source_px')
