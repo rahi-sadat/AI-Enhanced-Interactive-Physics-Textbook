@@ -1,0 +1,6 @@
+# Optional dataset-development dependencies; not imported by the application.
+# These versions define the reproducible v1 rasterization environment.
+schemdraw==0.23
+matplotlib==3.11.1
+Pillow==12.3.0
+numpy==2.5.2
