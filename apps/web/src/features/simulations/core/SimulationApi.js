@@ -92,6 +92,7 @@ export class SimulationApi {
     return {
       success: Boolean(res.success),
       reviewState: res.review_state || {},
+      bookIR: res.book_ir || bookIR,
       readyToCompile: Boolean(res.ready_to_compile),
       blockersCount: Number(res.blockers_count || 0),
       warningsCount: Number(res.warnings_count || 0),

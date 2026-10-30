@@ -107,17 +107,20 @@ const btnGenerateSim = document.getElementById('btn-generate-sim');
 // PR-08: Orchestrator & Evidence Review Dialog
 export const orchestrator = new SimulationOrchestrator();
 export const reviewModal = new PhysicsReviewModal(document.body, orchestrator, {
-  onStartSimulation: (scene) => {
+  onStartSimulation: async (scene) => {
+    await loadAugmentedScene(scene);
     closeModal();
-    setPlatformMode('runtime');
-    if (activeFigure) {
-      activeFigure.load(scene)
-        .then(() => activeFigure.play())
-        .catch((error) => console.error('[Simulation] Could not start the compiled scene:', error));
-    }
   },
   onClose: () => {
     if (btnGenerateSim) btnGenerateSim.disabled = false;
+  }
+});
+
+// Resolving a structural issue resumes the diagram automatically when the
+// backend produces a scene; review is a recovery tool, not an activation gate.
+orchestrator.onStateChange((state) => {
+  if (state === OrchestratorState.READY_TO_SIMULATE && reviewModal.isOpen) {
+    void reviewModal._startSimulation();
   }
 });
 
@@ -353,6 +356,10 @@ btnGenerateSim?.addEventListener('click', async () => {
       updateProgress('Sending image to ingestion pipeline...', 15);
       try {
         await orchestrator.startWithFile(uploadedFile, updateProgress);
+        if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
+          updateProgress('Applying standard values for missing parameters...', 85);
+          await orchestrator.useStandardDefaults();
+        }
       } catch (ingestErr) {
         console.error('[PR-08] Ingestion failed:', ingestErr);
         btnGenerateSim.disabled = false;
@@ -383,11 +390,9 @@ btnGenerateSim?.addEventListener('click', async () => {
         if (!activeFigure || !orchestrator.compiledScene) {
           throw new Error('The compiled simulation is unavailable.');
         }
-        await activeFigure.load(orchestrator.compiledScene);
+        await loadAugmentedScene(orchestrator.compiledScene);
         orchestrator.startSimulation();
-        activeFigure.play();
         closeModal();
-        setPlatformMode('runtime');
         updateProgress('Simulation ready!', 100);
       } else if (orchestrator.state === OrchestratorState.READY_TO_COMPILE) {
         updateProgress('Compiling simulation with resolved textbook defaults...', 90);
@@ -396,35 +401,21 @@ btnGenerateSim?.addEventListener('click', async () => {
           if (!activeFigure || !orchestrator.compiledScene) {
             throw new Error('The compiled simulation is unavailable.');
           }
-          await activeFigure.load(orchestrator.compiledScene);
+          await loadAugmentedScene(orchestrator.compiledScene);
           orchestrator.startSimulation();
-          activeFigure.play();
           closeModal();
-          setPlatformMode('runtime');
         } catch (compErr) {
           console.warn('[Main] Auto-compile note:', compErr);
           btnGenerateSim.disabled = false;
           progressStatus.textContent = 'Could not reliably interpret this diagram.';
         }
       } else if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
-        updateProgress('Compiling direct simulation...', 90);
-        try {
-          await orchestrator.compile();
-          if (activeFigure && orchestrator.compiledScene) {
-            await activeFigure.load(orchestrator.compiledScene);
-            orchestrator.startSimulation();
-            activeFigure.play();
-            closeModal();
-            setPlatformMode('runtime');
-            updateProgress('Simulation ready!', 100);
-            return;
-          }
-        } catch (compErr) {
-          console.warn('[Main] Direct compile note:', compErr);
-        }
+        // Numerical assumptions are already applied. Remaining issues describe
+        // diagram structure that must be identified before source-aligned playback.
         btnGenerateSim.disabled = false;
-        progressStatus.textContent = ctx.currentError || 'Could not compile a direct simulation for this diagram. Please verify diagram features.';
-        progressStatus.scrollIntoView({ block: 'nearest' });
+        progressStatus.textContent = orchestrator.currentError || 'Review the highlighted items to prepare your simulation.';
+        closeModal();
+        reviewModal.open();
       } else if (orchestrator.state === OrchestratorState.UNSUPPORTED || orchestrator.state === OrchestratorState.ERROR) {
         btnGenerateSim.disabled = false;
         progressStatus.textContent = ctx.currentError || 'Analysis could not proceed.';
@@ -568,9 +559,18 @@ if (figureHost) {
   if (typeof window !== 'undefined') {
     window.__activeFigure = activeFigure;
   }
-  activeFigure.load('/scenes/canonical/pendulum_figure.json');
+  activeFigure.load('/scenes/canonical/pendulum_figure.json')
+    .then(() => activeFigure.play())
+    .catch((error) => console.error('[Simulation] Could not load the example:', error));
 }
 
+async function loadAugmentedScene(scene) {
+  if (!activeFigure) throw new Error('The simulation view is unavailable.');
+  setPlatformMode('runtime');
+  await activeFigure.load(scene);
+  activeFigure.play();
+  figureHost?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 
 const btnModeRuntime = document.getElementById('view-mode-runtime');
@@ -619,7 +619,8 @@ figPills.forEach(({ id, url }) => {
         b.style.color = (p.id === id) ? '#ffffff' : '#e2e8f0';
       }
     });
-    activeFigure?.load(url);
+    activeFigure?.load(url).then(() => activeFigure.play())
+      .catch((error) => console.error('[Simulation] Could not load the example:', error));
   });
 });
 

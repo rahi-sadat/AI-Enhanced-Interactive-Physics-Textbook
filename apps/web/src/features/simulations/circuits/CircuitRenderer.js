@@ -440,6 +440,9 @@ export class CircuitRenderer extends SimulationRenderer {
         if (c.type === 'voltage_source' || c.type === 'battery' || c.type === 'dc_source') {
           valNumStr = `${Number(c.value.toFixed(1))}`;
           unitStr = 'V';
+        } else if (c.type === 'capacitor') {
+          valNumStr = Number((c.value * 1e6).toPrecision(4)).toString();
+          unitStr = 'µF';
         } else {
           if (c.value >= 1000) {
             valNumStr = `${(c.value / 1000).toFixed(1)}`;
@@ -484,7 +487,7 @@ export class CircuitRenderer extends SimulationRenderer {
         text.setAttribute('font-weight', '600');
 
         const isVolt = (c.type === 'voltage_source' || c.type === 'battery' || c.type === 'dc_source');
-        const desigLetter = isVolt ? 'V' : 'R';
+        const desigLetter = c.type === 'capacitor' ? 'C' : isVolt ? 'V' : 'R';
         const subIndex = String(c.label || c.id).match(/\d+$/)?.[0] || '';
 
         const tspanVar = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
@@ -573,6 +576,13 @@ export class CircuitRenderer extends SimulationRenderer {
         g.appendChild(textCur);
       }
 
+      if (c.type === 'capacitor' && Number.isFinite(c.voltage_V)) {
+        const reading = this._createText(cx + 20, cy + 48,
+          `Vc = ${c.voltage_V.toFixed(3)} V · Q = ${Number(c.charge_C).toExponential(2)} C`,
+          { fill:'#0891b2', fontSize:12, fontWeight:'bold' });
+        reading.setAttribute('class', 'circuit-capacitor-reading');
+        g.appendChild(reading);
+      }
       this.layers.components.appendChild(g);
     }
   }

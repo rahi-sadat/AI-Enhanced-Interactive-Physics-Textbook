@@ -279,6 +279,40 @@ export class SimulationOrchestrator {
   }
 
   /**
+   * Use backend-declared defaults for missing values under the application's
+   * standard-value preference. Never promote OCR candidates or invent topology.
+   */
+  async useStandardDefaults() {
+    const attempted = new Set();
+    while (this.state === OrchestratorState.NEEDS_REVIEW) {
+      const policies = this.reviewState?.availablePolicies || [];
+      const issue = (this.reviewState?.issues || []).find((item) => {
+        const parameter = item.parameterName || item.parameter_name;
+        const policyId = item.defaultPolicyId || item.default_policy_id;
+        let value = this.bookIR?.parameters?.[parameter];
+        if (parameter?.startsWith('component.')) {
+          const separator = parameter.lastIndexOf('.');
+          const componentId = parameter.slice('component.'.length, separator);
+          value = this.bookIR?.parameters?.components?.find((c) => c.id === componentId)?.[parameter.slice(separator + 1)];
+        }
+        if (value && typeof value === 'object' && 'value' in value) value = value.value;
+        return parameter && policyId && !item.candidates?.length
+          && value == null && this.bookIR?.resolutions?.[parameter] == null
+          && policies.some((policy) => (policy.id || policy.policyId) === policyId)
+          && !attempted.has(`${parameter}:${policyId}`);
+      });
+      if (!issue) return;
+      const parameter = issue.parameterName || issue.parameter_name;
+      const policyId = issue.defaultPolicyId || issue.default_policy_id;
+      attempted.add(`${parameter}:${policyId}`);
+      const operationId = this._operationId + 1;
+      await this.applyPolicy(policyId, parameter);
+      // A cancelled upload or a failed policy must not cause further writes.
+      if (this.currentError || this._operationId !== operationId) return;
+    }
+  }
+
+  /**
    * Confirms a diagram-extracted candidate value.
    *
    * @param {string} parameterName
@@ -350,8 +384,7 @@ export class SimulationOrchestrator {
       if (opId !== this._operationId) return;
       console.error('[SimulationOrchestrator] Policy application error:', err);
       this._metrics.failedResolutions++;
-      this.currentError = err.message || 'Failed to apply modeling policy.';
-      this._setState(OrchestratorState.NEEDS_REVIEW);
+      this._setState(OrchestratorState.NEEDS_REVIEW, err.message || 'Failed to apply modeling policy.');
     }
   }
 
@@ -514,9 +547,13 @@ export class SimulationOrchestrator {
       console.error('[SimulationOrchestrator] Compilation error:', err);
       this.compiledScene = null;
       if (err instanceof CompilationGatingError) {
+        const blockers = (err.blockers || [])
+          .map((blocker) => typeof blocker === 'string' ? blocker : blocker?.message || blocker?.code)
+          .filter(Boolean);
+        const details = blockers.length ? ` ${blockers.join('; ')}` : '';
         this._setState(
           OrchestratorState.NEEDS_REVIEW,
-          `The simulation is not ready yet: ${err.message}`
+          `The simulation is not ready yet: ${err.message}${details}`
         );
       } else {
         this._setState(
@@ -557,6 +594,19 @@ export class SimulationOrchestrator {
   _normalizeSceneBackground(scene) {
     if (!scene) return null;
     const cloned = JSON.parse(JSON.stringify(scene));
+    // Policies applied through the review API retain their resolution records.
+    // Expose those defaults alongside ingestion-time assumptions in the runtime.
+    cloned.assumptions = cloned.assumptions || [];
+    for (const [parameter, resolution] of Object.entries(this.bookIR?.resolutions || {})) {
+      const policyId = resolution.policyId || resolution.policy_id;
+      if (!policyId || cloned.assumptions.some((item) => item.parameter === parameter)) continue;
+      cloned.assumptions.push({
+        parameter, policyId,
+        value: resolution.resolvedValue ?? resolution.resolved_value,
+        unit: resolution.canonicalUnit ?? resolution.canonical_unit,
+        reason: resolution.notes || `Standard value assumed for ${parameter}`,
+      });
+    }
     if (!cloned.visual) cloned.visual = {};
     if (!cloned.visual.background_url && this.imageUrl) {
       cloned.visual.background_url = this.imageUrl;
