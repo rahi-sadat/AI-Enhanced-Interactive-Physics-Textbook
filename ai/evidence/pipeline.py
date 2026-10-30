@@ -21,6 +21,7 @@ Execution Order:
 from __future__ import annotations
 
 import logging
+import re
 import time
 from typing import Dict, Optional
 
@@ -85,6 +86,20 @@ class EvidenceExtractionPipeline:
             "dc_circuit": CircuitCVCandidateExtractor(),
             "resistors": CircuitCVCandidateExtractor(),
         }
+
+    @staticmethod
+    def _is_schematic_glyph_token(text: str) -> bool:
+        cleaned = (text or "").strip()
+        if not cleaned:
+            return True
+        # These physical unit tokens can be emitted separately from their
+        # values. Preserve their case-sensitive SI meaning during glyph cleanup.
+        if cleaned in {"mm", "Mm", "mW", "MW", "mV", "MV"}:
+            return False
+        # Repeating zigzags, waves, coils or wire ticks detected as pseudo-text by OCR (e.g. -WW, WWW, vvv, MM)
+        if re.match(r"^[\-_—~=]*[wWvVmM~/\\]{2,}[\-_—~=]*$", cleaned):
+            return True
+        return False
 
     def extract_and_fuse(
         self,
@@ -162,7 +177,13 @@ class EvidenceExtractionPipeline:
                     source_height=src_h,
                 )
                 if ocr_result and ocr_result.tokens:
-                    ocr_boxes = [t.bbox_source_px for t in ocr_result.tokens if t.bbox_source_px]
+                    ocr_boxes = [
+                        t.bbox_source_px
+                        for t in ocr_result.tokens
+                        if t.bbox_source_px
+                        and (t.confidence is None or t.confidence >= 0.50)
+                        and not self._is_schematic_glyph_token(t.raw_text)
+                    ]
             except Exception as e:
                 logger.warning("[EvidenceExtractionPipeline] OCR extraction error: %s", e)
                 ocr_result = OCRExtractionResult(
@@ -193,6 +214,7 @@ class EvidenceExtractionPipeline:
                     extraction_method="ocr",
                 )
                 for t in ocr_result.tokens
+                if not self._is_schematic_glyph_token(t.raw_text)
             ]
             page_ir.metadata["pipeline"] = "PR-06"
             page_ir.metadata["ocr_provider"] = ocr_result.provider
@@ -204,20 +226,17 @@ class EvidenceExtractionPipeline:
         extractor = self.cv_extractors.get(subtype_key)
         if extractor:
             try:
-                if hasattr(extractor, "extract_candidates"):
-                    cv_candidates = extractor.extract_candidates(
-                        img_bgr,
-                        source_width=src_w,
-                        source_height=src_h,
-                        ocr_boxes=ocr_boxes,
-                    )
-                else:
-                    cv_candidates = extractor.extract(
-                        img_bgr,
-                        source_width=src_w,
-                        source_height=src_h,
-                        ocr_boxes=ocr_boxes,
-                    )
+                extract_kwargs = {
+                    "source_width": src_w,
+                    "source_height": src_h,
+                    "ocr_boxes": ocr_boxes,
+                }
+                semantic_types = {e.type.lower() for e in getattr(book_ir, 'entities', []) if getattr(e, 'type', None)}
+                import inspect
+                fn = getattr(extractor, "extract_candidates", None) or getattr(extractor, "extract")
+                if "semantic_types" in inspect.signature(fn).parameters:
+                    extract_kwargs["semantic_types"] = semantic_types
+                cv_candidates = fn(img_bgr, **extract_kwargs)
             except Exception as e:
                 logger.warning("[EvidenceExtractionPipeline] CV candidate extraction error for %s: %s", subtype_key, e)
                 cv_candidates = {"error": str(e), "best_proposal": None}

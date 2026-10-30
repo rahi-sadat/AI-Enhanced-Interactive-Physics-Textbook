@@ -49,11 +49,9 @@ class EasyOCRBanglaProvider:
     def __init__(self, languages: tuple[str, ...] = ("bn", "en"), gpu: Optional[bool] = None):
         self.languages = list(languages)
         if gpu is None:
-            try:
-                import torch
-                self.gpu = torch.cuda.is_available()
-            except ImportError:
-                self.gpu = False
+            import os
+            # Default to CPU to prevent CUDA memory exhaustion across diverse environments
+            self.gpu = os.getenv("EASYOCR_USE_GPU", "false").lower() in ("true", "1", "yes")
         else:
             self.gpu = gpu
         self._reader = None
@@ -152,17 +150,42 @@ class EasyOCRBanglaProvider:
             # easyocr expects RGB or BGR numpy array
             results = reader.readtext(working_img)
         except Exception as e:
-            logger.error("[EasyOCRBanglaProvider] Extraction error: %s", e)
-            return OCRExtractionResult(
-                status=ExtractionStatus.ERROR,
-                tokens=[],
-                provider=self.name,
-                model=self._model_version,
-                package=self._package_name,
-                package_version=self._package_version,
-                latency_ms=(time.perf_counter() - start_time) * 1000.0,
-                error=f"EasyOCR error: {e}",
-            )
+            if self.gpu:
+                logger.warning("[EasyOCRBanglaProvider] Extraction error on GPU, retrying on CPU: %s", e)
+                try:
+                    import torch
+                    torch.cuda.empty_cache()
+                except Exception:
+                    pass
+                try:
+                    import easyocr
+                    self.gpu = False
+                    self._reader = easyocr.Reader(self.languages, gpu=False)
+                    results = self._reader.readtext(working_img)
+                except Exception as retry_err:
+                    logger.error("[EasyOCRBanglaProvider] CPU fallback failed: %s", retry_err)
+                    return OCRExtractionResult(
+                        status=ExtractionStatus.ERROR,
+                        tokens=[],
+                        provider=self.name,
+                        model=self._model_version,
+                        package=self._package_name,
+                        package_version=self._package_version,
+                        latency_ms=(time.perf_counter() - start_time) * 1000.0,
+                        error=f"EasyOCR error: {retry_err}",
+                    )
+            else:
+                logger.error("[EasyOCRBanglaProvider] Extraction error: %s", e)
+                return OCRExtractionResult(
+                    status=ExtractionStatus.ERROR,
+                    tokens=[],
+                    provider=self.name,
+                    model=self._model_version,
+                    package=self._package_name,
+                    package_version=self._package_version,
+                    latency_ms=(time.perf_counter() - start_time) * 1000.0,
+                    error=f"EasyOCR error: {e}",
+                )
 
         if not results:
             return OCRExtractionResult(
