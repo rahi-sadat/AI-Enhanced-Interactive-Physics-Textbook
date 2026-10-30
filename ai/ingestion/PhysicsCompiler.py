@@ -944,7 +944,7 @@ class PhysicsCompiler:
                     for node in nodes if isinstance(node, (str, dict))
                 }
                 sources = {"voltage_source", "battery", "dc_source"}
-                if not any(isinstance(comp, dict) and comp.get("type") in sources for comp in comps):
+                if not any(isinstance(comp, dict) and comp.get("type") in sources | {"capacitor"} for comp in comps):
                     issues.append({"code": "MISSING_CIRCUIT_SOURCE", "message": "A DC circuit simulation requires a grounded voltage source."})
                 for comp in comps:
                     if not isinstance(comp, dict):
@@ -957,14 +957,18 @@ class PhysicsCompiler:
                         issues.append({"code": "INVALID_CIRCUIT_CONNECTION", "message": f"Component {cid} must connect two declared nodes."})
                     elif terminals[0] == terminals[1] and comp.get("type") in sources:
                         issues.append({"code": "SHORTED_CIRCUIT_SOURCE", "message": f"Voltage source {cid} is shorted to one node."})
-                    if comp.get("type") in sources | {"resistor", "bulb", "lamp"}:
+                    if comp.get("type")=="capacitor":
+                        initial=comp.get("initial_voltage")
+                        if isinstance(initial,bool) or not isinstance(initial,(int,float)) or not math.isfinite(initial):
+                            issues.append({"code":"MISSING_INITIAL_VOLTAGE","message":f"Capacitor {cid} requires explicit initial voltage."})
+                    if comp.get("type") in sources | {"resistor", "bulb", "lamp", "capacitor"}:
                         value = comp.get("value")
                         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
                             issues.append({"code": "MISSING_CIRCUIT_VALUE", "message": f"Component {cid} requires a finite grounded value."})
-                        elif comp.get("type") in {"resistor", "bulb", "lamp"} and value <= 0:
+                        elif comp.get("type") in {"resistor", "bulb", "lamp", "capacitor"} and value <= 0:
                             issues.append({"code": "INVALID_CIRCUIT_RESISTANCE", "message": f"Resistance of {cid} must be positive."})
                         else:
-                            dimension = "voltage" if comp.get("type") in sources else "resistance"
+                            dimension = "capacitance" if comp.get("type")=="capacitor" else "voltage" if comp.get("type") in sources else "resistance"
                             quantity = UnitEngine.parse_quantity(value, comp.get("unit"), dimension)
                             if not quantity.success:
                                 issues.append({"code": "INCOMPATIBLE_CIRCUIT_UNIT", "message": f"Component {cid}: {quantity.error}"})
@@ -1068,6 +1072,13 @@ class PhysicsCompiler:
             if source_key is None:
                 continue
             record = (book_ir.parameter_provenance or {}).get(source_key)
+            if subtype == "dc_linear":
+                # Component value decisions supersede the original OCR record;
+                # topology provenance is never evidence of a physical value.
+                record = (book_ir.parameter_provenance or {}).get(f"component.{scene_key}.value") or record
+                if record is None:
+                    record = next((c.get("value_provenance") for c in book_ir.parameters.get("components",[])
+                                   if c.get("id")==scene_key),None)
             if record is None:
                 raw = (book_ir.parameters or {}).get(source_key)
                 record = raw.get("provenance") if isinstance(raw, dict) else getattr(raw, "provenance", None)
@@ -1080,8 +1091,6 @@ class PhysicsCompiler:
                 record = (book_ir.parameter_provenance or {}).get("object_position")
             if record is None:
                 record = (book_ir.provenance or {}).get(source_key)
-            if record is None and subtype == "dc_linear":
-                record = (book_ir.parameter_provenance or {}).get("components")
             if record is None:
                 continue
             data = record.to_dict() if hasattr(record, "to_dict") else record
@@ -1498,8 +1507,8 @@ class PhysicsCompiler:
         sources = {"voltage_source", "battery", "dc_source"}
         for component in components:
             kind = component.get("type")
-            if kind in sources | {"resistor", "bulb", "lamp"}:
-                dimension = "voltage" if kind in sources else "resistance"
+            if kind in sources | {"resistor", "bulb", "lamp", "capacitor"}:
+                dimension = "capacitance" if kind=="capacitor" else "voltage" if kind in sources else "resistance"
                 quantity = UnitEngine.parse_quantity(component["value"], component.get("unit"), dimension)
                 component["value"] = quantity.canonical_value
                 component["unit"] = quantity.canonical_unit
@@ -1527,10 +1536,11 @@ class PhysicsCompiler:
                     "unit": cunit or ("V" if is_source else "Ω"),
                     "label": comp.get("label") or f"{'Voltage Source' if is_source else 'Resistor'} ({cid})",
                     "editable": True,
-                    "min": 0 if is_source else 1,
-                    "max": max(100, int(num_val * 2)),
-                    "step": 1,
-                    "provenance": "observed",
+                    "min": 0 if is_source else 1e-12 if ctype=="capacitor" else 1e-6,
+                    "max": max(num_val * 10, .01) if ctype=="capacitor" else max(100, num_val * 2),
+                    "step": "any",
+                    "provenance": comp.get("value_provenance",{}).get("source", "observed"),
+                    "evidenceProvenance": deepcopy(comp.get("value_provenance",{})),
                 }
 
     # -----------------------------------------------------------------------

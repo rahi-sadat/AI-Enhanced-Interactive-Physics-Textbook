@@ -47,6 +47,7 @@ from shared.schemas.ingestion import (
 from ai.evidence.grounding.base import GroundingOutcome
 from ai.evidence.grounding.physical_value_parser import parse_physical_value_candidate
 from ai.resolution.evaluator import ReadinessEvaluator
+from ai.resolution.units import UnitEngine
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +86,8 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
 
         m_r_desig = re.fullmatch(r'^[Rr](\d+)$', raw_norm)
         m_v_desig = re.fullmatch(r'^[Vv](\d+)$', raw_norm)
+        m_c = re.fullmatch(r'(?:[Cc](\d*)\s*(?:=\s*)?)?(\d+(?:\.\d+)?)\s*([munpµμ]?F)', raw_norm)
+        m_c_desig = re.fullmatch(r'[Cc](\d*)', raw_norm)
 
         m_r_comb = re.match(r'^[Rr](\d+?)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
         m_v_comb = re.match(r'^[Vv](\d*)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
@@ -92,7 +95,13 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
         m_r_val = re.fullmatch(r'^(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
         m_v_val = re.fullmatch(r'^(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
 
-        if m_r_desig:
+        if m_c:
+            quantity=UnitEngine.parse_quantity(float(m_c[2]),m_c[3],'capacitance')
+            ptype='capacitor';pdesig=f'C{m_c[1] or 1}' if m_c[1] is not None else None
+            pval=quantity.canonical_value;punit='F'
+        elif m_c_desig:
+            ptype='capacitor';pdesig=f'C{m_c_desig[1] or 1}'
+        elif m_r_desig:
             ptype = 'resistor'
             pdesig = f"R{m_r_desig.group(1)}"
         elif m_v_desig:
@@ -156,7 +165,7 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
 
     # Pass 1: Tokens with both designator and value (e.g. "R1 = 10 Ω", "V=6 V")
     for i, p in enumerate(parsed):
-        if p['type'] in ('voltage_source', 'resistor') and p['desig'] and p['val'] is not None:
+        if p['type'] in ('voltage_source', 'resistor', 'capacitor') and p['desig'] and p['val'] is not None:
             used.add(i)
             b = p['tok'].bbox_source_px
             lbl_box = [float(b.x), float(b.y), float(b.width), float(b.height)] if b else None
@@ -254,7 +263,7 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
             # duplicate readings, not extra physical circuit elements.
             continue
 
-        prefix = "V" if c_type == 'voltage_source' else "R"
+        prefix = "C" if c_type == 'capacitor' else "V" if c_type == 'voltage_source' else "R"
         idx = 1
         while f"{prefix}{idx}" in existing_ids:
             idx += 1
@@ -329,7 +338,7 @@ class CircuitGrounder:
         used=set()
         for e in semantics:
             compatible=[(i,c) for i,c in enumerate(clusters) if normalize(e.type)==c['type'] and i not in used]
-            designator=re.search(r'\b([RV]\d+)\b',e.label or '',re.I)
+            designator=re.search(r'\b([RVC]\d+)\b',e.label or '',re.I)
             matches=[(i,c) for i,c in compatible if designator and c['id'].lower()==designator[1].lower()]
             if not matches and len(compatible)==1 and sum(normalize(x.type)==normalize(e.type) for x in semantics)==1:
                 matches=compatible
@@ -425,9 +434,12 @@ class CircuitGrounder:
                 supporting_evidence=refs,checks=checks,notes='' if complete else
                 'Review '+', '.join(k for k,v in checks.items() if not v)))
         book.parameters.update(components=components,nodes=nodes,wires=wires,
-            reference_node=next((c['nodes'][1] for c in components if c['type']=='voltage_source'),None))
+            reference_node=next((c['nodes'][1] for c in components if c['type']=='voltage_source'),
+                                next((c['nodes'][1] for c in components if c['type']=='capacitor'),None)))
         book.evidence.update({k:v.to_dict() for k,v in evidence.items()})
-        geometry_ok=bool(semantics) and len(assigned)==len(semantics) and len(assigned)==len(cv_candidates.get('components',[]))
+        # Rejected proposals are diagnostics, not extra physical components.
+        # An unmatched VERIFIED symbol still blocks compilation.
+        geometry_ok=bool(semantics) and len(assigned)==len(semantics) and len(assigned)==len(verified)
         topology_ok=geometry_ok and bool(nodes) and all(all(c['nodes']) for c in components)
         book.geometry['circuit_validation']={'semantic':book.isPhysics is True,
             'geometry':geometry_ok,'topology':topology_ok,'referential_integrity':False,'physics_readiness':False}

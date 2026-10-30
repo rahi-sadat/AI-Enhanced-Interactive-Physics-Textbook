@@ -53,7 +53,7 @@ RULES & CONSTRAINTS:
      - For pendulum: "pivot", "bob", "string", "rod", "support_ceiling", "angle_marker", "equilibrium_position", "force_vector", "vertical_reference", "extreme_position".
      - For projectile: "projectile_body", "launch_platform", "trajectory_path", "landing_surface", "velocity_vector", "apex_marker", "angle_marker".
      - For optics: "lens", "optical_axis", "focal_point", "mirror", "optical_center", "object", "image", "light_ray", "interface_boundary", "normal_line", "incident_ray", "refracted_ray", "prism_body".
-     - For circuits: "resistor", "voltage_source", "current_source", "wire", "ground", "junction", "switch", "ammeter", "voltmeter".
+     - For circuits: "resistor", "voltage_source", "current_source", "capacitor", "wire", "ground", "junction", "switch", "ammeter", "voltmeter". Linear resistor-capacitor circuits with DC sources use "dc_linear"; identify capacitors as semantic roles only, never supply capacitance or initial charge values.
    - If bounding box coordinates are provided, they are understood to be coarse/approximate.
 
 5. CONFIDENCE CALIBRATION & REALISM:
@@ -247,7 +247,7 @@ def _discard_dangling_relationships(payload: Dict[str, Any]) -> Dict[str, Any]:
 class GeminiVisionProvider(VisionProvider):
     """Multimodal vision provider implementing Google Gemini via google-genai SDK."""
 
-    PROMPT_VERSION = "pr05-v1"
+    PROMPT_VERSION = "pr05-v2-rc"
 
     def __init__(
         self,

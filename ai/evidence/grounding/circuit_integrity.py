@@ -3,7 +3,7 @@ from collections import Counter
 import math
 
 
-COMPONENT_TYPES={'resistor','voltage_source','dc_voltage_source','battery','dc_source','switch','open_switch','closed_switch','bulb','lamp'}
+COMPONENT_TYPES={'resistor','voltage_source','dc_voltage_source','battery','dc_source','switch','open_switch','closed_switch','bulb','lamp','capacitor'}
 
 
 def validate_circuit_integrity(book):
