@@ -1,0 +1,3 @@
+# Optional offline detector-training tools, separate from application requirements.
+# Install a CUDA-enabled PyTorch build for GPU training before this requirement.
+ultralytics==8.4.193
