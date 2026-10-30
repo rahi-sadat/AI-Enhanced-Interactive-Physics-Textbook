@@ -104,7 +104,7 @@ export class PhysicsReviewModal {
    * @param {HTMLElement} hostElement
    * @param {import('../features/simulations/core/SimulationOrchestrator.js').SimulationOrchestrator} orchestrator
    * @param {object} [options={}]
-   * @param {function(): void} [options.onStartSimulation]
+   * @param {function(object): (void|Promise<void>)} [options.onStartSimulation]
    * @param {function(): void} [options.onClose]
    */
   constructor(hostElement, orchestrator, options = {}) {
@@ -202,21 +202,7 @@ export class PhysicsReviewModal {
     this.dom.btnClose.addEventListener('click', () => this.close());
     this.dom.btnCancel.addEventListener('click', () => this.close());
 
-    this.dom.btnStartSim.addEventListener('click', async () => {
-      try {
-        if (!this.orchestrator.compiledScene) {
-          await this.orchestrator.compile();
-        }
-        const scene = this.orchestrator.startSimulation();
-        this.close();
-        this.options.onStartSimulation?.(scene);
-      } catch (err) {
-        console.error('[PhysicsReviewModal] Failed to start simulation:', err);
-        if (this.dom.footerStatus) {
-          this.dom.footerStatus.innerHTML = `<span style="color:#ef4444;">⚠️ ${this._escape(err.message)}</span>`;
-        }
-      }
-    });
+    this.dom.btnStartSim.addEventListener('click', () => this._startSimulation());
 
     // Close on backdrop click (outside dialog)
     this.dom.backdrop.addEventListener('click', (e) => {
@@ -231,6 +217,31 @@ export class PhysicsReviewModal {
         this.close();
       }
     });
+  }
+
+  async _startSimulation() {
+    if (this._startingSimulation) return;
+    this._startingSimulation = true;
+    this.render();
+    try {
+      if (!this.orchestrator.compiledScene) await this.orchestrator.compile();
+      if (!this.orchestrator.compiledScene || ![
+        OrchestratorState.READY_TO_SIMULATE, OrchestratorState.SIMULATING,
+      ].includes(this.orchestrator.state)) {
+        throw new Error(this.orchestrator.currentError || 'The diagram still requires review.');
+      }
+      // Keep the dialog visible until the renderer and runtime actually load.
+      await this.options.onStartSimulation?.(this.orchestrator.compiledScene);
+      this.orchestrator.startSimulation();
+      this.close();
+    } catch (err) {
+      console.error('[PhysicsReviewModal] Failed to start simulation:', err);
+      this._startingSimulation = false;
+      this.render();
+      this.dom.footerStatus.innerHTML = `<span style="color:#ef4444;">⚠️ ${this._escape(err.message)}</span>`;
+    } finally {
+      this._startingSimulation = false;
+    }
   }
 
   open() {
@@ -262,7 +273,7 @@ export class PhysicsReviewModal {
     const state = ctx.state;
     const bookIR = ctx.bookIR;
     const reviewState = ctx.reviewState;
-    const isBusy =
+    const isBusy = this._startingSimulation ||
       state === OrchestratorState.APPLYING_RESOLUTION ||
       state === OrchestratorState.EVALUATING ||
       state === OrchestratorState.COMPILING;
@@ -285,22 +296,15 @@ export class PhysicsReviewModal {
 
     // 4. Calculate Unresolved Issues
     const issues = reviewState?.issues || [];
-    const unresolvedIssues = issues.filter((iss) => {
-      const pName = iss.parameterName || iss.parameter_name;
-      if (!pName) return false;
-      // Never interrogate student for internal geometric coordinates or spatial scale
-      if (INTERNAL_GEOMETRY_PARAMS.has(pName)) return false;
-      const isResolved =
-        bookIR?.parameters && (bookIR.parameters[pName] !== undefined || (bookIR.resolutions && bookIR.resolutions[pName] !== undefined));
-      return !isResolved;
-    });
+    // Backend issues include invalid existing values and structural blockers.
+    // Neither parameter presence nor hiding a coordinate makes an issue resolved.
+    const unresolvedIssues = issues;
 
     // 5. Ready Hero Banner if ready to simulate
     const isReady =
       state === OrchestratorState.READY_TO_SIMULATE ||
       state === OrchestratorState.READY_TO_COMPILE ||
-      unresolvedIssues.length === 0 ||
-      (ctx.compiledScene !== null && reviewState?.readyToCompile);
+      (state === OrchestratorState.SIMULATING && Boolean(this.orchestrator.compiledScene));
 
     if (isReady) {
       const readyBanner = document.createElement('div');
@@ -318,21 +322,7 @@ export class PhysicsReviewModal {
           ▶ Start Simulation
         </button>
       `;
-      readyBanner.querySelector('[data-action="start-sim-banner"]').addEventListener('click', async () => {
-        try {
-          if (!this.orchestrator.compiledScene) {
-            await this.orchestrator.compile();
-          }
-          const scene = this.orchestrator.startSimulation();
-          this.close();
-          this.options.onStartSimulation?.(scene);
-        } catch (err) {
-          console.error('[PhysicsReviewModal] Start sim error:', err);
-          if (this.dom.footerStatus) {
-            this.dom.footerStatus.innerHTML = `<span style="color:#ef4444;">⚠️ ${this._escape(err.message)}</span>`;
-          }
-        }
-      });
+      readyBanner.querySelector('[data-action="start-sim-banner"]').addEventListener('click', () => this._startSimulation());
       this.dom.body.appendChild(readyBanner);
       this.dom.btnStartSim.style.display = 'inline-flex';
       this.dom.btnStartSim.disabled = isBusy;
@@ -356,7 +346,14 @@ export class PhysicsReviewModal {
     }
 
     // 6. Resolved Parameters Section (Auditable Provenance & Reversibility)
-    const resolvedParams = Object.entries(bookIR?.parameters || {});
+    const resolvedParams = bookIR?.subtype === 'dc_linear'
+      ? (bookIR.parameters?.components || []).flatMap(c => [
+        ...(c.value == null ? [] : [[`component.${c.id}.value`,
+          { value:c.value, unit:c.unit, label:c.label || c.id, provenance:c.value_provenance }]]),
+        ...(c.initial_voltage == null ? [] : [[`component.${c.id}.initial_voltage`,
+          { value:c.initial_voltage, unit:'V', label:`${c.label || c.id} initial voltage`, provenance:c.initial_voltage_provenance }]])
+      ])
+      : Object.entries(bookIR?.parameters || {});
     if (resolvedParams.length > 0) {
       const resolvedSection = document.createElement('div');
       resolvedSection.style.marginTop = '10px';
@@ -405,7 +402,7 @@ export class PhysicsReviewModal {
     const card = document.createElement('div');
     card.className = 'prm-issue-card';
 
-    const paramName = issue.parameterName || issue.parameter_name || 'parameter';
+    const paramName = issue.parameterName || issue.parameter_name;
     const friendlyLabel = PARAMETER_LABELS[paramName] || issue.title || paramName;
     const isCorrecting = this._correctionModes.has(paramName);
 
@@ -472,8 +469,10 @@ export class PhysicsReviewModal {
     }
 
     // B. Manual Entry Form (if applicable)
-    const isStructural = issue.issueType === 'ungrounded_geometry' ||
-                         issue.issueType === 'ambiguous_geometry' ||
+    const issueType = issue.issueType || issue.issue_type;
+    const isStructural = issueType === 'ungrounded_geometry' ||
+                         issueType === 'ambiguous_geometry' ||
+                         INTERNAL_GEOMETRY_PARAMS.has(paramName) ||
                          paramName === 'nodes' ||
                          paramName === 'components' ||
                          !paramName;
@@ -603,7 +602,7 @@ export class PhysicsReviewModal {
     const item = document.createElement('div');
     item.className = 'prm-resolved-item';
 
-    const friendlyLabel = PARAMETER_LABELS[paramKey] || paramKey;
+    const friendlyLabel = PARAMETER_LABELS[paramKey] || pVal?.label || paramKey;
     let valStr = '';
     let unitStr = '';
 
@@ -615,7 +614,7 @@ export class PhysicsReviewModal {
     }
 
     // Provenance identification
-    const provRecord = bookIR?.parameter_provenance?.[paramKey] || pVal?.provenance;
+    const provRecord = bookIR?.parameterProvenance?.[paramKey] || bookIR?.parameter_provenance?.[paramKey] || pVal?.provenance;
     let badgeClass = 'confirmed';
     let badgeText = 'Confirmed';
 
@@ -633,6 +632,9 @@ export class PhysicsReviewModal {
       } else if (src.includes('user')) {
         badgeClass = 'confirmed';
         badgeText = 'Student Value';
+      } else if (src.includes('ocr')) {
+        badgeClass = 'detected';
+        badgeText = 'Diagram Value';
       }
     }
 

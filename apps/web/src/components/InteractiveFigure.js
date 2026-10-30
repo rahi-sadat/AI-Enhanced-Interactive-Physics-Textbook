@@ -76,7 +76,7 @@ export class InteractiveFigure {
         <div class="if-header-left">
           <span class="if-id-chip" data-el="idChip">FIG-001</span>
           <span class="if-domain-badge mechanics" data-el="domainBadge">👣 Mechanics</span>
-          <h3 class="if-title" data-el="title">Interactive Simulation</h3>
+          <h3 class="if-title" data-el="title">Augmented Simulation</h3>
         </div>
         <div class="if-header-right">
           <button class="if-btn if-btn-secondary" data-el="btnReviewSetup" title="Reopen evidence review and modeling setup" style="padding:4px 10px; font-size:0.76rem;">
@@ -85,8 +85,8 @@ export class InteractiveFigure {
           <button class="if-btn if-btn-secondary" data-el="btnToggleAnchors" title="Toggle sub-pixel alignment reticles" style="padding:4px 10px; font-size:0.76rem;">
             🎯 Anchors (0px)
           </button>
-          <button class="if-btn if-btn-secondary" data-el="btnToggleSidebar" title="Simulate drawer/sidebar width changes" style="padding:4px 10px; font-size:0.76rem;">
-            ⇄ Sidebar
+          <button class="if-btn if-btn-secondary" data-el="btnToggleSidebar" title="Show or hide simulation controls" style="padding:4px 10px; font-size:0.76rem;">
+            ⇄ Controls
           </button>
           <span class="if-status-pill paused" data-el="statusPill">PAUSED</span>
         </div>
@@ -107,7 +107,7 @@ export class InteractiveFigure {
 
           <!-- Dynamic Parameters with Provenance -->
           <div>
-            <div class="if-section-title">Parameters &amp; Evidence</div>
+            <div class="if-section-title">Adjust the simulation</div>
             <div class="if-parameters-list" data-el="paramsList"></div>
             <details data-el="assumptionsPanel" style="display:none; margin-top:12px;">
               <summary data-el="assumptionsSummary">Model assumptions</summary>
@@ -132,8 +132,8 @@ export class InteractiveFigure {
 
       <!-- Footer -->
       <footer class="if-footer" data-el="footer">
-        <span class="if-curriculum-tag" data-el="curriculumTag">Platform Content Spine v1</span>
-        <span class="if-engine-tag" data-el="engineTag">Layout-Invariant FigureViewport</span>
+        <span class="if-curriculum-tag" data-el="curriculumTag">Explore physics on your diagram</span>
+        <span class="if-engine-tag" data-el="engineTag">Simulation over the original image</span>
       </footer>
     `;
 
@@ -249,7 +249,7 @@ export class InteractiveFigure {
 
     const assumptions = Array.isArray(scene.assumptions) ? scene.assumptions : [];
     this.dom.assumptionsPanel.style.display = assumptions.length ? '' : 'none';
-    this.dom.assumptionsSummary.textContent = `Model assumptions (${assumptions.length})`;
+    this.dom.assumptionsSummary.textContent = `Assumed values (${assumptions.length})`;
     this.dom.assumptionsList.replaceChildren();
     for (const assumption of assumptions) {
       const item = document.createElement('li');
@@ -264,7 +264,7 @@ export class InteractiveFigure {
     if (scene.metadata?.chapter || scene.metadata?.topic) {
       this.dom.curriculumTag.textContent = `${scene.metadata.chapter || ''} • ${scene.metadata.topic || ''}`;
     } else {
-      this.dom.curriculumTag.textContent = `Canonical Scene v1 (${domain})`;
+      this.dom.curriculumTag.textContent = `${domain.charAt(0).toUpperCase() + domain.slice(1)} simulation`;
     }
 
     // 5. Clear previous overlay canvas, parameters and telemetry from previous domain
