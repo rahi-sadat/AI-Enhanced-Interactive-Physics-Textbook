@@ -10,6 +10,7 @@
 import { SimulationAdapter } from '../core/SimulationAdapter.js';
 import { CircuitCompiler } from './CircuitCompiler.js';
 import { CircuitSolver } from './CircuitSolver.js';
+import { CircuitTransientSolver } from './CircuitTransientSolver.js';
 import { UnsupportedPhysicsSubtypeError, PhysicsSceneValidationError } from '../core/errors.js';
 
 export class CircuitAdapter extends SimulationAdapter {
@@ -57,7 +58,7 @@ export class CircuitAdapter extends SimulationAdapter {
 
     // 1. Compile topology and initial solve using verified MNA engine
     this.model = CircuitCompiler.compile(scene);
-    this.solver = new CircuitSolver(this.model);
+    this.solver = this.model.capacitors.length ? new CircuitTransientSolver(this.model) : new CircuitSolver(this.model);
     this.solve();
 
     this.notifyStateChange(this.getState());
@@ -68,13 +69,24 @@ export class CircuitAdapter extends SimulationAdapter {
     this.electricalState = this.solver.solveDC();
   }
 
+  step(dt = 1 / 60) {
+    if (!this.running) return;
+    if (this.solver instanceof CircuitTransientSolver) {
+      this.electricalState = this.solver.step(dt);
+      this.time = this.electricalState.time;
+      this.notifyStateChange(this.getState());
+    } else {
+      super.step(dt);
+    }
+  }
+
   /**
    * Internal hook called by SimulationAdapter after atomic validation, unit conversion,
    * and scene mutation succeed.
    */
   _applyParameterUpdate(address, convertedVal, key, targetId, incomingUnit) {
     const rawTarget = targetId || address || key;
-    const compId = rawTarget.split('.')[0].replace(/_(resistance|voltage|current)$/, '');
+    const compId = rawTarget.split('.')[0].replace(/_(resistance|voltage|current|capacitance)$/, '');
     const comp = this.scene.circuit?.components?.find(c => c.id === compId || c.id === rawTarget || c.label === rawTarget);
     if (comp && typeof convertedVal === 'number') {
       comp.value = convertedVal;
@@ -103,7 +115,7 @@ export class CircuitAdapter extends SimulationAdapter {
   reset() {
     super.reset();
     this.model = CircuitCompiler.compile(this.scene);
-    this.solver.load(this.model);
+    this.solver = this.model.capacitors.length ? new CircuitTransientSolver(this.model) : new CircuitSolver(this.model);
     this.solve();
     this.notifyStateChange(this.getState());
   }
@@ -148,6 +160,8 @@ export class CircuitAdapter extends SimulationAdapter {
         label_bbox_source_px: c.label_bbox_source_px || c.geometry?.label_bbox_source_px,
         terminals: c.terminals || [],
         current_A: cur,
+        voltage_V: state.capacitorVoltages?.[c.id],
+        charge_C: state.capacitorCharge?.[c.id],
         power_W: power
       };
     });
@@ -185,7 +199,7 @@ export class CircuitAdapter extends SimulationAdapter {
     return {
       domain: 'circuits',
       subtype: this.subtype,
-      time: 0.0,
+      time: this.time,
       state,
       geometry: {
         nodeVoltages: state.nodeVoltages,
@@ -280,6 +294,8 @@ export class CircuitAdapter extends SimulationAdapter {
             const vThis = nodeVoltages[node] ?? 0.0;
             const rVal = c.value || 10.0;
             inj = (vOther - vThis) / rVal;
+          } else if (c.type === 'capacitor') {
+            inj = (idx === 1 ? 1 : -1) * (branchCurrents[c.id] ?? 0);
           } else if (c.type === 'switch') {
             if (c.state !== 'open') {
               const iBranch = branchCurrents[c.id] ?? 0.0;
@@ -422,6 +438,10 @@ export class CircuitAdapter extends SimulationAdapter {
       domain: 'circuits',
       subtype: this.subtype,
       running: this.running,
+      time: this.time,
+      capacitorVoltages: es.capacitorVoltages || {},
+      capacitorCharge: es.capacitorCharge || {},
+      capacitorEnergy: es.capacitorEnergy || {},
       nodeVoltages,
       branchCurrents,
       branchPowers,
@@ -470,7 +490,7 @@ export class CircuitAdapter extends SimulationAdapter {
               control: comp.control || { type: 'toggle' }
             };
           } else if (comp.value !== undefined) {
-            const key = (comp.type === 'voltage_source' || comp.type === 'battery') ? 'voltage' : 'resistance';
+            const key = comp.type === 'capacitor' ? 'capacitance' : (comp.type === 'voltage_source' || comp.type === 'battery') ? 'voltage' : 'resistance';
             const unit = comp.unit || ((comp.type === 'voltage_source' || comp.type === 'battery') ? 'V' : 'Ω');
             const pMeta = comp.parameter || {};
             params[`${comp.id}.${key}`] = {

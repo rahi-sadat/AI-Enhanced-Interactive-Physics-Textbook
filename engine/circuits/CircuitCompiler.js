@@ -70,6 +70,7 @@ export class CircuitCompiler {
     // 3. Classify components and assign auxiliary source current variables
     const voltageSources = [];
     const resistors = [];
+    const capacitors = [];
     const switches = [];
     const ammeters = [];
     const voltmeters = [];
@@ -171,6 +172,10 @@ export class CircuitCompiler {
             c.sourceVarIndex = -1;
           }
           switches.push(c);
+          break;
+
+        case 'capacitor':
+          capacitors.push(c);
           break;
 
         case 'ammeter':
@@ -280,6 +285,7 @@ export class CircuitCompiler {
       matrixSize,
       voltageSources,
       resistors,
+      capacitors,
       switches,
       ammeters,
       voltmeters,
