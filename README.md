@@ -70,6 +70,11 @@ AI-Enhanced-Interactive-Physics-Textbook/
 
 ## 🚀 Quick Start & Installation
 
+For the matched Windows/Python environment and new circuit dataset/YOLO tools,
+use [the reproducible setup guide](docs/WINDOWS_REPRODUCIBLE_SETUP.md).
+[This Codex prompt](docs/CODEX_FRIEND_SETUP_PROMPT.md) performs the setup on a
+collaborator's laptop. Trained weights are shared in a separate verified asset ZIP.
+
 ### 1. Backend & Perception Setup
 
 ```bash
