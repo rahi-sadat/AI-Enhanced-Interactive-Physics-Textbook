@@ -1,0 +1,94 @@
+{
+  "status": "complete",
+  "epochs": 30,
+  "elapsed_seconds": 5566.344649899998,
+  "weights_last": "D:\\AugmentedPhysics\\runs\\augmented_physics\\circuits_real_v2_20261031\\weights\\last.pt",
+  "weights_best": "D:\\AugmentedPhysics\\runs\\augmented_physics\\circuits_real_v2_20261031\\weights\\best.pt",
+  "weights_last_sha256": "95bc8a1f76aaed83ad907e87bdee0255da1837fdb8f9c8405a723779e8ed0c46",
+  "starting_checkpoint_unchanged": true,
+  "source_files_unchanged": true,
+  "real_images_used_for_training": 59,
+  "synthetic_rehearsal_images": 120,
+  "synthetic_validation": {
+    "precision": 0.9972774815464267,
+    "recall": 0.9986117571190142,
+    "map50": 0.9947286821705427,
+    "map50_95": 0.8311074795955525,
+    "per_class": [
+      {
+        "name": "resistor",
+        "instances": 279,
+        "precision": 0.9990359931894545,
+        "recall": 1.0,
+        "map50": 0.995,
+        "map50_95": 0.8412217124541657
+      },
+      {
+        "name": "voltage_source",
+        "instances": 128,
+        "precision": 0.9907247733916663,
+        "recall": 1.0,
+        "map50": 0.9939147286821705,
+        "map50_95": 0.8166875878403429
+      },
+      {
+        "name": "capacitor",
+        "instances": 160,
+        "precision": 1.0,
+        "recall": 0.9944470284760568,
+        "map50": 0.995,
+        "map50_95": 0.8715298775174334
+      },
+      {
+        "name": "switch",
+        "instances": 103,
+        "precision": 0.9993491596045859,
+        "recall": 1.0,
+        "map50": 0.995,
+        "map50_95": 0.794990740570268
+      }
+    ]
+  },
+  "seen_real_training_fit": {
+    "precision": 0.8439816645026419,
+    "recall": 0.899684002761113,
+    "map50": 0.8797480077678346,
+    "map50_95": 0.6667693765331114,
+    "per_class": [
+      {
+        "name": "resistor",
+        "instances": 203,
+        "precision": 0.987772871796099,
+        "recall": 0.9901477832512315,
+        "map50": 0.995,
+        "map50_95": 0.8278280760385892
+      },
+      {
+        "name": "voltage_source",
+        "instances": 72,
+        "precision": 0.9017083405309356,
+        "recall": 0.9722222222222222,
+        "map50": 0.979492031071338,
+        "map50_95": 0.7952994300938564
+      },
+      {
+        "name": "capacitor",
+        "instances": 4,
+        "precision": 1.0,
+        "recall": 0.9968084475372659,
+        "map50": 0.995,
+        "map50_95": 0.6215
+      },
+      {
+        "name": "switch",
+        "instances": 3,
+        "precision": 0.486445445683533,
+        "recall": 0.6395575580337327,
+        "map50": 0.5495000000000001,
+        "map50_95": 0.42245
+      }
+    ]
+  },
+  "independent_real_test_metrics": null,
+  "warning": "Scores on the 59 real diagrams are training fit, not unseen-image accuracy. Await a new independent real test set."
+}

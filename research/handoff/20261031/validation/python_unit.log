@@ -1,0 +1,339 @@
+........................................................................ [ 20%]
+
+..................FFFF.FFF.FFFFFF....................................... [ 41%]
+
+..............................................F....................F.... [ 61%]
+
+..........F............................................................. [ 82%]
+
+..........................................................FFFFF          [100%]
+
+================================== FAILURES ===================================
+
+___ test_supplied_drawings_ground_all_components[parallel_three_plate.jpeg] ___
+
+tests\unit\test_circuit_generalization.py:70: in test_supplied_drawings_ground_all_components
+
+    assert book.geometry["circuit_validation"]["geometry"], (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([{'candidate_id': 'cv_symbol_3', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'ca...essage': 'Review unresolved physical symbols or conductor paths before compilation.', 'entity_id': None, 'stage': 17}])
+
+E   assert False
+
+___ test_supplied_drawings_ground_all_components[symbolic_single_loop.png] ____
+
+tests\unit\test_circuit_generalization.py:70: in test_supplied_drawings_ground_all_components
+
+    assert book.geometry["circuit_validation"]["geometry"], (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([], [{'code': 'MISSING_PHYSICAL_COMPONENT', 'message': 'r1 has no verified physical symbol and terminal graph.', 'ent...essage': 'Review unresolved physical symbols or conductor paths before compilation.', 'entity_id': None, 'stage': 17}])
+
+E   assert False
+
+___ test_supplied_drawings_ground_all_components[mixed_four_resistors.jpg] ____
+
+tests\unit\test_circuit_generalization.py:70: in test_supplied_drawings_ground_all_components
+
+    assert book.geometry["circuit_validation"]["geometry"], (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([{'candidate_id': 'cv_symbol_3', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'ca...essage': 'Review unresolved physical symbols or conductor paths before compilation.', 'entity_id': None, 'stage': 17}])
+
+E   assert False
+
+____ test_missing_values_default_or_manual_only_affect_selected_component _____
+
+tests\unit\test_circuit_generalization.py:88: in test_missing_values_default_or_manual_only_affect_selected_component
+
+    resistor=next(c for c in book.parameters["components"] if c["id"]=="r1")
+
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+E   StopIteration
+
+_ test_real_drawings_rotated_and_rescaled[options0-parallel_three_plate.jpeg] _
+
+tests\unit\test_circuit_generalization.py:120: in test_real_drawings_rotated_and_rescaled
+
+    assert PhysicsCompiler().compile(book).status=="READY", (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([{'candidate_id': 'cv_symbol_3', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'ca...essage': 'Review unresolved physical symbols or conductor paths before compilation.', 'entity_id': None, 'stage': 17}])
+
+E   assert 'NEEDS_REVIEW' == 'READY'
+
+E
+
+E     - READY
+
+E     + NEEDS_REVIEW
+
+_ test_real_drawings_rotated_and_rescaled[options0-mixed_four_resistors.jpg] __
+
+tests\unit\test_circuit_generalization.py:120: in test_real_drawings_rotated_and_rescaled
+
+    assert PhysicsCompiler().compile(book).status=="READY", (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([{'candidate_id': 'cv_symbol_1', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'ca...essage': 'Review unresolved physical symbols or conductor paths before compilation.', 'entity_id': None, 'stage': 17}])
+
+E   assert 'NEEDS_REVIEW' == 'READY'
+
+E
+
+E     - READY
+
+E     + NEEDS_REVIEW
+
+_ test_real_drawings_rotated_and_rescaled[options1-parallel_three_plate.jpeg] _
+
+tests\unit\test_circuit_generalization.py:120: in test_real_drawings_rotated_and_rescaled
+
+    assert PhysicsCompiler().compile(book).status=="READY", (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([{'candidate_id': 'cv_symbol_4', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'ca...essage': 'Review unresolved physical symbols or conductor paths before compilation.', 'entity_id': None, 'stage': 17}])
+
+E   assert 'NEEDS_REVIEW' == 'READY'
+
+E
+
+E     - READY
+
+E     + NEEDS_REVIEW
+
+_ test_real_drawings_rotated_and_rescaled[options2-parallel_three_plate.jpeg] _
+
+tests\unit\test_circuit_generalization.py:120: in test_real_drawings_rotated_and_rescaled
+
+    assert PhysicsCompiler().compile(book).status=="READY", (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([{'candidate_id': 'cv_symbol_3', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'ca...essage': 'Review unresolved physical symbols or conductor paths before compilation.', 'entity_id': None, 'stage': 17}])
+
+E   assert 'NEEDS_REVIEW' == 'READY'
+
+E
+
+E     - READY
+
+E     + NEEDS_REVIEW
+
+_ test_real_drawings_rotated_and_rescaled[options2-mixed_four_resistors.jpg] __
+
+tests\unit\test_circuit_generalization.py:120: in test_real_drawings_rotated_and_rescaled
+
+    assert PhysicsCompiler().compile(book).status=="READY", (checked["validation_issues"],book.review_issues)
+
+E   AssertionError: ([{'candidate_id': 'cv_symbol_3', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'ca..._TERMINAL', 'message': 'A conductor island ends without a second physical terminal.', 'entity_id': None, 'stage': 17}])
+
+E   assert 'NEEDS_REVIEW' == 'READY'
+
+E
+
+E     - READY
+
+E     + NEEDS_REVIEW
+
+____________ test_component_resolution_cannot_hide_value_tampering ____________
+
+tests\unit\test_circuit_generalization.py:127: in test_component_resolution_cannot_hide_value_tampering
+
+    assert ResolutionEngine.apply_policy(book,policy,f"component.{cid}.value",True).success
+
+E   AssertionError: assert False
+
+E    +  where False = ResolutionResult(success=False, parameter_name='component.r1.value', resolved_value=None, canonical_unit=None, origina...tered_value=None, resolution=None, readiness_report=None, error='Unknown circuit component or unsupported value type.').success
+
+E    +    where ResolutionResult(success=False, parameter_name='component.r1.value', resolved_value=None, canonical_unit=None, origina...tered_value=None, resolution=None, readiness_report=None, error='Unknown circuit component or unsupported value type.') = apply_policy(BookIR(version='1.0', source_asset_id='symbolic_single_loop.png', page_ir_version=None, figure_id='figure', domain='ci...ue, superseded_value=None, derived_from=None)}, calibration=None, id='symbolic_single_loop.png_figure', isPhysics=True), 'policy_standard_dc_resistance', 'component.r1.value', True)
+
+E    +      where apply_policy = ResolutionEngine.apply_policy
+
+_ test_actual_ocr_symbol_collisions_preserve_measured_geometry[parallel_three_plate.jpeg] _
+
+tests\unit\test_circuit_generalization.py:137: in test_actual_ocr_symbol_collisions_preserve_measured_geometry
+
+    assert book.geometry["circuit_validation"]["geometry"], checked["validation_issues"]
+
+E   AssertionError: [{'candidate_id': 'cv_symbol_3', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'can..., ...}, {'candidate_id': 'cv_symbol_7', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}]
+
+E   assert False
+
+_ test_actual_ocr_symbol_collisions_preserve_measured_geometry[symbolic_single_loop.png] _
+
+tests\unit\test_circuit_generalization.py:137: in test_actual_ocr_symbol_collisions_preserve_measured_geometry
+
+    assert book.geometry["circuit_validation"]["geometry"], checked["validation_issues"]
+
+E   AssertionError: []
+
+E   assert False
+
+_ test_actual_ocr_symbol_collisions_preserve_measured_geometry[mixed_four_resistors.jpg] _
+
+tests\unit\test_circuit_generalization.py:137: in test_actual_ocr_symbol_collisions_preserve_measured_geometry
+
+    assert book.geometry["circuit_validation"]["geometry"], checked["validation_issues"]
+
+E   AssertionError: [{'candidate_id': 'cv_symbol_3', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, {'can..., {'candidate_id': 'cv_symbol_10', 'stage': 14, 'status': 'AMBIGUOUS', 'code': 'SYMBOL_GEOMETRY_UNVERIFIED', ...}, ...]
+
+E   assert False
+
+_____________ TestPR06MultilingualOCR.test_ocr_benchmark_metrics ______________
+
+/mnt/d/AugmentedPhysics/tests/unit/test_pr06_multilingual_ocr.py:280: in test_ocr_benchmark_metrics
+
+    ???
+
+E   AssertionError: 1.0 not less than 0.4 : CER (1.00) exceeds acceptable bound
+
+________________ TestPR06OCR.test_rapidocr_provider_available _________________
+
+tests\unit\test_pr06_ocr.py:61: in test_rapidocr_provider_available
+
+    self.assertTrue(provider.available())
+
+E   AssertionError: False is not true
+
+____________ TestPR06Segmentation.test_sam2_provider_availability _____________
+
+tests\unit\test_pr06_segmentation.py:60: in test_sam2_provider_availability
+
+    self.assertTrue(provider.available())
+
+E   AssertionError: False is not true
+
+__________________ test_transient_failure_retries_same_model __________________
+
+ai\ingestion\vision\gemini_provider.py:303: in analyze_diagram
+
+    from google.genai import types
+
+E   ModuleNotFoundError: No module named 'google'
+
+
+
+During handling of the above exception, another exception occurred:
+
+tests\unit\test_vision_retry.py:30: in test_transient_failure_retries_same_model
+
+    result = instance.analyze_diagram(b"test-image", "image/png", None)
+
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ai\ingestion\vision\gemini_provider.py:397: in analyze_diagram
+
+    raise VisionProviderError(f"Gemini API request failed: {e}")
+
+E   ai.ingestion.vision.provider_interface.VisionProviderError: Gemini API request failed: No module named 'google'
+
+_ test_quota_or_missing_model_switches_without_retry[429 RESOURCE_EXHAUSTED] __
+
+ai\ingestion\vision\gemini_provider.py:303: in analyze_diagram
+
+    from google.genai import types
+
+E   ModuleNotFoundError: No module named 'google'
+
+
+
+During handling of the above exception, another exception occurred:
+
+tests\unit\test_vision_retry.py:38: in test_quota_or_missing_model_switches_without_retry
+
+    result = instance.analyze_diagram(b"test-image", "image/png", None)
+
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ai\ingestion\vision\gemini_provider.py:397: in analyze_diagram
+
+    raise VisionProviderError(f"Gemini API request failed: {e}")
+
+E   ai.ingestion.vision.provider_interface.VisionProviderError: Gemini API request failed: No module named 'google'
+
+______ test_quota_or_missing_model_switches_without_retry[404 NOT_FOUND] ______
+
+ai\ingestion\vision\gemini_provider.py:303: in analyze_diagram
+
+    from google.genai import types
+
+E   ModuleNotFoundError: No module named 'google'
+
+
+
+During handling of the above exception, another exception occurred:
+
+tests\unit\test_vision_retry.py:38: in test_quota_or_missing_model_switches_without_retry
+
+    result = instance.analyze_diagram(b"test-image", "image/png", None)
+
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ai\ingestion\vision\gemini_provider.py:397: in analyze_diagram
+
+    raise VisionProviderError(f"Gemini API request failed: {e}")
+
+E   ai.ingestion.vision.provider_interface.VisionProviderError: Gemini API request failed: No module named 'google'
+
+____________________ test_auth_error_fails_without_retries ____________________
+
+tests\unit\test_vision_retry.py:47: in test_auth_error_fails_without_retries
+
+    assert generate.call_count == 1
+
+E   AssertionError: assert 0 == 1
+
+E    +  where 0 = <Mock id='1268537771792'>.call_count
+
+____________ test_outage_is_bounded_and_never_returns_a_fake_scene ____________
+
+tests\unit\test_vision_retry.py:54: in test_outage_is_bounded_and_never_returns_a_fake_scene
+
+    assert generate.call_count == 8  # Configured primary + three existing fallback models, two tries each.
+
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+E   AssertionError: assert 0 == 8
+
+E    +  where 0 = <Mock id='1268547789568'>.call_count
+
+=========================== short test summary info ===========================
+
+FAILED tests/unit/test_circuit_generalization.py::test_supplied_drawings_ground_all_components[parallel_three_plate.jpeg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_supplied_drawings_ground_all_components[symbolic_single_loop.png]
+
+FAILED tests/unit/test_circuit_generalization.py::test_supplied_drawings_ground_all_components[mixed_four_resistors.jpg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_missing_values_default_or_manual_only_affect_selected_component
+
+FAILED tests/unit/test_circuit_generalization.py::test_real_drawings_rotated_and_rescaled[options0-parallel_three_plate.jpeg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_real_drawings_rotated_and_rescaled[options0-mixed_four_resistors.jpg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_real_drawings_rotated_and_rescaled[options1-parallel_three_plate.jpeg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_real_drawings_rotated_and_rescaled[options2-parallel_three_plate.jpeg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_real_drawings_rotated_and_rescaled[options2-mixed_four_resistors.jpg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_component_resolution_cannot_hide_value_tampering
+
+FAILED tests/unit/test_circuit_generalization.py::test_actual_ocr_symbol_collisions_preserve_measured_geometry[parallel_three_plate.jpeg]
+
+FAILED tests/unit/test_circuit_generalization.py::test_actual_ocr_symbol_collisions_preserve_measured_geometry[symbolic_single_loop.png]
+
+FAILED tests/unit/test_circuit_generalization.py::test_actual_ocr_symbol_collisions_preserve_measured_geometry[mixed_four_resistors.jpg]
+
+FAILED tests/unit/test_pr06_multilingual_ocr.py::TestPR06MultilingualOCR::test_ocr_benchmark_metrics
+
+FAILED tests/unit/test_pr06_ocr.py::TestPR06OCR::test_rapidocr_provider_available
+
+FAILED tests/unit/test_pr06_segmentation.py::TestPR06Segmentation::test_sam2_provider_availability
+
+FAILED tests/unit/test_vision_retry.py::test_transient_failure_retries_same_model
+
+FAILED tests/unit/test_vision_retry.py::test_quota_or_missing_model_switches_without_retry[429 RESOURCE_EXHAUSTED]
+
+FAILED tests/unit/test_vision_retry.py::test_quota_or_missing_model_switches_without_retry[404 NOT_FOUND]
+
+FAILED tests/unit/test_vision_retry.py::test_auth_error_fails_without_retries
+
+FAILED tests/unit/test_vision_retry.py::test_outage_is_bounded_and_never_returns_a_fake_scene
+
+21 failed, 330 passed in 109.32s (0:01:49)

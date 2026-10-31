@@ -1,5 +1,35 @@
 # Copy this prompt into Codex on the other laptop
 
+## Current handoff — use this for an existing working checkout
+
+```text
+Continue the completed AugmentedPhysics work from origin/main. Read AGENTS.md
+and docs/TEAM_HANDOFF_20261031.md. Preserve local changes and safely pull with
+git pull --ff-only. Keep my existing .venv, SAM2 and PyTorch/CUDA; do not run
+setup_windows.ps1, recreate environments or retrain as a setup check.
+
+Run my existing .venv\Scripts\python.exe scripts/verify_circuit_handoff.py.
+The approved annotations, v1/v2 weights, intermediate training checkpoints,
+predictions, plots, comparison gallery and reports are already in Git. No new
+model-assets transfer is needed for these circuit detectors. If raw historical
+evidence or local evaluation staging is needed, use this verifier's
+--restore-research and --prepare-staging flags; do not redo completed work.
+
+All 59 real textbook images were used to train v2 after the original v1
+evaluation. They are no longer an independent v2 test set. The next task is to
+evaluate both models on the new, separately supplied real test set. Do not
+integrate YOLO into production or silently treat training fit as test accuracy.
+Read the documented switch weakness, localization regression and 21 existing
+Python test failures before making claims. Keep my own API keys local.
+```
+
+## Historical fresh-machine setup prompt
+
+The following is retained for an entirely new installation. It predates the
+checked-in v1/v2 weights and approved real annotations. Use the current handoff
+above for an existing environment; its data roles and asset locations take
+precedence over the older instructions below.
+
 ```text
 Set up this AugmentedPhysics checkout so it can run the same new dataset/YOLO
 tools and the existing app as Rahi's laptop. Execute the setup and verification;

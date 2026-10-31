@@ -1,0 +1,408 @@
+{
+  "status": "seen training images only; not independent accuracy",
+  "confidence": 0.25,
+  "matching_iou": 0.5,
+  "overall": {
+    "tp": 276,
+    "fp": 14,
+    "fn": 6,
+    "reference": 282,
+    "predictions": 290,
+    "precision": 0.9517241379310345,
+    "recall": 0.9787234042553191
+  },
+  "per_class": {
+    "resistor": {
+      "tp": 201,
+      "fp": 3,
+      "fn": 2,
+      "reference": 203,
+      "predictions": 204,
+      "precision": 0.9852941176470589,
+      "recall": 0.9901477832512315
+    },
+    "voltage_source": {
+      "tp": 70,
+      "fp": 7,
+      "fn": 2,
+      "reference": 72,
+      "predictions": 77,
+      "precision": 0.9090909090909091,
+      "recall": 0.9722222222222222
+    },
+    "capacitor": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "reference": 4,
+      "predictions": 4,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "switch": {
+      "tp": 1,
+      "fp": 4,
+      "fn": 2,
+      "reference": 3,
+      "predictions": 5,
+      "precision": 0.2,
+      "recall": 0.3333333333333333
+    }
+  },
+  "images": [
+    {
+      "image": "Screenshot 2026-10-30 232522.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 232632.png",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 232905.png",
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 232921.png",
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234003.png",
+      "tp": 6,
+      "fp": 4,
+      "fn": 1
+    },
+    {
+      "image": "Screenshot 2026-10-30 234104.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234210.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234420.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234517.png",
+      "tp": 7,
+      "fp": 2,
+      "fn": 1
+    },
+    {
+      "image": "Screenshot 2026-10-30 234541.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234621.png",
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234647.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 1
+    },
+    {
+      "image": "Screenshot 2026-10-30 234712.png",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234759.png",
+      "tp": 6,
+      "fp": 1,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234822.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234851.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 1
+    },
+    {
+      "image": "Screenshot 2026-10-30 234914.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 234939.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235008.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235028.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235106.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235305.png",
+      "tp": 5,
+      "fp": 1,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235329.png",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235350.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235413.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235428.png",
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235447.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235508.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235606.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235636.png",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235705.png",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235725.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235808.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 1
+    },
+    {
+      "image": "Screenshot 2026-10-30 235825.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235847.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-30 235951.png",
+      "tp": 5,
+      "fp": 1,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000005.png",
+      "tp": 5,
+      "fp": 1,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000027.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000052.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000108.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000123.png",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000634.png",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000654.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000742.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000756.png",
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000816.png",
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000838.png",
+      "tp": 4,
+      "fp": 1,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000857.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000926.png",
+      "tp": 6,
+      "fp": 1,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 000946.png",
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001022.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001102.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001231.png",
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001314.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001333.png",
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001404.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001423.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "Screenshot 2026-10-31 001447.png",
+      "tp": 4,
+      "fp": 2,
+      "fn": 1
+    },
+    {
+      "image": "Screenshot 2026-10-31 001508.png",
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    }
+  ]
+}

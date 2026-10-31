@@ -1,5 +1,6 @@
 # Preserve byte-exact annotations, checkpoints and recorded research artifacts.
 datasets/circuits_v1/real_v1/evaluation_v1/labels/*.txt -text
+datasets/circuits_v1/real_v1/evaluation_v1/annotation_provenance.json -text whitespace=cr-at-eol
 outputs/circuits_real_eval_v1_cvat_draft_20261031* -text whitespace=cr-at-eol
 outputs/cvat_evaluation_v1_originals_59.zip -text
 runs/augmented_physics/** -text whitespace=cr-at-eol
