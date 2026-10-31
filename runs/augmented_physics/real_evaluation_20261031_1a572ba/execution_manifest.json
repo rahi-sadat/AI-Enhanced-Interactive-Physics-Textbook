@@ -1,0 +1,15 @@
+{
+  "started_utc": "2026-10-31T05:55:55.199366+00:00",
+  "python": "D:\\AugmentedPhysics\\.venv\\Scripts\\python.exe",
+  "python_version": "3.12.11 | packaged by conda-forge | (main, Jun  4 2025, 14:29:09) [MSC v.1943 64 bit (AMD64)]",
+  "torch": "2.14.0+cpu",
+  "ultralytics": "8.4.193",
+  "device": "cpu",
+  "evaluator_sha256": "4eb24478759244b378c86823ae5a32603a08137e5d1bc709b9764343fd959488",
+  "human_approved": true,
+  "ultralytics_source_sha256": {
+    "engine/validator.py": "9df74d4cecee8be82a6992d89f0b59e79ddf7eeb8c97978b3078d385ca7f9e72",
+    "models/yolo/detect/val.py": "811a23927aab993fcc70e57ac189fdff5b373b27ddf3dd4301990e75f7b52f6d",
+    "utils/metrics.py": "b4929f3dd2c6ee8ee5c4f1744911f076c826c5d892f8ddf413ed550d7957be39"
+  }
+}

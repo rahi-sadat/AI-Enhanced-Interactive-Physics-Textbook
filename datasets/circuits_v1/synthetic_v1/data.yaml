@@ -1,4 +1,3 @@
-path: "D:/AugmentedPhysics/datasets/circuits_v1/synthetic_v1"
 train: images/train
 val: images/val
 names:

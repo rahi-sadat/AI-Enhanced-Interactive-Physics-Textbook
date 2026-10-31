@@ -1,0 +1,169 @@
+{
+  "images": 120,
+  "instances": 670,
+  "precision": 0.9995050454754038,
+  "recall": 1.0,
+  "map50": 0.995,
+  "map50_95": 0.9858293991617748,
+  "per_class": [
+    {
+      "class_id": 0,
+      "name": "resistor",
+      "instances": 279,
+      "images": 120,
+      "precision": 0.9996260014735338,
+      "recall": 1.0,
+      "map50": 0.995,
+      "map50_95": 0.9948199323785062,
+      "ap_at_iou_50_to_95": [
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.9931993237850625
+      ]
+    },
+    {
+      "class_id": 1,
+      "name": "voltage_source",
+      "instances": 128,
+      "images": 120,
+      "precision": 0.9995030648938533,
+      "recall": 1.0,
+      "map50": 0.995,
+      "map50_95": 0.9892125527402854,
+      "ap_at_iou_50_to_95": [
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.9371255274028532
+      ]
+    },
+    {
+      "class_id": 2,
+      "name": "capacitor",
+      "instances": 160,
+      "images": 84,
+      "precision": 0.9996393972160875,
+      "recall": 1.0,
+      "map50": 0.995,
+      "map50_95": 0.9642851115283075,
+      "ap_at_iou_50_to_95": [
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.6878511152830757
+      ]
+    },
+    {
+      "class_id": 3,
+      "name": "switch",
+      "instances": 103,
+      "images": 103,
+      "precision": 0.9992517183181401,
+      "recall": 1.0,
+      "map50": 0.995,
+      "map50_95": 0.9949999999999999,
+      "ap_at_iou_50_to_95": [
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995,
+        0.995
+      ]
+    }
+  ],
+  "precision_recall_definition": "Macro mean at one common confidence maximizing smoothed mean class F1; not fixed 0.25",
+  "best_mean_f1_confidence": 0.8428428428428428,
+  "args": {
+    "data": "D:\\AugmentedPhysics\\runs\\augmented_physics\\real_evaluation_20261031_1a572ba\\data\\synthetic\\data.yaml",
+    "split": "val",
+    "imgsz": 960,
+    "conf": 0.001,
+    "iou": 0.7,
+    "max_det": 300,
+    "batch": 4,
+    "workers": 0,
+    "device": "cpu",
+    "half": false,
+    "plots": true,
+    "save_txt": true,
+    "save_conf": true,
+    "verbose": true,
+    "cache": false,
+    "augment": false,
+    "rect": true,
+    "seed": 20261030,
+    "deterministic": true,
+    "project": "D:\\AugmentedPhysics\\runs\\augmented_physics\\real_evaluation_20261031_1a572ba",
+    "name": "synthetic_validation",
+    "exist_ok": false
+  },
+  "speed_ms": {
+    "preprocess": 7.123735000034989,
+    "inference": 189.29963416679433,
+    "loss": 0.0008908328406202296,
+    "postprocess": 1.7244249995807575
+  },
+  "confusion_matrix_default_iou": 0.45,
+  "confusion_matrix_confidence": 0.001,
+  "confusion_matrix": [
+    [
+      279.0,
+      0.0,
+      0.0,
+      0.0,
+      13.0
+    ],
+    [
+      0.0,
+      128.0,
+      0.0,
+      0.0,
+      40.0
+    ],
+    [
+      0.0,
+      0.0,
+      160.0,
+      0.0,
+      16.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      103.0,
+      11.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}

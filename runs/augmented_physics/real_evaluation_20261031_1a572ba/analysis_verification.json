@@ -1,0 +1,44 @@
+{
+  "official_matcher_crosscheck_images": 59,
+  "official_matcher_crosscheck_predictions": 312,
+  "all_prediction_tp_flags_agree": true,
+  "count_identities_passed": true,
+  "low_confidence_switch_matches": [
+    {
+      "image": "Screenshot 2026-10-30 232522.png",
+      "gt_index": 2,
+      "confidence": 0.00101691,
+      "iou": 0.8144322499874751
+    }
+  ],
+  "synthetic_resistor_orientation_coverage": {
+    "train": {
+      "resistors": 1159,
+      "max_degrees_from_cardinal": 1.5896400000000028,
+      "more_than_5_degrees_from_cardinal": 0
+    },
+    "val": {
+      "resistors": 279,
+      "max_degrees_from_cardinal": 1.5945200000000028,
+      "more_than_5_degrees_from_cardinal": 0
+    }
+  },
+  "fp_types_per_class": {
+    "resistor": {
+      "background_or_unmatched": 9,
+      "localization_error": 1
+    },
+    "voltage_source": {
+      "background_or_unmatched": 19,
+      "localization_error": 8
+    },
+    "capacitor": {
+      "classification_error": 15,
+      "background_or_unmatched": 4
+    },
+    "switch": {
+      "background_or_unmatched": 11
+    }
+  },
+  "note": "Diagnostic classification FP can overlap a reference already claimed by a correct-class TP; not all are cross-class FN pairs."
+}

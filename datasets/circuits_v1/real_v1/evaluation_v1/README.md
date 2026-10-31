@@ -1,5 +1,17 @@
 # Held-out real circuit evaluation images
 
+## Current role after the 2026-10-31 v2 training
+
+The user reviewed and approved all 59 CVAT annotations. Their exact five-column
+YOLO labels are now versioned in `labels/`, and the original CVAT export is
+included in `outputs/circuits_real_eval_v1_cvat_draft_20261031.zip`.
+After the v1 baseline evaluation, the user authorized training v2 on all 59
+images and will supply a new test set later. These images are now training /
+regression data for v2, not an independent v2 test set. See
+`docs/TEAM_HANDOFF_20261031.md` before continuing work.
+
+The following instructions describe the earlier, pre-annotation v1 evaluation.
+
 The 59 PNG files in `images/` are user-selected textbook screenshots. They are
 evaluation inputs, separate from the 480/120 synthetic training/validation split.
 Keep original pixels and filenames. Bangla, English and mixed-language figures

@@ -1,0 +1,169 @@
+{
+  "images": 59,
+  "instances": 282,
+  "precision": 0.6208231192416129,
+  "recall": 0.6138692520351168,
+  "map50": 0.6714886059462185,
+  "map50_95": 0.3338507751492033,
+  "per_class": [
+    {
+      "class_id": 0,
+      "name": "resistor",
+      "instances": 203,
+      "images": 58,
+      "precision": 1.0,
+      "recall": 0.7610325636960229,
+      "map50": 0.9162228074261722,
+      "map50_95": 0.5618899342791883,
+      "ap_at_iou_50_to_95": [
+        0.9162228074261722,
+        0.9162228074261722,
+        0.9096284297474608,
+        0.8949274500531037,
+        0.840235699665289,
+        0.704097278545238,
+        0.3510986787998251,
+        0.08264608530851578,
+        0.003462962962962963,
+        0.00035714285714285714
+      ]
+    },
+    {
+      "class_id": 1,
+      "name": "voltage_source",
+      "instances": 72,
+      "images": 58,
+      "precision": 0.8390591977770142,
+      "recall": 0.6944444444444444,
+      "map50": 0.7738835150928788,
+      "map50_95": 0.385544495431549,
+      "ap_at_iou_50_to_95": [
+        0.7738835150928788,
+        0.7738835150928788,
+        0.7727080466090628,
+        0.6776261094380898,
+        0.47054911161648794,
+        0.2231481047776146,
+        0.12300200989486704,
+        0.02564454179361012,
+        0.015,
+        0.0
+      ]
+    },
+    {
+      "class_id": 2,
+      "name": "capacitor",
+      "instances": 4,
+      "images": 2,
+      "precision": 0.6442332791894378,
+      "recall": 1.0,
+      "map50": 0.995,
+      "map50_95": 0.387375,
+      "ap_at_iou_50_to_95": [
+        0.995,
+        0.995,
+        0.995,
+        0.5587500000000001,
+        0.33,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "class_id": 3,
+      "name": "switch",
+      "instances": 3,
+      "images": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "map50": 0.0008481012658227849,
+      "map50_95": 0.0005936708860759494,
+      "ap_at_iou_50_to_95": [
+        0.0008481012658227849,
+        0.0008481012658227849,
+        0.0008481012658227849,
+        0.0008481012658227849,
+        0.0008481012658227849,
+        0.0008481012658227849,
+        0.0008481012658227849,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "precision_recall_definition": "Macro mean at one common confidence maximizing smoothed mean class F1; not fixed 0.25",
+  "best_mean_f1_confidence": 0.8768768768768769,
+  "args": {
+    "data": "D:\\AugmentedPhysics\\runs\\augmented_physics\\real_evaluation_20261031_1a572ba\\data\\real\\data.yaml",
+    "split": "test",
+    "imgsz": 960,
+    "conf": 0.001,
+    "iou": 0.7,
+    "max_det": 300,
+    "batch": 4,
+    "workers": 0,
+    "device": "cpu",
+    "half": false,
+    "plots": true,
+    "save_txt": true,
+    "save_conf": true,
+    "verbose": true,
+    "cache": false,
+    "augment": false,
+    "rect": true,
+    "seed": 20261030,
+    "deterministic": true,
+    "project": "D:\\AugmentedPhysics\\runs\\augmented_physics\\real_evaluation_20261031_1a572ba",
+    "name": "real_validation",
+    "exist_ok": false
+  },
+  "speed_ms": {
+    "preprocess": 5.192310169489138,
+    "inference": 129.47430338965083,
+    "loss": 0.0007525429236150141,
+    "postprocess": 1.804840678232722
+  },
+  "confusion_matrix_default_iou": 0.45,
+  "confusion_matrix_confidence": 0.001,
+  "confusion_matrix": [
+    [
+      189.0,
+      0.0,
+      0.0,
+      0.0,
+      457.0
+    ],
+    [
+      0.0,
+      64.0,
+      0.0,
+      1.0,
+      615.0
+    ],
+    [
+      0.0,
+      5.0,
+      4.0,
+      0.0,
+      194.0
+    ],
+    [
+      8.0,
+      1.0,
+      0.0,
+      1.0,
+      389.0
+    ],
+    [
+      6.0,
+      2.0,
+      0.0,
+      1.0,
+      0.0
+    ]
+  ]
+}
