@@ -1,0 +1,65 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 3,
+  "component": "Upload persistence and dimension decoding",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 3,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\UploadService.py",
+      "function": "UploadService.ingest",
+      "line": 57,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\apps\\api\\main.py",
+        "function": "ingest_diagram",
+        "line": 1621
+      }
+    }
+  ],
+  "upstream_stage": "HTTP request reaches /api/ingest",
+  "downstream_stage": "PageIR / whole-figure coordinate frame",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00003_UploadService.ingest",
+        "value": {
+          "data": {
+            "bytes": 35941,
+            "sha256": "b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd.bin"
+          },
+          "original_filename": "photo_2026-10-10_12-06-38 (2).jpg",
+          "mime_type": "image/jpeg"
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Original encoded JPEG bytes, filename and MIME type from the upload.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00003_UploadService.ingest",
+        "return_value": {
+          "id": "25c3ba19a02041ee9ec790156fc87e44",
+          "mime_type": "image/jpeg",
+          "original_filename": "photo_2026-10-10_12-06-38 (2).jpg",
+          "byte_size": 35941,
+          "width_px": 1280,
+          "height_px": 960,
+          "sha256": "b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd",
+          "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_25c3ba19.jpg"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "SourceAsset with storage path/public URL, content hash, native decoded dimensions and original filename.",
+  "expected_diagram": "The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "Encoded bytes are persisted; metadata and an asset ID are added. This is not object detection."
+}

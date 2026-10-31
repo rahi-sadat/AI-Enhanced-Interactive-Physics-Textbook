@@ -1,0 +1,154 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 15,
+  "component": "SAM2 segmentation prompted by CV",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 332,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\segmentation\\sam2_provider.py",
+      "function": "SAM2SegmentationProvider.segment",
+      "line": 124,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 243
+      }
+    }
+  ],
+  "upstream_stage": "Domain CV: raw candidates → selected geometry",
+  "downstream_stage": "Semantic-to-spatial grounding and parameter binding",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00332_SAM2SegmentationProvider.segment",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+          },
+          "prompt": {
+            "box": {
+              "x": 804.3286188987023,
+              "y": 612.0167375242029,
+              "width": 74.06952348457754,
+              "height": 74.06952348457754
+            },
+            "points": [
+              [
+                841.3633806409911,
+                649.0514992664916
+              ]
+            ],
+            "labels": [
+              1
+            ]
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "entity_id": "bob"
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Source image plus the actual CV-provided box/point prompts, with prompt provenance.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00332_SAM2SegmentationProvider.segment",
+        "return_value": {
+          "status": "success",
+          "masks": [
+            {
+              "id": "mask_bob_53389",
+              "source_asset_id": null,
+              "figure_id": null,
+              "source_width": 1280,
+              "source_height": 960,
+              "bbox_source_px": {
+                "x": 804.0,
+                "y": 612.0,
+                "width": 75.0,
+                "height": 76.0
+              },
+              "centroid_source_px": {
+                "x": 841.8054054054054,
+                "y": 650.2034594594595
+              },
+              "area_px": 4625.0,
+              "rle_counts": null,
+              "polygon_approx": {
+                "points": [
+                  {
+                    "x": 831.0,
+                    "y": 613.0
+                  },
+                  {
+                    "x": 807.0,
+                    "y": 634.0
+                  },
+                  {
+                    "x": 806.0,
+                    "y": 664.0
+                  },
+                  {
+                    "x": 822.0,
+                    "y": 683.0
+                  },
+                  {
+                    "x": 852.0,
+                    "y": 687.0
+                  },
+                  {
+                    "x": 872.0,
+                    "y": 674.0
+                  },
+                  {
+                    "x": 879.0,
+                    "y": 660.0
+                  },
+                  {
+                    "x": 879.0,
+                    "y": 642.0
+                  },
+                  {
+                    "x": 861.0,
+                    "y": 617.0
+                  }
+                ]
+              },
+              "confidence": 0.9772201180458069,
+              "provider": "sam2.1",
+              "model": "sam2.1_hiera_tiny",
+              "prompt_provenance": {
+                "has_box": true,
+                "has_points": true
+              },
+              "verified": false
+            }
+          ],
+          "provider": "sam2.1",
+          "model": "sam2.1_hiera_tiny",
+          "latency_ms": 11867.196100007277,
+          "error": null
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Segmentation mask, score, centroid, area and source bbox. Segmentation only supports the prompted object; it cannot certify unrelated geometry.",
+  "expected_diagram": "The pivot must agree with the mounting point/support; the string must connect that pivot to the bob. Bob segmentation is not evidence for the pivot. Record disagreement rather than accepting inconsistent constraints.",
+  "status": "BOB SUPPORT ONLY",
+  "finding": "SAM2 independently finds bob centroid=(841.8054054054054,650.2034594594595), bbox=(804,612,75,76), area=4625. Grounder retains the CV bob/pivot; CV–SAM agreement is about 1.23 px. SAM verifies the bob, not the pivot. String length is rounded from 634.6110579092531 to 634.61 px.",
+  "change_or_loss": "This active implementation invokes SAM2 only when a best_proposal.bob exists. Absence in optics/circuits is NOT EXECUTED, not a segmentation failure."
+}

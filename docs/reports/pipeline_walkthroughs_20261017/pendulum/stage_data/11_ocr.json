@@ -1,0 +1,1130 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 11,
+  "component": "Symbol candidates, deduplication and final OCR",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 50,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+      "function": "MultiOCRRouter.extract",
+      "line": 150,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 159
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 119,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+      "function": "deduplicate_spatial_tokens",
+      "line": 46,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 319
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 123,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "GreekSymbolVisualOCR.extract_symbols",
+      "line": 208,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 323
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 124,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 126,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 128,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 130,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    }
+  ],
+  "upstream_stage": "EasyOCR: independent OCR candidates",
+  "downstream_stage": "Grayscale, blur and edge extraction",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00050_MultiOCRRouter.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "region": null
+        }
+      },
+      {
+        "call": "00119_deduplicate_spatial_tokens",
+        "value": {
+          "tokens": [
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "L",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 738.0,
+                "y": 357.0,
+                "width": 55.0,
+                "height": 61.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 738.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 418.0
+                  },
+                  {
+                    "x": 738.0,
+                    "y": 418.0
+                  }
+                ]
+              },
+              "confidence": 0.99996,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "]",
+                  "script": "latin",
+                  "confidence": 0.47404840130162995,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "m",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 896.0,
+                "y": 632.0,
+                "width": 63.0,
+                "height": 50.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 896.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 682.0
+                  },
+                  {
+                    "x": 896.0,
+                    "y": 682.0
+                  }
+                ]
+              },
+              "confidence": 0.99987,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "171",
+                  "script": "latin",
+                  "confidence": 0.5532381496450604,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "Fig. 1 Simple Pendulum",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 338.0,
+                "y": 827.0,
+                "width": 599.0,
+                "height": 78.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 338.0,
+                    "y": 827.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 829.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 905.0
+                  },
+                  {
+                    "x": 338.0,
+                    "y": 903.0
+                  }
+                ]
+              },
+              "confidence": 0.98953,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig",
+                  "script": "latin",
+                  "confidence": 0.9781465020509537,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            }
+          ]
+        }
+      },
+      {
+        "call": "00123_GreekSymbolVisualOCR.extract_symbols",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+          },
+          "existing_tokens": [
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "Fig. 1 Simple Pendulum",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 338.0,
+                "y": 827.0,
+                "width": 599.0,
+                "height": 78.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 338.0,
+                    "y": 827.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 829.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 905.0
+                  },
+                  {
+                    "x": 338.0,
+                    "y": 903.0
+                  }
+                ]
+              },
+              "confidence": 0.98953,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig",
+                  "script": "latin",
+                  "confidence": 0.9781465020509537,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            },
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "L",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 738.0,
+                "y": 357.0,
+                "width": 55.0,
+                "height": 61.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 738.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 418.0
+                  },
+                  {
+                    "x": 738.0,
+                    "y": 418.0
+                  }
+                ]
+              },
+              "confidence": 0.99996,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "]",
+                  "script": "latin",
+                  "confidence": 0.47404840130162995,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "m",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 896.0,
+                "y": 632.0,
+                "width": 63.0,
+                "height": 50.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 896.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 682.0
+                  },
+                  {
+                    "x": 896.0,
+                    "y": 682.0
+                  }
+                ]
+              },
+              "confidence": 0.99987,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "171",
+                  "script": "latin",
+                  "confidence": 0.5532381496450604,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            }
+          ],
+          "source_width": 1280,
+          "source_height": 960
+        }
+      },
+      {
+        "call": "00124_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_003",
+            "raw_text": "Fig. 1 Simple Pendulum",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 338.0,
+              "y": 827.0,
+              "width": 599.0,
+              "height": 78.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 338.0,
+                  "y": 827.0
+                },
+                {
+                  "x": 937.0,
+                  "y": 829.0
+                },
+                {
+                  "x": 937.0,
+                  "y": 905.0
+                },
+                {
+                  "x": 338.0,
+                  "y": 903.0
+                }
+              ]
+            },
+            "confidence": 0.98953,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Fig",
+                "script": "latin",
+                "confidence": 0.9781465020509537,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_003"
+          }
+        }
+      },
+      {
+        "call": "00126_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_001",
+            "raw_text": "L",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 738.0,
+              "y": 357.0,
+              "width": 55.0,
+              "height": 61.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 738.0,
+                  "y": 357.0
+                },
+                {
+                  "x": 793.0,
+                  "y": 357.0
+                },
+                {
+                  "x": 793.0,
+                  "y": 418.0
+                },
+                {
+                  "x": 738.0,
+                  "y": 418.0
+                }
+              ]
+            },
+            "confidence": 0.99996,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "]",
+                "script": "latin",
+                "confidence": 0.47404840130162995,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_001"
+          }
+        }
+      },
+      {
+        "call": "00128_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_002",
+            "raw_text": "m",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 896.0,
+              "y": 632.0,
+              "width": 63.0,
+              "height": 50.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 896.0,
+                  "y": 632.0
+                },
+                {
+                  "x": 959.0,
+                  "y": 632.0
+                },
+                {
+                  "x": 959.0,
+                  "y": 682.0
+                },
+                {
+                  "x": 896.0,
+                  "y": 682.0
+                }
+              ]
+            },
+            "confidence": 0.99987,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "171",
+                "script": "latin",
+                "confidence": 0.5532381496450604,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_002"
+          }
+        }
+      },
+      {
+        "call": "00130_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_greek_theta_597_270",
+            "raw_text": "θ",
+            "normalized_text": "θ",
+            "bbox_source_px": {
+              "x": 597.0,
+              "y": 270.0,
+              "width": 28.0,
+              "height": 43.0
+            },
+            "polygon_source_px": null,
+            "confidence": 0.96,
+            "script_candidate": "greek",
+            "language_candidate": "el",
+            "provider": "greek_symbol_ocr",
+            "recognizer_model": "visual_topology_matcher",
+            "candidate_alternatives": [],
+            "evidence_ref": ""
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Provider token candidates, spatial overlap information and symbol alternatives.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00050_MultiOCRRouter.extract",
+        "return_value": {
+          "status": "success",
+          "tokens": [
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "Fig. 1 Simple Pendulum",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 338.0,
+                "y": 827.0,
+                "width": 599.0,
+                "height": 78.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 338.0,
+                    "y": 827.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 829.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 905.0
+                  },
+                  {
+                    "x": 338.0,
+                    "y": 903.0
+                  }
+                ]
+              },
+              "confidence": 0.98953,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig",
+                  "script": "latin",
+                  "confidence": 0.9781465020509537,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            },
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "L",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 738.0,
+                "y": 357.0,
+                "width": 55.0,
+                "height": 61.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 738.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 418.0
+                  },
+                  {
+                    "x": 738.0,
+                    "y": 418.0
+                  }
+                ]
+              },
+              "confidence": 0.99996,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "]",
+                  "script": "latin",
+                  "confidence": 0.47404840130162995,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "m",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 896.0,
+                "y": 632.0,
+                "width": 63.0,
+                "height": 50.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 896.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 682.0
+                  },
+                  {
+                    "x": 896.0,
+                    "y": 682.0
+                  }
+                ]
+              },
+              "confidence": 0.99987,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "171",
+                  "script": "latin",
+                  "confidence": 0.5532381496450604,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_greek_theta_597_270",
+              "raw_text": "θ",
+              "normalized_text": "θ",
+              "bbox_source_px": {
+                "x": 597.0,
+                "y": 270.0,
+                "width": 28.0,
+                "height": 43.0
+              },
+              "polygon_source_px": null,
+              "confidence": 0.96,
+              "script_candidate": "greek",
+              "language_candidate": "el",
+              "provider": "greek_symbol_ocr",
+              "recognizer_model": "visual_topology_matcher",
+              "candidate_alternatives": [
+                {
+                  "text": "θ",
+                  "script": "greek",
+                  "name": "theta",
+                  "confidence": 0.96,
+                  "provider": "symbol_engine"
+                }
+              ],
+              "evidence_ref": ""
+            }
+          ],
+          "provider": "multi_ocr_router",
+          "model": "PP-OCRv6-onnx",
+          "package": "rapidocr+easyocr+greek_ocr",
+          "package_version": "3.9.2",
+          "detector_model": "PP-OCRv6_det_small.onnx",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx+bengali.pth",
+          "recognizer_language": "en+bn+el",
+          "latency_ms": 13201.892899989616,
+          "error": null,
+          "metadata": {
+            "bangla_available": true,
+            "greek_available": true,
+            "formula_available": false,
+            "regions_count": 3,
+            "token_count": 4
+          }
+        }
+      },
+      {
+        "call": "00119_deduplicate_spatial_tokens",
+        "return_value": [
+          {
+            "id": "ocr_tok_003",
+            "raw_text": "Fig. 1 Simple Pendulum",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 338.0,
+              "y": 827.0,
+              "width": 599.0,
+              "height": 78.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 338.0,
+                  "y": 827.0
+                },
+                {
+                  "x": 937.0,
+                  "y": 829.0
+                },
+                {
+                  "x": 937.0,
+                  "y": 905.0
+                },
+                {
+                  "x": 338.0,
+                  "y": 903.0
+                }
+              ]
+            },
+            "confidence": 0.98953,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Fig",
+                "script": "latin",
+                "confidence": 0.9781465020509537,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_003"
+          },
+          {
+            "id": "ocr_tok_001",
+            "raw_text": "L",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 738.0,
+              "y": 357.0,
+              "width": 55.0,
+              "height": 61.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 738.0,
+                  "y": 357.0
+                },
+                {
+                  "x": 793.0,
+                  "y": 357.0
+                },
+                {
+                  "x": 793.0,
+                  "y": 418.0
+                },
+                {
+                  "x": 738.0,
+                  "y": 418.0
+                }
+              ]
+            },
+            "confidence": 0.99996,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "]",
+                "script": "latin",
+                "confidence": 0.47404840130162995,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_001"
+          },
+          {
+            "id": "ocr_tok_002",
+            "raw_text": "m",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 896.0,
+              "y": 632.0,
+              "width": 63.0,
+              "height": 50.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 896.0,
+                  "y": 632.0
+                },
+                {
+                  "x": 959.0,
+                  "y": 632.0
+                },
+                {
+                  "x": 959.0,
+                  "y": 682.0
+                },
+                {
+                  "x": 896.0,
+                  "y": 682.0
+                }
+              ]
+            },
+            "confidence": 0.99987,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "171",
+                "script": "latin",
+                "confidence": 0.5532381496450604,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_002"
+          }
+        ]
+      },
+      {
+        "call": "00123_GreekSymbolVisualOCR.extract_symbols",
+        "return_value": [
+          {
+            "id": "ocr_tok_greek_theta_597_270",
+            "raw_text": "θ",
+            "normalized_text": "θ",
+            "bbox_source_px": {
+              "x": 597.0,
+              "y": 270.0,
+              "width": 28.0,
+              "height": 43.0
+            },
+            "polygon_source_px": null,
+            "confidence": 0.96,
+            "script_candidate": "greek",
+            "language_candidate": "el",
+            "provider": "greek_symbol_ocr",
+            "recognizer_model": "visual_topology_matcher",
+            "candidate_alternatives": [],
+            "evidence_ref": ""
+          }
+        ]
+      },
+      {
+        "call": "00124_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_003",
+          "raw_text": "Fig. 1 Simple Pendulum",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 338.0,
+            "y": 827.0,
+            "width": 599.0,
+            "height": 78.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 338.0,
+                "y": 827.0
+              },
+              {
+                "x": 937.0,
+                "y": 829.0
+              },
+              {
+                "x": 937.0,
+                "y": 905.0
+              },
+              {
+                "x": 338.0,
+                "y": 903.0
+              }
+            ]
+          },
+          "confidence": 0.98953,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "Fig",
+              "script": "latin",
+              "confidence": 0.9781465020509537,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_003"
+        }
+      },
+      {
+        "call": "00126_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_001",
+          "raw_text": "L",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 738.0,
+            "y": 357.0,
+            "width": 55.0,
+            "height": 61.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 738.0,
+                "y": 357.0
+              },
+              {
+                "x": 793.0,
+                "y": 357.0
+              },
+              {
+                "x": 793.0,
+                "y": 418.0
+              },
+              {
+                "x": 738.0,
+                "y": 418.0
+              }
+            ]
+          },
+          "confidence": 0.99996,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "]",
+              "script": "latin",
+              "confidence": 0.47404840130162995,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_001"
+        }
+      },
+      {
+        "call": "00128_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_002",
+          "raw_text": "m",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 896.0,
+            "y": 632.0,
+            "width": 63.0,
+            "height": 50.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 896.0,
+                "y": 632.0
+              },
+              {
+                "x": 959.0,
+                "y": 632.0
+              },
+              {
+                "x": 959.0,
+                "y": 682.0
+              },
+              {
+                "x": 896.0,
+                "y": 682.0
+              }
+            ]
+          },
+          "confidence": 0.99987,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "171",
+              "script": "latin",
+              "confidence": 0.5532381496450604,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_002"
+        }
+      },
+      {
+        "call": "00130_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_greek_theta_597_270",
+          "raw_text": "θ",
+          "normalized_text": "θ",
+          "bbox_source_px": {
+            "x": 597.0,
+            "y": 270.0,
+            "width": 28.0,
+            "height": 43.0
+          },
+          "polygon_source_px": null,
+          "confidence": 0.96,
+          "script_candidate": "greek",
+          "language_candidate": "el",
+          "provider": "greek_symbol_ocr",
+          "recognizer_model": "visual_topology_matcher",
+          "candidate_alternatives": [
+            {
+              "text": "θ",
+              "script": "greek",
+              "name": "theta",
+              "confidence": 0.96,
+              "provider": "symbol_engine"
+            }
+          ],
+          "evidence_ref": ""
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Merged tokens with retained provenance/alternatives. Preserve literal printed values and symbolic quantities. Do not turn L or m into a numerical length or mass.",
+  "expected_diagram": "The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "status": "OBSERVED / REVIEW ALTERNATIVES",
+  "finding": "Compare the literal source labels with the retained tokens below. A wrong alternative is not necessarily the selected output. The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "change_or_loss": "OCR alternatives → selected token set. PageIR text blocks are filled from these tokens inside the evidence pipeline."
+}

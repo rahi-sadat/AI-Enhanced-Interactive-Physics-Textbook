@@ -1,0 +1,169 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 33,
+  "component": "Actual renderer at t=0 over the original",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/components/InteractiveFigure.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "CoordinateMapper: source → overlay → browser",
+  "downstream_stage": "Activation, motion and reset",
+  "actual_input": {
+    "records": [
+      {
+        "runtime_output": {
+          "domain": "mechanics",
+          "subtype": "pendulum",
+          "time": 0,
+          "state": {
+            "domain": "mechanics",
+            "type": "pendulum",
+            "subtype": "pendulum",
+            "running": false,
+            "time": 0,
+            "thetaDeg": 26.1,
+            "thetaRad": 0.4558,
+            "omega": 0,
+            "speed": 0,
+            "length": 1,
+            "gravity": 9.81,
+            "potentialEnergy": 1,
+            "kineticEnergy": 0,
+            "totalEnergy": 1,
+            "calibrated": true
+          },
+          "geometry": {
+            "thetaRad": 0.45553093477052004,
+            "lengthM": 1,
+            "xM": 0,
+            "yM": 0
+          },
+          "telemetry": {
+            "domain": "mechanics",
+            "type": "pendulum",
+            "subtype": "pendulum",
+            "running": false,
+            "time": 0,
+            "thetaDeg": 26.1,
+            "thetaRad": 0.4558,
+            "omega": 0,
+            "speed": 0,
+            "length": 1,
+            "gravity": 9.81,
+            "potentialEnergy": 1,
+            "kineticEnergy": 0,
+            "totalEnergy": 1,
+            "calibrated": true
+          },
+          "events": [],
+          "editableParameters": {
+            "length": {
+              "value": 1,
+              "unit": "m",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                "policyId": "policy_standard_pendulum_length",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": 0.2,
+                "max": 5,
+                "step": 0.05
+              }
+            },
+            "initialAngle": {
+              "value": 26.117406100584446,
+              "unit": "°",
+              "provenance": "observed",
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": -80,
+                "max": 80,
+                "step": 1
+              },
+              "targetId": "bob_1"
+            }
+          }
+        },
+        "transforms": [
+          {
+            "tag": "CANVAS",
+            "rect": {
+              "x": 219,
+              "y": 227,
+              "width": 640,
+              "height": 480,
+              "top": 227,
+              "right": 859,
+              "bottom": 707,
+              "left": 219
+            },
+            "imageRect": {
+              "x": 219,
+              "y": 227,
+              "width": 640,
+              "height": 480,
+              "top": 227,
+              "right": 859,
+              "bottom": 707,
+              "left": 219
+            },
+            "scaleX": 2,
+            "scaleY": 2,
+            "dest": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 960
+            }
+          }
+        ]
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Initialized runtime output, original background and the measured mapper/DOM geometry.",
+  "actual_output": {
+    "records": [
+      {
+        "captured_svg": [],
+        "browser_state": {
+          "domain": "mechanics",
+          "type": "pendulum",
+          "subtype": "pendulum",
+          "running": false,
+          "time": 0,
+          "thetaDeg": 26.1,
+          "thetaRad": 0.4558,
+          "omega": 0,
+          "speed": 0,
+          "length": 1,
+          "gravity": 9.81,
+          "potentialEnergy": 1,
+          "kineticEnergy": 0,
+          "totalEnergy": 1,
+          "calibrated": true
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "The rendered source landmarks should coincide with the printed diagram at t=0. This requires correct upstream geometry as well as correct transforms.",
+  "expected_diagram": "The pivot must agree with the mounting point/support; the string must connect that pivot to the bob. Bob segmentation is not evidence for the pivot. Record disagreement rather than accepting inconsistent constraints.",
+  "status": "FAIL — T=0 SOURCE REGISTRATION",
+  "finding": "MechanicsAdapter → PendulumKernel / PendulumSimulation. t=0 bob is source-aligned while pivot is above the printed support. No integration defect is established; physical time-scale accuracy has no numeric source ground truth.",
+  "change_or_loss": "Overlay image is captured from the actual canvas/SVG and projected back using measured DOM-to-source ratios. No objects were manually repositioned."
+}

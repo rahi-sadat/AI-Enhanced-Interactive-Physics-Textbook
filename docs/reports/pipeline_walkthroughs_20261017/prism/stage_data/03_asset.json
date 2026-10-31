@@ -1,0 +1,65 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 3,
+  "component": "Upload persistence and dimension decoding",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 3,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\UploadService.py",
+      "function": "UploadService.ingest",
+      "line": 57,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\apps\\api\\main.py",
+        "function": "ingest_diagram",
+        "line": 1621
+      }
+    }
+  ],
+  "upstream_stage": "HTTP request reaches /api/ingest",
+  "downstream_stage": "PageIR / whole-figure coordinate frame",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00003_UploadService.ingest",
+        "value": {
+          "data": {
+            "bytes": 59343,
+            "sha256": "59aaf1ff61b692e086a588d9916227a1fc3720e8135095484f99abb335739cd2",
+            "artifact": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017\\arrays\\59aaf1ff61b692e086a588d9916227a1fc3720e8135095484f99abb335739cd2.bin"
+          },
+          "original_filename": "photo_2026-10-10_12-06-37.jpg",
+          "mime_type": "image/jpeg"
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Original encoded JPEG bytes, filename and MIME type from the upload.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00003_UploadService.ingest",
+        "return_value": {
+          "id": "2a50897a2e704e7aa51642dab568571b",
+          "mime_type": "image/jpeg",
+          "original_filename": "photo_2026-10-10_12-06-37.jpg",
+          "byte_size": 59343,
+          "width_px": 1280,
+          "height_px": 960,
+          "sha256": "59aaf1ff61b692e086a588d9916227a1fc3720e8135095484f99abb335739cd2",
+          "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_2a50897a.jpg"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "SourceAsset with storage path/public URL, content hash, native decoded dimensions and original filename.",
+  "expected_diagram": "60° is printed apex-angle evidence. Vertices and rays require source measurement. No numerical refractive index is printed. An assumed index must not be described as measured from this diagram.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "Encoded bytes are persisted; metadata and an asset ID are added. This is not object detection."
+}

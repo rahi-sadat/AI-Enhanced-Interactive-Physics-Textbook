@@ -1,0 +1,24 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 15,
+  "component": "SAM2 segmentation prompted by CV",
+  "execution": "NOT EXECUTED",
+  "location_and_callers": [],
+  "upstream_stage": "Domain CV: raw candidates → selected geometry",
+  "downstream_stage": "Semantic-to-spatial grounding and parameter binding",
+  "actual_input": {
+    "records": [],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Source image plus the actual CV-provided box/point prompts, with prompt provenance.",
+  "actual_output": {
+    "records": [],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Segmentation mask, score, centroid, area and source bbox. Segmentation only supports the prompted object; it cannot certify unrelated geometry.",
+  "expected_diagram": "Ground the whole lens/axis, object base and tip, image base and tip, focal markers and ray paths independently. A missing object detection must remain missing evidence, not become an assumed exploration object.",
+  "status": "NOT EXECUTED",
+  "finding": "No output exists for this diagram at this component. The expected contract is described for debugging, not reported as an executed result. The active segmentation trigger requires a best_proposal.bob; this domain did not produce that trigger.",
+  "change_or_loss": "No transformation, mutation or output was produced by this component for this diagram: the branch was not reached. Expected behavior above is a contract, not an observed result."
+}

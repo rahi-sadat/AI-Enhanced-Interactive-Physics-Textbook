@@ -1,0 +1,29 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 33,
+  "component": "Actual renderer at t=0 over the original",
+  "execution": "NOT EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/components/InteractiveFigure.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "CoordinateMapper: source → overlay → browser",
+  "downstream_stage": "Activation, motion and reset",
+  "actual_input": {
+    "records": [],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Initialized runtime output, original background and the measured mapper/DOM geometry.",
+  "actual_output": {
+    "records": [],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "The rendered source landmarks should coincide with the printed diagram at t=0. This requires correct upstream geometry as well as correct transforms.",
+  "expected_diagram": "Keep real wire spans separate from component bodies, switch gap and current annotation. Ground resistor/battery/switch terminals; build resolvable node IDs and relationships without filling gaps with artificial wires.",
+  "status": "NOT EXECUTED",
+  "finding": "No output exists for this diagram at this component. The expected contract is described for debugging, not reported as an executed result.",
+  "change_or_loss": "No transformation, mutation or output was produced by this component for this diagram: the branch was not reached. Expected behavior above is a contract, not an observed result."
+}

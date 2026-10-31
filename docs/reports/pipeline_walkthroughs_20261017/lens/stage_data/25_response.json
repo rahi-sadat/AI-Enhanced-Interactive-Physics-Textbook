@@ -1,0 +1,1785 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 25,
+  "component": "API response delivered to the browser",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 1,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\apps\\api\\main.py",
+      "function": "ingest_diagram",
+      "line": 1569,
+      "caller": {
+        "file": "C:\\Users\\saher\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\fastapi\\routing.py",
+        "function": "run_endpoint_function",
+        "line": 191
+      }
+    }
+  ],
+  "upstream_stage": "Canonical scene construction and schema validation",
+  "downstream_stage": "Frontend receives result and selects next state",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00001_ingest_diagram",
+        "value": {
+          "file": {
+            "type": "starlette.datastructures.UploadFile",
+            "not_serialized": true
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Completed ingestion, evidence, resolution and compilation results.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00001_ingest_diagram",
+        "return_value": {
+          "success": true,
+          "pipeline": "PR-06",
+          "image_url": "/uploads/diagram_dd013d21.jpg",
+          "debug_overlay_url": null,
+          "source_asset": {
+            "id": "dd013d21b8704bd296afcc9dcbc6a750",
+            "mimeType": "image/jpeg",
+            "originalFilename": "photo_2026-10-10_12-06-36 (2).jpg",
+            "byteSize": 51136,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c"
+          },
+          "page_ir": {
+            "version": "1.0",
+            "source": {
+              "assetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "width_px": 1280,
+              "height_px": 960,
+              "mimeType": "image/jpeg",
+              "url": "/uploads/diagram_dd013d21.jpg",
+              "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c"
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "origin": "top_left"
+            },
+            "regions": [
+              {
+                "id": "region_001",
+                "label": "whole_image",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "confidence": 1.0,
+                "detectionMethod": "user_supplied",
+                "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+              }
+            ],
+            "figures": [
+              {
+                "id": "figure_001",
+                "regionId": "region_001",
+                "pageX": 0.0,
+                "pageY": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "detectionMethod": "user_supplied",
+                "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+              }
+            ],
+            "textBlocks": [
+              {
+                "id": "ocr_tok_008",
+                "text": "Fig. 5 Image Formation by a Convex Lens",
+                "x": 197.0,
+                "y": 748.0,
+                "width": 859.0,
+                "height": 62.0,
+                "confidence": 0.99927,
+                "extractionMethod": "ocr"
+              },
+              {
+                "id": "ocr_tok_001",
+                "text": "f = 15 cm",
+                "x": 933.0,
+                "y": 189.0,
+                "width": 208.0,
+                "height": 55.0,
+                "confidence": 0.96641,
+                "extractionMethod": "ocr"
+              },
+              {
+                "id": "ocr_tok_002",
+                "text": "Object",
+                "x": 188.0,
+                "y": 220.0,
+                "width": 135.0,
+                "height": 57.0,
+                "confidence": 0.9999,
+                "extractionMethod": "ocr"
+              },
+              {
+                "id": "ocr_tok_007",
+                "text": "Image",
+                "x": 1118.0,
+                "y": 646.0,
+                "width": 129.0,
+                "height": 56.0,
+                "confidence": 0.99991,
+                "extractionMethod": "ocr"
+              },
+              {
+                "id": "ocr_tok_003",
+                "text": "2F",
+                "x": 102.0,
+                "y": 449.0,
+                "width": 70.0,
+                "height": 51.0,
+                "confidence": 0.99964,
+                "extractionMethod": "ocr"
+              },
+              {
+                "id": "ocr_tok_006",
+                "text": "2F",
+                "x": 1102.0,
+                "y": 449.0,
+                "width": 69.0,
+                "height": 51.0,
+                "confidence": 0.99972,
+                "extractionMethod": "ocr"
+              },
+              {
+                "id": "ocr_tok_004",
+                "text": "F",
+                "x": 356.0,
+                "y": 451.0,
+                "width": 42.0,
+                "height": 47.0,
+                "confidence": 0.99927,
+                "extractionMethod": "ocr"
+              },
+              {
+                "id": "ocr_tok_005",
+                "text": "F",
+                "x": 849.0,
+                "y": 449.0,
+                "width": 38.0,
+                "height": 43.0,
+                "confidence": 0.9994,
+                "extractionMethod": "ocr"
+              }
+            ],
+            "metadata": {
+              "pipeline": "PR-06",
+              "note": "Single-diagram upload. Text blocks populated via PR-06 OCR pipeline.",
+              "ocr_provider": "multi_ocr_router"
+            }
+          },
+          "book_ir": {
+            "version": "1.0",
+            "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+            "pageIRVersion": "1.0",
+            "figureId": "figure_001",
+            "domain": "optics",
+            "subtype": "thin_lens",
+            "entities": [
+              {
+                "id": "lens_1",
+                "type": "lens",
+                "label": "convex lens",
+                "positionSourcePx": {
+                  "x": 641.0,
+                  "y": 432.0,
+                  "coordinate_space": "source_px",
+                  "method": "cv_lens_center"
+                },
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ]
+              },
+              {
+                "id": "object_1",
+                "type": "object",
+                "label": "Object",
+                "positionSourcePx": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidenceRefs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "image_1",
+                "type": "image",
+                "label": "Image",
+                "positionSourcePx": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidenceRefs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "axis_1",
+                "type": "optical_axis",
+                "label": "principal axis",
+                "positionSourcePx": null,
+                "geometry": {
+                  "start": {
+                    "x": 650.0,
+                    "y": 432.0
+                  },
+                  "end": {
+                    "x": 1124.0,
+                    "y": 432.0
+                  },
+                  "length_px": 474.0
+                },
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ]
+              },
+              {
+                "id": "focal_point_1",
+                "type": "focal_point",
+                "label": "F",
+                "positionSourcePx": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidenceRefs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "focal_point_2",
+                "type": "focal_point",
+                "label": "2F",
+                "positionSourcePx": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidenceRefs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "forms_image",
+                "from": "lens_1",
+                "to": "image_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "refracts",
+                "from": "object_1",
+                "to": "lens_1",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "lens_center": {
+                "x": 641.0,
+                "y": 432.0
+              },
+              "aperture_height_px": {
+                "value": 234.0,
+                "unit": "px",
+                "status": "observed",
+                "provenance": {
+                  "source": "diagram_measurement",
+                  "evidenceRefs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.85,
+                  "notes": ""
+                }
+              },
+              "focal_length": {
+                "value": 0.15,
+                "unit": "m",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.96641,
+                  "notes": ""
+                }
+              },
+              "focal_length_px": {
+                "value": 117.0,
+                "unit": "px",
+                "status": "assumed",
+                "provenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.7,
+                  "notes": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                  "policyId": "policy_normalized_lens_focal_ratio",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "objectDistance": {
+                "value": 234.0,
+                "unit": "px",
+                "status": "assumed",
+                "provenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.7,
+                  "notes": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                  "policyId": "policy_normalized_lens_object_distance",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "object_height_px": {
+                "value": 81.89999999999999,
+                "unit": "px",
+                "status": "assumed",
+                "provenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.7,
+                  "notes": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                  "policyId": "policy_normalized_lens_object_height",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              }
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "lens_center": {
+                "x": 641.0,
+                "y": 432.0
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "focal_length_px",
+                "policyId": "policy_normalized_lens_focal_ratio",
+                "policyVersion": "1.0",
+                "value": 117.0,
+                "unit": "px",
+                "reason": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                "provenance": "auto_policy",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7
+              },
+              {
+                "parameter": "objectDistance",
+                "policyId": "policy_normalized_lens_object_distance",
+                "policyVersion": "1.0",
+                "value": 234.0,
+                "unit": "px",
+                "reason": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "provenance": "auto_policy",
+                "confidence": 0.7
+              },
+              {
+                "parameter": "object_height_px",
+                "policyId": "policy_normalized_lens_object_height",
+                "policyVersion": "1.0",
+                "value": 81.89999999999999,
+                "unit": "px",
+                "reason": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "provenance": "auto_policy",
+                "confidence": 0.7
+              }
+            ],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:26:19.538410+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "Object",
+                  "confidence": 0.95,
+                  "semanticRole": "object_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Image",
+                  "confidence": 0.95,
+                  "semanticRole": "image_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "f = 15 cm",
+                  "confidence": 0.95,
+                  "semanticRole": "focal_length",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "2F",
+                  "confidence": 0.95,
+                  "semanticRole": "focal_point_marker",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "F",
+                  "confidence": 0.95,
+                  "semanticRole": "focal_point_marker",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "O",
+                  "confidence": 0.95,
+                  "semanticRole": "optical_center",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "Diagram shows image formation by a convex lens with an object placed beyond 2F."
+              ],
+              "latency_ms": 4418,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "lens_1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "checks": {
+                    "lens_center": {
+                      "x": 641.0,
+                      "y": 432.0
+                    }
+                  },
+                  "conflicts": [],
+                  "notes": "Lens center grounded at axis-vertical intersection."
+                },
+                {
+                  "entityId": "axis_1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "checks": {
+                    "axis_y": 432.0
+                  },
+                  "conflicts": [],
+                  "notes": "Principal optical axis grounded."
+                },
+                {
+                  "entityId": "object_1",
+                  "groundingState": "unresolved",
+                  "supportingEvidence": [],
+                  "checks": {},
+                  "conflicts": [],
+                  "notes": "Object arrow not detected."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "f = 15 cm",
+                  "numericValue": 15.0,
+                  "rawUnit": "cm",
+                  "canonicalUnit": "cm",
+                  "quantityCandidate": "focal_length",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.96641
+                },
+                {
+                  "rawText": "- = 15 cn",
+                  "numericValue": 15.0,
+                  "rawUnit": "cn",
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.87
+                },
+                {
+                  "rawText": "2F",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "two_f_symbol",
+                  "sourceOcrTokenId": "ocr_tok_003",
+                  "confidence": 0.99964
+                },
+                {
+                  "rawText": "2F",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "two_f_symbol",
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.99972
+                },
+                {
+                  "rawText": "F",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "focal_or_force_symbol",
+                  "sourceOcrTokenId": "ocr_tok_004",
+                  "confidence": 0.99927
+                },
+                {
+                  "rawText": "F",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "focal_or_force_symbol",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.9994
+                }
+              ],
+              "evidence_pipeline_latency_ms": 36914.145899994764
+            },
+            "evidence": {
+              "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750": {
+                "id": "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750",
+                "method": "classical_cv",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "thin_lens_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "has_optical_axis": true,
+                  "has_lens_center": true,
+                  "has_object_arrow": false
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_008": {
+                "id": "ev_ocr_ocr_tok_008",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.99927,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+                  "bbox": {
+                    "x": 197.0,
+                    "y": 748.0,
+                    "width": 859.0,
+                    "height": 62.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.96641,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "f = 15 cm",
+                  "bbox": {
+                    "x": 933.0,
+                    "y": 189.0,
+                    "width": 208.0,
+                    "height": 55.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.9999,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Object",
+                  "bbox": {
+                    "x": 188.0,
+                    "y": 220.0,
+                    "width": 135.0,
+                    "height": 57.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.99991,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Image",
+                  "bbox": {
+                    "x": 1118.0,
+                    "y": 646.0,
+                    "width": 129.0,
+                    "height": 56.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.99964,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "2F",
+                  "bbox": {
+                    "x": 102.0,
+                    "y": 449.0,
+                    "width": 70.0,
+                    "height": 51.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.99972,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "2F",
+                  "bbox": {
+                    "x": 1102.0,
+                    "y": 449.0,
+                    "width": 69.0,
+                    "height": 51.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.99927,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "F",
+                  "bbox": {
+                    "x": 356.0,
+                    "y": 451.0,
+                    "width": 42.0,
+                    "height": 47.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figureId": "figure_001",
+                "confidence": 0.9994,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "F",
+                  "bbox": {
+                    "x": 849.0,
+                    "y": 449.0,
+                    "width": 38.0,
+                    "height": 43.0
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "status": "READY_TO_COMPILE",
+            "statusNotes": "Missing focal_length, object_distance, or lens center.",
+            "resolutions": {},
+            "reviewIssues": [],
+            "parameterProvenance": {
+              "lens_center": {
+                "source": "diagram_measurement",
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.9,
+                "notes": ""
+              },
+              "focal_length_px": {
+                "source": "auto_policy",
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7,
+                "notes": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                "policyId": "policy_normalized_lens_focal_ratio",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "objectDistance": {
+                "source": "auto_policy",
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7,
+                "notes": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                "policyId": "policy_normalized_lens_object_distance",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "object_height_px": {
+                "source": "auto_policy",
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7,
+                "notes": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                "policyId": "policy_normalized_lens_object_height",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "calibration": null,
+            "id": "dd013d21b8704bd296afcc9dcbc6a750_figure_001",
+            "isPhysics": true
+          },
+          "compiler": {
+            "status": "READY",
+            "scene": {
+              "schemaVersion": "1.0",
+              "id": "PHY-OPTI-figure_001",
+              "domain": "optics",
+              "subtype": "thin_lens",
+              "source": {
+                "type": "book_figure",
+                "source_asset_id": "dd013d21b8704bd296afcc9dcbc6a750",
+                "figure_id": "figure_001",
+                "width": 1280.0,
+                "height": 960.0,
+                "image_width_px": 1280.0,
+                "image_height_px": 960.0
+              },
+              "coordinateSpace": {
+                "type": "source_px",
+                "width": 1280.0,
+                "height": 960.0,
+                "image_width_px": 1280.0,
+                "image_height_px": 960.0,
+                "unit": "px"
+              },
+              "coordinateSystem": {
+                "type": "source_px",
+                "width": 1280.0,
+                "height": 960.0,
+                "image_width_px": 1280.0,
+                "image_height_px": 960.0,
+                "unit": "px"
+              },
+              "parameters": {
+                "focalLength": {
+                  "value": 117.0,
+                  "unit": "px",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [
+                      "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                    ],
+                    "derivedFrom": [
+                      "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                    ],
+                    "confidence": 0.7,
+                    "notes": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                    "policyId": "policy_normalized_lens_focal_ratio",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "objectDistance": {
+                  "value": 234.0,
+                  "unit": "px",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [
+                      "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                    ],
+                    "derivedFrom": [
+                      "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                    ],
+                    "confidence": 0.7,
+                    "notes": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                    "policyId": "policy_normalized_lens_object_distance",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "objectHeight": {
+                  "value": -81.89999999999999,
+                  "unit": "px",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [
+                      "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                    ],
+                    "derivedFrom": [
+                      "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                    ],
+                    "confidence": 0.7,
+                    "notes": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                    "policyId": "policy_normalized_lens_object_height",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                }
+              },
+              "assumptions": [
+                {
+                  "parameter": "focal_length_px",
+                  "policyId": "policy_normalized_lens_focal_ratio",
+                  "policyVersion": "1.0",
+                  "value": 117.0,
+                  "unit": "px",
+                  "reason": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                  "provenance": "auto_policy",
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.7
+                },
+                {
+                  "parameter": "objectDistance",
+                  "policyId": "policy_normalized_lens_object_distance",
+                  "policyVersion": "1.0",
+                  "value": 234.0,
+                  "unit": "px",
+                  "reason": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "provenance": "auto_policy",
+                  "confidence": 0.7
+                },
+                {
+                  "parameter": "object_height_px",
+                  "policyId": "policy_normalized_lens_object_height",
+                  "policyVersion": "1.0",
+                  "value": 81.89999999999999,
+                  "unit": "px",
+                  "reason": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "provenance": "auto_policy",
+                  "confidence": 0.7
+                }
+              ],
+              "geometry": {
+                "width": 1280,
+                "height": 960,
+                "coordinate_space": "source_px",
+                "lens_center": {
+                  "x": 641.0,
+                  "y": 432.0
+                },
+                "lensX": 641.0,
+                "axisY": 432.0,
+                "aperture_height_px": 234.0
+              },
+              "objects": [
+                {
+                  "id": "lens_1",
+                  "type": "thin_lens",
+                  "role": "lens",
+                  "label": "convex lens",
+                  "evidence_refs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "optics": {
+                    "model": "thin_lens",
+                    "subtype": "thin_lens",
+                    "center": {
+                      "x": 641.0,
+                      "y": 432.0
+                    },
+                    "aperture_height_px": 234.0,
+                    "focal_length_px": {
+                      "value": 117.0,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "object_1",
+                  "type": "optical_object",
+                  "role": "object",
+                  "label": "Object",
+                  "evidence_refs": [
+                    "figure_001"
+                  ],
+                  "optics": {
+                    "model": "optical_object",
+                    "base": {
+                      "x": 407.0,
+                      "y": 432.0
+                    },
+                    "tip": {
+                      "x": 407.0,
+                      "y": 350.1
+                    },
+                    "height_px": 81.89999999999999
+                  }
+                }
+              ],
+              "render": {
+                "coordinate_space": "source_px"
+              },
+              "elements": [
+                {
+                  "id": "lens_1",
+                  "type": "thin_lens",
+                  "role": "lens",
+                  "label": "convex lens",
+                  "evidence_refs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "optics": {
+                    "model": "thin_lens",
+                    "subtype": "thin_lens",
+                    "center": {
+                      "x": 641.0,
+                      "y": 432.0
+                    },
+                    "aperture_height_px": 234.0,
+                    "focal_length_px": {
+                      "value": 117.0,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "object_1",
+                  "type": "optical_object",
+                  "role": "object",
+                  "label": "Object",
+                  "evidence_refs": [
+                    "figure_001"
+                  ],
+                  "optics": {
+                    "model": "optical_object",
+                    "base": {
+                      "x": 407.0,
+                      "y": 432.0
+                    },
+                    "tip": {
+                      "x": 407.0,
+                      "y": 350.1
+                    },
+                    "height_px": 81.89999999999999
+                  }
+                }
+              ]
+            },
+            "issues": [],
+            "bookIRStatus": "READY_TO_COMPILE"
+          },
+          "evidence": {
+            "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750": {
+              "id": "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750",
+              "method": "classical_cv",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": null,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "thin_lens_cv_extractor",
+              "model": null,
+              "version": null,
+              "payload": {
+                "has_optical_axis": true,
+                "has_lens_center": true,
+                "has_object_arrow": false
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_008": {
+              "id": "ev_ocr_ocr_tok_008",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.99927,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+                "bbox": {
+                  "x": 197.0,
+                  "y": 748.0,
+                  "width": 859.0,
+                  "height": 62.0
+                }
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_001": {
+              "id": "ev_ocr_ocr_tok_001",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.96641,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "f = 15 cm",
+                "bbox": {
+                  "x": 933.0,
+                  "y": 189.0,
+                  "width": 208.0,
+                  "height": 55.0
+                }
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_002": {
+              "id": "ev_ocr_ocr_tok_002",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.9999,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "Object",
+                "bbox": {
+                  "x": 188.0,
+                  "y": 220.0,
+                  "width": 135.0,
+                  "height": 57.0
+                }
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_007": {
+              "id": "ev_ocr_ocr_tok_007",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.99991,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "Image",
+                "bbox": {
+                  "x": 1118.0,
+                  "y": 646.0,
+                  "width": 129.0,
+                  "height": 56.0
+                }
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_003": {
+              "id": "ev_ocr_ocr_tok_003",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.99964,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "2F",
+                "bbox": {
+                  "x": 102.0,
+                  "y": 449.0,
+                  "width": 70.0,
+                  "height": 51.0
+                }
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_006": {
+              "id": "ev_ocr_ocr_tok_006",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.99972,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "2F",
+                "bbox": {
+                  "x": 1102.0,
+                  "y": 449.0,
+                  "width": 69.0,
+                  "height": 51.0
+                }
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_004": {
+              "id": "ev_ocr_ocr_tok_004",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.99927,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "F",
+                "bbox": {
+                  "x": 356.0,
+                  "y": 451.0,
+                  "width": 42.0,
+                  "height": 47.0
+                }
+              },
+              "metadata": {}
+            },
+            "ev_ocr_ocr_tok_005": {
+              "id": "ev_ocr_ocr_tok_005",
+              "method": "ocr",
+              "sourceAssetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figureId": "figure_001",
+              "confidence": 0.9994,
+              "verified": false,
+              "coordinateSpace": "source_px",
+              "provider": "multi_ocr_router",
+              "model": null,
+              "version": null,
+              "payload": {
+                "raw_text": "F",
+                "bbox": {
+                  "x": 849.0,
+                  "y": 449.0,
+                  "width": 38.0,
+                  "height": 43.0
+                }
+              },
+              "metadata": {}
+            }
+          },
+          "grounding": [
+            {
+              "entityId": "lens_1",
+              "groundingState": "grounded",
+              "supportingEvidence": [
+                "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+              ],
+              "checks": {
+                "lens_center": {
+                  "x": 641.0,
+                  "y": 432.0
+                }
+              },
+              "conflicts": [],
+              "notes": "Lens center grounded at axis-vertical intersection."
+            },
+            {
+              "entityId": "axis_1",
+              "groundingState": "grounded",
+              "supportingEvidence": [
+                "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+              ],
+              "checks": {
+                "axis_y": 432.0
+              },
+              "conflicts": [],
+              "notes": "Principal optical axis grounded."
+            },
+            {
+              "entityId": "object_1",
+              "groundingState": "unresolved",
+              "supportingEvidence": [],
+              "checks": {},
+              "conflicts": [],
+              "notes": "Object arrow not detected."
+            }
+          ],
+          "assumptions": [
+            {
+              "parameter": "focal_length_px",
+              "policyId": "policy_normalized_lens_focal_ratio",
+              "policyVersion": "1.0",
+              "value": 117.0,
+              "unit": "px",
+              "reason": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+              "provenance": "auto_policy",
+              "derivedFrom": [
+                "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+              ],
+              "confidence": 0.7
+            },
+            {
+              "parameter": "objectDistance",
+              "policyId": "policy_normalized_lens_object_distance",
+              "policyVersion": "1.0",
+              "value": 234.0,
+              "unit": "px",
+              "reason": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+              "derivedFrom": [
+                "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+              ],
+              "provenance": "auto_policy",
+              "confidence": 0.7
+            },
+            {
+              "parameter": "object_height_px",
+              "policyId": "policy_normalized_lens_object_height",
+              "policyVersion": "1.0",
+              "value": 81.89999999999999,
+              "unit": "px",
+              "reason": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+              "derivedFrom": [
+                "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+              ],
+              "provenance": "auto_policy",
+              "confidence": 0.7
+            }
+          ],
+          "auto_failures": [],
+          "failure_category": null,
+          "debugId": "dd013d21b8704bd296afcc9dcbc6a750",
+          "debugTrace": {
+            "id": "dd013d21b8704bd296afcc9dcbc6a750",
+            "source": {
+              "width": 1280,
+              "height": 960,
+              "coordinateSpace": "source_px"
+            },
+            "classification": {
+              "domain": "optics",
+              "subtype": "thin_lens",
+              "confidence": {
+                "isPhysics": 0.99,
+                "domain": 0.98,
+                "subtype": 0.96,
+                "overall": 0.96,
+                "rawProvider": {
+                  "isPhysics": 1.0,
+                  "domain": 1.0,
+                  "subtype": 1.0,
+                  "overall": 1.0
+                }
+              }
+            },
+            "grounding": [
+              {
+                "entityId": "lens_1",
+                "groundingState": "grounded",
+                "supportingEvidence": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "checks": {
+                  "lens_center": {
+                    "x": 641.0,
+                    "y": 432.0
+                  }
+                },
+                "conflicts": [],
+                "notes": "Lens center grounded at axis-vertical intersection."
+              },
+              {
+                "entityId": "axis_1",
+                "groundingState": "grounded",
+                "supportingEvidence": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "checks": {
+                  "axis_y": 432.0
+                },
+                "conflicts": [],
+                "notes": "Principal optical axis grounded."
+              },
+              {
+                "entityId": "object_1",
+                "groundingState": "unresolved",
+                "supportingEvidence": [],
+                "checks": {},
+                "conflicts": [],
+                "notes": "Object arrow not detected."
+              }
+            ],
+            "assumptions": [
+              {
+                "parameter": "focal_length_px",
+                "policyId": "policy_normalized_lens_focal_ratio",
+                "policyVersion": "1.0",
+                "value": 117.0,
+                "unit": "px",
+                "reason": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                "provenance": "auto_policy",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7
+              },
+              {
+                "parameter": "objectDistance",
+                "policyId": "policy_normalized_lens_object_distance",
+                "policyVersion": "1.0",
+                "value": 234.0,
+                "unit": "px",
+                "reason": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "provenance": "auto_policy",
+                "confidence": 0.7
+              },
+              {
+                "parameter": "object_height_px",
+                "policyId": "policy_normalized_lens_object_height",
+                "policyVersion": "1.0",
+                "value": 81.89999999999999,
+                "unit": "px",
+                "reason": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "provenance": "auto_policy",
+                "confidence": 0.7
+              }
+            ],
+            "automaticFailures": [],
+            "readiness": {
+              "ready": true,
+              "bookIRStatus": "READY_TO_COMPILE",
+              "status": "READY_TO_COMPILE",
+              "bookIrId": "dd013d21b8704bd296afcc9dcbc6a750_figure_001",
+              "subtype": "thin_lens",
+              "blockers": [],
+              "warnings": [],
+              "satisfiedRequirements": [
+                "lens_center",
+                "focal_length_px",
+                "aperture_height_px"
+              ],
+              "resolvedRequirements": [
+                "lens_center",
+                "focal_length_px",
+                "aperture_height_px"
+              ],
+              "missingRequirements": [],
+              "policyAssumptions": [],
+              "unresolvedAmbiguities": [],
+              "calibrationStatus": null
+            },
+            "compilation": {
+              "status": "READY",
+              "issues": []
+            }
+          },
+          "status": "ready",
+          "domain": "optics",
+          "scenario": "thin_lens",
+          "scene": {
+            "schemaVersion": "1.0",
+            "id": "PHY-OPTI-figure_001",
+            "domain": "optics",
+            "subtype": "thin_lens",
+            "source": {
+              "type": "book_figure",
+              "source_asset_id": "dd013d21b8704bd296afcc9dcbc6a750",
+              "figure_id": "figure_001",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "coordinateSystem": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "parameters": {
+              "focalLength": {
+                "value": 117.0,
+                "unit": "px",
+                "provenance": "auto_policy",
+                "evidenceProvenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.7,
+                  "notes": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                  "policyId": "policy_normalized_lens_focal_ratio",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "objectDistance": {
+                "value": 234.0,
+                "unit": "px",
+                "provenance": "auto_policy",
+                "evidenceProvenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.7,
+                  "notes": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                  "policyId": "policy_normalized_lens_object_distance",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "objectHeight": {
+                "value": -81.89999999999999,
+                "unit": "px",
+                "provenance": "auto_policy",
+                "evidenceProvenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "derivedFrom": [
+                    "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                  ],
+                  "confidence": 0.7,
+                  "notes": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                  "policyId": "policy_normalized_lens_object_height",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "focal_length_px",
+                "policyId": "policy_normalized_lens_focal_ratio",
+                "policyVersion": "1.0",
+                "value": 117.0,
+                "unit": "px",
+                "reason": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                "provenance": "auto_policy",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7
+              },
+              {
+                "parameter": "objectDistance",
+                "policyId": "policy_normalized_lens_object_distance",
+                "policyVersion": "1.0",
+                "value": 234.0,
+                "unit": "px",
+                "reason": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "provenance": "auto_policy",
+                "confidence": 0.7
+              },
+              {
+                "parameter": "object_height_px",
+                "policyId": "policy_normalized_lens_object_height",
+                "policyVersion": "1.0",
+                "value": 81.89999999999999,
+                "unit": "px",
+                "reason": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "provenance": "auto_policy",
+                "confidence": 0.7
+              }
+            ],
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "lens_center": {
+                "x": 641.0,
+                "y": 432.0
+              },
+              "lensX": 641.0,
+              "axisY": 432.0,
+              "aperture_height_px": 234.0
+            },
+            "objects": [
+              {
+                "id": "lens_1",
+                "type": "thin_lens",
+                "role": "lens",
+                "label": "convex lens",
+                "evidence_refs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "optics": {
+                  "model": "thin_lens",
+                  "subtype": "thin_lens",
+                  "center": {
+                    "x": 641.0,
+                    "y": 432.0
+                  },
+                  "aperture_height_px": 234.0,
+                  "focal_length_px": {
+                    "value": 117.0,
+                    "unit": "px"
+                  }
+                }
+              },
+              {
+                "id": "object_1",
+                "type": "optical_object",
+                "role": "object",
+                "label": "Object",
+                "evidence_refs": [
+                  "figure_001"
+                ],
+                "optics": {
+                  "model": "optical_object",
+                  "base": {
+                    "x": 407.0,
+                    "y": 432.0
+                  },
+                  "tip": {
+                    "x": 407.0,
+                    "y": 350.1
+                  },
+                  "height_px": 81.89999999999999
+                }
+              }
+            ],
+            "render": {
+              "coordinate_space": "source_px"
+            },
+            "elements": [
+              {
+                "id": "lens_1",
+                "type": "thin_lens",
+                "role": "lens",
+                "label": "convex lens",
+                "evidence_refs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "optics": {
+                  "model": "thin_lens",
+                  "subtype": "thin_lens",
+                  "center": {
+                    "x": 641.0,
+                    "y": 432.0
+                  },
+                  "aperture_height_px": 234.0,
+                  "focal_length_px": {
+                    "value": 117.0,
+                    "unit": "px"
+                  }
+                }
+              },
+              {
+                "id": "object_1",
+                "type": "optical_object",
+                "role": "object",
+                "label": "Object",
+                "evidence_refs": [
+                  "figure_001"
+                ],
+                "optics": {
+                  "model": "optical_object",
+                  "base": {
+                    "x": 407.0,
+                    "y": 432.0
+                  },
+                  "tip": {
+                    "x": 407.0,
+                    "y": 350.1
+                  },
+                  "height_px": 81.89999999999999
+                }
+              }
+            ]
+          },
+          "issues": [],
+          "width": 1280,
+          "height": 960
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "A response whose status, scene, BookIR and readiness agree, correlated to this source and trace. HTTP 200 does not itself mean a simulation is ready.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "PROPAGATED / RECONSTRUCTED GEOMETRY",
+  "finding": "Compiler carries lens_center=(641,432), f=117, u=234 into the scene and normalizes objectHeight to −81.9 in source Y-down coordinates. Runtime object base=(407,432), tip=(407,350.1); image is x=875, height=81.9. Model output is consistent with the substituted parameters, not registered to the original object/rays.",
+  "change_or_loss": "This is the handler return, after nested work. Exact HTTP status/body are retained separately from the Python object."
+}

@@ -1,0 +1,4679 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 24,
+  "component": "Canonical scene construction and schema validation",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 506,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+      "function": "PhysicsCompiler._build_canonical_scene",
+      "line": 973,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+        "function": "compile",
+        "line": 498
+      }
+    },
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 514,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+      "function": "PhysicsCompiler._populate_canonical_prism",
+      "line": 1430,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+        "function": "_build_canonical_scene",
+        "line": 1036
+      }
+    },
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 529,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+      "function": "PhysicsCompiler._preserve_parameter_provenance",
+      "line": 1047,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+        "function": "_build_canonical_scene",
+        "line": 1043
+      }
+    },
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 530,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+      "function": "validate_canonical_scene",
+      "line": 244,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PhysicsCompiler.py",
+        "function": "compile",
+        "line": 508
+      }
+    }
+  ],
+  "upstream_stage": "PhysicsCompiler entry and gate",
+  "downstream_stage": "API response delivered to the browser",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00506_PhysicsCompiler._build_canonical_scene",
+        "value": {
+          "book_ir": {
+            "version": "1.0",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "page_ir_version": "1.0",
+            "figure_id": "figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "entities": [
+              {
+                "id": "prism_1",
+                "type": "prism_body",
+                "label": "Glass Prism",
+                "position_source_px": {
+                  "x": 621.3,
+                  "y": 80.9,
+                  "coordinate_space": "source_px",
+                  "method": "cv_prism_apex"
+                },
+                "geometry": {
+                  "polygon": {
+                    "points": [
+                      {
+                        "x": 621.3,
+                        "y": 80.9
+                      },
+                      {
+                        "x": 229.2,
+                        "y": 757.0
+                      },
+                      {
+                        "x": 1003.9,
+                        "y": 757.0
+                      }
+                    ]
+                  },
+                  "bounds": {
+                    "x": 229.2,
+                    "y": 80.9,
+                    "width": 774.7,
+                    "height": 676.1
+                  }
+                },
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                ]
+              },
+              {
+                "id": "ray_1",
+                "type": "incident_ray",
+                "label": "Incident ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_2",
+                "type": "refracted_ray",
+                "label": null,
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_3",
+                "type": "emergent_ray",
+                "label": "Emergent ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_1",
+                "type": "normal_line",
+                "label": "N1",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_2",
+                "type": "normal_line",
+                "label": "N2",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "refracts_at",
+                "from": "ray_1",
+                "to": "prism_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "refracts_at",
+                "from": "prism_1",
+                "to": "ray_3",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "apex_angle": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "apex_angle_deg": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "n": 1.52
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:30:10.150278+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "A = 60°",
+                  "confidence": 0.95,
+                  "semanticRole": "prism_angle",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "i",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r1",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_refraction",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r2",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence_internal",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "e",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_emergence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "δ",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_deviation",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Fig. 8 Refraction through a Prism",
+                  "confidence": 0.95,
+                  "semanticRole": "caption",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "Standard textbook diagram of light refraction through a triangular glass prism."
+              ],
+              "latency_ms": 5807,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "prism_1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                  ],
+                  "checks": {
+                    "vertex_count": 3
+                  },
+                  "conflicts": [],
+                  "notes": "Prism triangular body grounded."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "A=60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.98817
+                },
+                {
+                  "rawText": "A = 60",
+                  "numericValue": 60.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "Δ = 60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "12",
+                  "numericValue": 12.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.672
+                },
+                {
+                  "rawText": "r1",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "resistor_label",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.98446
+                }
+              ],
+              "evidence_pipeline_latency_ms": 21677.147500013234
+            },
+            "evidence": {
+              "ev_cv_prism_2a50897a2e704e7aa51642dab568571b": {
+                "id": "ev_cv_prism_2a50897a2e704e7aa51642dab568571b",
+                "method": "classical_cv",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "prism_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "has_polygon": true,
+                  "has_apex": true
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_011": {
+                "id": "ev_ocr_ocr_tok_011",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98457,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 8 Refraction through a Prism",
+                  "bbox": {
+                    "x": 290.0,
+                    "y": 837.0,
+                    "width": 669.0,
+                    "height": 62.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_009": {
+                "id": "ev_ocr_ocr_tok_009",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99989,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Glass Prism",
+                  "bbox": {
+                    "x": 506.0,
+                    "y": 613.0,
+                    "width": 245.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99992,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Incident ray",
+                  "bbox": {
+                    "x": 46.0,
+                    "y": 342.0,
+                    "width": 216.0,
+                    "height": 55.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_010": {
+                "id": "ev_ocr_ocr_tok_010",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99521,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Emergent ray",
+                  "bbox": {
+                    "x": 1022.0,
+                    "y": 610.0,
+                    "width": 238.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98817,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "A=60°",
+                  "bbox": {
+                    "x": 556.0,
+                    "y": 184.0,
+                    "width": 128.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_008": {
+                "id": "ev_ocr_ocr_tok_008",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.95735,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N2",
+                  "bbox": {
+                    "x": 730.0,
+                    "y": 541.0,
+                    "width": 85.0,
+                    "height": 73.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.74629,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "21",
+                  "bbox": {
+                    "x": 738.0,
+                    "y": 465.0,
+                    "width": 63.0,
+                    "height": 76.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.9941,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N1",
+                  "bbox": {
+                    "x": 267.0,
+                    "y": 225.0,
+                    "width": 67.0,
+                    "height": 61.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99967,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "δ",
+                  "bbox": {
+                    "x": 1086.0,
+                    "y": 392.0,
+                    "width": 49.0,
+                    "height": 64.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98446,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "r1",
+                  "bbox": {
+                    "x": 500.0,
+                    "y": 412.0,
+                    "width": 56.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99829,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "e",
+                  "bbox": {
+                    "x": 909.0,
+                    "y": 518.0,
+                    "width": 34.0,
+                    "height": 36.0
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "status": "READY_TO_COMPILE",
+            "status_notes": "Grounded prism polygon, apex angle, and refractive index; ready for compiler verification.",
+            "resolutions": {
+              "n": {
+                "id": "auto_policy_crown_glass_refractive_index",
+                "requirementId": "",
+                "parameterName": "n",
+                "value": 1.52,
+                "resolvedValue": 1.52,
+                "unit": "",
+                "canonicalUnit": "",
+                "rawInput": "1.52",
+                "originalEnteredValue": "1.52",
+                "source": "policy_default",
+                "resolutionSource": "policy_default",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "supersededValue": null,
+                "evidenceRefs": [],
+                "timestamp": "",
+                "notes": "Automatic model assumption: Refractive index of standard optical crown glass (n = 1.52).",
+                "userAccepted": false,
+                "resolvedBy": "auto_policy"
+              }
+            },
+            "review_issues": [],
+            "parameter_provenance": {
+              "n": {
+                "source": "auto_policy",
+                "evidence_refs": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policy_id": "policy_crown_glass_refractive_index",
+                "policy_version": "1.0",
+                "user_accepted": false,
+                "superseded_value": null,
+                "derived_from": []
+              }
+            },
+            "calibration": null,
+            "id": "2a50897a2e704e7aa51642dab568571b_figure_001",
+            "isPhysics": true
+          },
+          "domain": "optics",
+          "subtype": "prism"
+        }
+      },
+      {
+        "call": "00514_PhysicsCompiler._populate_canonical_prism",
+        "value": {
+          "scene": {
+            "schemaVersion": "1.0",
+            "id": "PHY-OPTI-figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "source": {
+              "type": "book_figure",
+              "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+              "figure_id": "figure_001",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "coordinateSystem": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "parameters": {},
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              }
+            },
+            "objects": [],
+            "render": {
+              "coordinate_space": "source_px"
+            }
+          },
+          "book_ir": {
+            "version": "1.0",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "page_ir_version": "1.0",
+            "figure_id": "figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "entities": [
+              {
+                "id": "prism_1",
+                "type": "prism_body",
+                "label": "Glass Prism",
+                "position_source_px": {
+                  "x": 621.3,
+                  "y": 80.9,
+                  "coordinate_space": "source_px",
+                  "method": "cv_prism_apex"
+                },
+                "geometry": {
+                  "polygon": {
+                    "points": [
+                      {
+                        "x": 621.3,
+                        "y": 80.9
+                      },
+                      {
+                        "x": 229.2,
+                        "y": 757.0
+                      },
+                      {
+                        "x": 1003.9,
+                        "y": 757.0
+                      }
+                    ]
+                  },
+                  "bounds": {
+                    "x": 229.2,
+                    "y": 80.9,
+                    "width": 774.7,
+                    "height": 676.1
+                  }
+                },
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                ]
+              },
+              {
+                "id": "ray_1",
+                "type": "incident_ray",
+                "label": "Incident ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_2",
+                "type": "refracted_ray",
+                "label": null,
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_3",
+                "type": "emergent_ray",
+                "label": "Emergent ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_1",
+                "type": "normal_line",
+                "label": "N1",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_2",
+                "type": "normal_line",
+                "label": "N2",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "refracts_at",
+                "from": "ray_1",
+                "to": "prism_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "refracts_at",
+                "from": "prism_1",
+                "to": "ray_3",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "apex_angle": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "apex_angle_deg": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "n": 1.52
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:30:10.150278+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "A = 60°",
+                  "confidence": 0.95,
+                  "semanticRole": "prism_angle",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "i",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r1",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_refraction",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r2",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence_internal",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "e",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_emergence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "δ",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_deviation",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Fig. 8 Refraction through a Prism",
+                  "confidence": 0.95,
+                  "semanticRole": "caption",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "Standard textbook diagram of light refraction through a triangular glass prism."
+              ],
+              "latency_ms": 5807,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "prism_1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                  ],
+                  "checks": {
+                    "vertex_count": 3
+                  },
+                  "conflicts": [],
+                  "notes": "Prism triangular body grounded."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "A=60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.98817
+                },
+                {
+                  "rawText": "A = 60",
+                  "numericValue": 60.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "Δ = 60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "12",
+                  "numericValue": 12.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.672
+                },
+                {
+                  "rawText": "r1",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "resistor_label",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.98446
+                }
+              ],
+              "evidence_pipeline_latency_ms": 21677.147500013234
+            },
+            "evidence": {
+              "ev_cv_prism_2a50897a2e704e7aa51642dab568571b": {
+                "id": "ev_cv_prism_2a50897a2e704e7aa51642dab568571b",
+                "method": "classical_cv",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "prism_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "has_polygon": true,
+                  "has_apex": true
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_011": {
+                "id": "ev_ocr_ocr_tok_011",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98457,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 8 Refraction through a Prism",
+                  "bbox": {
+                    "x": 290.0,
+                    "y": 837.0,
+                    "width": 669.0,
+                    "height": 62.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_009": {
+                "id": "ev_ocr_ocr_tok_009",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99989,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Glass Prism",
+                  "bbox": {
+                    "x": 506.0,
+                    "y": 613.0,
+                    "width": 245.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99992,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Incident ray",
+                  "bbox": {
+                    "x": 46.0,
+                    "y": 342.0,
+                    "width": 216.0,
+                    "height": 55.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_010": {
+                "id": "ev_ocr_ocr_tok_010",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99521,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Emergent ray",
+                  "bbox": {
+                    "x": 1022.0,
+                    "y": 610.0,
+                    "width": 238.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98817,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "A=60°",
+                  "bbox": {
+                    "x": 556.0,
+                    "y": 184.0,
+                    "width": 128.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_008": {
+                "id": "ev_ocr_ocr_tok_008",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.95735,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N2",
+                  "bbox": {
+                    "x": 730.0,
+                    "y": 541.0,
+                    "width": 85.0,
+                    "height": 73.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.74629,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "21",
+                  "bbox": {
+                    "x": 738.0,
+                    "y": 465.0,
+                    "width": 63.0,
+                    "height": 76.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.9941,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N1",
+                  "bbox": {
+                    "x": 267.0,
+                    "y": 225.0,
+                    "width": 67.0,
+                    "height": 61.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99967,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "δ",
+                  "bbox": {
+                    "x": 1086.0,
+                    "y": 392.0,
+                    "width": 49.0,
+                    "height": 64.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98446,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "r1",
+                  "bbox": {
+                    "x": 500.0,
+                    "y": 412.0,
+                    "width": 56.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99829,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "e",
+                  "bbox": {
+                    "x": 909.0,
+                    "y": 518.0,
+                    "width": 34.0,
+                    "height": 36.0
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "status": "READY_TO_COMPILE",
+            "status_notes": "Grounded prism polygon, apex angle, and refractive index; ready for compiler verification.",
+            "resolutions": {
+              "n": {
+                "id": "auto_policy_crown_glass_refractive_index",
+                "requirementId": "",
+                "parameterName": "n",
+                "value": 1.52,
+                "resolvedValue": 1.52,
+                "unit": "",
+                "canonicalUnit": "",
+                "rawInput": "1.52",
+                "originalEnteredValue": "1.52",
+                "source": "policy_default",
+                "resolutionSource": "policy_default",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "supersededValue": null,
+                "evidenceRefs": [],
+                "timestamp": "",
+                "notes": "Automatic model assumption: Refractive index of standard optical crown glass (n = 1.52).",
+                "userAccepted": false,
+                "resolvedBy": "auto_policy"
+              }
+            },
+            "review_issues": [],
+            "parameter_provenance": {
+              "n": {
+                "source": "auto_policy",
+                "evidence_refs": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policy_id": "policy_crown_glass_refractive_index",
+                "policy_version": "1.0",
+                "user_accepted": false,
+                "superseded_value": null,
+                "derived_from": []
+              }
+            },
+            "calibration": null,
+            "id": "2a50897a2e704e7aa51642dab568571b_figure_001",
+            "isPhysics": true
+          }
+        }
+      },
+      {
+        "call": "00529_PhysicsCompiler._preserve_parameter_provenance",
+        "value": {
+          "scene": {
+            "schemaVersion": "1.0",
+            "id": "PHY-OPTI-figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "source": {
+              "type": "book_figure",
+              "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+              "figure_id": "figure_001",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "coordinateSystem": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "parameters": {
+              "refractiveIndex": {
+                "value": 1.52,
+                "unit": "",
+                "provenance": "observed"
+              },
+              "apexAngle": {
+                "value": 60.0,
+                "unit": "deg",
+                "provenance": "observed"
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "apex_angle_deg": 60.0
+            },
+            "objects": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757.0
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757.0
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60.0
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47.0,
+                    "y": 456.0
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ],
+            "render": {
+              "coordinate_space": "source_px"
+            },
+            "elements": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757.0
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757.0
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60.0
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47.0,
+                    "y": 456.0
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ]
+          },
+          "book_ir": {
+            "version": "1.0",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "page_ir_version": "1.0",
+            "figure_id": "figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "entities": [
+              {
+                "id": "prism_1",
+                "type": "prism_body",
+                "label": "Glass Prism",
+                "position_source_px": {
+                  "x": 621.3,
+                  "y": 80.9,
+                  "coordinate_space": "source_px",
+                  "method": "cv_prism_apex"
+                },
+                "geometry": {
+                  "polygon": {
+                    "points": [
+                      {
+                        "x": 621.3,
+                        "y": 80.9
+                      },
+                      {
+                        "x": 229.2,
+                        "y": 757.0
+                      },
+                      {
+                        "x": 1003.9,
+                        "y": 757.0
+                      }
+                    ]
+                  },
+                  "bounds": {
+                    "x": 229.2,
+                    "y": 80.9,
+                    "width": 774.7,
+                    "height": 676.1
+                  }
+                },
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                ]
+              },
+              {
+                "id": "ray_1",
+                "type": "incident_ray",
+                "label": "Incident ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_2",
+                "type": "refracted_ray",
+                "label": null,
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_3",
+                "type": "emergent_ray",
+                "label": "Emergent ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_1",
+                "type": "normal_line",
+                "label": "N1",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_2",
+                "type": "normal_line",
+                "label": "N2",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "refracts_at",
+                "from": "ray_1",
+                "to": "prism_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "refracts_at",
+                "from": "prism_1",
+                "to": "ray_3",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "apex_angle": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "apex_angle_deg": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "n": 1.52
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:30:10.150278+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "A = 60°",
+                  "confidence": 0.95,
+                  "semanticRole": "prism_angle",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "i",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r1",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_refraction",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r2",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence_internal",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "e",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_emergence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "δ",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_deviation",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Fig. 8 Refraction through a Prism",
+                  "confidence": 0.95,
+                  "semanticRole": "caption",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "Standard textbook diagram of light refraction through a triangular glass prism."
+              ],
+              "latency_ms": 5807,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "prism_1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                  ],
+                  "checks": {
+                    "vertex_count": 3
+                  },
+                  "conflicts": [],
+                  "notes": "Prism triangular body grounded."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "A=60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.98817
+                },
+                {
+                  "rawText": "A = 60",
+                  "numericValue": 60.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "Δ = 60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "12",
+                  "numericValue": 12.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.672
+                },
+                {
+                  "rawText": "r1",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "resistor_label",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.98446
+                }
+              ],
+              "evidence_pipeline_latency_ms": 21677.147500013234
+            },
+            "evidence": {
+              "ev_cv_prism_2a50897a2e704e7aa51642dab568571b": {
+                "id": "ev_cv_prism_2a50897a2e704e7aa51642dab568571b",
+                "method": "classical_cv",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "prism_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "has_polygon": true,
+                  "has_apex": true
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_011": {
+                "id": "ev_ocr_ocr_tok_011",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98457,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 8 Refraction through a Prism",
+                  "bbox": {
+                    "x": 290.0,
+                    "y": 837.0,
+                    "width": 669.0,
+                    "height": 62.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_009": {
+                "id": "ev_ocr_ocr_tok_009",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99989,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Glass Prism",
+                  "bbox": {
+                    "x": 506.0,
+                    "y": 613.0,
+                    "width": 245.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99992,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Incident ray",
+                  "bbox": {
+                    "x": 46.0,
+                    "y": 342.0,
+                    "width": 216.0,
+                    "height": 55.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_010": {
+                "id": "ev_ocr_ocr_tok_010",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99521,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Emergent ray",
+                  "bbox": {
+                    "x": 1022.0,
+                    "y": 610.0,
+                    "width": 238.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98817,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "A=60°",
+                  "bbox": {
+                    "x": 556.0,
+                    "y": 184.0,
+                    "width": 128.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_008": {
+                "id": "ev_ocr_ocr_tok_008",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.95735,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N2",
+                  "bbox": {
+                    "x": 730.0,
+                    "y": 541.0,
+                    "width": 85.0,
+                    "height": 73.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.74629,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "21",
+                  "bbox": {
+                    "x": 738.0,
+                    "y": 465.0,
+                    "width": 63.0,
+                    "height": 76.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.9941,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N1",
+                  "bbox": {
+                    "x": 267.0,
+                    "y": 225.0,
+                    "width": 67.0,
+                    "height": 61.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99967,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "δ",
+                  "bbox": {
+                    "x": 1086.0,
+                    "y": 392.0,
+                    "width": 49.0,
+                    "height": 64.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98446,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "r1",
+                  "bbox": {
+                    "x": 500.0,
+                    "y": 412.0,
+                    "width": 56.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99829,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "e",
+                  "bbox": {
+                    "x": 909.0,
+                    "y": 518.0,
+                    "width": 34.0,
+                    "height": 36.0
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "status": "READY_TO_COMPILE",
+            "status_notes": "Grounded prism polygon, apex angle, and refractive index; ready for compiler verification.",
+            "resolutions": {
+              "n": {
+                "id": "auto_policy_crown_glass_refractive_index",
+                "requirementId": "",
+                "parameterName": "n",
+                "value": 1.52,
+                "resolvedValue": 1.52,
+                "unit": "",
+                "canonicalUnit": "",
+                "rawInput": "1.52",
+                "originalEnteredValue": "1.52",
+                "source": "policy_default",
+                "resolutionSource": "policy_default",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "supersededValue": null,
+                "evidenceRefs": [],
+                "timestamp": "",
+                "notes": "Automatic model assumption: Refractive index of standard optical crown glass (n = 1.52).",
+                "userAccepted": false,
+                "resolvedBy": "auto_policy"
+              }
+            },
+            "review_issues": [],
+            "parameter_provenance": {
+              "n": {
+                "source": "auto_policy",
+                "evidence_refs": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policy_id": "policy_crown_glass_refractive_index",
+                "policy_version": "1.0",
+                "user_accepted": false,
+                "superseded_value": null,
+                "derived_from": []
+              }
+            },
+            "calibration": null,
+            "id": "2a50897a2e704e7aa51642dab568571b_figure_001",
+            "isPhysics": true
+          },
+          "subtype": "prism"
+        }
+      },
+      {
+        "call": "00530_validate_canonical_scene",
+        "value": {
+          "scene": {
+            "schemaVersion": "1.0",
+            "id": "PHY-OPTI-figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "source": {
+              "type": "book_figure",
+              "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+              "figure_id": "figure_001",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "coordinateSystem": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "parameters": {
+              "refractiveIndex": {
+                "value": 1.52,
+                "unit": "",
+                "provenance": "auto_policy",
+                "evidenceProvenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0.8,
+                  "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                  "policyId": "policy_crown_glass_refractive_index",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "apexAngle": {
+                "value": 60.0,
+                "unit": "deg",
+                "provenance": "ocr",
+                "evidenceProvenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": ""
+                }
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "apex_angle_deg": 60.0
+            },
+            "objects": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757.0
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757.0
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60.0
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47.0,
+                    "y": 456.0
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ],
+            "render": {
+              "coordinate_space": "source_px"
+            },
+            "elements": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757.0
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757.0
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60.0
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47.0,
+                    "y": 456.0
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Validated BookIR and an initially empty canonical scene structure.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00506_PhysicsCompiler._build_canonical_scene",
+        "return_value": {
+          "schemaVersion": "1.0",
+          "id": "PHY-OPTI-figure_001",
+          "domain": "optics",
+          "subtype": "prism",
+          "source": {
+            "type": "book_figure",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "figure_id": "figure_001",
+            "width": 1280.0,
+            "height": 960.0,
+            "image_width_px": 1280.0,
+            "image_height_px": 960.0
+          },
+          "coordinateSpace": {
+            "type": "source_px",
+            "width": 1280.0,
+            "height": 960.0,
+            "image_width_px": 1280.0,
+            "image_height_px": 960.0,
+            "unit": "px"
+          },
+          "coordinateSystem": {
+            "type": "source_px",
+            "width": 1280.0,
+            "height": 960.0,
+            "image_width_px": 1280.0,
+            "image_height_px": 960.0,
+            "unit": "px"
+          },
+          "parameters": {
+            "refractiveIndex": {
+              "value": 1.52,
+              "unit": "",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "apexAngle": {
+              "value": 60.0,
+              "unit": "deg",
+              "provenance": "ocr",
+              "evidenceProvenance": {
+                "source": "ocr",
+                "evidenceRefs": [
+                  "ev_ocr_ocr_tok_001"
+                ],
+                "derivedFrom": [
+                  "ev_ocr_ocr_tok_001"
+                ],
+                "confidence": 0.889,
+                "notes": ""
+              }
+            }
+          },
+          "assumptions": [
+            {
+              "parameter": "n",
+              "policyId": "policy_crown_glass_refractive_index",
+              "policyVersion": "1.0",
+              "value": 1.52,
+              "unit": null,
+              "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            }
+          ],
+          "geometry": {
+            "width": 1280,
+            "height": 960,
+            "coordinate_space": "source_px",
+            "vertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757.0
+              },
+              {
+                "x": 1003.9,
+                "y": 757.0
+              }
+            ],
+            "prismVertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757.0
+              },
+              {
+                "x": 1003.9,
+                "y": 757.0
+              }
+            ],
+            "ray_origin": {
+              "x": 47.0,
+              "y": 456.0
+            },
+            "rayOrigin": {
+              "x": 47.0,
+              "y": 456.0
+            },
+            "ray_direction": {
+              "x": 0.9825,
+              "y": -0.1862
+            },
+            "rayDirection": {
+              "x": 0.9825,
+              "y": -0.1862
+            },
+            "apex_angle_deg": 60.0
+          },
+          "objects": [
+            {
+              "id": "element_prism",
+              "type": "prism",
+              "role": "fixed",
+              "label": "Optical Prism",
+              "evidence_refs": [],
+              "optics": {
+                "model": "prism",
+                "vertices": [
+                  {
+                    "x": 621.3,
+                    "y": 80.9
+                  },
+                  {
+                    "x": 229.2,
+                    "y": 757.0
+                  },
+                  {
+                    "x": 1003.9,
+                    "y": 757.0
+                  }
+                ],
+                "refractiveIndex": 1.52,
+                "apex_angle_deg": 60.0
+              }
+            },
+            {
+              "id": "element_ray_source",
+              "type": "ray_source",
+              "role": "dynamic",
+              "optics": {
+                "model": "ray_source",
+                "position": {
+                  "x": 47.0,
+                  "y": 456.0
+                },
+                "direction": {
+                  "x": 0.9825,
+                  "y": -0.1862
+                }
+              }
+            }
+          ],
+          "render": {
+            "coordinate_space": "source_px"
+          },
+          "elements": [
+            {
+              "id": "element_prism",
+              "type": "prism",
+              "role": "fixed",
+              "label": "Optical Prism",
+              "evidence_refs": [],
+              "optics": {
+                "model": "prism",
+                "vertices": [
+                  {
+                    "x": 621.3,
+                    "y": 80.9
+                  },
+                  {
+                    "x": 229.2,
+                    "y": 757.0
+                  },
+                  {
+                    "x": 1003.9,
+                    "y": 757.0
+                  }
+                ],
+                "refractiveIndex": 1.52,
+                "apex_angle_deg": 60.0
+              }
+            },
+            {
+              "id": "element_ray_source",
+              "type": "ray_source",
+              "role": "dynamic",
+              "optics": {
+                "model": "ray_source",
+                "position": {
+                  "x": 47.0,
+                  "y": 456.0
+                },
+                "direction": {
+                  "x": 0.9825,
+                  "y": -0.1862
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "call": "00514_PhysicsCompiler._populate_canonical_prism",
+        "return_value": null
+      },
+      {
+        "call": "00529_PhysicsCompiler._preserve_parameter_provenance",
+        "return_value": null
+      },
+      {
+        "call": "00530_validate_canonical_scene",
+        "return_value": []
+      }
+    ],
+    "in_place_outputs": [
+      {
+        "call": "00514_PhysicsCompiler._populate_canonical_prism",
+        "post_call_locals": {
+          "scene": {
+            "schemaVersion": "1.0",
+            "id": "PHY-OPTI-figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "source": {
+              "type": "book_figure",
+              "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+              "figure_id": "figure_001",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "coordinateSystem": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "parameters": {
+              "refractiveIndex": {
+                "value": 1.52,
+                "unit": "",
+                "provenance": "observed"
+              },
+              "apexAngle": {
+                "value": 60.0,
+                "unit": "deg",
+                "provenance": "observed"
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "apex_angle_deg": 60.0
+            },
+            "objects": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757.0
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757.0
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60.0
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47.0,
+                    "y": 456.0
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ],
+            "render": {
+              "coordinate_space": "source_px"
+            }
+          },
+          "book_ir": {
+            "version": "1.0",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "page_ir_version": "1.0",
+            "figure_id": "figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "entities": [
+              {
+                "id": "prism_1",
+                "type": "prism_body",
+                "label": "Glass Prism",
+                "position_source_px": {
+                  "x": 621.3,
+                  "y": 80.9,
+                  "coordinate_space": "source_px",
+                  "method": "cv_prism_apex"
+                },
+                "geometry": {
+                  "polygon": {
+                    "points": [
+                      {
+                        "x": 621.3,
+                        "y": 80.9
+                      },
+                      {
+                        "x": 229.2,
+                        "y": 757.0
+                      },
+                      {
+                        "x": 1003.9,
+                        "y": 757.0
+                      }
+                    ]
+                  },
+                  "bounds": {
+                    "x": 229.2,
+                    "y": 80.9,
+                    "width": 774.7,
+                    "height": 676.1
+                  }
+                },
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                ]
+              },
+              {
+                "id": "ray_1",
+                "type": "incident_ray",
+                "label": "Incident ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_2",
+                "type": "refracted_ray",
+                "label": null,
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_3",
+                "type": "emergent_ray",
+                "label": "Emergent ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_1",
+                "type": "normal_line",
+                "label": "N1",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_2",
+                "type": "normal_line",
+                "label": "N2",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "refracts_at",
+                "from": "ray_1",
+                "to": "prism_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "refracts_at",
+                "from": "prism_1",
+                "to": "ray_3",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "apex_angle": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "apex_angle_deg": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "n": 1.52
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:30:10.150278+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "A = 60°",
+                  "confidence": 0.95,
+                  "semanticRole": "prism_angle",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "i",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r1",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_refraction",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r2",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence_internal",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "e",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_emergence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "δ",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_deviation",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Fig. 8 Refraction through a Prism",
+                  "confidence": 0.95,
+                  "semanticRole": "caption",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "Standard textbook diagram of light refraction through a triangular glass prism."
+              ],
+              "latency_ms": 5807,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "prism_1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                  ],
+                  "checks": {
+                    "vertex_count": 3
+                  },
+                  "conflicts": [],
+                  "notes": "Prism triangular body grounded."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "A=60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.98817
+                },
+                {
+                  "rawText": "A = 60",
+                  "numericValue": 60.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "Δ = 60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "12",
+                  "numericValue": 12.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.672
+                },
+                {
+                  "rawText": "r1",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "resistor_label",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.98446
+                }
+              ],
+              "evidence_pipeline_latency_ms": 21677.147500013234
+            },
+            "evidence": {
+              "ev_cv_prism_2a50897a2e704e7aa51642dab568571b": {
+                "id": "ev_cv_prism_2a50897a2e704e7aa51642dab568571b",
+                "method": "classical_cv",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "prism_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "has_polygon": true,
+                  "has_apex": true
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_011": {
+                "id": "ev_ocr_ocr_tok_011",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98457,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 8 Refraction through a Prism",
+                  "bbox": {
+                    "x": 290.0,
+                    "y": 837.0,
+                    "width": 669.0,
+                    "height": 62.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_009": {
+                "id": "ev_ocr_ocr_tok_009",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99989,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Glass Prism",
+                  "bbox": {
+                    "x": 506.0,
+                    "y": 613.0,
+                    "width": 245.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99992,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Incident ray",
+                  "bbox": {
+                    "x": 46.0,
+                    "y": 342.0,
+                    "width": 216.0,
+                    "height": 55.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_010": {
+                "id": "ev_ocr_ocr_tok_010",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99521,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Emergent ray",
+                  "bbox": {
+                    "x": 1022.0,
+                    "y": 610.0,
+                    "width": 238.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98817,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "A=60°",
+                  "bbox": {
+                    "x": 556.0,
+                    "y": 184.0,
+                    "width": 128.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_008": {
+                "id": "ev_ocr_ocr_tok_008",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.95735,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N2",
+                  "bbox": {
+                    "x": 730.0,
+                    "y": 541.0,
+                    "width": 85.0,
+                    "height": 73.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.74629,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "21",
+                  "bbox": {
+                    "x": 738.0,
+                    "y": 465.0,
+                    "width": 63.0,
+                    "height": 76.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.9941,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N1",
+                  "bbox": {
+                    "x": 267.0,
+                    "y": 225.0,
+                    "width": 67.0,
+                    "height": 61.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99967,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "δ",
+                  "bbox": {
+                    "x": 1086.0,
+                    "y": 392.0,
+                    "width": 49.0,
+                    "height": 64.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98446,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "r1",
+                  "bbox": {
+                    "x": 500.0,
+                    "y": 412.0,
+                    "width": 56.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99829,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "e",
+                  "bbox": {
+                    "x": 909.0,
+                    "y": 518.0,
+                    "width": 34.0,
+                    "height": 36.0
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "status": "READY_TO_COMPILE",
+            "status_notes": "Grounded prism polygon, apex angle, and refractive index; ready for compiler verification.",
+            "resolutions": {
+              "n": {
+                "id": "auto_policy_crown_glass_refractive_index",
+                "requirementId": "",
+                "parameterName": "n",
+                "value": 1.52,
+                "resolvedValue": 1.52,
+                "unit": "",
+                "canonicalUnit": "",
+                "rawInput": "1.52",
+                "originalEnteredValue": "1.52",
+                "source": "policy_default",
+                "resolutionSource": "policy_default",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "supersededValue": null,
+                "evidenceRefs": [],
+                "timestamp": "",
+                "notes": "Automatic model assumption: Refractive index of standard optical crown glass (n = 1.52).",
+                "userAccepted": false,
+                "resolvedBy": "auto_policy"
+              }
+            },
+            "review_issues": [],
+            "parameter_provenance": {
+              "n": {
+                "source": "auto_policy",
+                "evidence_refs": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policy_id": "policy_crown_glass_refractive_index",
+                "policy_version": "1.0",
+                "user_accepted": false,
+                "superseded_value": null,
+                "derived_from": []
+              }
+            },
+            "calibration": null,
+            "id": "2a50897a2e704e7aa51642dab568571b_figure_001",
+            "isPhysics": true
+          }
+        }
+      },
+      {
+        "call": "00529_PhysicsCompiler._preserve_parameter_provenance",
+        "post_call_locals": {
+          "scene": {
+            "schemaVersion": "1.0",
+            "id": "PHY-OPTI-figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "source": {
+              "type": "book_figure",
+              "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+              "figure_id": "figure_001",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "coordinateSystem": {
+              "type": "source_px",
+              "width": 1280.0,
+              "height": 960.0,
+              "image_width_px": 1280.0,
+              "image_height_px": 960.0,
+              "unit": "px"
+            },
+            "parameters": {
+              "refractiveIndex": {
+                "value": 1.52,
+                "unit": "",
+                "provenance": "auto_policy",
+                "evidenceProvenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0.8,
+                  "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                  "policyId": "policy_crown_glass_refractive_index",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "apexAngle": {
+                "value": 60.0,
+                "unit": "deg",
+                "provenance": "ocr",
+                "evidenceProvenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": ""
+                }
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "apex_angle_deg": 60.0
+            },
+            "objects": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757.0
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757.0
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60.0
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47.0,
+                    "y": 456.0
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ],
+            "render": {
+              "coordinate_space": "source_px"
+            },
+            "elements": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757.0
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757.0
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60.0
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47.0,
+                    "y": 456.0
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ]
+          },
+          "book_ir": {
+            "version": "1.0",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "page_ir_version": "1.0",
+            "figure_id": "figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "entities": [
+              {
+                "id": "prism_1",
+                "type": "prism_body",
+                "label": "Glass Prism",
+                "position_source_px": {
+                  "x": 621.3,
+                  "y": 80.9,
+                  "coordinate_space": "source_px",
+                  "method": "cv_prism_apex"
+                },
+                "geometry": {
+                  "polygon": {
+                    "points": [
+                      {
+                        "x": 621.3,
+                        "y": 80.9
+                      },
+                      {
+                        "x": 229.2,
+                        "y": 757.0
+                      },
+                      {
+                        "x": 1003.9,
+                        "y": 757.0
+                      }
+                    ]
+                  },
+                  "bounds": {
+                    "x": 229.2,
+                    "y": 80.9,
+                    "width": 774.7,
+                    "height": 676.1
+                  }
+                },
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                ]
+              },
+              {
+                "id": "ray_1",
+                "type": "incident_ray",
+                "label": "Incident ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_2",
+                "type": "refracted_ray",
+                "label": null,
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "ray_3",
+                "type": "emergent_ray",
+                "label": "Emergent ray",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_1",
+                "type": "normal_line",
+                "label": "N1",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              },
+              {
+                "id": "normal_2",
+                "type": "normal_line",
+                "label": "N2",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "refracts_at",
+                "from": "ray_1",
+                "to": "prism_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "refracts_at",
+                "from": "prism_1",
+                "to": "ray_3",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "apex_angle": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "apex_angle_deg": {
+                "value": 60.0,
+                "unit": "deg",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": "",
+                  "policy_id": null,
+                  "policy_version": null,
+                  "user_accepted": null,
+                  "superseded_value": null,
+                  "derived_from": [
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                }
+              },
+              "n": 1.52
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757.0
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757.0
+                }
+              ],
+              "ray_origin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "rayOrigin": {
+                "x": 47.0,
+                "y": 456.0
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:30:10.150278+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "A = 60°",
+                  "confidence": 0.95,
+                  "semanticRole": "prism_angle",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "i",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r1",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_refraction",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "r2",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_incidence_internal",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "e",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_emergence",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "δ",
+                  "confidence": 0.95,
+                  "semanticRole": "angle_of_deviation",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Fig. 8 Refraction through a Prism",
+                  "confidence": 0.95,
+                  "semanticRole": "caption",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "Standard textbook diagram of light refraction through a triangular glass prism."
+              ],
+              "latency_ms": 5807,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "prism_1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_prism_2a50897a2e704e7aa51642dab568571b"
+                  ],
+                  "checks": {
+                    "vertex_count": 3
+                  },
+                  "conflicts": [],
+                  "notes": "Prism triangular body grounded."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "A=60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.98817
+                },
+                {
+                  "rawText": "A = 60",
+                  "numericValue": 60.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "Δ = 60°",
+                  "numericValue": 60.0,
+                  "rawUnit": "°",
+                  "canonicalUnit": "°",
+                  "quantityCandidate": "angle",
+                  "sourceOcrTokenId": "ocr_tok_001",
+                  "confidence": 0.889
+                },
+                {
+                  "rawText": "12",
+                  "numericValue": 12.0,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.672
+                },
+                {
+                  "rawText": "r1",
+                  "numericValue": null,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": "resistor_label",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.98446
+                }
+              ],
+              "evidence_pipeline_latency_ms": 21677.147500013234
+            },
+            "evidence": {
+              "ev_cv_prism_2a50897a2e704e7aa51642dab568571b": {
+                "id": "ev_cv_prism_2a50897a2e704e7aa51642dab568571b",
+                "method": "classical_cv",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "prism_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "has_polygon": true,
+                  "has_apex": true
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_011": {
+                "id": "ev_ocr_ocr_tok_011",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98457,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 8 Refraction through a Prism",
+                  "bbox": {
+                    "x": 290.0,
+                    "y": 837.0,
+                    "width": 669.0,
+                    "height": 62.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_009": {
+                "id": "ev_ocr_ocr_tok_009",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99989,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Glass Prism",
+                  "bbox": {
+                    "x": 506.0,
+                    "y": 613.0,
+                    "width": 245.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99992,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Incident ray",
+                  "bbox": {
+                    "x": 46.0,
+                    "y": 342.0,
+                    "width": 216.0,
+                    "height": 55.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_010": {
+                "id": "ev_ocr_ocr_tok_010",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99521,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Emergent ray",
+                  "bbox": {
+                    "x": 1022.0,
+                    "y": 610.0,
+                    "width": 238.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98817,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "A=60°",
+                  "bbox": {
+                    "x": 556.0,
+                    "y": 184.0,
+                    "width": 128.0,
+                    "height": 49.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_008": {
+                "id": "ev_ocr_ocr_tok_008",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.95735,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N2",
+                  "bbox": {
+                    "x": 730.0,
+                    "y": 541.0,
+                    "width": 85.0,
+                    "height": 73.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.74629,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "21",
+                  "bbox": {
+                    "x": 738.0,
+                    "y": 465.0,
+                    "width": 63.0,
+                    "height": 76.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.9941,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "N1",
+                  "bbox": {
+                    "x": 267.0,
+                    "y": 225.0,
+                    "width": 67.0,
+                    "height": 61.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99967,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "δ",
+                  "bbox": {
+                    "x": 1086.0,
+                    "y": 392.0,
+                    "width": 49.0,
+                    "height": 64.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.98446,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "r1",
+                  "bbox": {
+                    "x": 500.0,
+                    "y": 412.0,
+                    "width": 56.0,
+                    "height": 53.0
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "2a50897a2e704e7aa51642dab568571b",
+                "figureId": "figure_001",
+                "confidence": 0.99829,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "e",
+                  "bbox": {
+                    "x": 909.0,
+                    "y": 518.0,
+                    "width": 34.0,
+                    "height": 36.0
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "status": "READY_TO_COMPILE",
+            "status_notes": "Grounded prism polygon, apex angle, and refractive index; ready for compiler verification.",
+            "resolutions": {
+              "n": {
+                "id": "auto_policy_crown_glass_refractive_index",
+                "requirementId": "",
+                "parameterName": "n",
+                "value": 1.52,
+                "resolvedValue": 1.52,
+                "unit": "",
+                "canonicalUnit": "",
+                "rawInput": "1.52",
+                "originalEnteredValue": "1.52",
+                "source": "policy_default",
+                "resolutionSource": "policy_default",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "supersededValue": null,
+                "evidenceRefs": [],
+                "timestamp": "",
+                "notes": "Automatic model assumption: Refractive index of standard optical crown glass (n = 1.52).",
+                "userAccepted": false,
+                "resolvedBy": "auto_policy"
+              }
+            },
+            "review_issues": [],
+            "parameter_provenance": {
+              "n": {
+                "source": "auto_policy",
+                "evidence_refs": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policy_id": "policy_crown_glass_refractive_index",
+                "policy_version": "1.0",
+                "user_accepted": false,
+                "superseded_value": null,
+                "derived_from": []
+              }
+            },
+            "calibration": null,
+            "id": "2a50897a2e704e7aa51642dab568571b_figure_001",
+            "isPhysics": true
+          }
+        }
+      }
+    ],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Domain scene objects, parameters and geometry that preserve evidence/provenance and source frame. If model geometry is reconstructed, distinguish it from observed geometry.",
+  "expected_diagram": "Preserve the triangle sides/base and distinguish incident/internal/emergent rays from body edges and normal lines. Use observed base evidence rather than averaging unrelated side-segment extents.",
+  "status": "PROPAGATED / RECONSTRUCTED GEOMETRY",
+  "finding": "Compiler preserves CV vertices and incident input. Runtime recomputes refraction using n=1.52: hit1=(447.8163870862532,380.0386653684882), hit2=(807.0350434576367,409.11605562391077). The computed internal/emergent rays disagree visibly with the source. This is model re-synthesis from assumptions and incomplete observed ray constraints, not a proven Snell-law implementation error.",
+  "change_or_loss": "Populate methods mutate scene in place and return None. Their real output is locals_after.scene and the enclosing compile result. None is not a failed scene."
+}

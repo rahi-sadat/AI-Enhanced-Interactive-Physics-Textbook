@@ -1,0 +1,336 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 1,
+  "component": "Browser selects the original diagram",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/features/simulations/core/SimulationOrchestrator.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "User original file",
+  "downstream_stage": "HTTP request reaches /api/ingest",
+  "actual_input": {
+    "records": [
+      {
+        "original_file": {
+          "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+          "source": "C:\\Users\\saher\\Downloads\\photo_2026-10-10_12-06-37.jpg",
+          "sha256": "59aaf1ff61b692e086a588d9916227a1fc3720e8135095484f99abb335739cd2",
+          "bytes": 59343
+        },
+        "metadata": {
+          "file_format": "JPEG",
+          "encoded_width": 1280,
+          "encoded_height": 960,
+          "EXIF_orientation": null,
+          "orientation": "landscape",
+          "decoded_width": 1280,
+          "decoded_height": 960,
+          "sha256": "59aaf1ff61b692e086a588d9916227a1fc3720e8135095484f99abb335739cd2",
+          "png_note": "Lossless serialization of OpenCV decoded original JPEG; no resize, crop, redrawing, or orientation edit. Byte-exact original.jpg retained.",
+          "decoded_pixels_sha256": "dfdfab3de47c738590a8f6dce298a93d8d7ffd9c30ad72aa75d561565c537eeb",
+          "browser_images": [
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "if-viewport-host",
+              "src": null,
+              "viewBox": null,
+              "rect": {
+                "x": 34,
+                "y": 227,
+                "width": 1010,
+                "height": 480,
+                "top": 227,
+                "right": 1044,
+                "bottom": 707,
+                "left": 34
+              },
+              "css": {
+                "width": "1010px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "505px 240px",
+                "zoom": "1",
+                "display": "flex",
+                "position": "relative"
+              }
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "figure-viewport",
+              "src": null,
+              "viewBox": null,
+              "rect": {
+                "x": 34,
+                "y": 227,
+                "width": 1010,
+                "height": 480,
+                "top": 227,
+                "right": 1044,
+                "bottom": 707,
+                "left": 34
+              },
+              "css": {
+                "width": "1010px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "505px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "relative"
+              }
+            },
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "figure-viewport-img",
+              "src": "http://127.0.0.1:5173/uploads/test1.jpg",
+              "naturalWidth": 797,
+              "naturalHeight": 652,
+              "width": 587,
+              "height": 480,
+              "viewBox": null,
+              "rect": {
+                "x": 245.625,
+                "y": 227,
+                "width": 586.734375,
+                "height": 480,
+                "top": 227,
+                "right": 832.359375,
+                "bottom": 707,
+                "left": 245.625
+              },
+              "css": {
+                "width": "586.734px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "293.367px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "figure-viewport-overlay",
+              "src": null,
+              "viewBox": null,
+              "rect": {
+                "x": 245.625,
+                "y": 227,
+                "width": 586.734375,
+                "height": 480,
+                "top": 227,
+                "right": 832.359375,
+                "bottom": 707,
+                "left": 245.625
+              },
+              "css": {
+                "width": "586.734px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "293.367px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "CANVAS",
+              "id": "",
+              "className": "pendulum-overlay-canvas",
+              "src": null,
+              "width": 587,
+              "height": 480,
+              "viewBox": null,
+              "rect": {
+                "x": 245.625,
+                "y": 227,
+                "width": 586.734375,
+                "height": 480,
+                "top": 227,
+                "right": 832.359375,
+                "bottom": 707,
+                "left": 245.625
+              },
+              "css": {
+                "width": "586.734px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "293.367px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "IMG",
+              "id": "diagram-image",
+              "className": "diagram-image",
+              "src": "http://127.0.0.1:5173/scenes/kinematics/with_spring.png?t=1792207801526",
+              "naturalWidth": 855,
+              "naturalHeight": 686,
+              "width": 855,
+              "height": 686,
+              "viewBox": null,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "css": {
+                "width": "747.813px",
+                "height": "600px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgba(0, 0, 0, 0)",
+                "transform": "none",
+                "transformOrigin": "50% 50%",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "CANVAS",
+              "id": "",
+              "className": null,
+              "src": null,
+              "width": 855,
+              "height": 686,
+              "viewBox": null,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "css": {
+                "width": "100%",
+                "height": "100%",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(241, 245, 249)",
+                "transform": "none",
+                "transformOrigin": "50% 50%",
+                "zoom": "1",
+                "display": "block",
+                "position": "static"
+              }
+            },
+            {
+              "tag": "IMG",
+              "id": "preview-image",
+              "className": null,
+              "src": "blob:http://127.0.0.1:5173/782199ea-9e13-4271-86f0-8964fb495844",
+              "naturalWidth": 1280,
+              "naturalHeight": 960,
+              "width": 224,
+              "height": 168,
+              "viewBox": null,
+              "rect": {
+                "x": 596,
+                "y": 249.5,
+                "width": 226,
+                "height": 170,
+                "top": 249.5,
+                "right": 822,
+                "bottom": 419.5,
+                "left": 596
+              },
+              "css": {
+                "width": "226px",
+                "height": "170px",
+                "objectFit": "contain",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "1px solid rgba(255, 255, 255, 0.07)",
+                "transform": "none",
+                "transformOrigin": "113px 85px",
+                "zoom": "1",
+                "display": "block",
+                "position": "static"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator.startWithFile",
+        "phase": "input",
+        "wallTime": 3188.2000000178814,
+        "data": [
+          {},
+          null
+        ]
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "An unchanged image File selected by the user. Identity is the recorded filename, byte count and SHA-256.",
+  "actual_output": {
+    "records": [
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator.startWithFile",
+        "phase": "output",
+        "wallTime": 34133.40000000596,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "One upload operation: first UPLOADING, then a response-governed final state. This outer async call spans the rest of the pipeline; it must not invent a scene locally.",
+  "expected_diagram": "60° is printed apex-angle evidence. Vertices and rays require source measurement. No numerical refractive index is printed. An assumed index must not be described as measured from this diagram.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "File → multipart request. The generic JS File snapshot is {}, so use multipart metadata and the byte-exact source, not {} as evidence of an empty file."
+}

@@ -1,0 +1,29 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 31,
+  "component": "Domain solver and actual initial state",
+  "execution": "NOT EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "engine/circuits/CircuitsAdapter.js",
+      "capture": "NOT EXECUTED"
+    }
+  ],
+  "upstream_stage": "PhysicsRuntime normalization and adapter initialization",
+  "downstream_stage": "CoordinateMapper: source → overlay → browser",
+  "actual_input": {
+    "records": [],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The actual scene-derived model parameters, source geometry and any explicit policy values.",
+  "actual_output": {
+    "records": [],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Mathematically consistent state/output for those inputs. Correct computation is separate from whether those inputs reconstruct this diagram.",
+  "expected_diagram": "Compilation should remain blocked while topology/switch state is ungrounded. A hypothetical corrected ideal open-switch model would have no conducting loop, but that is not a solver output from this trace. Do not present a closed-switch 0.4 A result as actual output.",
+  "status": "NOT EXECUTED",
+  "finding": "No output exists for this diagram at this component. The expected contract is described for debugging, not reported as an executed result.",
+  "change_or_loss": "No transformation, mutation or output was produced by this component for this diagram: the branch was not reached. Expected behavior above is a contract, not an observed result."
+}

@@ -1,0 +1,682 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 7,
+  "component": "Initial semantic BookIR",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 7,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\BookUnderstandingPipeline.py",
+      "function": "BookUnderstandingPipeline.analyze",
+      "line": 92,
+      "caller": {
+        "file": "C:\\Users\\saher\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\concurrent\\futures\\thread.py",
+        "function": "run",
+        "line": 59
+      }
+    },
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 52,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\BookUnderstandingPipeline.py",
+      "function": "BookUnderstandingPipeline._build_book_ir_from_result",
+      "line": 151,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\BookUnderstandingPipeline.py",
+        "function": "analyze",
+        "line": 121
+      }
+    }
+  ],
+  "upstream_stage": "Semantic validation, confidence caps and thresholds",
+  "downstream_stage": "Evidence dispatch and source decode",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00007_BookUnderstandingPipeline.analyze",
+        "value": {
+          "page_ir": {
+            "version": "1.0",
+            "source": {
+              "assetId": "2a50897a2e704e7aa51642dab568571b",
+              "width_px": 1280,
+              "height_px": 960,
+              "mimeType": "image/jpeg",
+              "url": "/uploads/diagram_2a50897a.jpg",
+              "sha256": "59aaf1ff61b692e086a588d9916227a1fc3720e8135095484f99abb335739cd2"
+            },
+            "coordinate_space": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "origin": "top_left"
+            },
+            "regions": [
+              {
+                "id": "region_001",
+                "label": "whole_image",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "confidence": 1.0,
+                "detection_method": "user_supplied",
+                "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+              }
+            ],
+            "figures": [
+              {
+                "id": "figure_001",
+                "region_id": "region_001",
+                "page_x": 0.0,
+                "page_y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "detection_method": "user_supplied",
+                "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+              }
+            ],
+            "text_blocks": [],
+            "metadata": {
+              "pipeline": "PR-04-standalone-upload",
+              "note": "Single-diagram upload. figure_001 is the entire image. Text blocks populated downstream by PR-06 evidence pipeline."
+            }
+          },
+          "asset": {
+            "id": "2a50897a2e704e7aa51642dab568571b",
+            "mime_type": "image/jpeg",
+            "original_filename": "photo_2026-10-10_12-06-37.jpg",
+            "byte_size": 59343,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "59aaf1ff61b692e086a588d9916227a1fc3720e8135095484f99abb335739cd2",
+            "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_2a50897a.jpg"
+          }
+        }
+      },
+      {
+        "call": "00052_BookUnderstandingPipeline._build_book_ir_from_result",
+        "value": {
+          "result": {
+            "classification": "supported",
+            "is_physics": true,
+            "domain": "optics",
+            "subtype": "prism",
+            "confidence": {
+              "is_physics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "raw_provider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "entities": [
+              {
+                "temporary_id": "prism_1",
+                "role": "prism_body",
+                "label": "Glass Prism",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "ray_1",
+                "role": "incident_ray",
+                "label": "Incident ray",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "ray_2",
+                "role": "refracted_ray",
+                "label": null,
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "ray_3",
+                "role": "emergent_ray",
+                "label": "Emergent ray",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "normal_1",
+                "role": "normal_line",
+                "label": "N1",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "normal_2",
+                "role": "normal_line",
+                "label": "N2",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              }
+            ],
+            "relationships": [
+              {
+                "type": "refracts_at",
+                "source_id": "ray_1",
+                "target_id": "prism_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "refracts_at",
+                "source_id": "prism_1",
+                "target_id": "ray_3",
+                "confidence": 0.95
+              }
+            ],
+            "visible_labels": [
+              {
+                "text": "A = 60°",
+                "confidence": 0.95,
+                "semantic_role": "prism_angle",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "i",
+                "confidence": 0.95,
+                "semantic_role": "angle_of_incidence",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "r1",
+                "confidence": 0.95,
+                "semantic_role": "angle_of_refraction",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "r2",
+                "confidence": 0.95,
+                "semantic_role": "angle_of_incidence_internal",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "e",
+                "confidence": 0.95,
+                "semantic_role": "angle_of_emergence",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "δ",
+                "confidence": 0.95,
+                "semantic_role": "angle_of_deviation",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "Fig. 8 Refraction through a Prism",
+                "confidence": 0.95,
+                "semantic_role": "caption",
+                "source": "vlm",
+                "verified": false
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "Standard textbook diagram of light refraction through a triangular glass prism."
+            ],
+            "provider": "gemini",
+            "model": "gemini-3.1-flash-lite",
+            "prompt_version": "pr05-v1",
+            "timestamp": "2026-10-17T03:30:10.150278+00:00",
+            "latency_ms": 5807,
+            "cache_hit": false,
+            "fallback_used": false,
+            "debug": {}
+          },
+          "asset_id": "2a50897a2e704e7aa51642dab568571b",
+          "page_ir_version": "1.0",
+          "figure_id": "figure_001"
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Validated semantic result plus the SourceAsset/PageIR identity.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00007_BookUnderstandingPipeline.analyze",
+        "return_value": {
+          "version": "1.0",
+          "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+          "page_ir_version": "1.0",
+          "figure_id": "figure_001",
+          "domain": "optics",
+          "subtype": "prism",
+          "entities": [
+            {
+              "id": "prism_1",
+              "type": "prism_body",
+              "label": "Glass Prism",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ray_1",
+              "type": "incident_ray",
+              "label": "Incident ray",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ray_2",
+              "type": "refracted_ray",
+              "label": null,
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ray_3",
+              "type": "emergent_ray",
+              "label": "Emergent ray",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "normal_1",
+              "type": "normal_line",
+              "label": "N1",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "normal_2",
+              "type": "normal_line",
+              "label": "N2",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            }
+          ],
+          "relationships": [
+            {
+              "type": "refracts_at",
+              "from": "ray_1",
+              "to": "prism_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "refracts_at",
+              "from": "prism_1",
+              "to": "ray_3",
+              "confidence": 0.95
+            }
+          ],
+          "parameters": {},
+          "geometry": {},
+          "assumptions": [],
+          "provenance": {
+            "pipeline": "PR-05-vlm",
+            "provider": "gemini",
+            "model": "gemini-3.1-flash-lite",
+            "prompt_version": "pr05-v1",
+            "timestamp": "2026-10-17T03:30:10.150278+00:00",
+            "classification": "supported",
+            "visible_labels": [
+              {
+                "text": "A = 60°",
+                "confidence": 0.95,
+                "semanticRole": "prism_angle",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "i",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_incidence",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "r1",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_refraction",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "r2",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_incidence_internal",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "e",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_emergence",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "δ",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_deviation",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "Fig. 8 Refraction through a Prism",
+                "confidence": 0.95,
+                "semanticRole": "caption",
+                "source": "vlm",
+                "verified": false
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "Standard textbook diagram of light refraction through a triangular glass prism."
+            ],
+            "latency_ms": 5807,
+            "cache_hit": false,
+            "fallback_used": false
+          },
+          "evidence": {},
+          "confidence": {
+            "isPhysics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "rawProvider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "status": "NEEDS_REVIEW",
+          "status_notes": "Semantically understood as optics/prism. Precise geometric localization and OCR parameter extraction (PR-06) required before simulation can be compiled.",
+          "resolutions": {},
+          "review_issues": [],
+          "parameter_provenance": {},
+          "calibration": null,
+          "id": "2a50897a2e704e7aa51642dab568571b_figure_001",
+          "isPhysics": true
+        }
+      },
+      {
+        "call": "00052_BookUnderstandingPipeline._build_book_ir_from_result",
+        "return_value": {
+          "version": "1.0",
+          "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+          "page_ir_version": "1.0",
+          "figure_id": "figure_001",
+          "domain": "optics",
+          "subtype": "prism",
+          "entities": [
+            {
+              "id": "prism_1",
+              "type": "prism_body",
+              "label": "Glass Prism",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ray_1",
+              "type": "incident_ray",
+              "label": "Incident ray",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ray_2",
+              "type": "refracted_ray",
+              "label": null,
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ray_3",
+              "type": "emergent_ray",
+              "label": "Emergent ray",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "normal_1",
+              "type": "normal_line",
+              "label": "N1",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "normal_2",
+              "type": "normal_line",
+              "label": "N2",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            }
+          ],
+          "relationships": [
+            {
+              "type": "refracts_at",
+              "from": "ray_1",
+              "to": "prism_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "refracts_at",
+              "from": "prism_1",
+              "to": "ray_3",
+              "confidence": 0.95
+            }
+          ],
+          "parameters": {},
+          "geometry": {},
+          "assumptions": [],
+          "provenance": {
+            "pipeline": "PR-05-vlm",
+            "provider": "gemini",
+            "model": "gemini-3.1-flash-lite",
+            "prompt_version": "pr05-v1",
+            "timestamp": "2026-10-17T03:30:10.150278+00:00",
+            "classification": "supported",
+            "visible_labels": [
+              {
+                "text": "A = 60°",
+                "confidence": 0.95,
+                "semanticRole": "prism_angle",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "i",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_incidence",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "r1",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_refraction",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "r2",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_incidence_internal",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "e",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_emergence",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "δ",
+                "confidence": 0.95,
+                "semanticRole": "angle_of_deviation",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "Fig. 8 Refraction through a Prism",
+                "confidence": 0.95,
+                "semanticRole": "caption",
+                "source": "vlm",
+                "verified": false
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "Standard textbook diagram of light refraction through a triangular glass prism."
+            ],
+            "latency_ms": 5807,
+            "cache_hit": false,
+            "fallback_used": false
+          },
+          "evidence": {},
+          "confidence": {
+            "isPhysics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "rawProvider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "status": "NEEDS_REVIEW",
+          "status_notes": "Semantically understood as optics/prism. Precise geometric localization and OCR parameter extraction (PR-06) required before simulation can be compiled.",
+          "resolutions": {},
+          "review_issues": [],
+          "parameter_provenance": {},
+          "calibration": null,
+          "id": "2a50897a2e704e7aa51642dab568571b_figure_001",
+          "isPhysics": true
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "BookIR with semantic entities and evidence references, but null authoritative positions/geometry until CV/OCR grounds them. Missing numbers remain missing.",
+  "expected_diagram": "Expected accepted classification: supported; isPhysics=true; domain/subtype=optics / prism. Expected semantic content: A triangular glass prism with A=60°, an incident ray, internal and emergent rays, face normals, and symbolic incidence/refraction/emergence/deviation angles. These are semantic roles/labels, not authorization to supply numerical parameters or precise positions.",
+  "status": "PASS WITH LIMITS",
+  "finding": "Accepted domain/subtype agrees with the source. Semantic-only output is appropriate here; missing source geometry is intentional. Raw provider confidence can be 1.0; accepted confidence is capped by validation.",
+  "change_or_loss": "Semantic roles are assigned durable entity IDs. This BookIR is an intermediate hypothesis, not a runnable simulation."
+}

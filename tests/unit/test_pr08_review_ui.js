@@ -402,6 +402,7 @@ async function runTests() {
 
   const btnStart = readyBanner.querySelector('[data-action="start-sim-banner"]');
   btnStart.trigger('click');
+  await new Promise((resolve) => setTimeout(resolve, 0));
   assert(startSimCalled === true, 'Clicking Start Simulation called orchestrator.startSimulation()');
   assert(modal.isOpen === false, 'Modal closed automatically upon starting simulation');
 
@@ -410,6 +411,78 @@ async function runTests() {
   mockOrch.state = OrchestratorState.APPLYING_RESOLUTION;
   modal.open();
   assert(modal.dom.footerStatus.textContent.includes('Applying decision'), 'Displays busy status text');
+
+  console.log('\n[9] Circuit values target individual components and preserve provenance');
+  mockOrch.state = OrchestratorState.NEEDS_REVIEW;
+  mockOrch.bookIR = { subtype: 'dc_linear', parameters: { nodes: ['N1','N2'], components: [
+    { id:'supply', label:'Battery', type:'voltage_source', value:10, unit:'V',
+      value_provenance:{source:'policy_default'} },
+    { id:'load', label:'R', type:'resistor', value:null }
+  ]}};
+  mockOrch.reviewState = { readyToCompile:false, blockersCount:1, issues:[
+    { id:'missing_load', parameterName:'component.load.value', title:'Missing resistance: R',
+      question:'Enter the printed resistance, or use a default if no value is printed.',
+      allowedUnits:['Ω','kΩ','MΩ'], candidates:[], defaultPolicyId:'policy_standard_dc_resistance' }
+  ], availablePolicies:[{id:'policy_standard_dc_resistance',name:'Standard Resistance',
+    value:100,unit:'Ω',targetParameter:'resistance'}]};
+  let selectedTarget;
+  mockOrch.applyPolicy = async (policy,target) => { selectedTarget=target; };
+  modal.render();
+  assert(modal.dom.body.querySelectorAll('.prm-resolved-item').length===1,
+    'Circuit review shows one resolved component, not topology arrays');
+  assert(modal.dom.body.textContent.includes('Assumption'), 'Default voltage is labeled as an assumption');
+  modal.dom.body.querySelector('[data-action="apply-policy"]').trigger('click');
+  assert(selectedTarget==='component.load.value','Default targets the selected missing resistor');
+  const circuitForm=modal.dom.body.querySelector('.prm-manual-form');
+  circuitForm.querySelector('[data-el="numInput"]').value='220';
+  circuitForm.querySelector('[data-action="save-manual"]').trigger('click');
+  assert(manualSubmittedParam==='component.load.value' && manualSubmittedVal==='220',
+    'Manual resistance targets the same individual component');
+
+  console.log('\n[10] Structural blockers never masquerade as simulation readiness');
+  mockOrch.compiledScene = null;
+  mockOrch.bookIR = { parameters: {} };
+  mockOrch.reviewState = { readyToCompile: false, issues: [
+    { issueType: 'ungrounded_geometry', question: 'Wire connectivity is unverified.' },
+    { issueType: 'ungrounded_geometry', parameterName: 'launch_position', question: 'Launch position is missing.' },
+  ] };
+  modal.render();
+  assert(!modal.dom.body.querySelector('.prm-ready-banner'), 'Hidden or unnamed blockers do not create a ready banner');
+  assert(modal.dom.btnStartSim.style.display === 'none', 'Start button stays hidden while backend requires review');
+  assert(modal.dom.body.textContent.includes('Wire connectivity is unverified.'), 'Unnamed structural blocker is visible');
+  assert(modal.dom.body.textContent.includes('Launch position is missing.'), 'Coordinate blocker is visible');
+  assert(modal.dom.body.querySelectorAll('.prm-manual-form').length === 0, 'Structural issues do not request a numeric coordinate');
+
+  console.log('\n[11] Failed compilation preserves the original blocker');
+  mockOrch.state = OrchestratorState.READY_TO_COMPILE;
+  mockOrch.compile = async () => {
+    mockOrch.state = OrchestratorState.NEEDS_REVIEW;
+    mockOrch.currentError = 'The lens center could not be grounded.';
+  };
+  startSimCalled = false;
+  modal.open();
+  await modal._startSimulation();
+  assert(!startSimCalled, 'No startup attempted after compilation is refused');
+  assert(modal.isOpen, 'Review stays open after failed compilation');
+  assert(modal.dom.footerStatus.innerHTML.includes('lens center could not be grounded'), 'Original compilation error remains visible');
+
+  console.log('\n[12] Runtime load failures stay visible and permit retry');
+  mockOrch.state = OrchestratorState.READY_TO_SIMULATE;
+  mockOrch.compiledScene = { id: 'test' };
+  let finishLoading;
+  modal.options.onStartSimulation = () => new Promise((resolve) => { finishLoading = resolve; });
+  const startup = modal._startSimulation();
+  assert(!startSimCalled && modal.isOpen, 'Playback waits for asynchronous runtime loading');
+  finishLoading();
+  await startup;
+  assert(startSimCalled && !modal.isOpen, 'Successful loading starts playback and closes review');
+  modal.options.onStartSimulation = async () => { throw new Error('Renderer failed to load'); };
+  startSimCalled = false;
+  modal.open();
+  await modal._startSimulation();
+  assert(!startSimCalled && modal.isOpen, 'Failed runtime load does not claim simulation started');
+  assert(modal.dom.footerStatus.innerHTML.includes('Renderer failed to load'), 'Runtime failure is shown to the user');
+  assert(!modal.dom.btnStartSim.disabled, 'Runtime loading failure allows retry');
 }
 
 runTests().then(() => {

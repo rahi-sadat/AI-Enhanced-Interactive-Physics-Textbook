@@ -1,0 +1,34 @@
+[
+  {
+    "diagram": "Convex lens",
+    "html": "lens/WALKTHROUGH.html",
+    "markdown": "lens/WALKTHROUGH.md",
+    "stages": 34,
+    "calls": 457,
+    "trace": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017"
+  },
+  {
+    "diagram": "Series DC circuit",
+    "html": "circuit/WALKTHROUGH.html",
+    "markdown": "circuit/WALKTHROUGH.md",
+    "stages": 34,
+    "calls": 1393,
+    "trace": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017"
+  },
+  {
+    "diagram": "Simple pendulum",
+    "html": "pendulum/WALKTHROUGH.html",
+    "markdown": "pendulum/WALKTHROUGH.md",
+    "stages": 34,
+    "calls": 808,
+    "trace": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017"
+  },
+  {
+    "diagram": "Glass prism",
+    "html": "prism/WALKTHROUGH.html",
+    "markdown": "prism/WALKTHROUGH.md",
+    "stages": 34,
+    "calls": 530,
+    "trace": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017"
+  }
+]

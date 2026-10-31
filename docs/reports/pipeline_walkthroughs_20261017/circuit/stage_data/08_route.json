@@ -1,0 +1,95 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 8,
+  "component": "Evidence dispatch and source decode",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 55,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\grounding\\registry.py",
+      "function": "GrounderRegistry.find_grounder",
+      "line": 37,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 117
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 63,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\transforms.py",
+      "function": "load_and_validate_source_image",
+      "line": 256,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 130
+      }
+    }
+  ],
+  "upstream_stage": "Initial semantic BookIR",
+  "downstream_stage": "RapidOCR: first text/box observations",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00055_GrounderRegistry.find_grounder",
+        "value": {
+          "domain": "circuits",
+          "subtype": "dc_linear"
+        }
+      },
+      {
+        "call": "00063_load_and_validate_source_image",
+        "value": {
+          "asset": {
+            "id": "9b910bff7ee74e90a1763e5358b474ff",
+            "mime_type": "image/jpeg",
+            "original_filename": "photo_2026-10-10_12-06-37 (2).jpg",
+            "byte_size": 38634,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63",
+            "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_9b910bff.jpg"
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Supported domain/subtype, semantic BookIR, SourceAsset and PageIR.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00055_GrounderRegistry.find_grounder",
+        "return_value": {
+          "type": "ai.evidence.grounding.circuits.CircuitGrounder",
+          "not_serialized": true
+        }
+      },
+      {
+        "call": "00063_load_and_validate_source_image",
+        "return_value": {
+          "shape": [
+            960,
+            1280,
+            3
+          ],
+          "dtype": "uint8",
+          "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.npy",
+          "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.png"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "The matching subtype grounder and the unchanged native BGR image array; decoder dimensions must match the asset.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "The pipeline routes to the domain module. Other grounders may execute supports() checks; their ground() methods are not thereby executed."
+}

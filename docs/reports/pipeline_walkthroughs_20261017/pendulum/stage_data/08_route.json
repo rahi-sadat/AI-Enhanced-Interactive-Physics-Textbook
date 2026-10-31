@@ -1,0 +1,95 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 8,
+  "component": "Evidence dispatch and source decode",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 45,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\grounding\\registry.py",
+      "function": "GrounderRegistry.find_grounder",
+      "line": 37,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 117
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 47,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\transforms.py",
+      "function": "load_and_validate_source_image",
+      "line": 256,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 130
+      }
+    }
+  ],
+  "upstream_stage": "Initial semantic BookIR",
+  "downstream_stage": "RapidOCR: first text/box observations",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00045_GrounderRegistry.find_grounder",
+        "value": {
+          "domain": "mechanics",
+          "subtype": "pendulum"
+        }
+      },
+      {
+        "call": "00047_load_and_validate_source_image",
+        "value": {
+          "asset": {
+            "id": "25c3ba19a02041ee9ec790156fc87e44",
+            "mime_type": "image/jpeg",
+            "original_filename": "photo_2026-10-10_12-06-38 (2).jpg",
+            "byte_size": 35941,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd",
+            "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_25c3ba19.jpg"
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Supported domain/subtype, semantic BookIR, SourceAsset and PageIR.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00045_GrounderRegistry.find_grounder",
+        "return_value": {
+          "type": "ai.evidence.grounding.pendulum.PendulumGrounder",
+          "not_serialized": true
+        }
+      },
+      {
+        "call": "00047_load_and_validate_source_image",
+        "return_value": {
+          "shape": [
+            960,
+            1280,
+            3
+          ],
+          "dtype": "uint8",
+          "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+          "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "The matching subtype grounder and the unchanged native BGR image array; decoder dimensions must match the asset.",
+  "expected_diagram": "The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "The pipeline routes to the domain module. Other grounders may execute supports() checks; their ground() methods are not thereby executed."
+}

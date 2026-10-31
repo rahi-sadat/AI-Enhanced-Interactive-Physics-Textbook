@@ -1,0 +1,117 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 13,
+  "component": "OCR-region suppression before geometry detection",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 203,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+      "function": "mask_out_text_regions",
+      "line": 38,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+        "function": "preprocess_for_geometry",
+        "line": 79
+      }
+    }
+  ],
+  "upstream_stage": "Grayscale, blur and edge extraction",
+  "downstream_stage": "Domain CV: raw candidates → selected geometry",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00203_mask_out_text_regions",
+        "value": {
+          "edge_map": {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\a1ae1bea1b315185fe87db837f7e8a71f76b53649db277637adfab3637e77831.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\a1ae1bea1b315185fe87db837f7e8a71f76b53649db277637adfab3637e77831.png"
+          },
+          "ocr_boxes": [
+            {
+              "x": 197.0,
+              "y": 748.0,
+              "width": 859.0,
+              "height": 62.0
+            },
+            {
+              "x": 933.0,
+              "y": 189.0,
+              "width": 208.0,
+              "height": 55.0
+            },
+            {
+              "x": 188.0,
+              "y": 220.0,
+              "width": 135.0,
+              "height": 57.0
+            },
+            {
+              "x": 1118.0,
+              "y": 646.0,
+              "width": 129.0,
+              "height": 56.0
+            },
+            {
+              "x": 102.0,
+              "y": 449.0,
+              "width": 70.0,
+              "height": 51.0
+            },
+            {
+              "x": 1102.0,
+              "y": 449.0,
+              "width": 69.0,
+              "height": 51.0
+            },
+            {
+              "x": 356.0,
+              "y": 451.0,
+              "width": 42.0,
+              "height": 47.0
+            },
+            {
+              "x": 849.0,
+              "y": 449.0,
+              "width": 38.0,
+              "height": 43.0
+            }
+          ],
+          "margin_px": 4
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Actual edge map, selected OCR boxes and margin_px.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00203_mask_out_text_regions",
+        "return_value": {
+          "shape": [
+            960,
+            1280
+          ],
+          "dtype": "uint8",
+          "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\2916599985fe98e3c82aa6b5d4ec343475d238d578722f40189e9807bee3d784.npy",
+          "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\2916599985fe98e3c82aa6b5d4ec343475d238d578722f40189e9807bee3d784.png"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "An edge map suppressing text while preserving relevant diagram boundaries/rays. This is the registration requirement; the implementation zeros the entire expanded rectangle without distinguishing text from geometry.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "FAIL — FIRST PROVEN GEOMETRY LOSS",
+  "finding": "Object OCR bbox=(188,220,135,57); margin=4 removes incident-ray pixels adjacent to the label. The removed-edge overlay proves the loss. Its causal connection to the later missing vertical object arrow is not established.",
+  "change_or_loss": "Every pixel removed by the actual mask is shown in red on the original. A valid OCR box does not guarantee safe geometry suppression."
+}

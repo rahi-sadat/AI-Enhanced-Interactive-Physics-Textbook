@@ -1,0 +1,94 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 12,
+  "component": "Grayscale, blur and edge extraction",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 202,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+      "function": "preprocess_diagram",
+      "line": 16,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+        "function": "preprocess_for_geometry",
+        "line": 77
+      }
+    }
+  ],
+  "upstream_stage": "Symbol candidates, deduplication and final OCR",
+  "downstream_stage": "OCR-region suppression before geometry detection",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00202_preprocess_diagram",
+        "value": {
+          "img_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.png"
+          },
+          "blur_ksize": [
+            5,
+            5
+          ],
+          "blur_sigma": 1.0,
+          "canny_thresh1": 50.0,
+          "canny_thresh2": 150.0
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Native BGR array and actual Canny/blur settings.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00202_preprocess_diagram",
+        "return_value": [
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\01aaa62c2cb5f718906a9b5c457d9a627ef90114f4015e33af095429712318be.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\01aaa62c2cb5f718906a9b5c457d9a627ef90114f4015e33af095429712318be.png"
+          },
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\049e9b702cc424677029d5e76feea0a9fc1b4b1c083698c4b84f7b62aafc55ad.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\049e9b702cc424677029d5e76feea0a9fc1b4b1c083698c4b84f7b62aafc55ad.png"
+          },
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\a1ae1bea1b315185fe87db837f7e8a71f76b53649db277637adfab3637e77831.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\a1ae1bea1b315185fe87db837f7e8a71f76b53649db277637adfab3637e77831.png"
+          }
+        ]
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Grayscale/blur/edge arrays in the same 1280×960 source frame. Image processing may change intensities, but must not imply a spatial crop/scale that was not performed.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "FRAME PASS / LOSSY PROCESSING",
+  "finding": "Arrays preserve the source frame. Blur and Canny change image information; no detector correctness is inferred from shape alone.",
+  "change_or_loss": "Color/intensity information becomes an edge representation. Exact arrays are retained. OpenCV internal per-operation frames were not separately profiled."
+}

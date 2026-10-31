@@ -40,7 +40,7 @@ def test_readiness_preserves_unsupported_classification_status():
     assert book_ir.status == BookIRStatus.UNSUPPORTED
 
 
-def test_auto_resolve_does_not_accept_ocr_candidates_or_opt_in_policies():
+def test_evidence_only_resolution_does_not_accept_ocr_candidates_or_opt_in_policies():
     book_ir = BookIR(
         source_asset_id="asset-1",
         figure_id="figure-1",
@@ -54,7 +54,7 @@ def test_auto_resolve_does_not_accept_ocr_candidates_or_opt_in_policies():
         },
     )
 
-    result = ResolutionEngine.auto_resolve(book_ir)
+    result = ResolutionEngine.auto_resolve(book_ir, assume_missing=False)
 
     assert not result.ready
     assert "length" not in book_ir.parameters

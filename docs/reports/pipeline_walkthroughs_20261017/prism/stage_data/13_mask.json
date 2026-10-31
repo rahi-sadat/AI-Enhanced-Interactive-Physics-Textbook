@@ -1,0 +1,135 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 13,
+  "component": "OCR-region suppression before geometry detection",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+      "sequence": 258,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+      "function": "mask_out_text_regions",
+      "line": 38,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+        "function": "preprocess_for_geometry",
+        "line": 79
+      }
+    }
+  ],
+  "upstream_stage": "Grayscale, blur and edge extraction",
+  "downstream_stage": "Domain CV: raw candidates → selected geometry",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00258_mask_out_text_regions",
+        "value": {
+          "edge_map": {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017\\arrays\\0e417d279fcb2057428cdfca04c1ed2851801fa2eca349581f032b71ee467b60.npy",
+            "image": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017\\arrays\\0e417d279fcb2057428cdfca04c1ed2851801fa2eca349581f032b71ee467b60.png"
+          },
+          "ocr_boxes": [
+            {
+              "x": 290.0,
+              "y": 837.0,
+              "width": 669.0,
+              "height": 62.0
+            },
+            {
+              "x": 506.0,
+              "y": 613.0,
+              "width": 245.0,
+              "height": 53.0
+            },
+            {
+              "x": 46.0,
+              "y": 342.0,
+              "width": 216.0,
+              "height": 55.0
+            },
+            {
+              "x": 1022.0,
+              "y": 610.0,
+              "width": 238.0,
+              "height": 49.0
+            },
+            {
+              "x": 556.0,
+              "y": 184.0,
+              "width": 128.0,
+              "height": 49.0
+            },
+            {
+              "x": 730.0,
+              "y": 541.0,
+              "width": 85.0,
+              "height": 73.0
+            },
+            {
+              "x": 738.0,
+              "y": 465.0,
+              "width": 63.0,
+              "height": 76.0
+            },
+            {
+              "x": 267.0,
+              "y": 225.0,
+              "width": 67.0,
+              "height": 61.0
+            },
+            {
+              "x": 1086.0,
+              "y": 392.0,
+              "width": 49.0,
+              "height": 64.0
+            },
+            {
+              "x": 500.0,
+              "y": 412.0,
+              "width": 56.0,
+              "height": 53.0
+            },
+            {
+              "x": 909.0,
+              "y": 518.0,
+              "width": 34.0,
+              "height": 36.0
+            }
+          ],
+          "margin_px": 4
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Actual edge map, selected OCR boxes and margin_px.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00258_mask_out_text_regions",
+        "return_value": {
+          "shape": [
+            960,
+            1280
+          ],
+          "dtype": "uint8",
+          "artifact": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017\\arrays\\9c95b9ebf40ef7bb1629c3e99f0ea0e4b4f82a63ab990a53e73247918f0303bf.npy",
+          "image": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017\\arrays\\9c95b9ebf40ef7bb1629c3e99f0ea0e4b4f82a63ab990a53e73247918f0303bf.png"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "An edge map suppressing text while preserving relevant diagram boundaries/rays. This is the registration requirement; the implementation zeros the entire expanded rectangle without distinguishing text from geometry.",
+  "expected_diagram": "60° is printed apex-angle evidence. Vertices and rays require source measurement. No numerical refractive index is printed. An assumed index must not be described as measured from this diagram.",
+  "status": "FAIL — FIRST PROVEN GEOMETRY LOSS",
+  "finding": "A=60° bbox=(556,184,128,49); margin=4 removes prism-side pixels. Other masks remove angle/normal strokes. This is an earlier loss than the wrong base inference; it is not proven to be the sole cause of contour failure.",
+  "change_or_loss": "Every pixel removed by the actual mask is shown in red on the original. A valid OCR box does not guarantee safe geometry suppression."
+}

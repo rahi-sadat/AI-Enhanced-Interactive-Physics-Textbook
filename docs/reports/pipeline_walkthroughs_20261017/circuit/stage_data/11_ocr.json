@@ -1,0 +1,2098 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 11,
+  "component": "Symbol candidates, deduplication and final OCR",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 66,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+      "function": "MultiOCRRouter.extract",
+      "line": 150,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 159
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 167,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+      "function": "deduplicate_spatial_tokens",
+      "line": 46,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 319
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 175,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "GreekSymbolVisualOCR.extract_symbols",
+      "line": 208,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 323
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 176,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 178,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 180,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 182,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 184,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 186,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 188,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    }
+  ],
+  "upstream_stage": "EasyOCR: independent OCR candidates",
+  "downstream_stage": "Grayscale, blur and edge extraction",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00066_MultiOCRRouter.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "region": null
+        }
+      },
+      {
+        "call": "00167_deduplicate_spatial_tokens",
+        "value": {
+          "tokens": [
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "S",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 378.0,
+                "y": 159.0,
+                "width": 47.0,
+                "height": 53.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 378.0,
+                    "y": 159.0
+                  },
+                  {
+                    "x": 425.0,
+                    "y": 159.0
+                  },
+                  {
+                    "x": 425.0,
+                    "y": 212.0
+                  },
+                  {
+                    "x": 378.0,
+                    "y": 212.0
+                  }
+                ]
+              },
+              "confidence": 0.99926,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "R1 = 10 Ω",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 636.0,
+                "y": 148.0,
+                "width": 242.0,
+                "height": 68.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 636.0,
+                    "y": 151.0
+                  },
+                  {
+                    "x": 877.0,
+                    "y": 148.0
+                  },
+                  {
+                    "x": 878.0,
+                    "y": 213.0
+                  },
+                  {
+                    "x": 637.0,
+                    "y": 216.0
+                  }
+                ]
+              },
+              "confidence": 0.86803,
+              "script_candidate": "greek",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "R1 = 10 `2",
+                  "script": "latin",
+                  "confidence": 0.46127750970800835,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "十",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 175.0,
+                "y": 362.0,
+                "width": 40.0,
+                "height": 40.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 175.0,
+                    "y": 362.0
+                  },
+                  {
+                    "x": 215.0,
+                    "y": 362.0
+                  },
+                  {
+                    "x": 215.0,
+                    "y": 402.0
+                  },
+                  {
+                    "x": 175.0,
+                    "y": 402.0
+                  }
+                ]
+              },
+              "confidence": 0.72651,
+              "script_candidate": "mixed",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            },
+            {
+              "id": "ocr_tok_004",
+              "raw_text": "12 V",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 39.0,
+                "y": 426.0,
+                "width": 123.0,
+                "height": 63.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 39.0,
+                    "y": 428.0
+                  },
+                  {
+                    "x": 161.0,
+                    "y": 426.0
+                  },
+                  {
+                    "x": 162.0,
+                    "y": 487.0
+                  },
+                  {
+                    "x": 40.0,
+                    "y": 489.0
+                  }
+                ]
+              },
+              "confidence": 0.98113,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "12 `",
+                  "script": "latin",
+                  "confidence": 0.3936148122970558,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_004"
+            },
+            {
+              "id": "ocr_tok_005",
+              "raw_text": "R2 = 20 Ω",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1029.0,
+                "y": 421.0,
+                "width": 241.0,
+                "height": 71.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1029.0,
+                    "y": 423.0
+                  },
+                  {
+                    "x": 1270.0,
+                    "y": 421.0
+                  },
+                  {
+                    "x": 1270.0,
+                    "y": 490.0
+                  },
+                  {
+                    "x": 1029.0,
+                    "y": 492.0
+                  }
+                ]
+              },
+              "confidence": 0.90339,
+              "script_candidate": "greek",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "R2 = 20 2",
+                  "script": "latin",
+                  "confidence": 0.43002614643260995,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_005"
+            },
+            {
+              "id": "ocr_tok_006",
+              "raw_text": "I",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 613.0,
+                "y": 706.0,
+                "width": 39.0,
+                "height": 52.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 613.0,
+                    "y": 706.0
+                  },
+                  {
+                    "x": 652.0,
+                    "y": 706.0
+                  },
+                  {
+                    "x": 652.0,
+                    "y": 758.0
+                  },
+                  {
+                    "x": 613.0,
+                    "y": 758.0
+                  }
+                ]
+              },
+              "confidence": 0.99429,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_006"
+            },
+            {
+              "id": "ocr_tok_007",
+              "raw_text": "Fig. 9 Series DC Circuit",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 336.0,
+                "y": 817.0,
+                "width": 603.0,
+                "height": 70.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 336.0,
+                    "y": 817.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 817.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 887.0
+                  },
+                  {
+                    "x": 336.0,
+                    "y": 887.0
+                  }
+                ]
+              },
+              "confidence": 0.97378,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig",
+                  "script": "latin",
+                  "confidence": 0.9334288835525513,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_007"
+            }
+          ]
+        }
+      },
+      {
+        "call": "00175_GreekSymbolVisualOCR.extract_symbols",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.png"
+          },
+          "existing_tokens": [
+            {
+              "id": "ocr_tok_007",
+              "raw_text": "Fig. 9 Series DC Circuit",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 336.0,
+                "y": 817.0,
+                "width": 603.0,
+                "height": 70.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 336.0,
+                    "y": 817.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 817.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 887.0
+                  },
+                  {
+                    "x": 336.0,
+                    "y": 887.0
+                  }
+                ]
+              },
+              "confidence": 0.97378,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig",
+                  "script": "latin",
+                  "confidence": 0.9334288835525513,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_007"
+            },
+            {
+              "id": "ocr_tok_005",
+              "raw_text": "R2 = 20 Ω",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1029.0,
+                "y": 421.0,
+                "width": 241.0,
+                "height": 71.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1029.0,
+                    "y": 423.0
+                  },
+                  {
+                    "x": 1270.0,
+                    "y": 421.0
+                  },
+                  {
+                    "x": 1270.0,
+                    "y": 490.0
+                  },
+                  {
+                    "x": 1029.0,
+                    "y": 492.0
+                  }
+                ]
+              },
+              "confidence": 0.90339,
+              "script_candidate": "greek",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "R2 = 20 2",
+                  "script": "latin",
+                  "confidence": 0.43002614643260995,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_005"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "R1 = 10 Ω",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 636.0,
+                "y": 148.0,
+                "width": 242.0,
+                "height": 68.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 636.0,
+                    "y": 151.0
+                  },
+                  {
+                    "x": 877.0,
+                    "y": 148.0
+                  },
+                  {
+                    "x": 878.0,
+                    "y": 213.0
+                  },
+                  {
+                    "x": 637.0,
+                    "y": 216.0
+                  }
+                ]
+              },
+              "confidence": 0.86803,
+              "script_candidate": "greek",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "R1 = 10 `2",
+                  "script": "latin",
+                  "confidence": 0.46127750970800835,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_004",
+              "raw_text": "12 V",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 39.0,
+                "y": 426.0,
+                "width": 123.0,
+                "height": 63.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 39.0,
+                    "y": 428.0
+                  },
+                  {
+                    "x": 161.0,
+                    "y": 426.0
+                  },
+                  {
+                    "x": 162.0,
+                    "y": 487.0
+                  },
+                  {
+                    "x": 40.0,
+                    "y": 489.0
+                  }
+                ]
+              },
+              "confidence": 0.98113,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "12 `",
+                  "script": "latin",
+                  "confidence": 0.3936148122970558,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_004"
+            },
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "S",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 378.0,
+                "y": 159.0,
+                "width": 47.0,
+                "height": 53.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 378.0,
+                    "y": 159.0
+                  },
+                  {
+                    "x": 425.0,
+                    "y": 159.0
+                  },
+                  {
+                    "x": 425.0,
+                    "y": 212.0
+                  },
+                  {
+                    "x": 378.0,
+                    "y": 212.0
+                  }
+                ]
+              },
+              "confidence": 0.99926,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_006",
+              "raw_text": "I",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 613.0,
+                "y": 706.0,
+                "width": 39.0,
+                "height": 52.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 613.0,
+                    "y": 706.0
+                  },
+                  {
+                    "x": 652.0,
+                    "y": 706.0
+                  },
+                  {
+                    "x": 652.0,
+                    "y": 758.0
+                  },
+                  {
+                    "x": 613.0,
+                    "y": 758.0
+                  }
+                ]
+              },
+              "confidence": 0.99429,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_006"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "十",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 175.0,
+                "y": 362.0,
+                "width": 40.0,
+                "height": 40.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 175.0,
+                    "y": 362.0
+                  },
+                  {
+                    "x": 215.0,
+                    "y": 362.0
+                  },
+                  {
+                    "x": 215.0,
+                    "y": 402.0
+                  },
+                  {
+                    "x": 175.0,
+                    "y": 402.0
+                  }
+                ]
+              },
+              "confidence": 0.72651,
+              "script_candidate": "mixed",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            }
+          ],
+          "source_width": 1280,
+          "source_height": 960
+        }
+      },
+      {
+        "call": "00176_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_007",
+            "raw_text": "Fig. 9 Series DC Circuit",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 336.0,
+              "y": 817.0,
+              "width": 603.0,
+              "height": 70.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 336.0,
+                  "y": 817.0
+                },
+                {
+                  "x": 939.0,
+                  "y": 817.0
+                },
+                {
+                  "x": 939.0,
+                  "y": 887.0
+                },
+                {
+                  "x": 336.0,
+                  "y": 887.0
+                }
+              ]
+            },
+            "confidence": 0.97378,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Fig",
+                "script": "latin",
+                "confidence": 0.9334288835525513,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_007"
+          }
+        }
+      },
+      {
+        "call": "00178_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_005",
+            "raw_text": "R2 = 20 Ω",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 1029.0,
+              "y": 421.0,
+              "width": 241.0,
+              "height": 71.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 1029.0,
+                  "y": 423.0
+                },
+                {
+                  "x": 1270.0,
+                  "y": 421.0
+                },
+                {
+                  "x": 1270.0,
+                  "y": 490.0
+                },
+                {
+                  "x": 1029.0,
+                  "y": 492.0
+                }
+              ]
+            },
+            "confidence": 0.90339,
+            "script_candidate": "greek",
+            "language_candidate": "und",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "R2 = 20 2",
+                "script": "latin",
+                "confidence": 0.43002614643260995,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_005"
+          }
+        }
+      },
+      {
+        "call": "00180_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_002",
+            "raw_text": "R1 = 10 Ω",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 636.0,
+              "y": 148.0,
+              "width": 242.0,
+              "height": 68.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 636.0,
+                  "y": 151.0
+                },
+                {
+                  "x": 877.0,
+                  "y": 148.0
+                },
+                {
+                  "x": 878.0,
+                  "y": 213.0
+                },
+                {
+                  "x": 637.0,
+                  "y": 216.0
+                }
+              ]
+            },
+            "confidence": 0.86803,
+            "script_candidate": "greek",
+            "language_candidate": "und",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "R1 = 10 `2",
+                "script": "latin",
+                "confidence": 0.46127750970800835,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_002"
+          }
+        }
+      },
+      {
+        "call": "00182_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_004",
+            "raw_text": "12 V",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 39.0,
+              "y": 426.0,
+              "width": 123.0,
+              "height": 63.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 39.0,
+                  "y": 428.0
+                },
+                {
+                  "x": 161.0,
+                  "y": 426.0
+                },
+                {
+                  "x": 162.0,
+                  "y": 487.0
+                },
+                {
+                  "x": 40.0,
+                  "y": 489.0
+                }
+              ]
+            },
+            "confidence": 0.98113,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "12 `",
+                "script": "latin",
+                "confidence": 0.3936148122970558,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_004"
+          }
+        }
+      },
+      {
+        "call": "00184_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_001",
+            "raw_text": "S",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 378.0,
+              "y": 159.0,
+              "width": 47.0,
+              "height": 53.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 378.0,
+                  "y": 159.0
+                },
+                {
+                  "x": 425.0,
+                  "y": 159.0
+                },
+                {
+                  "x": 425.0,
+                  "y": 212.0
+                },
+                {
+                  "x": 378.0,
+                  "y": 212.0
+                }
+              ]
+            },
+            "confidence": 0.99926,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_001"
+          }
+        }
+      },
+      {
+        "call": "00186_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_006",
+            "raw_text": "I",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 613.0,
+              "y": 706.0,
+              "width": 39.0,
+              "height": 52.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 613.0,
+                  "y": 706.0
+                },
+                {
+                  "x": 652.0,
+                  "y": 706.0
+                },
+                {
+                  "x": 652.0,
+                  "y": 758.0
+                },
+                {
+                  "x": 613.0,
+                  "y": 758.0
+                }
+              ]
+            },
+            "confidence": 0.99429,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_006"
+          }
+        }
+      },
+      {
+        "call": "00188_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_003",
+            "raw_text": "十",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 175.0,
+              "y": 362.0,
+              "width": 40.0,
+              "height": 40.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 175.0,
+                  "y": 362.0
+                },
+                {
+                  "x": 215.0,
+                  "y": 362.0
+                },
+                {
+                  "x": 215.0,
+                  "y": 402.0
+                },
+                {
+                  "x": 175.0,
+                  "y": 402.0
+                }
+              ]
+            },
+            "confidence": 0.72651,
+            "script_candidate": "mixed",
+            "language_candidate": "und",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_003"
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Provider token candidates, spatial overlap information and symbol alternatives.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00066_MultiOCRRouter.extract",
+        "return_value": {
+          "status": "success",
+          "tokens": [
+            {
+              "id": "ocr_tok_007",
+              "raw_text": "Fig. 9 Series DC Circuit",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 336.0,
+                "y": 817.0,
+                "width": 603.0,
+                "height": 70.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 336.0,
+                    "y": 817.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 817.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 887.0
+                  },
+                  {
+                    "x": 336.0,
+                    "y": 887.0
+                  }
+                ]
+              },
+              "confidence": 0.97378,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig",
+                  "script": "latin",
+                  "confidence": 0.9334288835525513,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_007"
+            },
+            {
+              "id": "ocr_tok_005",
+              "raw_text": "R2 = 20 Ω",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1029.0,
+                "y": 421.0,
+                "width": 241.0,
+                "height": 71.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1029.0,
+                    "y": 423.0
+                  },
+                  {
+                    "x": 1270.0,
+                    "y": 421.0
+                  },
+                  {
+                    "x": 1270.0,
+                    "y": 490.0
+                  },
+                  {
+                    "x": 1029.0,
+                    "y": 492.0
+                  }
+                ]
+              },
+              "confidence": 0.90339,
+              "script_candidate": "greek",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "R2 = 20 2",
+                  "script": "latin",
+                  "confidence": 0.43002614643260995,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_005"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "R1 = 10 Ω",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 636.0,
+                "y": 148.0,
+                "width": 242.0,
+                "height": 68.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 636.0,
+                    "y": 151.0
+                  },
+                  {
+                    "x": 877.0,
+                    "y": 148.0
+                  },
+                  {
+                    "x": 878.0,
+                    "y": 213.0
+                  },
+                  {
+                    "x": 637.0,
+                    "y": 216.0
+                  }
+                ]
+              },
+              "confidence": 0.86803,
+              "script_candidate": "greek",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "R1 = 10 `2",
+                  "script": "latin",
+                  "confidence": 0.46127750970800835,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_004",
+              "raw_text": "12 V",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 39.0,
+                "y": 426.0,
+                "width": 123.0,
+                "height": 63.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 39.0,
+                    "y": 428.0
+                  },
+                  {
+                    "x": 161.0,
+                    "y": 426.0
+                  },
+                  {
+                    "x": 162.0,
+                    "y": 487.0
+                  },
+                  {
+                    "x": 40.0,
+                    "y": 489.0
+                  }
+                ]
+              },
+              "confidence": 0.98113,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "12 `",
+                  "script": "latin",
+                  "confidence": 0.3936148122970558,
+                  "provider": "easyocr_bangla"
+                },
+                {
+                  "text": "12 V",
+                  "script": "mixed",
+                  "name": "voltage_value",
+                  "confidence": 0.95,
+                  "provider": "physics_unit_confusable"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_004"
+            },
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "S",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 378.0,
+                "y": 159.0,
+                "width": 47.0,
+                "height": 53.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 378.0,
+                    "y": 159.0
+                  },
+                  {
+                    "x": 425.0,
+                    "y": 159.0
+                  },
+                  {
+                    "x": 425.0,
+                    "y": 212.0
+                  },
+                  {
+                    "x": 378.0,
+                    "y": 212.0
+                  }
+                ]
+              },
+              "confidence": 0.99926,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_006",
+              "raw_text": "I",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 613.0,
+                "y": 706.0,
+                "width": 39.0,
+                "height": 52.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 613.0,
+                    "y": 706.0
+                  },
+                  {
+                    "x": 652.0,
+                    "y": 706.0
+                  },
+                  {
+                    "x": 652.0,
+                    "y": 758.0
+                  },
+                  {
+                    "x": 613.0,
+                    "y": 758.0
+                  }
+                ]
+              },
+              "confidence": 0.99429,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "1",
+                  "script": "numeric",
+                  "name": "one",
+                  "confidence": 0.845,
+                  "provider": "confusable_resolver"
+                },
+                {
+                  "text": "l",
+                  "script": "latin",
+                  "name": "length_l",
+                  "confidence": 0.795,
+                  "provider": "confusable_resolver"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_006"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "十",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 175.0,
+                "y": 362.0,
+                "width": 40.0,
+                "height": 40.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 175.0,
+                    "y": 362.0
+                  },
+                  {
+                    "x": 215.0,
+                    "y": 362.0
+                  },
+                  {
+                    "x": 215.0,
+                    "y": 402.0
+                  },
+                  {
+                    "x": 175.0,
+                    "y": 402.0
+                  }
+                ]
+              },
+              "confidence": 0.72651,
+              "script_candidate": "mixed",
+              "language_candidate": "und",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            }
+          ],
+          "provider": "multi_ocr_router",
+          "model": "PP-OCRv6-onnx",
+          "package": "rapidocr+easyocr+greek_ocr",
+          "package_version": "3.9.2",
+          "detector_model": "PP-OCRv6_det_small.onnx",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx+bengali.pth",
+          "recognizer_language": "en+bn+el",
+          "latency_ms": 14451.245300006121,
+          "error": null,
+          "metadata": {
+            "bangla_available": true,
+            "greek_available": true,
+            "formula_available": false,
+            "regions_count": 7,
+            "token_count": 7
+          }
+        }
+      },
+      {
+        "call": "00167_deduplicate_spatial_tokens",
+        "return_value": [
+          {
+            "id": "ocr_tok_007",
+            "raw_text": "Fig. 9 Series DC Circuit",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 336.0,
+              "y": 817.0,
+              "width": 603.0,
+              "height": 70.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 336.0,
+                  "y": 817.0
+                },
+                {
+                  "x": 939.0,
+                  "y": 817.0
+                },
+                {
+                  "x": 939.0,
+                  "y": 887.0
+                },
+                {
+                  "x": 336.0,
+                  "y": 887.0
+                }
+              ]
+            },
+            "confidence": 0.97378,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Fig",
+                "script": "latin",
+                "confidence": 0.9334288835525513,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_007"
+          },
+          {
+            "id": "ocr_tok_005",
+            "raw_text": "R2 = 20 Ω",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 1029.0,
+              "y": 421.0,
+              "width": 241.0,
+              "height": 71.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 1029.0,
+                  "y": 423.0
+                },
+                {
+                  "x": 1270.0,
+                  "y": 421.0
+                },
+                {
+                  "x": 1270.0,
+                  "y": 490.0
+                },
+                {
+                  "x": 1029.0,
+                  "y": 492.0
+                }
+              ]
+            },
+            "confidence": 0.90339,
+            "script_candidate": "greek",
+            "language_candidate": "und",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "R2 = 20 2",
+                "script": "latin",
+                "confidence": 0.43002614643260995,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_005"
+          },
+          {
+            "id": "ocr_tok_002",
+            "raw_text": "R1 = 10 Ω",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 636.0,
+              "y": 148.0,
+              "width": 242.0,
+              "height": 68.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 636.0,
+                  "y": 151.0
+                },
+                {
+                  "x": 877.0,
+                  "y": 148.0
+                },
+                {
+                  "x": 878.0,
+                  "y": 213.0
+                },
+                {
+                  "x": 637.0,
+                  "y": 216.0
+                }
+              ]
+            },
+            "confidence": 0.86803,
+            "script_candidate": "greek",
+            "language_candidate": "und",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "R1 = 10 `2",
+                "script": "latin",
+                "confidence": 0.46127750970800835,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_002"
+          },
+          {
+            "id": "ocr_tok_004",
+            "raw_text": "12 V",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 39.0,
+              "y": 426.0,
+              "width": 123.0,
+              "height": 63.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 39.0,
+                  "y": 428.0
+                },
+                {
+                  "x": 161.0,
+                  "y": 426.0
+                },
+                {
+                  "x": 162.0,
+                  "y": 487.0
+                },
+                {
+                  "x": 40.0,
+                  "y": 489.0
+                }
+              ]
+            },
+            "confidence": 0.98113,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "12 `",
+                "script": "latin",
+                "confidence": 0.3936148122970558,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_004"
+          },
+          {
+            "id": "ocr_tok_001",
+            "raw_text": "S",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 378.0,
+              "y": 159.0,
+              "width": 47.0,
+              "height": 53.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 378.0,
+                  "y": 159.0
+                },
+                {
+                  "x": 425.0,
+                  "y": 159.0
+                },
+                {
+                  "x": 425.0,
+                  "y": 212.0
+                },
+                {
+                  "x": 378.0,
+                  "y": 212.0
+                }
+              ]
+            },
+            "confidence": 0.99926,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_001"
+          },
+          {
+            "id": "ocr_tok_006",
+            "raw_text": "I",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 613.0,
+              "y": 706.0,
+              "width": 39.0,
+              "height": 52.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 613.0,
+                  "y": 706.0
+                },
+                {
+                  "x": 652.0,
+                  "y": 706.0
+                },
+                {
+                  "x": 652.0,
+                  "y": 758.0
+                },
+                {
+                  "x": 613.0,
+                  "y": 758.0
+                }
+              ]
+            },
+            "confidence": 0.99429,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_006"
+          },
+          {
+            "id": "ocr_tok_003",
+            "raw_text": "十",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 175.0,
+              "y": 362.0,
+              "width": 40.0,
+              "height": 40.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 175.0,
+                  "y": 362.0
+                },
+                {
+                  "x": 215.0,
+                  "y": 362.0
+                },
+                {
+                  "x": 215.0,
+                  "y": 402.0
+                },
+                {
+                  "x": 175.0,
+                  "y": 402.0
+                }
+              ]
+            },
+            "confidence": 0.72651,
+            "script_candidate": "mixed",
+            "language_candidate": "und",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_003"
+          }
+        ]
+      },
+      {
+        "call": "00175_GreekSymbolVisualOCR.extract_symbols",
+        "return_value": []
+      },
+      {
+        "call": "00176_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_007",
+          "raw_text": "Fig. 9 Series DC Circuit",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 336.0,
+            "y": 817.0,
+            "width": 603.0,
+            "height": 70.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 336.0,
+                "y": 817.0
+              },
+              {
+                "x": 939.0,
+                "y": 817.0
+              },
+              {
+                "x": 939.0,
+                "y": 887.0
+              },
+              {
+                "x": 336.0,
+                "y": 887.0
+              }
+            ]
+          },
+          "confidence": 0.97378,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "Fig",
+              "script": "latin",
+              "confidence": 0.9334288835525513,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_007"
+        }
+      },
+      {
+        "call": "00178_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_005",
+          "raw_text": "R2 = 20 Ω",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 1029.0,
+            "y": 421.0,
+            "width": 241.0,
+            "height": 71.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 1029.0,
+                "y": 423.0
+              },
+              {
+                "x": 1270.0,
+                "y": 421.0
+              },
+              {
+                "x": 1270.0,
+                "y": 490.0
+              },
+              {
+                "x": 1029.0,
+                "y": 492.0
+              }
+            ]
+          },
+          "confidence": 0.90339,
+          "script_candidate": "greek",
+          "language_candidate": "und",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "R2 = 20 2",
+              "script": "latin",
+              "confidence": 0.43002614643260995,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_005"
+        }
+      },
+      {
+        "call": "00180_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_002",
+          "raw_text": "R1 = 10 Ω",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 636.0,
+            "y": 148.0,
+            "width": 242.0,
+            "height": 68.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 636.0,
+                "y": 151.0
+              },
+              {
+                "x": 877.0,
+                "y": 148.0
+              },
+              {
+                "x": 878.0,
+                "y": 213.0
+              },
+              {
+                "x": 637.0,
+                "y": 216.0
+              }
+            ]
+          },
+          "confidence": 0.86803,
+          "script_candidate": "greek",
+          "language_candidate": "und",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "R1 = 10 `2",
+              "script": "latin",
+              "confidence": 0.46127750970800835,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_002"
+        }
+      },
+      {
+        "call": "00182_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_004",
+          "raw_text": "12 V",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 39.0,
+            "y": 426.0,
+            "width": 123.0,
+            "height": 63.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 39.0,
+                "y": 428.0
+              },
+              {
+                "x": 161.0,
+                "y": 426.0
+              },
+              {
+                "x": 162.0,
+                "y": 487.0
+              },
+              {
+                "x": 40.0,
+                "y": 489.0
+              }
+            ]
+          },
+          "confidence": 0.98113,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "12 `",
+              "script": "latin",
+              "confidence": 0.3936148122970558,
+              "provider": "easyocr_bangla"
+            },
+            {
+              "text": "12 V",
+              "script": "mixed",
+              "name": "voltage_value",
+              "confidence": 0.95,
+              "provider": "physics_unit_confusable"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_004"
+        }
+      },
+      {
+        "call": "00184_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_001",
+          "raw_text": "S",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 378.0,
+            "y": 159.0,
+            "width": 47.0,
+            "height": 53.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 378.0,
+                "y": 159.0
+              },
+              {
+                "x": 425.0,
+                "y": 159.0
+              },
+              {
+                "x": 425.0,
+                "y": 212.0
+              },
+              {
+                "x": 378.0,
+                "y": 212.0
+              }
+            ]
+          },
+          "confidence": 0.99926,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [],
+          "evidence_ref": "evidence_ocr_ocr_tok_001"
+        }
+      },
+      {
+        "call": "00186_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_006",
+          "raw_text": "I",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 613.0,
+            "y": 706.0,
+            "width": 39.0,
+            "height": 52.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 613.0,
+                "y": 706.0
+              },
+              {
+                "x": 652.0,
+                "y": 706.0
+              },
+              {
+                "x": 652.0,
+                "y": 758.0
+              },
+              {
+                "x": 613.0,
+                "y": 758.0
+              }
+            ]
+          },
+          "confidence": 0.99429,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "1",
+              "script": "numeric",
+              "name": "one",
+              "confidence": 0.845,
+              "provider": "confusable_resolver"
+            },
+            {
+              "text": "l",
+              "script": "latin",
+              "name": "length_l",
+              "confidence": 0.795,
+              "provider": "confusable_resolver"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_006"
+        }
+      },
+      {
+        "call": "00188_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_003",
+          "raw_text": "十",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 175.0,
+            "y": 362.0,
+            "width": 40.0,
+            "height": 40.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 175.0,
+                "y": 362.0
+              },
+              {
+                "x": 215.0,
+                "y": 362.0
+              },
+              {
+                "x": 215.0,
+                "y": 402.0
+              },
+              {
+                "x": 175.0,
+                "y": 402.0
+              }
+            ]
+          },
+          "confidence": 0.72651,
+          "script_candidate": "mixed",
+          "language_candidate": "und",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [],
+          "evidence_ref": "evidence_ocr_ocr_tok_003"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Merged tokens with retained provenance/alternatives. Preserve literal printed values and symbolic quantities. Do not turn L or m into a numerical length or mass.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "OBSERVED / REVIEW ALTERNATIVES",
+  "finding": "Compare the literal source labels with the retained tokens below. A wrong alternative is not necessarily the selected output. 12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "change_or_loss": "OCR alternatives → selected token set. PageIR text blocks are filled from these tokens inside the evidence pipeline."
+}

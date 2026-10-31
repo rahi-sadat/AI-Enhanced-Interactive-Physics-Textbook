@@ -1,0 +1,689 @@
+/**
+ * apps/web/src/components/InteractiveFigure.js
+ * 
+ * Reusable, book-agnostic interactive figure component.
+ * Bridges any book page, exam question, AI tutor, or studio to the PhysicsRuntime.
+ * Embeds transparent simulation overlays over textbook diagrams with sub-pixel alignment,
+ * dynamic parameter sliders with evidentiary provenance badges, and live telemetry.
+ */
+
+import './interactiveFigure.css';
+import { PhysicsRuntime } from '@engine/core/PhysicsRuntime.js';
+import { FigureViewport } from './FigureViewport.js';
+import { calibrationAnchorsFromScene } from './calibrationAnchors.js';
+import { defaultRendererRegistry } from '../features/simulations/core/RendererRegistry.js';
+
+export class InteractiveFigure {
+  /**
+   * @param {HTMLElement} hostElement - DOM element to mount the figure into
+   * @param {object} [options={}]
+   * @param {object|string} [options.scene] - Canonical PhysicsScene or URL
+   * @param {Function} [options.onStateChange]
+   * @param {Function} [options.onParameterChange]
+   */
+  constructor(hostElement, options = {}) {
+    if (!hostElement) {
+      throw new Error('[InteractiveFigure] Host DOM element is required.');
+    }
+
+    this.host = hostElement;
+    this.options = options;
+    this.runtime = new PhysicsRuntime();
+    this.scene = null;
+    this.currentDomain = 'mechanics';
+    this.state = null;
+    this.viewport = null;
+    this.renderer = null;
+
+    this.dom = {
+      root: null,
+      header: null,
+      idChip: null,
+      domainBadge: null,
+      title: null,
+      statusPill: null,
+      body: null,
+      viewportHost: null,
+      sidebar: null,
+      btnPlayPause: null,
+      btnReset: null,
+      btnToggleSidebar: null,
+      btnToggleAnchors: null,
+      paramsList: null,
+      telemetryGrid: null,
+      footer: null
+    };
+
+    this._stateUnsub = null;
+    this._sourceSize = { width: 800, height: 600 };
+
+    this._renderScaffold();
+
+    if (options.scene) {
+      this.load(options.scene);
+    }
+  }
+
+  _renderScaffold() {
+    this.host.innerHTML = '';
+
+    const root = document.createElement('div');
+    root.className = 'interactive-figure-root';
+
+    root.innerHTML = `
+      <!-- Header -->
+      <header class="if-header">
+        <div class="if-header-left">
+          <span class="if-id-chip" data-el="idChip">FIG-001</span>
+          <span class="if-domain-badge mechanics" data-el="domainBadge">👣 Mechanics</span>
+          <h3 class="if-title" data-el="title">Interactive Simulation</h3>
+        </div>
+        <div class="if-header-right">
+          <button class="if-btn if-btn-secondary" data-el="btnReviewSetup" title="Reopen evidence review and modeling setup" style="padding:4px 10px; font-size:0.76rem;">
+            ✎ Review Setup
+          </button>
+          <button class="if-btn if-btn-secondary" data-el="btnToggleAnchors" title="Toggle sub-pixel alignment reticles" style="padding:4px 10px; font-size:0.76rem;">
+            🎯 Anchors (0px)
+          </button>
+          <button class="if-btn if-btn-secondary" data-el="btnToggleSidebar" title="Simulate drawer/sidebar width changes" style="padding:4px 10px; font-size:0.76rem;">
+            ⇄ Sidebar
+          </button>
+          <span class="if-status-pill paused" data-el="statusPill">PAUSED</span>
+        </div>
+      </header>
+
+      <!-- Body -->
+      <div class="if-body" data-el="body">
+        <!-- Layout-Invariant Figure Viewport Host -->
+        <div class="if-viewport-host" data-el="viewportHost"></div>
+
+        <!-- Sidebar -->
+        <aside class="if-sidebar" data-el="sidebar">
+          <!-- Controls -->
+          <div class="if-control-bar">
+            <button class="if-btn if-btn-primary" data-el="btnPlayPause">▶ Play</button>
+            <button class="if-btn if-btn-secondary" data-el="btnReset">↺ Reset</button>
+          </div>
+
+          <!-- Dynamic Parameters with Provenance -->
+          <div>
+            <div class="if-section-title">Parameters &amp; Evidence</div>
+            <div class="if-parameters-list" data-el="paramsList"></div>
+            <details data-el="assumptionsPanel" style="display:none; margin-top:12px;">
+              <summary data-el="assumptionsSummary">Model assumptions</summary>
+              <ul data-el="assumptionsList"></ul>
+            </details>
+          </div>
+
+          <!-- Live Telemetry -->
+          <div>
+            <div class="if-section-title">Live Physics Telemetry</div>
+            <div class="if-telemetry-panel">
+              <div class="if-telemetry-grid" data-el="telemetryGrid">
+                <div class="if-telemetry-metric">
+                  <span class="if-metric-label">Status</span>
+                  <span class="if-metric-value">Ready</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Footer -->
+      <footer class="if-footer" data-el="footer">
+        <span class="if-curriculum-tag" data-el="curriculumTag">Platform Content Spine v1</span>
+        <span class="if-engine-tag" data-el="engineTag">Layout-Invariant FigureViewport</span>
+      </footer>
+    `;
+
+    this.host.appendChild(root);
+    this.dom.root = root;
+
+    // Cache elements
+    this.dom.idChip = root.querySelector('[data-el="idChip"]');
+    this.dom.domainBadge = root.querySelector('[data-el="domainBadge"]');
+    this.dom.title = root.querySelector('[data-el="title"]');
+    this.dom.statusPill = root.querySelector('[data-el="statusPill"]');
+    this.dom.body = root.querySelector('[data-el="body"]');
+    this.dom.viewportHost = root.querySelector('[data-el="viewportHost"]');
+    this.dom.sidebar = root.querySelector('[data-el="sidebar"]');
+    this.dom.btnPlayPause = root.querySelector('[data-el="btnPlayPause"]');
+    this.dom.btnReset = root.querySelector('[data-el="btnReset"]');
+    this.dom.btnReviewSetup = root.querySelector('[data-el="btnReviewSetup"]');
+    this.dom.btnToggleSidebar = root.querySelector('[data-el="btnToggleSidebar"]');
+    this.dom.btnToggleAnchors = root.querySelector('[data-el="btnToggleAnchors"]');
+    this.dom.paramsList = root.querySelector('[data-el="paramsList"]');
+    this.dom.assumptionsPanel = root.querySelector('[data-el="assumptionsPanel"]');
+    this.dom.assumptionsSummary = root.querySelector('[data-el="assumptionsSummary"]');
+    this.dom.assumptionsList = root.querySelector('[data-el="assumptionsList"]');
+    this.dom.telemetryGrid = root.querySelector('[data-el="telemetryGrid"]');
+    this.dom.curriculumTag = root.querySelector('[data-el="curriculumTag"]');
+    this.dom.engineTag = root.querySelector('[data-el="engineTag"]');
+
+    // Instantiate authoritative FigureViewport
+    this.viewport = new FigureViewport(this.dom.viewportHost, {
+      onLayoutChange: (context) => {
+        this.runtime.resize(context.displayWidth, context.displayHeight, context);
+        if (this.renderer) {
+          this.renderer.resize(this.viewport.mapper);
+        }
+      }
+    });
+
+    // Bind playback controls
+    this.dom.btnPlayPause.addEventListener('click', () => {
+      const isRunning = Boolean(this.state?.running);
+      if (isRunning) {
+        this.pause();
+      } else {
+        this.play();
+      }
+    });
+
+    this.dom.btnReset.addEventListener('click', () => {
+      this.reset();
+    });
+
+    // Bind sidebar collapse toggle for live responsiveness testing
+    this.dom.btnToggleSidebar?.addEventListener('click', () => {
+      this.toggleSidebar();
+    });
+
+    // Bind calibration anchor inspector
+    this.dom.btnToggleAnchors?.addEventListener('click', () => {
+      const active = !this.viewport.showInspectAnchors;
+      this.viewport.setInspectAnchors(active);
+      this.dom.btnToggleAnchors.classList.toggle('if-btn-primary', active);
+      this.dom.btnToggleAnchors.classList.toggle('if-btn-secondary', !active);
+    });
+
+    // Bind review setup opener
+    this.dom.btnReviewSetup?.addEventListener('click', () => {
+      this.options.onOpenReview?.();
+    });
+  }
+
+  toggleSidebar() {
+    this.dom.body.classList.toggle('sidebar-collapsed');
+    // FigureViewport's ResizeObserver detects container width change instantly
+  }
+
+  /**
+   * Loads a simulation scene into this InteractiveFigure.
+   * @param {object|string} sceneOrUrl - Scene JSON object or URL string
+   */
+  async load(sceneOrUrl) {
+    let scene = sceneOrUrl;
+    if (typeof sceneOrUrl === 'string') {
+      const cacheBustUrl = sceneOrUrl.includes('?') ? `${sceneOrUrl}&t=${Date.now()}` : `${sceneOrUrl}?t=${Date.now()}`;
+      const res = await fetch(cacheBustUrl);
+      if (!res.ok) {
+        throw new Error(`[InteractiveFigure] Failed to fetch scene from ${sceneOrUrl}`);
+      }
+      scene = await res.json();
+    }
+
+    this.scene = scene;
+    this._sourceScene = JSON.parse(JSON.stringify(scene));
+    const domain = scene.domain || scene.simulation?.domain || (scene.simulation_type === 'kinematics' ? 'mechanics' : scene.simulation_type || 'mechanics');
+    this.currentDomain = domain;
+
+    // 1. Update Header metadata
+    this.dom.idChip.textContent = scene.id || 'FIG-001';
+    this.dom.title.textContent = scene.title || `${domain.toUpperCase()} Figure`;
+
+    this.dom.domainBadge.className = `if-domain-badge ${domain}`;
+    if (domain === 'mechanics') {
+      this.dom.domainBadge.innerHTML = '👣 Mechanics';
+    } else if (domain === 'optics') {
+      this.dom.domainBadge.innerHTML = '🔍 Optics';
+    } else if (domain === 'circuits') {
+      this.dom.domainBadge.innerHTML = '⚡ Circuits';
+    }
+
+    // 2. Set Background Image and Dimensions via FigureViewport
+    const bgUrl = scene.source?.image || scene.visual?.background_url;
+    this._sourceSize = this._getSceneSourceSize(scene);
+    await this.viewport.setBackground(bgUrl, this._sourceSize.width, this._sourceSize.height);
+
+    const assumptions = Array.isArray(scene.assumptions) ? scene.assumptions : [];
+    this.dom.assumptionsPanel.style.display = assumptions.length ? '' : 'none';
+    this.dom.assumptionsSummary.textContent = `Model assumptions (${assumptions.length})`;
+    this.dom.assumptionsList.replaceChildren();
+    for (const assumption of assumptions) {
+      const item = document.createElement('li');
+      item.textContent = `${assumption.reason || assumption.parameter}: ${assumption.value ?? ''} ${assumption.unit || ''}`.trim();
+      this.dom.assumptionsList.appendChild(item);
+    }
+
+    // 3. Configure calibration alignment anchors for inspection
+    this._setupSceneCalibrationAnchors(scene);
+
+    // 4. Update Curriculum / Educational Footer
+    if (scene.metadata?.chapter || scene.metadata?.topic) {
+      this.dom.curriculumTag.textContent = `${scene.metadata.chapter || ''} • ${scene.metadata.topic || ''}`;
+    } else {
+      this.dom.curriculumTag.textContent = `Canonical Scene v1 (${domain})`;
+    }
+
+    // 5. Clear previous overlay canvas, parameters and telemetry from previous domain
+    const overlayContainer = this.viewport.getOverlayContainer();
+    overlayContainer.innerHTML = '';
+    this.dom.paramsList.innerHTML = '<div style="font-size:0.8rem;color:#64748b;">Loading parameters...</div>';
+    if (this.dom.telemetryList) {
+      this.dom.telemetryList.innerHTML = '';
+    }
+
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer = null;
+    }
+
+    const subtype = scene.subtype || scene.type;
+
+    if (defaultRendererRegistry.has(domain, subtype)) {
+      this.renderer = defaultRendererRegistry.resolve(scene);
+      this.renderer.mount({
+        container: overlayContainer,
+        sourceImage: bgUrl,
+        scene,
+        coordinateMapper: this.viewport.mapper,
+        onInteract: (action) => {
+          this.runtime.updateParameter(action);
+        }
+      });
+    }
+
+    await this.runtime.load(scene, overlayContainer, {
+      viewport: this.viewport,
+      renderContext: this.viewport.getRenderContext()
+    });
+
+    const initialOutput = this.runtime.getOutput();
+    if (this.renderer && initialOutput) {
+      this.renderer.render(initialOutput);
+    }
+
+    // 6. Render Dynamic Parameters with Provenance Badges
+    // Strictly render editableParameters from runtime output.
+    // Never fall back to scene.parameters; non-editable parameters show no controls.
+    const initialParams = initialOutput?.editableParameters || {};
+    this._renderParameters(initialParams);
+
+    // 7. Subscribe to real-time telemetry updates
+    this._stateUnsub?.();
+    this._stateUnsub = this.runtime.onStateChange((state) => {
+      this.state = state;
+      const output = this.runtime.getOutput();
+      if (this.renderer && output) {
+        this.renderer.render(output);
+      }
+      if (output?.editableParameters) {
+        this._syncParametersUI(output.editableParameters);
+      }
+      this._updateTelemetry(output?.telemetry || state);
+      this._updateStatusPill(state);
+      this.options.onStateChange?.(state);
+    });
+
+    const initial = this.runtime.getState();
+    this.state = initial;
+    this._updateTelemetry(initialOutput?.telemetry || initial);
+    this._updateStatusPill(initial);
+  }
+
+  _setupSceneCalibrationAnchors(scene) {
+    this.viewport.setCalibrationAnchors(calibrationAnchorsFromScene(scene));
+  }
+
+  _getSceneSourceSize(scene) {
+    const source = scene?.source || {};
+    const coordinateSpace = scene?.coordinateSpace || scene?.coordinateSystem || {};
+    const hasImage = Boolean(source.image || scene?.visual?.background_url);
+    const width = Number(coordinateSpace.width || coordinateSpace.image_width_px || source.width || source.image_width_px || scene?.geometry?.source_width);
+    const height = Number(coordinateSpace.height || coordinateSpace.image_height_px || source.height || source.image_height_px || scene?.geometry?.source_height);
+    if (hasImage && (!Number.isInteger(width) || width <= 0 || !Number.isInteger(height) || height <= 0)) {
+      throw new Error('[InteractiveFigure] Source image dimensions are required for an image-backed scene.');
+    }
+    return {
+      width: hasImage ? width : (width || 800),
+      height: hasImage ? height : (height || 600)
+    };
+  }
+
+
+  _renderParameters(parameters) {
+    this.dom.paramsList.innerHTML = '';
+
+    const paramEntries = Object.entries(parameters);
+    if (paramEntries.length === 0) {
+      this.dom.paramsList.innerHTML = '<div style="font-size:0.8rem;color:#64748b;">No adjustable parameters.</div>';
+      return;
+    }
+
+    for (const [key, param] of paramEntries) {
+      const item = document.createElement('div');
+      item.className = 'if-param-item';
+      item.setAttribute('data-param-key', key);
+
+      const labelText = param.label || key;
+      const unitText = param.unit ? ` ${param.unit}` : '';
+      const provenance = param.provenance || 'observed';
+      const sourceDesc = param.source || 'textbook';
+      const confPercent = param.confidence != null ? `${Math.round(param.confidence * 100)}%` : '100%';
+      const isBoolean = typeof param.value === 'boolean' || param.control?.type === 'toggle';
+
+      if (isBoolean) {
+        const isTrue = Boolean(param.value);
+        item.innerHTML = `
+          <div class="if-param-header">
+            <span class="if-param-label">${labelText}</span>
+            <span class="if-param-provenance ${provenance}" title="Evidence: ${provenance} • Source: ${sourceDesc} • Confidence: ${confPercent}">
+              ${this._provenanceIcon(provenance)} ${provenance}
+            </span>
+          </div>
+          <div class="if-param-controls" style="margin-top:4px;">
+            <button type="button" class="if-btn ${isTrue ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn" style="width:100%; font-size:0.8rem; padding:4px 8px;">
+              ${isTrue ? 'ON / CLOSED' : 'OFF / OPEN'}
+            </button>
+          </div>
+          <div class="if-param-error" style="display:none; color:#ef4444; font-size:0.72rem; margin-top:2px;"></div>
+        `;
+
+        const toggleBtn = item.querySelector('.if-toggle-btn');
+        const provBadge = item.querySelector('.if-param-provenance');
+        const errDiv = item.querySelector('.if-param-error');
+
+        toggleBtn.addEventListener('click', () => {
+          const currentVal = Boolean(this.runtime.getParameter(key)?.value ?? param.value);
+          const nextVal = !currentVal;
+
+          try {
+            // Runtime is authority: call updateParameter first
+            this.runtime.updateParameter(key, nextVal);
+
+            // Succeeded: synchronize button
+            toggleBtn.className = `if-btn ${nextVal ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn`;
+            toggleBtn.textContent = nextVal ? 'ON / CLOSED' : 'OFF / OPEN';
+            provBadge.className = 'if-param-provenance student';
+            provBadge.innerHTML = '✏️ student';
+            if (errDiv) errDiv.style.display = 'none';
+
+            this.options.onParameterChange?.(key, nextVal);
+          } catch (err) {
+            // Rejected update: roll back UI to previous valid state and show concise error
+            const validVal = Boolean(this.runtime.getParameter(key)?.value ?? param.value);
+            toggleBtn.className = `if-btn ${validVal ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn`;
+            toggleBtn.textContent = validVal ? 'ON / CLOSED' : 'OFF / OPEN';
+            if (errDiv) {
+              errDiv.textContent = err.message || 'Invalid parameter update';
+              errDiv.style.display = 'block';
+            }
+          }
+        });
+      } else {
+        const minVal = param.control?.min ?? param.min;
+        const maxVal = param.control?.max ?? param.max;
+        const stepVal = param.control?.step ?? param.step;
+
+        const minAttr = minVal !== undefined ? `min="${minVal}"` : '';
+        const maxAttr = maxVal !== undefined ? `max="${maxVal}"` : '';
+        const stepAttr = stepVal !== undefined ? `step="${stepVal}"` : '';
+
+        item.innerHTML = `
+          <div class="if-param-header">
+            <span class="if-param-label">${labelText}</span>
+            <span class="if-param-provenance ${provenance}" title="Evidence: ${provenance} • Source: ${sourceDesc} • Confidence: ${confPercent}">
+              ${this._provenanceIcon(provenance)} ${provenance}
+            </span>
+          </div>
+          <div class="if-param-controls">
+            <input type="range" class="if-slider" 
+                   ${minAttr} ${maxAttr} ${stepAttr} value="${param.value}" />
+            <input type="number" class="if-val-input" 
+                   ${minAttr} ${maxAttr} ${stepAttr} value="${param.value}" />
+            <span class="if-unit-badge">${unitText}</span>
+          </div>
+          <div class="if-param-error" style="display:none; color:#ef4444; font-size:0.72rem; margin-top:2px;"></div>
+        `;
+
+        const slider = item.querySelector('.if-slider');
+        const numInput = item.querySelector('.if-val-input');
+        const provBadge = item.querySelector('.if-param-provenance');
+        const errDiv = item.querySelector('.if-param-error');
+
+        const onValChange = (newVal) => {
+          const val = Number(newVal);
+          try {
+            // Runtime is authority: validate and apply in runtime first
+            this.runtime.updateParameter(key, val);
+
+            // Succeeded: update input display and provenance
+            slider.value = val;
+            numInput.value = val;
+            provBadge.className = 'if-param-provenance student';
+            provBadge.innerHTML = '✏️ student';
+            provBadge.title = `Evidence: student • Source: runtime_interaction • Confidence: 100%`;
+            if (errDiv) errDiv.style.display = 'none';
+
+            this.options.onParameterChange?.(key, val);
+          } catch (err) {
+            // Rejected update: rollback UI to current valid runtime state and show error
+            const validParam = this.runtime.getParameter(key);
+            const validVal = validParam?.value !== undefined ? validParam.value : param.value;
+            slider.value = validVal;
+            numInput.value = validVal;
+            if (errDiv) {
+              errDiv.textContent = err.message || 'Invalid parameter update';
+              errDiv.style.display = 'block';
+            }
+          }
+        };
+
+        slider.addEventListener('input', (e) => onValChange(e.target.value));
+        numInput.addEventListener('change', (e) => onValChange(e.target.value));
+      }
+
+      this.dom.paramsList.appendChild(item);
+    }
+  }
+
+  _syncParametersUI(parameters) {
+    if (!parameters) return;
+    for (const [key, param] of Object.entries(parameters)) {
+      const item = this.dom.paramsList.querySelector(`[data-param-key="${key}"]`);
+      if (!item) continue;
+
+      const slider = item.querySelector('.if-slider');
+      const numInput = item.querySelector('.if-val-input');
+      const toggleBtn = item.querySelector('.if-toggle-btn');
+      const provBadge = item.querySelector('.if-param-provenance');
+
+      const val = param.value;
+      if (slider && document.activeElement !== slider) {
+        slider.value = val;
+      }
+      if (numInput && document.activeElement !== numInput) {
+        numInput.value = val;
+      }
+      if (toggleBtn) {
+        const isTrue = Boolean(val);
+        toggleBtn.className = `if-btn ${isTrue ? 'if-btn-primary' : 'if-btn-secondary'} if-toggle-btn`;
+        toggleBtn.textContent = isTrue ? 'ON / CLOSED' : 'OFF / OPEN';
+      }
+      if (provBadge) {
+        const prov = param.provenance || 'observed';
+        provBadge.className = `if-param-provenance ${prov}`;
+        provBadge.innerHTML = `${this._provenanceIcon(prov)} ${prov}`;
+      }
+    }
+  }
+
+  _provenanceIcon(prov) {
+    switch (prov) {
+      case 'observed': return '👁';
+      case 'assumed': return '⚙';
+      case 'inferred': return '🧠';
+      case 'student': return '✏️';
+      case 'author_override': return '📝';
+      default: return '•';
+    }
+  }
+
+  _updateStatusPill(state) {
+    const isRunning = Boolean(state?.running);
+    this.dom.statusPill.className = `if-status-pill ${isRunning ? 'running' : 'paused'}`;
+    this.dom.statusPill.textContent = isRunning ? 'RUNNING' : 'PAUSED';
+
+    this.dom.btnPlayPause.innerHTML = isRunning ? '⏸ Pause' : '▶ Play';
+  }
+
+  _updateTelemetry(state) {
+    if (!state) return;
+
+    this.dom.telemetryGrid.innerHTML = '';
+
+    const addMetric = (label, val, highlight = false) => {
+      const el = document.createElement('div');
+      el.className = 'if-telemetry-metric';
+      el.innerHTML = `
+        <span class="if-metric-label">${label}</span>
+        <span class="if-metric-value ${highlight ? 'highlight' : ''}">${val}</span>
+      `;
+      this.dom.telemetryGrid.appendChild(el);
+    };
+
+    if (state.domain === 'mechanics') {
+      addMetric('Angle θ', `${state.thetaDeg ?? 0}°`, true);
+      addMetric('Speed v', `${state.speed ?? 0} m/s`);
+      addMetric('Length L', `${state.length ?? 1} m`);
+      addMetric('Total Energy', `${state.totalEnergy ?? 0} J`);
+    } else if (state.domain === 'optics' && (state.subtype === 'prism' || state.type === 'prism')) {
+      const i1 = state.incidenceAngle_deg ?? state.solution?.angles?.i1Deg;
+      const r1 = state.refractedAngle_deg ?? state.solution?.angles?.r1Deg;
+      const dev = state.deviationAngle_deg ?? state.solution?.angles?.deviationDeg;
+      const nVal = state.refractiveIndex ?? state.solution?.refractiveIndex ?? 1.52;
+      const crit = state.criticalAngle_deg ?? state.solution?.angles?.criticalAngleDeg;
+
+      addMetric('Incident Angle (i)', i1 !== undefined && i1 !== null ? `${Number(i1).toFixed(1)}°` : '—', true);
+      addMetric('Refracted Angle (r₁)', r1 !== undefined && r1 !== null ? `${Number(r1).toFixed(1)}°` : '—');
+      addMetric('Deviation Angle (δ)', dev !== undefined && dev !== null ? `${Number(dev).toFixed(1)}°` : '—', true);
+      addMetric('Refractive Index (n)', `${Number(nVal).toFixed(2)}`);
+      if (crit !== undefined && crit !== null) {
+        addMetric('Critical Angle (θc)', `${Number(crit).toFixed(1)}°`);
+      }
+      addMetric('Ray Status', state.tir ? 'Total Internal Reflection' : 'Refracted & Emerged');
+    } else if (state.domain === 'optics') {
+      addMetric('Object dist (u)', `${state.u ?? 0} px`);
+      addMetric('Image dist (v)', `${state.v ?? 0} px`, true);
+      addMetric('Focal length (f)', `${state.focalLength ?? 0} px`);
+      addMetric('Magnification', `${state.magnification ?? 0}×`);
+      addMetric('Image Type', state.imageType || 'real');
+      addMetric('Real / Inverted', `${state.isReal ? 'Real' : 'Virtual'} • ${state.isInverted ? 'Inverted' : 'Upright'}`);
+    } else if (state.domain === 'circuits') {
+      const formatCurrent = (a) => {
+        if (a === undefined || a === null || isNaN(a)) return '0 A';
+        const abs = Math.abs(a);
+        if (abs >= 1.0) return `${abs.toFixed(2)} A`;
+        if (abs >= 0.001) return `${(abs * 1000).toFixed(1)} mA`;
+        if (abs >= 1e-6) return `${(abs * 1e6).toFixed(1)} µA`;
+        return '0 A';
+      };
+
+      addMetric('Total Power', `${Number((state.totalPower ?? 0).toFixed(2))} W`, true);
+      const totalI = state.totalDeliveredSourceCurrent_A ?? state.totalCurrent_A;
+      if (totalI !== undefined && !isNaN(totalI)) {
+        addMetric('Total Current (I)', formatCurrent(totalI), true);
+      }
+      if (state.nodeVoltages) {
+        for (const [node, v] of Object.entries(state.nodeVoltages)) {
+          const vNum = Number(v);
+          addMetric(`Voltage ${node}`, `${vNum >= 0 ? '+' : ''}${vNum.toFixed(2)} V`);
+        }
+      }
+      if (state.branchCurrents) {
+        for (const [branch, i] of Object.entries(state.branchCurrents)) {
+          if (!branch.endsWith('.branch')) {
+            const delivered = state.sourceCurrents?.[branch] ?? Math.abs(i);
+            addMetric(`Current ${branch}`, formatCurrent(delivered));
+          }
+        }
+      }
+    } else {
+      for (const [k, v] of Object.entries(state)) {
+        if (typeof v === 'number' || typeof v === 'string') {
+          addMetric(k, String(v));
+        }
+      }
+    }
+  }
+
+  play() {
+    this.runtime.play();
+  }
+
+  pause() {
+    this.runtime.pause();
+  }
+
+  reset() {
+    // Restore initial textbook parameters if they were experimentally changed
+    if (this._sourceScene?.parameters) {
+      for (const [key, param] of Object.entries(this._sourceScene.parameters)) {
+        if (param?.value !== undefined) {
+          try {
+            this.runtime.updateParameter(key, param.value);
+          } catch (_) {}
+        }
+      }
+    }
+    this.runtime.reset();
+    const output = this.runtime.getOutput();
+    if (this.renderer && output) {
+      this.renderer.reset();
+      this.renderer.render(output);
+    }
+    if (output?.editableParameters) {
+      this._syncParametersUI(output.editableParameters);
+    }
+    this._updateTelemetry(output?.telemetry || this.runtime.getState());
+  }
+
+  setParameter(name, value) {
+    this.runtime.setParameter(name, value);
+  }
+
+  getState() {
+    return this.runtime.getState();
+  }
+
+  destroy() {
+    this._stateUnsub?.();
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer = null;
+    }
+    this.viewport?.destroy();
+    this.runtime.destroy();
+    this.host.innerHTML = '';
+  }
+}
+
+// Register as Web Component for direct declarative embedding:
+// <interactive-figure src="/scenes/canonical/pendulum_figure.json"></interactive-figure>
+if (typeof customElements !== 'undefined' && !customElements.get('interactive-figure')) {
+  customElements.define('interactive-figure', class extends HTMLElement {
+    async connectedCallback() {
+      const src = this.getAttribute('src');
+      this.figure = new InteractiveFigure(this);
+      if (src) {
+        await this.figure.load(src);
+      }
+    }
+
+    disconnectedCallback() {
+      this.figure?.destroy();
+    }
+  });
+}

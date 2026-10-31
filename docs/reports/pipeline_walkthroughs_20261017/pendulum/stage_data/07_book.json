@@ -1,0 +1,543 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 7,
+  "component": "Initial semantic BookIR",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 7,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\BookUnderstandingPipeline.py",
+      "function": "BookUnderstandingPipeline.analyze",
+      "line": 92,
+      "caller": {
+        "file": "C:\\Users\\saher\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\concurrent\\futures\\thread.py",
+        "function": "run",
+        "line": 59
+      }
+    },
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 42,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\BookUnderstandingPipeline.py",
+      "function": "BookUnderstandingPipeline._build_book_ir_from_result",
+      "line": 151,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\BookUnderstandingPipeline.py",
+        "function": "analyze",
+        "line": 121
+      }
+    }
+  ],
+  "upstream_stage": "Semantic validation, confidence caps and thresholds",
+  "downstream_stage": "Evidence dispatch and source decode",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00007_BookUnderstandingPipeline.analyze",
+        "value": {
+          "page_ir": {
+            "version": "1.0",
+            "source": {
+              "assetId": "25c3ba19a02041ee9ec790156fc87e44",
+              "width_px": 1280,
+              "height_px": 960,
+              "mimeType": "image/jpeg",
+              "url": "/uploads/diagram_25c3ba19.jpg",
+              "sha256": "b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd"
+            },
+            "coordinate_space": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "origin": "top_left"
+            },
+            "regions": [
+              {
+                "id": "region_001",
+                "label": "whole_image",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "confidence": 1.0,
+                "detection_method": "user_supplied",
+                "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+              }
+            ],
+            "figures": [
+              {
+                "id": "figure_001",
+                "region_id": "region_001",
+                "page_x": 0.0,
+                "page_y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "detection_method": "user_supplied",
+                "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+              }
+            ],
+            "text_blocks": [],
+            "metadata": {
+              "pipeline": "PR-04-standalone-upload",
+              "note": "Single-diagram upload. figure_001 is the entire image. Text blocks populated downstream by PR-06 evidence pipeline."
+            }
+          },
+          "asset": {
+            "id": "25c3ba19a02041ee9ec790156fc87e44",
+            "mime_type": "image/jpeg",
+            "original_filename": "photo_2026-10-10_12-06-38 (2).jpg",
+            "byte_size": 35941,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd",
+            "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_25c3ba19.jpg"
+          }
+        }
+      },
+      {
+        "call": "00042_BookUnderstandingPipeline._build_book_ir_from_result",
+        "value": {
+          "result": {
+            "classification": "supported",
+            "is_physics": true,
+            "domain": "mechanics",
+            "subtype": "pendulum",
+            "confidence": {
+              "is_physics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "raw_provider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "entities": [
+              {
+                "temporary_id": "pivot_1",
+                "role": "pivot",
+                "label": "pivot",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "bob_1",
+                "role": "bob",
+                "label": "m",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "string_1",
+                "role": "string",
+                "label": "L",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "ref_1",
+                "role": "vertical_reference",
+                "label": "vertical_line",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              }
+            ],
+            "relationships": [
+              {
+                "type": "connected_to",
+                "source_id": "bob_1",
+                "target_id": "string_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_to",
+                "source_id": "string_1",
+                "target_id": "pivot_1",
+                "confidence": 0.95
+              }
+            ],
+            "visible_labels": [
+              {
+                "text": "θ",
+                "confidence": 0.95,
+                "semantic_role": "angle",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "L",
+                "confidence": 0.95,
+                "semantic_role": "length",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "m",
+                "confidence": 0.95,
+                "semantic_role": "mass",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "Fig. 1 Simple Pendulum",
+                "confidence": 0.95,
+                "semantic_role": "caption",
+                "source": "vlm",
+                "verified": false
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "The image is a standard textbook diagram of a simple pendulum."
+            ],
+            "provider": "gemini",
+            "model": "gemini-3.1-flash-lite",
+            "prompt_version": "pr05-v1",
+            "timestamp": "2026-10-17T03:28:45.104214+00:00",
+            "latency_ms": 3541,
+            "cache_hit": false,
+            "fallback_used": false,
+            "debug": {}
+          },
+          "asset_id": "25c3ba19a02041ee9ec790156fc87e44",
+          "page_ir_version": "1.0",
+          "figure_id": "figure_001"
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Validated semantic result plus the SourceAsset/PageIR identity.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00007_BookUnderstandingPipeline.analyze",
+        "return_value": {
+          "version": "1.0",
+          "source_asset_id": "25c3ba19a02041ee9ec790156fc87e44",
+          "page_ir_version": "1.0",
+          "figure_id": "figure_001",
+          "domain": "mechanics",
+          "subtype": "pendulum",
+          "entities": [
+            {
+              "id": "pivot_1",
+              "type": "pivot",
+              "label": "pivot",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "bob_1",
+              "type": "bob",
+              "label": "m",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "string_1",
+              "type": "string",
+              "label": "L",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ref_1",
+              "type": "vertical_reference",
+              "label": "vertical_line",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            }
+          ],
+          "relationships": [
+            {
+              "type": "connected_to",
+              "from": "bob_1",
+              "to": "string_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_to",
+              "from": "string_1",
+              "to": "pivot_1",
+              "confidence": 0.95
+            }
+          ],
+          "parameters": {},
+          "geometry": {},
+          "assumptions": [],
+          "provenance": {
+            "pipeline": "PR-05-vlm",
+            "provider": "gemini",
+            "model": "gemini-3.1-flash-lite",
+            "prompt_version": "pr05-v1",
+            "timestamp": "2026-10-17T03:28:45.104214+00:00",
+            "classification": "supported",
+            "visible_labels": [
+              {
+                "text": "θ",
+                "confidence": 0.95,
+                "semanticRole": "angle",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "L",
+                "confidence": 0.95,
+                "semanticRole": "length",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "m",
+                "confidence": 0.95,
+                "semanticRole": "mass",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "Fig. 1 Simple Pendulum",
+                "confidence": 0.95,
+                "semanticRole": "caption",
+                "source": "vlm",
+                "verified": false
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "The image is a standard textbook diagram of a simple pendulum."
+            ],
+            "latency_ms": 3541,
+            "cache_hit": false,
+            "fallback_used": false
+          },
+          "evidence": {},
+          "confidence": {
+            "isPhysics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "rawProvider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "status": "NEEDS_REVIEW",
+          "status_notes": "Semantically understood as mechanics/pendulum. Precise geometric localization and OCR parameter extraction (PR-06) required before simulation can be compiled.",
+          "resolutions": {},
+          "review_issues": [],
+          "parameter_provenance": {},
+          "calibration": null,
+          "id": "25c3ba19a02041ee9ec790156fc87e44_figure_001",
+          "isPhysics": true
+        }
+      },
+      {
+        "call": "00042_BookUnderstandingPipeline._build_book_ir_from_result",
+        "return_value": {
+          "version": "1.0",
+          "source_asset_id": "25c3ba19a02041ee9ec790156fc87e44",
+          "page_ir_version": "1.0",
+          "figure_id": "figure_001",
+          "domain": "mechanics",
+          "subtype": "pendulum",
+          "entities": [
+            {
+              "id": "pivot_1",
+              "type": "pivot",
+              "label": "pivot",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "bob_1",
+              "type": "bob",
+              "label": "m",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "string_1",
+              "type": "string",
+              "label": "L",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            },
+            {
+              "id": "ref_1",
+              "type": "vertical_reference",
+              "label": "vertical_line",
+              "position_source_px": null,
+              "geometry": null,
+              "attributes": {
+                "confidence": 0.95,
+                "precision": "approximate",
+                "vlmLocalizationVerified": false
+              },
+              "evidence_refs": [
+                "figure_001"
+              ]
+            }
+          ],
+          "relationships": [
+            {
+              "type": "connected_to",
+              "from": "bob_1",
+              "to": "string_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_to",
+              "from": "string_1",
+              "to": "pivot_1",
+              "confidence": 0.95
+            }
+          ],
+          "parameters": {},
+          "geometry": {},
+          "assumptions": [],
+          "provenance": {
+            "pipeline": "PR-05-vlm",
+            "provider": "gemini",
+            "model": "gemini-3.1-flash-lite",
+            "prompt_version": "pr05-v1",
+            "timestamp": "2026-10-17T03:28:45.104214+00:00",
+            "classification": "supported",
+            "visible_labels": [
+              {
+                "text": "θ",
+                "confidence": 0.95,
+                "semanticRole": "angle",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "L",
+                "confidence": 0.95,
+                "semanticRole": "length",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "m",
+                "confidence": 0.95,
+                "semanticRole": "mass",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "Fig. 1 Simple Pendulum",
+                "confidence": 0.95,
+                "semanticRole": "caption",
+                "source": "vlm",
+                "verified": false
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "The image is a standard textbook diagram of a simple pendulum."
+            ],
+            "latency_ms": 3541,
+            "cache_hit": false,
+            "fallback_used": false
+          },
+          "evidence": {},
+          "confidence": {
+            "isPhysics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "rawProvider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "status": "NEEDS_REVIEW",
+          "status_notes": "Semantically understood as mechanics/pendulum. Precise geometric localization and OCR parameter extraction (PR-06) required before simulation can be compiled.",
+          "resolutions": {},
+          "review_issues": [],
+          "parameter_provenance": {},
+          "calibration": null,
+          "id": "25c3ba19a02041ee9ec790156fc87e44_figure_001",
+          "isPhysics": true
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "BookIR with semantic entities and evidence references, but null authoritative positions/geometry until CV/OCR grounds them. Missing numbers remain missing.",
+  "expected_diagram": "Expected accepted classification: supported; isPhysics=true; domain/subtype=mechanics / pendulum. Expected semantic content: A fixed mounting point on a horizontal support, a string to a bob displaced to the right, a vertical reference, and symbolic θ, L and m labels. These are semantic roles/labels, not authorization to supply numerical parameters or precise positions.",
+  "status": "PASS WITH LIMITS",
+  "finding": "Accepted domain/subtype agrees with the source. Semantic-only output is appropriate here; missing source geometry is intentional. Raw provider confidence can be 1.0; accepted confidence is capped by validation.",
+  "change_or_loss": "Semantic roles are assigned durable entity IDs. This BookIR is an intermediate hypothesis, not a runnable simulation."
+}

@@ -1,0 +1,295 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 14,
+  "component": "Domain CV: raw candidates → selected geometry",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 195,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\circuits_cv.py",
+      "function": "CircuitCVCandidateExtractor.extract",
+      "line": 28,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 215
+      }
+    }
+  ],
+  "upstream_stage": "OCR-region suppression before geometry detection",
+  "downstream_stage": "SAM2 segmentation prompted by CV",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00195_CircuitCVCandidateExtractor.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "ocr_boxes": [
+            {
+              "x": 336.0,
+              "y": 817.0,
+              "width": 603.0,
+              "height": 70.0
+            },
+            {
+              "x": 1029.0,
+              "y": 421.0,
+              "width": 241.0,
+              "height": 71.0
+            },
+            {
+              "x": 636.0,
+              "y": 148.0,
+              "width": 242.0,
+              "height": 68.0
+            },
+            {
+              "x": 39.0,
+              "y": 426.0,
+              "width": 123.0,
+              "height": 63.0
+            },
+            {
+              "x": 378.0,
+              "y": 159.0,
+              "width": 47.0,
+              "height": 53.0
+            },
+            {
+              "x": 613.0,
+              "y": 706.0,
+              "width": 39.0,
+              "height": 52.0
+            },
+            {
+              "x": 175.0,
+              "y": 362.0,
+              "width": 40.0,
+              "height": 40.0
+            }
+          ]
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Image/edge evidence and OCR boxes in source pixels, with no hand-authored landmarks.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00195_CircuitCVCandidateExtractor.extract",
+        "return_value": {
+          "components": [],
+          "wires": [
+            {
+              "start": {
+                "x": 230.0,
+                "y": 253.0
+              },
+              "end": {
+                "x": 345.0,
+                "y": 253.0
+              }
+            },
+            {
+              "start": {
+                "x": 230.0,
+                "y": 672.0
+              },
+              "end": {
+                "x": 993.0,
+                "y": 672.0
+              }
+            },
+            {
+              "start": {
+                "x": 228.0,
+                "y": 669.0
+              },
+              "end": {
+                "x": 228.0,
+                "y": 508.0
+              }
+            },
+            {
+              "start": {
+                "x": 473.0,
+                "y": 666.0
+              },
+              "end": {
+                "x": 591.0,
+                "y": 666.0
+              }
+            },
+            {
+              "start": {
+                "x": 234.0,
+                "y": 421.0
+              },
+              "end": {
+                "x": 234.0,
+                "y": 259.0
+              }
+            },
+            {
+              "start": {
+                "x": 989.0,
+                "y": 386.0
+              },
+              "end": {
+                "x": 989.0,
+                "y": 253.0
+              }
+            },
+            {
+              "start": {
+                "x": 547.0,
+                "y": 697.0
+              },
+              "end": {
+                "x": 713.0,
+                "y": 697.0
+              }
+            },
+            {
+              "start": {
+                "x": 995.0,
+                "y": 669.0
+              },
+              "end": {
+                "x": 995.0,
+                "y": 543.0
+              }
+            },
+            {
+              "start": {
+                "x": 627.0,
+                "y": 253.0
+              },
+              "end": {
+                "x": 686.0,
+                "y": 254.0
+              }
+            },
+            {
+              "start": {
+                "x": 224.0,
+                "y": 421.0
+              },
+              "end": {
+                "x": 289.0,
+                "y": 421.0
+              }
+            },
+            {
+              "start": {
+                "x": 184.0,
+                "y": 493.0
+              },
+              "end": {
+                "x": 278.0,
+                "y": 493.0
+              }
+            },
+            {
+              "start": {
+                "x": 357.0,
+                "y": 255.0
+              },
+              "end": {
+                "x": 438.0,
+                "y": 216.0
+              }
+            },
+            {
+              "start": {
+                "x": 231.0,
+                "y": 255.0
+              },
+              "end": {
+                "x": 992.0,
+                "y": 255.0
+              }
+            },
+            {
+              "start": {
+                "x": 231.0,
+                "y": 416.0
+              },
+              "end": {
+                "x": 992.0,
+                "y": 416.0
+              }
+            },
+            {
+              "start": {
+                "x": 231.0,
+                "y": 668.0
+              },
+              "end": {
+                "x": 992.0,
+                "y": 668.0
+              }
+            }
+          ],
+          "junctions": [
+            {
+              "x": 230.0,
+              "y": 253.0
+            },
+            {
+              "x": 230.0,
+              "y": 672.0
+            },
+            {
+              "x": 993.0,
+              "y": 672.0
+            },
+            {
+              "x": 234.0,
+              "y": 421.0
+            }
+          ],
+          "rails_y": [
+            255,
+            416,
+            668
+          ],
+          "branches_x": [
+            231,
+            992
+          ],
+          "edges": {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\e43fd5c1f17898d796fc4383315ee7be81c112e7ccb418ec93c4483ed9cd79a2.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\e43fd5c1f17898d796fc4383315ee7be81c112e7ccb418ec93c4483ed9cd79a2.png"
+          }
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Source-supported candidate lines/circles/polygons and selected geometry, with scores, rejection/selection diagnostics and unresolved ambiguity where evidence is insufficient.",
+  "expected_diagram": "Keep real wire spans separate from component bodies, switch gap and current annotation. Ground resistor/battery/switch terminals; build resolvable node IDs and relationships without filling gaps with artificial wires.",
+  "status": "FAIL — PERCEPTION / SELECTION",
+  "finding": "components=[]; branches_x=[231,992]; rails_y=[255,416,668]. Returned rails span x=231→992 at all three Y values. y=416 crosses empty circuit interior; y=255 bridges the open switch/components. The implementation accepts a span with more than ten edge pixels, without requiring continuous wire support.",
+  "change_or_loss": "Candidate generation and selection are distinct. Compare all_candidates_overlay with selected output; inspect locals for fitted lines, rejected candidates and thresholds."
+}

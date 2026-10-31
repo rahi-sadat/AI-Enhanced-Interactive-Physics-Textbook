@@ -7,7 +7,7 @@
  */
 
 import { SimulationOrchestrator, OrchestratorState } from '../../apps/web/src/features/simulations/core/SimulationOrchestrator.js';
-import { CompilationGatingError } from '../../apps/web/src/features/simulations/core/SimulationApi.js';
+import { CompilationGatingError, SimulationApi } from '../../apps/web/src/features/simulations/core/SimulationApi.js';
 
 let passed = 0;
 let failed = 0;
@@ -27,6 +27,95 @@ console.log('  RUNNING PR-08 SIMULATION ORCHESTRATOR TESTS');
 console.log('==============================================\n');
 
 async function runTests() {
+  const originalPost = SimulationApi._postJson;
+  const preparedBook = { status: 'READY_TO_COMPILE', parameters: { gravity: 9.80665 } };
+  try {
+    SimulationApi._postJson = async () => ({ success: true, book_ir: preparedBook,
+      ready_to_compile: true, review_state: { issues: [] } });
+    const response = await SimulationApi.review({ status: 'NEEDS_REVIEW', parameters: {} });
+    assert(response.bookIR === preparedBook, 'Review API preserves backend-resolved BookIR for compilation');
+  } finally {
+    SimulationApi._postJson = originalPost;
+  }
+  console.log('[defaults] Backend policies fill missing values without altering diagram evidence');
+  const appliedDefaults = [];
+  const policyIssues = [
+    { parameterName: 'gravity', defaultPolicyId: 'gravity-policy' },
+    { parameterName: 'component.R1.value', defaultPolicyId: 'resistor-policy' },
+    { parameterName: 'component.R2.value', defaultPolicyId: 'resistor-policy' },
+    { parameterName: 'length', defaultPolicyId: 'length-policy', candidates: [{ numericValue: 0.8 }] },
+    { parameterName: 'launch_position', issueType: 'ungrounded_geometry' },
+  ];
+  const availablePolicies = [
+    { id: 'gravity-policy' }, { id: 'resistor-policy' }, { id: 'length-policy' },
+  ];
+  const defaultsApi = {
+    applyPolicy: async (book, policyId, parameter) => {
+      appliedDefaults.push([policyId, parameter]);
+      const updated = structuredClone(book);
+      if (parameter.startsWith('component.')) {
+        const id = parameter.split('.')[1];
+        updated.parameters.components.find((c) => c.id === id).value = 100;
+      } else updated.parameters[parameter] = 9.80665;
+      updated.resolutions[parameter] = { policyId, resolvedValue: parameter === 'gravity' ? 9.80665 : 100,
+        canonicalUnit: parameter === 'gravity' ? 'm/s²' : 'Ω', notes: 'Disclosed example value' };
+      return { bookIR: updated, canCompile: false };
+    },
+    review: async (book) => ({ readyToCompile: false, reviewState: {
+      issues: policyIssues.filter((item) => !book.resolutions[item.parameterName]), availablePolicies,
+    } }),
+  };
+  const defaultsOrch = new SimulationOrchestrator({ api: defaultsApi });
+  defaultsOrch.state = OrchestratorState.NEEDS_REVIEW;
+  defaultsOrch.bookIR = { status: 'NEEDS_REVIEW', parameters: { gravity: null, components: [
+    { id: 'R1', value: null }, { id: 'R2', value: 220 },
+  ] }, resolutions: {}, geometry: { launch_position: null } };
+  defaultsOrch.reviewState = { issues: policyIssues, availablePolicies };
+  await defaultsOrch.useStandardDefaults();
+  assert(appliedDefaults.length === 2, 'Only missing gravity and the individual missing resistor receive defaults');
+  assert(defaultsOrch.bookIR.parameters.components[1].value === 220, 'Existing resistance is preserved');
+  assert(defaultsOrch.bookIR.parameters.length === undefined, 'OCR candidate is not overwritten by a default');
+  assert(defaultsOrch.bookIR.geometry.launch_position === null, 'Missing geometry is not invented');
+  assert(defaultsOrch.state === OrchestratorState.NEEDS_REVIEW, 'Structural blockers still require review');
+  await defaultsOrch.useStandardDefaults();
+  assert(appliedDefaults.length === 2, 'Repeated default application is idempotent');
+  const normalized = defaultsOrch._normalizeSceneBackground({});
+  assert(normalized.assumptions.length === 2, 'Applied defaults are disclosed in runtime assumptions');
+
+  const readyOrch = new SimulationOrchestrator({ api: {
+    ...defaultsApi,
+    review: async (book) => ({ bookIR: { ...book, status: 'READY_TO_COMPILE' },
+      readyToCompile: true, reviewState: { issues: [], availablePolicies: [] } }),
+    compile: async (book) => ({ success: true, bookIR: book, scene: { domain: 'mechanics' } }),
+  } });
+  readyOrch.state = OrchestratorState.NEEDS_REVIEW;
+  readyOrch.bookIR = { parameters: {}, resolutions: {} };
+  readyOrch.reviewState = { issues: [policyIssues[0]], availablePolicies };
+  await readyOrch.useStandardDefaults();
+  assert(readyOrch.state === OrchestratorState.READY_TO_SIMULATE, 'Final default advances to a compiled scene when backend confirms readiness');
+  assert(readyOrch.compiledScene.assumptions[0].parameter === 'gravity', 'Compiled scene retains the default disclosure');
+
+  let refusedAttempts = 0;
+  const refusedOrch = new SimulationOrchestrator({ api: {
+    applyPolicy: async () => { refusedAttempts++; throw new Error('Policy refused'); },
+  } });
+  refusedOrch.state = OrchestratorState.NEEDS_REVIEW;
+  refusedOrch.bookIR = { parameters: {} };
+  refusedOrch.reviewState = { issues: [policyIssues[0]], availablePolicies };
+  await refusedOrch.useStandardDefaults();
+  assert(refusedAttempts === 1, 'Refused default is not retried in an endless loop');
+  assert(refusedOrch.compiledScene === null, 'Refused default does not generate a scene');
+
+  const blockedCompilation = new SimulationOrchestrator({ api: {
+    compile: async () => { throw new CompilationGatingError('BookIR is not ready to compile.', [
+      'Battery voltage is missing.', { message: 'Resistor resistance is missing.' },
+    ]); },
+  } });
+  blockedCompilation.bookIR = { status: 'NEEDS_REVIEW' };
+  await blockedCompilation.compile();
+  assert(blockedCompilation.currentError.includes('Battery voltage is missing.'), 'Compilation reports the specific missing voltage');
+  assert(blockedCompilation.currentError.includes('Resistor resistance is missing.'), 'Compilation reports structured blockers as readable messages');
+
   // A provider outage is retryable infrastructure failure, not a bad diagram.
   const providerOutage = new SimulationOrchestrator({ api: {
     ingest: async () => ({ status: 'unresolved', book_ir: {

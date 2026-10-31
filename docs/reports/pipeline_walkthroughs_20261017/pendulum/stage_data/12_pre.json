@@ -1,0 +1,94 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 12,
+  "component": "Grayscale, blur and edge extraction",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 138,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+      "function": "preprocess_diagram",
+      "line": 16,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\pendulum_cv.py",
+        "function": "extract_candidates",
+        "line": 69
+      }
+    }
+  ],
+  "upstream_stage": "Symbol candidates, deduplication and final OCR",
+  "downstream_stage": "OCR-region suppression before geometry detection",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00138_preprocess_diagram",
+        "value": {
+          "img_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+          },
+          "blur_ksize": [
+            5,
+            5
+          ],
+          "blur_sigma": 1.0,
+          "canny_thresh1": 40.0,
+          "canny_thresh2": 120.0
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Native BGR array and actual Canny/blur settings.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00138_preprocess_diagram",
+        "return_value": [
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\b0bb9f4dfdaec3e62977a1b7cf7e07bccf73574dd48f5d271ebf46798fd8bd5d.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\b0bb9f4dfdaec3e62977a1b7cf7e07bccf73574dd48f5d271ebf46798fd8bd5d.png"
+          },
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\8f76790a0e563430bf9c8870945eed89bcae3a7add1182a441171c62ccd6de6e.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\8f76790a0e563430bf9c8870945eed89bcae3a7add1182a441171c62ccd6de6e.png"
+          },
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\c7d30679d1eec7505681d33ae65f6ce3a13d410da195e74601769a64017a8923.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\c7d30679d1eec7505681d33ae65f6ce3a13d410da195e74601769a64017a8923.png"
+          }
+        ]
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Grayscale/blur/edge arrays in the same 1280×960 source frame. Image processing may change intensities, but must not imply a spatial crop/scale that was not performed.",
+  "expected_diagram": "The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "status": "FRAME PASS / LOSSY PROCESSING",
+  "finding": "Arrays preserve the source frame. Blur and Canny change image information; no detector correctness is inferred from shape alone.",
+  "change_or_loss": "Color/intensity information becomes an edge representation. Exact arrays are retained. OpenCV internal per-operation frames were not separately profiled."
+}

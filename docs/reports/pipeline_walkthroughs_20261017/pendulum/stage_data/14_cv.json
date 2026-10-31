@@ -1,0 +1,797 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 14,
+  "component": "Domain CV: raw candidates → selected geometry",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 137,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\pendulum_cv.py",
+      "function": "PendulumCVCandidateExtractor.extract_candidates",
+      "line": 50,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 208
+      }
+    }
+  ],
+  "upstream_stage": "OCR-region suppression before geometry detection",
+  "downstream_stage": "SAM2 segmentation prompted by CV",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00137_PendulumCVCandidateExtractor.extract_candidates",
+        "value": {
+          "img_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "ocr_boxes": [
+            {
+              "x": 338.0,
+              "y": 827.0,
+              "width": 599.0,
+              "height": 78.0
+            },
+            {
+              "x": 738.0,
+              "y": 357.0,
+              "width": 55.0,
+              "height": 61.0
+            },
+            {
+              "x": 896.0,
+              "y": 632.0,
+              "width": 63.0,
+              "height": 50.0
+            },
+            {
+              "x": 597.0,
+              "y": 270.0,
+              "width": 28.0,
+              "height": 43.0
+            }
+          ]
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Image/edge evidence and OCR boxes in source pixels, with no hand-authored landmarks.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00137_PendulumCVCandidateExtractor.extract_candidates",
+        "return_value": {
+          "all_circles": [
+            {
+              "center": {
+                "x": 841.3633806409911,
+                "y": 649.0514992664916
+              },
+              "radius_px": 37.03476174228877,
+              "bounds": {
+                "x": 804.3286188987023,
+                "y": 612.0167375242029,
+                "width": 74.06952348457754,
+                "height": 74.06952348457754
+              },
+              "initial_radius": 38.724998474121094
+            },
+            {
+              "center": {
+                "x": 571.1147334653926,
+                "y": 164.0757964347032
+              },
+              "radius_px": 91.9470552672825,
+              "bounds": {
+                "x": 479.16767819811014,
+                "y": 72.1287411674207,
+                "width": 183.894110534565,
+                "height": 183.894110534565
+              },
+              "initial_radius": 87.71499633789062
+            },
+            {
+              "center": {
+                "x": 655.0319384260869,
+                "y": 134.6649499092607
+              },
+              "radius_px": 70.03571393799845,
+              "bounds": {
+                "x": 584.9962244880884,
+                "y": 64.62923597126226,
+                "width": 140.0714278759969,
+                "height": 140.0714278759969
+              },
+              "initial_radius": 73.56999969482422
+            },
+            {
+              "center": {
+                "x": 596.3270581458659,
+                "y": 224.44527219440852
+              },
+              "radius_px": 35.84310957893747,
+              "bounds": {
+                "x": 560.4839485669283,
+                "y": 188.60216261547106,
+                "width": 71.68621915787494,
+                "height": 71.68621915787494
+              },
+              "initial_radius": 34.93000030517578
+            },
+            {
+              "center": {
+                "x": 590.0557212477751,
+                "y": 282.59074774758096
+              },
+              "radius_px": 31.563455909281895,
+              "bounds": {
+                "x": 558.4922653384932,
+                "y": 251.02729183829908,
+                "width": 63.12691181856379,
+                "height": 63.12691181856379
+              },
+              "initial_radius": 32.744998931884766
+            },
+            {
+              "center": {
+                "x": 638.0950823036292,
+                "y": 298.775292891693
+              },
+              "radius_px": 36.79998802429366,
+              "bounds": {
+                "x": 601.2950942793356,
+                "y": 261.97530486739936,
+                "width": 73.59997604858732,
+                "height": 73.59997604858732
+              },
+              "initial_radius": 39.18499755859375
+            },
+            {
+              "center": {
+                "x": 414.6893717395315,
+                "y": 864.7054522078654
+              },
+              "radius_px": 25.818906653177198,
+              "bounds": {
+                "x": 388.87046508635433,
+                "y": 838.8865455546882,
+                "width": 51.637813306354396,
+                "height": 51.637813306354396
+              },
+              "initial_radius": 26.190000534057617
+            },
+            {
+              "center": {
+                "x": 511.0339222222365,
+                "y": 124.67930940645624
+              },
+              "radius_px": 56.28152089013627,
+              "bounds": {
+                "x": 454.75240133210025,
+                "y": 68.39778851631996,
+                "width": 112.56304178027254,
+                "height": 112.56304178027254
+              },
+              "initial_radius": 53.904998779296875
+            },
+            {
+              "center": {
+                "x": 627.4775955808365,
+                "y": 869.5124630764026
+              },
+              "radius_px": 22.700222609390313,
+              "bounds": {
+                "x": 604.7773729714462,
+                "y": 846.8122404670123,
+                "width": 45.400445218780625,
+                "height": 45.400445218780625
+              },
+              "initial_radius": 22.049999237060547
+            },
+            {
+              "center": {
+                "x": 807.1647727369075,
+                "y": 867.4977040530148
+              },
+              "radius_px": 22.29373704826661,
+              "bounds": {
+                "x": 784.8710356886409,
+                "y": 845.2039670047482,
+                "width": 44.58747409653322,
+                "height": 44.58747409653322
+              },
+              "initial_radius": 22.510000228881836
+            },
+            {
+              "center": {
+                "x": 540.7816473265955,
+                "y": 864.8711181318605
+              },
+              "radius_px": 16.80621586644672,
+              "bounds": {
+                "x": 523.9754314601488,
+                "y": 848.0649022654138,
+                "width": 33.61243173289344,
+                "height": 33.61243173289344
+              },
+              "initial_radius": 16.299999237060547
+            },
+            {
+              "center": {
+                "x": 683.1365573773103,
+                "y": 864.0604200282731
+              },
+              "radius_px": 25.85271591910029,
+              "bounds": {
+                "x": 657.28384145821,
+                "y": 838.2077041091728,
+                "width": 51.70543183820058,
+                "height": 51.70543183820058
+              },
+              "initial_radius": 25.959999084472656
+            },
+            {
+              "center": {
+                "x": 889.8398363000719,
+                "y": 869.9734304587197
+              },
+              "radius_px": 28.150251716162895,
+              "bounds": {
+                "x": 861.689584583909,
+                "y": 841.8231787425568,
+                "width": 56.30050343232579,
+                "height": 56.30050343232579
+              },
+              "initial_radius": 27.34000015258789
+            },
+            {
+              "center": {
+                "x": 752.9838309157753,
+                "y": 868.8901857402475
+              },
+              "radius_px": 21.293363032053378,
+              "bounds": {
+                "x": 731.690467883722,
+                "y": 847.5968227081942,
+                "width": 42.586726064106756,
+                "height": 42.586726064106756
+              },
+              "initial_radius": 21.934999465942383
+            },
+            {
+              "center": {
+                "x": 611.4067401492001,
+                "y": 291.05667698965135
+              },
+              "radius_px": 19.58114013985839,
+              "bounds": {
+                "x": 591.8256000093418,
+                "y": 271.47553684979295,
+                "width": 39.16228027971678,
+                "height": 39.16228027971678
+              },
+              "initial_radius": 22.8474178314209
+            },
+            {
+              "center": {
+                "x": 611.0,
+                "y": 291.0
+              },
+              "radius_px": 22.47230339050293,
+              "bounds": {
+                "x": 588.5276966094971,
+                "y": 268.52769660949707,
+                "width": 44.94460678100586,
+                "height": 44.94460678100586
+              },
+              "initial_radius": 22.47230339050293
+            },
+            {
+              "center": {
+                "x": 609.5,
+                "y": 300.5
+              },
+              "radius_px": 10.12432861328125,
+              "bounds": {
+                "x": 599.3756713867188,
+                "y": 290.37567138671875,
+                "width": 20.2486572265625,
+                "height": 20.2486572265625
+              },
+              "initial_radius": 10.12432861328125
+            },
+            {
+              "center": {
+                "x": 611.5,
+                "y": 280.5
+              },
+              "radius_px": 9.617792129516602,
+              "bounds": {
+                "x": 601.8822078704834,
+                "y": 270.8822078704834,
+                "width": 19.235584259033203,
+                "height": 19.235584259033203
+              },
+              "initial_radius": 9.617792129516602
+            }
+          ],
+          "pin_candidates": [
+            {
+              "center": {
+                "x": 611.0,
+                "y": 291.0
+              },
+              "radius_px": 22.47230339050293,
+              "bounds": {
+                "x": 588.5276966094971,
+                "y": 268.52769660949707,
+                "width": 44.94460678100586,
+                "height": 44.94460678100586
+              },
+              "initial_radius": 22.47230339050293
+            },
+            {
+              "center": {
+                "x": 609.5,
+                "y": 300.5
+              },
+              "radius_px": 10.12432861328125,
+              "bounds": {
+                "x": 599.3756713867188,
+                "y": 290.37567138671875,
+                "width": 20.2486572265625,
+                "height": 20.2486572265625
+              },
+              "initial_radius": 10.12432861328125
+            },
+            {
+              "center": {
+                "x": 611.5,
+                "y": 280.5
+              },
+              "radius_px": 9.617792129516602,
+              "bounds": {
+                "x": 601.8822078704834,
+                "y": 270.8822078704834,
+                "width": 19.235584259033203,
+                "height": 19.235584259033203
+              },
+              "initial_radius": 9.617792129516602
+            }
+          ],
+          "all_lines": [
+            {
+              "start": {
+                "x": 606.0,
+                "y": 166.0
+              },
+              "end": {
+                "x": 831.0,
+                "y": 617.0
+              },
+              "length_px": 504.00992053728464,
+              "dx": 225.0,
+              "dy": 451.0
+            },
+            {
+              "start": {
+                "x": 562.0,
+                "y": 61.0
+              },
+              "end": {
+                "x": 562.0,
+                "y": 774.0
+              },
+              "length_px": 713.0,
+              "dx": 0.0,
+              "dy": 713.0
+            },
+            {
+              "start": {
+                "x": 553.0,
+                "y": 70.0
+              },
+              "end": {
+                "x": 826.0,
+                "y": 619.0
+              },
+              "length_px": 613.1313073070074,
+              "dx": 273.0,
+              "dy": 549.0
+            },
+            {
+              "start": {
+                "x": 565.0,
+                "y": 112.0
+              },
+              "end": {
+                "x": 565.0,
+                "y": 775.0
+              },
+              "length_px": 663.0,
+              "dx": 0.0,
+              "dy": 663.0
+            },
+            {
+              "start": {
+                "x": 556.0,
+                "y": 67.0
+              },
+              "end": {
+                "x": 830.0,
+                "y": 617.0
+              },
+              "length_px": 614.4721311825297,
+              "dx": 274.0,
+              "dy": 550.0
+            },
+            {
+              "start": {
+                "x": 563.0,
+                "y": 131.0
+              },
+              "end": {
+                "x": 563.0,
+                "y": 775.0
+              },
+              "length_px": 644.0,
+              "dx": 0.0,
+              "dy": 644.0
+            },
+            {
+              "start": {
+                "x": 614.0,
+                "y": 192.0
+              },
+              "end": {
+                "x": 692.0,
+                "y": 347.0
+              },
+              "length_px": 173.5194513592064,
+              "dx": 78.0,
+              "dy": 155.0
+            },
+            {
+              "start": {
+                "x": 635.0,
+                "y": 859.0
+              },
+              "end": {
+                "x": 557.0,
+                "y": 871.0
+              },
+              "length_px": 78.91767862779544,
+              "dx": -78.0,
+              "dy": 12.0
+            },
+            {
+              "start": {
+                "x": 564.0,
+                "y": 131.0
+              },
+              "end": {
+                "x": 564.0,
+                "y": 775.0
+              },
+              "length_px": 644.0,
+              "dx": 0.0,
+              "dy": 644.0
+            }
+          ],
+          "support_lines": [
+            {
+              "start": {
+                "x": 577.0,
+                "y": 96.0
+              },
+              "end": {
+                "x": 699.0,
+                "y": 96.0
+              },
+              "length_px": 122.0,
+              "y_avg": 96.0
+            },
+            {
+              "start": {
+                "x": 428.0,
+                "y": 92.0
+              },
+              "end": {
+                "x": 700.0,
+                "y": 92.0
+              },
+              "length_px": 272.0,
+              "y_avg": 92.0
+            },
+            {
+              "start": {
+                "x": 428.0,
+                "y": 96.0
+              },
+              "end": {
+                "x": 550.0,
+                "y": 96.0
+              },
+              "length_px": 122.0,
+              "y_avg": 96.0
+            }
+          ],
+          "paired_candidates": [
+            {
+              "score": 138.51394009521402,
+              "bob": {
+                "center": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "radius_px": 37.03476174228877,
+                "bounds": {
+                  "x": 804.3286188987023,
+                  "y": 612.0167375242029,
+                  "width": 74.06952348457754,
+                  "height": 74.06952348457754
+                },
+                "initial_radius": 38.724998474121094
+              },
+              "string": {
+                "start": {
+                  "x": 562.0,
+                  "y": 79.23811193908072
+                },
+                "end": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "attachment_point": {
+                  "x": 824.8323943921771,
+                  "y": 615.910888666359
+                },
+                "visible_start": {
+                  "x": 556.0,
+                  "y": 67.0
+                },
+                "visible_end": {
+                  "x": 830.0,
+                  "y": 617.0
+                },
+                "visible_length_px": 614.4721311825297,
+                "length_to_bob_center_px": 634.6110579092531,
+                "subpixel_dir": [
+                  0.44636405018201547,
+                  0.8948514595758935
+                ]
+              },
+              "pivot": {
+                "x": 562.0,
+                "y": 79.23811193908072
+              },
+              "pivot_validation": {
+                "method": "vertical_reference_intersection",
+                "vref_residual_px": 0.0,
+                "support_residual_px": 16.761888060919276,
+                "string_fit_residual_px": 0.0,
+                "is_geometrically_consistent": true
+              },
+              "dist_to_perimeter": 3.0285119516699126,
+              "diameter_to_string_ratio": 0.12054171332723161
+            },
+            {
+              "score": 136.88279171681498,
+              "bob": {
+                "center": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "radius_px": 37.03476174228877,
+                "bounds": {
+                  "x": 804.3286188987023,
+                  "y": 612.0167375242029,
+                  "width": 74.06952348457754,
+                  "height": 74.06952348457754
+                },
+                "initial_radius": 38.724998474121094
+              },
+              "string": {
+                "start": {
+                  "x": 562.0,
+                  "y": 88.07255651467977
+                },
+                "end": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "attachment_point": {
+                  "x": 824.8736064266867,
+                  "y": 615.8903635249438
+                },
+                "visible_start": {
+                  "x": 553.0,
+                  "y": 70.0
+                },
+                "visible_end": {
+                  "x": 826.0,
+                  "y": 619.0
+                },
+                "visible_length_px": 613.1313073070074,
+                "length_to_bob_center_px": 626.6907312655134,
+                "subpixel_dir": [
+                  0.44525125688807304,
+                  0.89540567244104
+                ]
+              },
+              "pivot": {
+                "x": 562.0,
+                "y": 88.07255651467977
+              },
+              "pivot_validation": {
+                "method": "vertical_reference_intersection",
+                "vref_residual_px": 0.0,
+                "support_residual_px": 7.927443485320225,
+                "string_fit_residual_px": 0.0,
+                "is_geometrically_consistent": true
+              },
+              "dist_to_perimeter": 3.2838199349269033,
+              "diameter_to_string_ratio": 0.1208053195161496
+            },
+            {
+              "score": 133.0607012108778,
+              "bob": {
+                "center": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "radius_px": 37.03476174228877,
+                "bounds": {
+                  "x": 804.3286188987023,
+                  "y": 612.0167375242029,
+                  "width": 74.06952348457754,
+                  "height": 74.06952348457754
+                },
+                "initial_radius": 38.724998474121094
+              },
+              "string": {
+                "start": {
+                  "x": 562.0,
+                  "y": 75.69595223419401
+                },
+                "end": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "attachment_point": {
+                  "x": 824.8424517397193,
+                  "y": 615.9058738304373
+                },
+                "visible_start": {
+                  "x": 606.0,
+                  "y": 166.0
+                },
+                "visible_end": {
+                  "x": 831.0,
+                  "y": 617.0
+                },
+                "visible_length_px": 504.00992053728464,
+                "length_to_bob_center_px": 637.7934475642318,
+                "subpixel_dir": [
+                  0.44609248511533034,
+                  0.8949868684643527
+                ]
+              },
+              "pivot": {
+                "x": 562.0,
+                "y": 75.69595223419401
+              },
+              "pivot_validation": {
+                "method": "vertical_reference_intersection",
+                "vref_residual_px": 0.0,
+                "support_residual_px": 20.30404776580599,
+                "string_fit_residual_px": 0.0,
+                "is_geometrically_consistent": true
+              },
+              "dist_to_perimeter": 3.34947914676966,
+              "diameter_to_string_ratio": 0.14696044753567142
+            }
+          ],
+          "best_proposal": {
+            "score": 138.51394009521402,
+            "bob": {
+              "center": {
+                "x": 841.3633806409911,
+                "y": 649.0514992664916
+              },
+              "radius_px": 37.03476174228877,
+              "bounds": {
+                "x": 804.3286188987023,
+                "y": 612.0167375242029,
+                "width": 74.06952348457754,
+                "height": 74.06952348457754
+              },
+              "initial_radius": 38.724998474121094
+            },
+            "string": {
+              "start": {
+                "x": 562.0,
+                "y": 79.23811193908072
+              },
+              "end": {
+                "x": 841.3633806409911,
+                "y": 649.0514992664916
+              },
+              "attachment_point": {
+                "x": 824.8323943921771,
+                "y": 615.910888666359
+              },
+              "visible_start": {
+                "x": 556.0,
+                "y": 67.0
+              },
+              "visible_end": {
+                "x": 830.0,
+                "y": 617.0
+              },
+              "visible_length_px": 614.4721311825297,
+              "length_to_bob_center_px": 634.6110579092531,
+              "subpixel_dir": [
+                0.44636405018201547,
+                0.8948514595758935
+              ]
+            },
+            "pivot": {
+              "x": 562.0,
+              "y": 79.23811193908072
+            },
+            "pivot_validation": {
+              "method": "vertical_reference_intersection",
+              "vref_residual_px": 0.0,
+              "support_residual_px": 16.761888060919276,
+              "string_fit_residual_px": 0.0,
+              "is_geometrically_consistent": true
+            },
+            "dist_to_perimeter": 3.0285119516699126,
+            "diameter_to_string_ratio": 0.12054171332723161
+          },
+          "vertical_reference": {
+            "start": {
+              "x": 562.0,
+              "y": 61.0
+            },
+            "end": {
+              "x": 562.0,
+              "y": 774.0
+            }
+          },
+          "angle_marker": null,
+          "edge_map": {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\7d736214b3c297eecbabe2429111ab4441689718e8109ef11b71a00fbdf8937a.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\7d736214b3c297eecbabe2429111ab4441689718e8109ef11b71a00fbdf8937a.png"
+          }
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Source-supported candidate lines/circles/polygons and selected geometry, with scores, rejection/selection diagnostics and unresolved ambiguity where evidence is insufficient.",
+  "expected_diagram": "The pivot must agree with the mounting point/support; the string must connect that pivot to the bob. Bob segmentation is not evidence for the pivot. Record disagreement rather than accepting inconsistent constraints.",
+  "status": "FAIL — PERCEPTION / SELECTION",
+  "finding": "Selected pivot=(562,79.23811193908072), bob=(841.3633806409911,649.0514992664916), radius=37.03476174228877. Method vertical_reference_intersection reports support_residual_px=16.761888060919276 yet is_geometrically_consistent=true. The consistency predicate checks vertical-reference and string residuals but omits support_residual. The source and selected overlay show the misplaced mounting point.",
+  "change_or_loss": "Candidate generation and selection are distinct. Compare all_candidates_overlay with selected output; inspect locals for fitted lines, rejected candidates and thresholds."
+}

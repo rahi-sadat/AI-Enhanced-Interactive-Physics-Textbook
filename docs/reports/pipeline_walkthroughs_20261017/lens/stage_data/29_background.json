@@ -1,0 +1,137 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 29,
+  "component": "FigureViewport background and layout",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/components/FigureViewport.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "InteractiveFigure receives the compiled scene",
+  "downstream_stage": "PhysicsRuntime normalization and adapter initialization",
+  "actual_input": {
+    "records": [
+      {
+        "traceId": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+        "component": "FigureViewport.setBackground",
+        "phase": "input",
+        "wallTime": 48516.40000000596,
+        "data": [
+          "/uploads/diagram_dd013d21.jpg",
+          1280,
+          960
+        ]
+      },
+      {
+        "traceId": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+        "component": "FigureViewport.recalculate",
+        "phase": "input",
+        "wallTime": 48647.90000000596,
+        "data": []
+      },
+      {
+        "traceId": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+        "component": "FigureViewport.recalculate",
+        "phase": "input",
+        "wallTime": 48875.70000001788,
+        "data": []
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Original source URL, natural width/height and measured viewport bounds.",
+  "actual_output": {
+    "records": [
+      {
+        "traceId": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+        "component": "FigureViewport.recalculate",
+        "phase": "output",
+        "wallTime": 48703.40000000596,
+        "data": {
+          "sourceWidth": 1280,
+          "sourceHeight": 960,
+          "displayWidth": 640,
+          "displayHeight": 480,
+          "viewportWidth": 1010,
+          "viewportHeight": 480,
+          "scale": 0.5,
+          "offsetX": 185,
+          "offsetY": 0,
+          "dpr": 1,
+          "renderedImageRect": {
+            "left": 185,
+            "top": 0,
+            "width": 640,
+            "height": 480
+          }
+        }
+      },
+      {
+        "traceId": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+        "component": "FigureViewport.setBackground",
+        "phase": "output",
+        "wallTime": 48703.59999999404,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+        "component": "FigureViewport.recalculate",
+        "phase": "output",
+        "wallTime": 48876.40000000596,
+        "data": {
+          "sourceWidth": 1280,
+          "sourceHeight": 960,
+          "displayWidth": 800,
+          "displayHeight": 600,
+          "viewportWidth": 1010,
+          "viewportHeight": 600,
+          "scale": 0.625,
+          "offsetX": 105,
+          "offsetY": 0,
+          "dpr": 1,
+          "renderedImageRect": {
+            "left": 105,
+            "top": 0,
+            "width": 800,
+            "height": 600
+          }
+        }
+      },
+      {
+        "measured_image_rect": {
+          "x": 139,
+          "y": 227,
+          "width": 800,
+          "height": 600,
+          "top": 227,
+          "right": 939,
+          "bottom": 827,
+          "left": 139
+        },
+        "mapper": {
+          "sourceW": 1280,
+          "sourceH": 960,
+          "viewW": 1010,
+          "viewH": 600,
+          "dpr": 1,
+          "scale": 0.625,
+          "renderedW": 800,
+          "renderedH": 600,
+          "offsetX": 105,
+          "offsetY": 0
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "The source image displayed with an aspect-preserving transform shared by its overlay. Letterboxing belongs to the viewport, not to native geometry.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "EXECUTED; UPSTREAM REGISTRATION FAILURE",
+  "finding": "The source-matched scene reaches the expected runtime. No new source-coordinate displacement was established at this boundary. See exact normalized scene and DOM evidence.",
+  "change_or_loss": "Preserve source_px. The measured image rectangle and mapper offsets are shown in the coordinate stage; CSS pixels are not substituted into BookIR."
+}

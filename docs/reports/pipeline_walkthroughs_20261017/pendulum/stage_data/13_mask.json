@@ -1,0 +1,93 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 13,
+  "component": "OCR-region suppression before geometry detection",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 139,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+      "function": "mask_out_text_regions",
+      "line": 38,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\pendulum_cv.py",
+        "function": "extract_candidates",
+        "line": 78
+      }
+    }
+  ],
+  "upstream_stage": "Grayscale, blur and edge extraction",
+  "downstream_stage": "Domain CV: raw candidates → selected geometry",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00139_mask_out_text_regions",
+        "value": {
+          "edge_map": {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\c7d30679d1eec7505681d33ae65f6ce3a13d410da195e74601769a64017a8923.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\c7d30679d1eec7505681d33ae65f6ce3a13d410da195e74601769a64017a8923.png"
+          },
+          "ocr_boxes": [
+            {
+              "x": 338.0,
+              "y": 827.0,
+              "width": 599.0,
+              "height": 78.0
+            },
+            {
+              "x": 738.0,
+              "y": 357.0,
+              "width": 55.0,
+              "height": 61.0
+            },
+            {
+              "x": 896.0,
+              "y": 632.0,
+              "width": 63.0,
+              "height": 50.0
+            },
+            {
+              "x": 597.0,
+              "y": 270.0,
+              "width": 28.0,
+              "height": 43.0
+            }
+          ],
+          "margin_px": 2
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Actual edge map, selected OCR boxes and margin_px.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00139_mask_out_text_regions",
+        "return_value": {
+          "shape": [
+            960,
+            1280
+          ],
+          "dtype": "uint8",
+          "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\7d736214b3c297eecbabe2429111ab4441689718e8109ef11b71a00fbdf8937a.npy",
+          "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\7d736214b3c297eecbabe2429111ab4441689718e8109ef11b71a00fbdf8937a.png"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "An edge map suppressing text while preserving relevant diagram boundaries/rays. This is the registration requirement; the implementation zeros the entire expanded rectangle without distinguishing text from geometry.",
+  "expected_diagram": "The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "status": "NO EARLIER GEOMETRIC FAILURE DEMONSTRATED",
+  "finding": "Removed-edge overlay was inspected. No earlier failure explaining the later rail/pivot error is established by this mask capture.",
+  "change_or_loss": "Every pixel removed by the actual mask is shown in red on the original. A valid OCR box does not guarantee safe geometry suppression."
+}

@@ -14,6 +14,34 @@ from ai.resolution.engine import ResolutionEngine
 from ai.resolution.evaluator import ReadinessEvaluator
 
 
+@pytest.mark.parametrize("domain,subtype,parameter,policy_id,expected", [
+    ("mechanics", "pendulum", "length", "policy_standard_pendulum_length", 1.0),
+    ("mechanics", "projectile", "launch_angle_deg", "policy_standard_projectile_angle", 45.0),
+    ("optics", "thin_lens", "focal_length_px", "policy_example_thin_lens_focal_length", 100.0),
+    ("optics", "spherical_mirror", "focal_length_px", "policy_example_spherical_mirror_focal_length", 100.0),
+    ("optics", "interface_refraction", "theta1", "policy_example_incident_angle", 45.0),
+    ("optics", "interface_refraction", "n2", "policy_water_refractive_index", 1.333),
+])
+def test_missing_parameter_defaults_are_offered_and_apply_with_provenance(
+    domain, subtype, parameter, policy_id, expected,
+):
+    """Application defaults use permitted policies without asserting source geometry."""
+    from ai.resolution.analyzer import ResolutionAnalyzer
+    book = BookIR(source_asset_id="asset", figure_id="figure", domain=domain,
+                  subtype=subtype, parameters={})
+    review = ResolutionAnalyzer.analyze(book)
+    assert policy_id in {p["id"] for p in review.available_policies}
+    assert any(issue.parameter_name == parameter and issue.default_policy_id == policy_id
+               for issue in review.issues)
+    result = ResolutionEngine.apply_policy(book, policy_id, parameter)
+    assert result.success, result.error
+    assert book.parameters[parameter] == pytest.approx(expected)
+    assert book.parameter_provenance[parameter].policy_id == policy_id
+    assert book.parameter_provenance[parameter].source == "policy_default"
+    assert not book.geometry  # Numeric defaults cannot manufacture landmarks.
+    assert not ReadinessEvaluator.evaluate(book).ready
+
+
 class TestPolicyRegistry:
     """Verify registered physical modelling default policies."""
 

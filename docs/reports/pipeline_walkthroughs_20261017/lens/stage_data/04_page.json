@@ -1,0 +1,106 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 4,
+  "component": "PageIR / whole-figure coordinate frame",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 6,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\PageIRBuilder.py",
+      "function": "PageIRBuilder.build",
+      "line": 31,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\apps\\api\\main.py",
+        "function": "ingest_diagram",
+        "line": 1628
+      }
+    }
+  ],
+  "upstream_stage": "Upload persistence and dimension decoding",
+  "downstream_stage": "Actual Gemini request and response",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00006_PageIRBuilder.build",
+        "value": {
+          "asset": {
+            "id": "dd013d21b8704bd296afcc9dcbc6a750",
+            "mime_type": "image/jpeg",
+            "original_filename": "photo_2026-10-10_12-06-36 (2).jpg",
+            "byte_size": 51136,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c",
+            "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_dd013d21.jpg"
+          },
+          "public_url": "/uploads/diagram_dd013d21.jpg"
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The verified SourceAsset for this image.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00006_PageIRBuilder.build",
+        "return_value": {
+          "version": "1.0",
+          "source": {
+            "assetId": "dd013d21b8704bd296afcc9dcbc6a750",
+            "width_px": 1280,
+            "height_px": 960,
+            "mimeType": "image/jpeg",
+            "url": "/uploads/diagram_dd013d21.jpg",
+            "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c"
+          },
+          "coordinate_space": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "origin": "top_left"
+          },
+          "regions": [
+            {
+              "id": "region_001",
+              "label": "whole_image",
+              "x": 0.0,
+              "y": 0.0,
+              "width": 1280.0,
+              "height": 960.0,
+              "confidence": 1.0,
+              "detection_method": "user_supplied",
+              "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+            }
+          ],
+          "figures": [
+            {
+              "id": "figure_001",
+              "region_id": "region_001",
+              "page_x": 0.0,
+              "page_y": 0.0,
+              "width": 1280.0,
+              "height": 960.0,
+              "detection_method": "user_supplied",
+              "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+            }
+          ],
+          "text_blocks": [],
+          "metadata": {
+            "pipeline": "PR-04-standalone-upload",
+            "note": "Single-diagram upload. figure_001 is the entire image. Text blocks populated downstream by PR-06 evidence pipeline."
+          }
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Full-image region/figure in source_px, width=1280, height=960, top-left origin. No invented crop or landmark coordinates.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "SourceAsset → PageIR. The whole image is user-supplied; confidence in that extent does not imply confidence in physics landmarks."
+}

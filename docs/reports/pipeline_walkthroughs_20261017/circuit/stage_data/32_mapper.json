@@ -1,0 +1,29 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 32,
+  "component": "CoordinateMapper: source → overlay → browser",
+  "execution": "NOT EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "engine/core/coordinateMapper.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "Domain solver and actual initial state",
+  "downstream_stage": "Actual renderer at t=0 over the original",
+  "actual_input": {
+    "records": [],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Native source coordinates, source dimensions, viewport dimensions, DPR and image rectangle.",
+  "actual_output": {
+    "records": [],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Invertible mapping with the same image/overlay scale and offsets. Applying viewToSource(sourceToView(p)) should recover the supplied point within floating-point precision.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "NOT EXECUTED",
+  "finding": "No output exists for this diagram at this component. The expected contract is described for debugging, not reported as an executed result.",
+  "change_or_loss": "No transformation, mutation or output was produced by this component for this diagram: the branch was not reached. Expected behavior above is a contract, not an observed result."
+}
