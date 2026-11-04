@@ -177,7 +177,7 @@ export class SimulationOrchestrator {
           ? 'Diagram analysis is not configured on the server. Check the vision provider settings and try again.'
           : providerError === 'VisionProviderError'
             ? 'The diagram analysis service is temporarily unavailable. Your image is still selected; click Generate Simulation to retry.'
-            : "We couldn't reliably analyze this diagram. Try a clearer image or review the detected diagram region.";
+            : "We couldn't reliably analyze this diagram. Try a clearer crop of the complete diagram.";
         this._setState(
           OrchestratorState.ERROR,
           analysisMessage
@@ -190,6 +190,19 @@ export class SimulationOrchestrator {
         this.compiledScene = this._normalizeSceneBackground(ingestData.scene);
         this._metrics.timeToReadyMs = Date.now() - this._metrics.startTime;
         this._setState(OrchestratorState.READY_TO_SIMULATE);
+        return;
+      }
+
+      // Circuit uploads compile during ingestion. Keep any blocker in the
+      // upload dialog so students can retry without an evidence review step.
+      if (this.bookIR?.domain === 'circuits') {
+        const codes = new Set([...(this.bookIR.reviewIssues || []), ...(compilerResult.issues || [])]
+          .map(issue => issue.code));
+        const shorted = codes.has('SHORTED_CIRCUIT_SOURCE') && !codes.has('GROUNDING_INCOMPLETE');
+        const message = shorted
+          ? 'Short circuit detected. A wire connects both terminals of the voltage source. The ideal circuit has no finite current to simulate.'
+          : 'Circuit symbols were detected, but the app could not verify every component and wire connection. Try a clear crop of the complete diagram.';
+        this._setState(OrchestratorState.ERROR, message);
         return;
       }
 

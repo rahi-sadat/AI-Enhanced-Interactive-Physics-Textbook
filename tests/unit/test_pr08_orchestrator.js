@@ -131,6 +131,23 @@ async function runTests() {
   assert(providerOutage.reviewState === null, 'Previous figure review is cleared on a new upload');
   assert(providerOutage.compiledScene === null, 'No canned scene replaces a failed provider');
 
+  let circuitReviewCalls = 0;
+  let circuitIssues = [{ code: 'SHORTED_CIRCUIT_SOURCE' }];
+  const circuitUpload = new SimulationOrchestrator({ api: {
+    ingest: async () => ({ status: 'needs-review', book_ir: {
+      domain: 'circuits', subtype: 'dc_linear', status: 'NEEDS_REVIEW', reviewIssues: circuitIssues,
+    } }),
+    review: async () => { circuitReviewCalls++; },
+  } });
+  await circuitUpload.startWithFile(new Blob(['bytes']));
+  assert(circuitUpload.state === OrchestratorState.ERROR, 'A shorted circuit stops in the upload dialog');
+  assert(circuitUpload.currentError.includes('Short circuit detected'), 'The detected short is explained');
+  circuitIssues = [{ code: 'SHORTED_CIRCUIT_SOURCE' }, { code: 'GROUNDING_INCOMPLETE' }];
+  await circuitUpload.startWithFile(new Blob(['bytes']));
+  assert(circuitUpload.currentError.includes('Try a clear crop'), 'An ungrounded circuit offers a retry');
+  assert(!circuitUpload.currentError.includes('Short circuit detected'), 'Incomplete grounding cannot establish a short circuit');
+  assert(circuitReviewCalls === 0 && circuitUpload.reviewState === null, 'Circuit uploads skip evidence review');
+
   // Test 1: Initial State is IDLE
   console.log('[1/8] Verifying initial orchestrator state');
   const orch = new SimulationOrchestrator();

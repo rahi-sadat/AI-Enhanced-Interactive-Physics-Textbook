@@ -551,7 +551,7 @@ let activeFigure = null;
 if (figureHost) {
   activeFigure = new InteractiveFigure(figureHost, {
     onOpenReview: () => {
-      if (orchestrator.bookIR) {
+      if (orchestrator.bookIR && orchestrator.bookIR.domain !== 'circuits') {
         reviewModal.open();
       }
     }

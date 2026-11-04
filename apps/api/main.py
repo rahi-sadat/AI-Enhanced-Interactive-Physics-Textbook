@@ -2019,6 +2019,10 @@ async def compile_resolved(req: CompileResolvedRequest):
         raise HTTPException(status_code=500, detail=f"Compilation failed: {e}")
 
 
+from apps.api.circuit_v2_lab import create_router as create_circuit_v2_lab_router
+app.include_router(create_circuit_v2_lab_router(_get_ingestion_pipeline))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)

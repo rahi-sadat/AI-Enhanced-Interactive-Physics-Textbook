@@ -228,6 +228,7 @@ export class InteractiveFigure {
     this._sourceScene = JSON.parse(JSON.stringify(scene));
     const domain = scene.domain || scene.simulation?.domain || (scene.simulation_type === 'kinematics' ? 'mechanics' : scene.simulation_type || 'mechanics');
     this.currentDomain = domain;
+    this.dom.btnReviewSetup.style.display = domain === 'circuits' ? 'none' : '';
 
     // 1. Update Header metadata
     this.dom.idChip.textContent = scene.id || 'FIG-001';
