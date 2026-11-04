@@ -73,7 +73,8 @@ AI-Enhanced-Interactive-Physics-Textbook/
 For the matched Windows/Python environment and new circuit dataset/YOLO tools,
 use [the reproducible setup guide](docs/WINDOWS_REPRODUCIBLE_SETUP.md).
 [This Codex prompt](docs/CODEX_FRIEND_SETUP_PROMPT.md) performs the setup on a
-collaborator's laptop. Trained weights are shared in a separate verified asset ZIP.
+collaborator's laptop. The [circuit model handoff](docs/TEAM_HANDOFF_20261031.md)
+lists the detector checkpoints included in Git.
 
 ### 1. Backend & Perception Setup
 
@@ -110,6 +111,31 @@ npm run dev
 ```
 
 Open `http://localhost:5173` to explore interactive mechanics, circuits, and optics simulations.
+
+### Upload a circuit image
+
+Open the upload dialog, select a cropped circuit schematic, and click **Generate Interactive Simulation**.
+The upload pipeline tries the local `circuit_v2` checkpoint (`weights/last.pt`) before
+Gemini. It proposes resistor, voltage source, capacitor, and switch locations.
+The existing CV and OCR stages verify geometry and recover values. A circuit
+with a solvable graph starts automatically, using editable assumptions for
+missing values. If playback cannot start, the upload dialog explains the issue
+and lets the student retry.
+
+When the local detector recognizes a circuit, the upload works without a Gemini
+key. Images without a confident circuit detection use the existing semantic
+classifier. Set `CIRCUIT_V2_ONLY=true` in the API's `.env` to keep all diagram
+uploads on the local circuit path, including images the checkpoint cannot classify.
+
+Open `/circuit-v2.html` on the web server for the **Circuit v2 experiment**.
+It runs the real detector, OCR/CV grounding, resolution and compiler locally,
+shows the checkpoint SHA-256 and per-stage failures, and downloads the full trace.
+When compilation is blocked, the checked preview option plays an explicitly
+experimental series circuit with guessed connections and editable assumed values.
+Synthetic stand-ins are disclosed when no source or resistor is detected.
+This preview is separate from the source evidence and never marks it verified.
+`CIRCUIT_V2_CHECKPOINT` selects a different local checkpoint. The Vite API proxy
+can target a separate running API via `API_PROXY_TARGET`.
 
 ---
 

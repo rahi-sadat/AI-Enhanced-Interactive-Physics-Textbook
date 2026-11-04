@@ -955,8 +955,6 @@ class PhysicsCompiler:
                     if (not isinstance(terminals, list) or len(terminals) != 2
                             or any(node not in node_ids for node in terminals)):
                         issues.append({"code": "INVALID_CIRCUIT_CONNECTION", "message": f"Component {cid} must connect two declared nodes."})
-                    elif terminals[0] == terminals[1] and comp.get("type") in sources:
-                        issues.append({"code": "SHORTED_CIRCUIT_SOURCE", "message": f"Voltage source {cid} is shorted to one node."})
                     if comp.get("type")=="capacitor":
                         initial=comp.get("initial_voltage")
                         if isinstance(initial,bool) or not isinstance(initial,(int,float)) or not math.isfinite(initial):
