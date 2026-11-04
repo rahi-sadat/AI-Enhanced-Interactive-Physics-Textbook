@@ -15,7 +15,7 @@ from shared.schemas.ingestion import BookIR, BookEntity, SourceAsset
 from ai.evidence.cv.circuits_cv import CircuitCVCandidateExtractor
 from ai.evidence.cv.circuit_geometry_validator import CircuitGeometryValidator
 from ai.evidence.cv.geometry_helpers import merge_collinear_lines
-from ai.evidence.grounding.circuits import CircuitGrounder
+from ai.evidence.grounding.circuits import CircuitGrounder, parse_and_cluster_circuit_tokens
 from ai.evidence.grounding.circuit_graph import build_conductor_graph
 from ai.evidence.grounding.circuit_integrity import validate_circuit_integrity
 from ai.evidence.segmentation.circuit_prompts import segment_circuit_candidates
@@ -114,6 +114,56 @@ def test_reject_full_span_gap_and_body_short():
     checked=CircuitGeometryValidator().validate(image,damaged)
     assert 'fake-rail' not in {w['id'] for w in checked['wire_paths']}
     assert any(i['code']=='UNSUPPORTED_WIRE_PATH' for i in checked['validation_issues'])
+
+
+def test_visible_bypass_reports_a_shorted_voltage_source():
+    image, book, tokens, _ = schematic(parallel=True)
+    bypass = np.array([(140, 180), (25, 180), (25, 480), (140, 480)], dtype=np.int32)
+    cv2.polylines(image, [bypass], False, (0, 0, 0), 3)
+    height, width = image.shape[:2]
+    candidates = CircuitCVCandidateExtractor().extract(
+        image, source_width=width, source_height=height, ocr_boxes=[t.bbox_source_px for t in tokens],
+    )
+    checked = CircuitGeometryValidator().validate(
+        image, candidates, source_asset_id=book.source_asset_id, figure_id=book.figure_id,
+    )
+    result = CircuitGrounder().ground(
+        book, checked, OCRExtractionResult(status=ExtractionStatus.SUCCESS, tokens=tokens, provider='mock_ocr'),
+        source_width=width, source_height=height,
+    ).grounded_book_ir
+    assert result.geometry['circuit_topology']['verified_connectivity']
+    assert [issue['code'] for issue in result.review_issues] == ['SHORTED_CIRCUIT_SOURCE']
+    assert PhysicsCompiler().compile(result).scene is None
+
+
+def test_local_grounding_keeps_unmatched_symbols_on_the_circuit_as_blockers():
+    image, candidates, original, _ = ground_fixture(parallel=True)
+    by_id = {candidate['id']: candidate for candidate in candidates['components']}
+    entities = []
+    for entity in original.entities:
+        candidate_id = entity.attributes['geometry_candidate_id']
+        if entity.id != 'r2':
+            entities.append(BookEntity(id=entity.id, type=entity.type,
+                attributes={'circuitV2BBox': by_id[candidate_id]['bbox'].to_dict()}))
+    book = BookIR(
+        source_asset_id=original.source_asset_id, figure_id=original.figure_id, domain='circuits',
+        subtype='dc_linear', entities=entities, provenance={'pipeline': 'circuit_v2'},
+    )
+    height, width = image.shape[:2]
+    grounded = CircuitGrounder().ground(book, candidates, source_width=width, source_height=height).grounded_book_ir
+    assert not grounded.geometry['circuit_validation']['geometry']
+    assert grounded.provenance['off_circuit_candidates'] == []
+    assert PhysicsCompiler().compile(grounded).scene is None
+
+
+def test_split_value_stays_with_nearer_designator():
+    tokens = [
+        OCRToken(id='r2', raw_text='R2', bbox_source_px=SourceBBox(200, 20, 30, 20)),
+        OCRToken(id='r1', raw_text='R1', bbox_source_px=SourceBBox(20, 20, 30, 20)),
+        OCRToken(id='value', raw_text='= 4 Ω', bbox_source_px=SourceBBox(22, 48, 50, 20)),
+    ]
+    labels = parse_and_cluster_circuit_tokens(tokens, keep_standalone_values=True)
+    assert {label['id']: label['val'] for label in labels} == {'R1': 4, 'R2': None}
 
 
 def test_missing_symbol_and_direct_unverified_candidates_never_compile():

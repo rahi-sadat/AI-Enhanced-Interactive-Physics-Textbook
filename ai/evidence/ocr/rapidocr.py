@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import importlib.metadata
 import logging
+import re
 import time
+from threading import Lock
 from typing import Optional
 
 import numpy as np
@@ -31,6 +33,7 @@ class RapidOCRProvider:
     def __init__(self, model_version: str = "PP-OCRv6-onnx"):
         self._model_version = model_version
         self._engine = None
+        self._engine_lock = Lock()
         self._package_name = "rapidocr"
         self._package_version = "unknown"
         self._detector_model = "PP-OCRv6_det_small.onnx"
@@ -78,6 +81,34 @@ class RapidOCRProvider:
                 self._model_version = "PP-OCRv3-onnx"
                 self._engine = RapidOCR()
         return self._engine
+
+    def _retry_reversed_values(self, engine, image, readings):
+        """Recover an explicit value when the angle classifier flips its line."""
+        flipped = [i for i, (_, text, _) in enumerate(readings) if re.search(r"\d\s*=\s*$", text)]
+        if not flipped or not getattr(engine, "use_cls", False):
+            return {}
+        try:
+            alternate = engine(image, use_cls=False)
+        except Exception as error:
+            logger.debug("OCR orientation retry failed: %s", type(error).__name__)
+            return {}
+        finally:
+            # RapidOCR's per-call options persist on the engine.
+            engine.use_cls = True
+
+        if alternate.boxes is None or alternate.txts is None or alternate.scores is None:
+            return {}
+        explicit_value = re.compile(r"=\s*\d+(?:\.\d+)?\s*(?:k?[Ωω]|k?ohm|V)", re.IGNORECASE)
+        alternatives = {}
+        for index in flipped:
+            box, original, confidence = readings[index]
+            for new_box, text, score in zip(alternate.boxes, alternate.txts, alternate.scores):
+                if (score >= 0.85 and score > (confidence or 0) and explicit_value.fullmatch(text.strip())
+                        and np.array_equal(new_box, box)):
+                    readings[index] = (box, text, score)
+                    alternatives[index] = [{"text": original, "confidence": confidence, "provider": self.name}]
+                    break
+        return alternatives
 
     def extract(
         self,
@@ -127,23 +158,23 @@ class RapidOCRProvider:
                 latency_ms=(time.perf_counter() - start_time) * 1000.0,
             )
 
+        alternatives = {}
         try:
-            engine = self._get_engine()
-            res = engine(working_img)
-            if hasattr(res, "boxes") and hasattr(res, "txts"):
-                # Unified rapidocr >= 3.9.0 RapidOCROutput
-                boxes = res.boxes if res.boxes is not None else []
-                txts = res.txts if res.txts is not None else []
-                scores = res.scores if res.scores is not None else []
-                elapse = getattr(res, "elapse", 0.0)
-                raw_results = []
-                for b, t, s in zip(boxes, txts, scores):
-                    raw_results.append((b, t, s))
-            elif isinstance(res, (tuple, list)) and len(res) == 2:
-                # Legacy rapidocr_onnxruntime tuple (results, elapse)
-                raw_results, elapse = res
-            else:
-                raw_results, elapse = res, 0.0
+            with self._engine_lock:
+                engine = self._get_engine()
+                res = engine(working_img)
+                if hasattr(res, "boxes") and hasattr(res, "txts"):
+                    # Unified rapidocr >= 3.9.0 RapidOCROutput
+                    boxes = res.boxes if res.boxes is not None else []
+                    txts = res.txts if res.txts is not None else []
+                    scores = res.scores if res.scores is not None else []
+                    raw_results = list(zip(boxes, txts, scores))
+                    alternatives = self._retry_reversed_values(engine, working_img, raw_results)
+                elif isinstance(res, (tuple, list)) and len(res) == 2:
+                    # Legacy rapidocr_onnxruntime tuple (results, elapse)
+                    raw_results, _ = res
+                else:
+                    raw_results = res
         except Exception as e:
             logger.error("[RapidOCRProvider] Execution failed: %s", e)
             return OCRExtractionResult(
@@ -212,6 +243,7 @@ class RapidOCRProvider:
                     provider=self.name,
                     recognizer_model=self._recognizer_model,
                     evidence_ref=f"evidence_ocr_{token_id}",
+                    candidate_alternatives=alternatives.get(idx, []),
                 )
             )
 

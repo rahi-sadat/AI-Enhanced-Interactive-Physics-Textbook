@@ -14,13 +14,89 @@ import numpy as np
 
 from shared.schemas.evidence import SourceLine, SourcePoint
 from .circuit_paths import raster, trace_paths
-from .circuit_symbols import detect_symbols
+from .circuit_symbols import detect_symbols, proposal
+
+
+def _intersection_area(first, second):
+    width = max(0, min(first.x_max, second.x_max) - max(first.x, second.x))
+    height = max(0, min(first.y_max, second.y_max) - max(first.y, second.y))
+    return width * height
+
+
+def _recover_resistor_symbols(ink, stroke, components, resistor_regions):
+    """Measure unresolved resistor symbols inside their local detector regions."""
+    height, width = ink.shape
+    recovered = []
+    for region in resistor_regions:
+        if any(c['type'] == 'resistor' and region.iou(c['bbox']) >= .30 for c in components):
+            continue
+        pad = int(np.ceil(stroke * 6))
+        x0, y0 = max(0, int(region.x) - pad), max(0, int(region.y) - pad)
+        x1 = min(width, int(np.ceil(region.x_max)) + pad)
+        y1 = min(height, int(np.ceil(region.y_max)) + pad)
+        max_step = max(stroke * 10, 36, max(region.width, region.height) / 3)
+        measured, _ = detect_symbols(
+            ink[y0:y1, x0:x1].copy(), stroke, include_switches=False, max_resistor_step=max_step,
+        )
+        candidates = []
+        for symbol in measured:
+            if symbol['type'] != 'resistor':
+                continue
+            native = proposal(
+                'resistor',
+                np.asarray(symbol['symbol_path']) + [x0, y0],
+                [(symbol[k].x + x0, symbol[k].y + y0) for k in ('terminal_1', 'terminal_2')],
+                stroke, notation=symbol['notation'],
+            )
+            overlap = region.iou(native['bbox'])
+            if overlap >= .30:
+                candidates.append((overlap, native))
+        candidates.sort(key=lambda candidate: candidate[0], reverse=True)
+        if candidates and (len(candidates) == 1 or candidates[0][0] - candidates[1][0] >= .10):
+            best = candidates[0][1]
+            if all(best['bbox'].iou(c['bbox']) <= .40 for c in recovered):
+                recovered.append(best)
+
+    # A whole-image candidate may include a long piece of adjacent wire.
+    # Prefer the local measurement for the same body before tracing wires.
+    kept = [
+        c for c in components if c['type'] != 'resistor'
+        or any(region.iou(c['bbox']) >= .30 for region in resistor_regions)
+        or not any(_intersection_area(c['bbox'], r['bbox']) >=
+                   .70 * min(c['bbox'].width * c['bbox'].height, r['bbox'].width * r['bbox'].height)
+                   for r in recovered)
+    ]
+    for index, c in enumerate(recovered, 1):
+        c['id'] = f'cv_local_resistor_{index}'
+    return kept + recovered
+
+
+def _separate_overlapping_hypotheses(components, symbol_regions):
+    """Keep competing interpretations of one body from cutting the same wire."""
+    corroborated = [
+        (candidate, region) for candidate in components for kind, region in symbol_regions
+        if candidate['type'] == kind and region.iou(candidate['bbox']) >= .30
+    ]
+    supported_ids = {candidate['id'] for candidate, _ in corroborated}
+    kept, rejected = [], []
+    for candidate in components:
+        box = candidate['bbox']
+        if candidate['id'] not in supported_ids and any(
+            body['type'] != candidate['type'] and body['bbox'].contains(candidate['center'])
+            and _intersection_area(box, region) >= .85 * box.width * box.height
+            for body, region in corroborated
+        ):
+            rejected.append(dict(kind=candidate['type'], bbox=box.to_dict(), reason='overlaps_corroborated_symbol'))
+        else:
+            kept.append(candidate)
+    return kept, rejected
 
 
 class CircuitCVCandidateExtractor:
     """Extract measured symbol hypotheses and continuous native-pixel paths."""
 
-    def extract(self, image_bgr, *, source_width, source_height, ocr_boxes=None, semantic_types=None):
+    def extract(self, image_bgr, *, source_width, source_height, ocr_boxes=None, semantic_types=None,
+                symbol_regions=None):
         h,w=image_bgr.shape[:2]
         if (w,h) != (source_width,source_height):
             raise ValueError("Circuit CV requires the decoded native source frame.")
@@ -73,6 +149,12 @@ class CircuitCVCandidateExtractor:
                 protected.append(dict(type=candidate['type'],bbox=box.to_dict(),
                                       restored_ink_pixels=int(np.count_nonzero(ink[restore]))))
         components,rejected=detect_symbols(clean,stroke,polarity_ink=ink,semantic_types=semantic_types)
+        if symbol_regions:
+            components = _recover_resistor_symbols(
+                clean, stroke, components, [box for kind, box in symbol_regions if kind == 'resistor'],
+            )
+            components, conflicts = _separate_overlapping_hypotheses(components, symbol_regions)
+            rejected.extend(conflicts)
         conductor=clean.copy()
         for c in components:
             b=c['bbox']

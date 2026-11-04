@@ -45,12 +45,14 @@ def positive_terminal_from_marker(ink, terminals, plate_length, stroke):
     return next(iter(matches)) if len(matches)==1 else None
 
 
-def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, include_switches=True):
+def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, include_switches=True,
+                   max_resistor_step=None):
     paths, _, _, _ = trace_paths(ink, stroke, spur_widths=3)
     components, rejected = [], []
 
     # 1. Resistor Proposals (Zigzag & Rectangle)
     # A. Reversal-based zigzag detection (detects 3-10 tooth zigzags robustly along polylines)
+    max_step = max_resistor_step or max(stroke * 10.0, 36.0)
     for path in paths:
         pts = cv2.approxPolyDP(np.asarray(path['points'], np.float32).reshape(-1, 1, 2),
                                stroke * 0.85, False).reshape(-1, 2).astype(float)
@@ -66,7 +68,7 @@ def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, inclu
                 idx1, idx2 = nonzeros[i], nonzeros[i + 1]
                 if signs[idx1] != signs[idx2]:
                     step_len = np.linalg.norm(pts[idx2] - pts[idx1])
-                    if stroke * 1.0 <= step_len <= max(stroke * 10.0, 36.0):
+                    if stroke * 1.0 <= step_len <= max_step:
                         reversals.append(idx2)
             runs = []
             curr = []
@@ -196,7 +198,9 @@ def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, inclu
                 prev = group[-1][1]
                 sep = q['center'][axis] - prev['center'][axis]
                 max_len = max(q['length'], prev['length'])
-                if abs(q['center'][1 - axis] - p['center'][1 - axis]) <= max(stroke * 4.0, max_len * 0.3) and stroke * 1.2 < sep < max_len * 1.8:
+                # Plates should be spaced closer than their length. A wider
+                # gap groups unrelated parallel wires and masks real conductors.
+                if abs(q['center'][1 - axis] - p['center'][1 - axis]) <= max(stroke * 4.0, max_len * 0.3) and stroke * 1.2 < sep < max_len:
                     group.append((j, q))
                     if len(group) == 4:
                         break

@@ -52,7 +52,9 @@ from ai.resolution.units import UnitEngine
 logger = logging.getLogger(__name__)
 
 
-def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius: float = 220.0) -> List[Dict[str, Any]]:
+def parse_and_cluster_circuit_tokens(
+    tokens: List[OCRToken], association_radius: float = 220.0, *, keep_standalone_values: bool = False,
+) -> List[Dict[str, Any]]:
     """Extract and cluster semantic circuit component tokens into coherent component specifications.
     
     Groups designators (e.g. 'R1', 'V1') with their adjacent physical values (e.g. '100Ω', '24 V').
@@ -92,8 +94,9 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
         m_r_comb = re.match(r'^[Rr](\d+?)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
         m_v_comb = re.match(r'^[Vv](\d*)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
 
-        m_r_val = re.fullmatch(r'^(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
-        m_v_val = re.fullmatch(r'^(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
+        # OCR can split a label into a designator and a separate "= 10 Ω".
+        m_r_val = re.fullmatch(r'^(?:=\s*)?(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
+        m_v_val = re.fullmatch(r'^(?:=\s*)?(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
 
         if m_c:
             quantity=UnitEngine.parse_quantity(float(m_c[2]),m_c[3],'capacitance')
@@ -199,6 +202,13 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
                 continue
             if q['val'] is not None and q['desig'] is None and q['type'] in (c_type, 'value_only'):
                 dist = ((p['cx'] - q['cx']) ** 2 + (p['cy'] - q['cy']) ** 2) ** 0.5
+                if keep_standalone_values and any(
+                    other is not p and other['type'] == c_type and other['desig']
+                    and np.hypot(other['cx'] - q['cx'], other['cy'] - q['cy']) <= dist + association_radius * .1
+                    for other in parsed
+                ):
+                    # A closer designator owns the value regardless of OCR order.
+                    continue
                 if dist < association_radius and dist < min_dist:
                     min_dist = dist
                     best_j = j
@@ -256,7 +266,7 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
         elif c_type == 'raw_number':
             continue
 
-        if any(c['type'] == c_type and
+        if not keep_standalone_values and any(c['type'] == c_type and
                ((p['cx'] - c['cx']) ** 2 + (p['cy'] - c['cy']) ** 2) ** 0.5 < association_radius
                for c in components):
             # Standalone OCR values near an identified component are likely
@@ -287,6 +297,39 @@ def parse_and_cluster_circuit_tokens(tokens: List[OCRToken], association_radius:
     return components
 
 
+def _unique_matches(costs, ambiguity_margin):
+    """Return one-to-one assignments that remain distinct from the next best fit."""
+    from scipy.optimize import linear_sum_assignment
+
+    rows, cols = linear_sum_assignment(costs)
+    optimum = costs[rows, cols].sum()
+    for i, j in zip(rows, cols):
+        if costs[i, j] >= 1e5:
+            continue
+        alternative = costs.copy()
+        alternative[i, j] = 1e6
+        other_rows, other_cols = linear_sum_assignment(alternative)
+        if alternative[other_rows, other_cols].sum() - optimum >= ambiguity_margin:
+            yield i, j
+
+
+def _associate_local_ocr(assigned, clusters, scale):
+    """Bind OCR to already matched physical symbols with a unique nearby owner."""
+    components = list(assigned.items())
+    costs = np.full((len(components), len(clusters) + len(components)), 1e6)
+    for i, (_, component) in enumerate(components):
+        for j, cluster in enumerate(clusters):
+            if component['type'] != cluster['type']:
+                continue
+            box = component['bbox']
+            dx = max(box.x - cluster['cx'], cluster['cx'] - box.x_max, 0)
+            dy = max(box.y - cluster['cy'], cluster['cy'] - box.y_max, 0)
+            distance = np.hypot(dx, dy) / scale
+            if distance < .15:
+                costs[i, j] = distance
+    return {components[i][0]: clusters[j] for i, j in _unique_matches(costs, .015)}
+
+
 class CircuitGrounder:
     """Assign semantics to verified symbols; conductor paths alone define nodes."""
     domain = "circuits"
@@ -304,7 +347,6 @@ class CircuitGrounder:
         return self.fuse(book, cv_candidates, seg_result, ocr_result)
 
     def fuse(self, book_ir, cv_candidates, segmentation_candidates=None, ocr_result=None):
-        from scipy.optimize import linear_sum_assignment
         from .circuit_graph import build_conductor_graph
         from .circuit_integrity import COMPONENT_TYPES, validate_circuit_integrity
         book=book_ir
@@ -326,8 +368,12 @@ class CircuitGrounder:
                 confidence=tok.confidence,verified=False,provider=ocr_result.provider,
                 payload={'raw_text':tok.raw_text,'bbox':tok.bbox_source_px.to_dict() if tok.bbox_source_px else None})
             values.extend(parse_physical_value_candidate(tok))
-        clusters=parse_and_cluster_circuit_tokens(tokens, association_radius=np.hypot(
-            book.geometry.get('width',0),book.geometry.get('height',0))*.15)
+        local_detection = book.provenance.get('pipeline') == 'circuit_v2'
+        scale=max(1,np.hypot(book.geometry.get('width',0),book.geometry.get('height',0)))
+        binding_tokens = [t for t in tokens if (t.confidence or 0) >= .5] if local_detection else tokens
+        clusters=parse_and_cluster_circuit_tokens(
+            binding_tokens, association_radius=scale*.15, keep_standalone_values=local_detection,
+        )
         semantics=[e for e in book.entities if e.type in COMPONENT_TYPES]
         normalize=lambda kind: ('voltage_source' if kind in {'battery','dc_source','dc_voltage_source'} else
                                 'switch' if kind in {'open_switch','closed_switch'} else kind)
@@ -336,7 +382,7 @@ class CircuitGrounder:
         # compatible OCR cluster, but duplicate or ambiguous designators cannot.
         labels={}
         used=set()
-        for e in semantics:
+        for e in ([] if local_detection else semantics):
             compatible=[(i,c) for i,c in enumerate(clusters) if normalize(e.type)==c['type'] and i not in used]
             designator=re.search(r'\b([RVC]\d+)\b',e.label or '',re.I)
             matches=[(i,c) for i,c in compatible if designator and c['id'].lower()==designator[1].lower()]
@@ -347,31 +393,27 @@ class CircuitGrounder:
         # Global one-to-one assignment: type mismatch forbidden; OCR is only a
         # distance/identity cue, never the returned center or terminal geometry.
         costs=np.full((len(semantics),len(verified)+len(semantics)),1e6)
-        scale=max(1,np.hypot(book.geometry.get('width',0),book.geometry.get('height',0)))
         for i,e in enumerate(semantics):
             cluster=labels.get(e.id)
+            proposal = SourceBBox.from_dict(e.attributes['circuitV2BBox']) if local_detection else None
             for j,c in enumerate(verified):
                 if normalize(e.type)!=c['type']:
                     continue
-                if cluster:
+                if proposal:
+                    overlap = proposal.iou(c['bbox'])
+                    if overlap >= .20:
+                        costs[i, j] = 1 - overlap
+                elif cluster:
                     center=c['center']
                     distance=np.hypot(center.x-cluster['cx'],center.y-cluster['cy'])
                     if distance < scale*.25:
                         costs[i,j]=distance/scale
                 elif sum(normalize(x.type)==normalize(e.type) for x in semantics)==1 and sum(x['type']==c['type'] for x in verified)==1:
                     costs[i,j]=.2
-        assigned={}
-        if semantics and verified:
-            rows,cols=linear_sum_assignment(costs)
-            optimum=costs[rows,cols].sum()
-            for i,j in zip(rows,cols):
-                if j>=len(verified) or costs[i,j]>=1e5:
-                    continue
-                alternative=costs.copy();alternative[i,j]=1e6
-                ar,ac=linear_sum_assignment(alternative)
-                if alternative[ar,ac].sum()-optimum < .015:
-                    continue  # Two nearly equivalent physical assignments need review.
-                assigned[semantics[i].id]=verified[j]
+        assigned = {semantics[i].id: verified[j]
+                    for i, j in _unique_matches(costs, .10 if local_detection else .015)}
+        if local_detection:
+            labels = _associate_local_ocr(assigned, clusters, scale)
         nodes,wires,wire_nodes=build_conductor_graph(cv_candidates.get('wire_paths',[]),list(assigned.values()))
         components=[]
         for e in semantics:
@@ -437,9 +479,21 @@ class CircuitGrounder:
             reference_node=next((c['nodes'][1] for c in components if c['type']=='voltage_source'),
                                 next((c['nodes'][1] for c in components if c['type']=='capacitor'),None)))
         book.evidence.update({k:v.to_dict() for k,v in evidence.items()})
-        # Rejected proposals are diagnostics, not extra physical components.
-        # An unmatched VERIFIED symbol still blocks compilation.
-        geometry_ok=bool(semantics) and len(assigned)==len(semantics) and len(assigned)==len(verified)
+        assigned_ids = {candidate['id'] for candidate in assigned.values()}
+        unmatched = [candidate for candidate in verified if candidate['id'] not in assigned_ids]
+        if local_detection:
+            # Caption glyphs can independently resemble symbols and short leads.
+            # Only an unmatched symbol attached to a conductor of this circuit
+            # is a blocker. Keep off-circuit candidates for diagnostics.
+            off_circuit = [
+                candidate for candidate in unmatched
+                if not any(attachment and attachment['wire_id'] in wire_nodes
+                           for attachment in candidate.get('terminal_attachments', []))
+            ]
+            ignored_ids = {candidate['id'] for candidate in off_circuit}
+            unmatched = [candidate for candidate in unmatched if candidate['id'] not in ignored_ids]
+            book.provenance['off_circuit_candidates'] = sorted(ignored_ids)
+        geometry_ok = bool(semantics) and len(assigned) == len(semantics) and not unmatched
         topology_ok=geometry_ok and bool(nodes) and all(all(c['nodes']) for c in components)
         book.geometry['circuit_validation']={'semantic':book.isPhysics is True,
             'geometry':geometry_ok,'topology':topology_ok,'referential_integrity':False,'physics_readiness':False}

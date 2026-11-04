@@ -11,6 +11,8 @@ Tests:
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 import numpy as np
 
 from shared.schemas.evidence import (
@@ -59,6 +61,27 @@ class TestPR06OCR(unittest.TestCase):
         provider = RapidOCRProvider()
         # rapidocr-onnxruntime was installed in .venv, so it should report available
         self.assertTrue(provider.available())
+
+    def test_rapidocr_retries_a_flipped_value_at_the_same_box(self):
+        box = np.array([[10, 20], [45, 20], [45, 40], [10, 40]], dtype=float)
+
+        class AngleClassifier:
+            use_cls = True
+
+            def __call__(self, image, use_cls=None):
+                if use_cls is not None:
+                    self.use_cls = use_cls
+                text, score = ("U9=", 0.91) if self.use_cls else ("=6 Ω", 0.99)
+                return SimpleNamespace(boxes=[box], txts=[text], scores=[score])
+
+        provider = RapidOCRProvider()
+        engine = AngleClassifier()
+        with patch.object(provider, "available", return_value=True), patch.object(provider, "_get_engine", return_value=engine):
+            result = provider.extract(np.zeros((100, 100, 3), dtype=np.uint8), source_width=100, source_height=100)
+        self.assertEqual(result.tokens[0].raw_text, "=6 Ω")
+        self.assertEqual(result.tokens[0].candidate_alternatives[0]["text"], "U9=")
+        self.assertEqual(result.tokens[0].bbox_source_px.x, 10)
+        self.assertTrue(engine.use_cls)
 
     def test_ocr_normalization_preserves_raw_text(self):
         raw = "1O Ω"

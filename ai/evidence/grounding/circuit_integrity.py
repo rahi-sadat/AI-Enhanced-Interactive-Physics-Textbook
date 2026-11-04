@@ -4,6 +4,7 @@ import math
 
 
 COMPONENT_TYPES={'resistor','voltage_source','dc_voltage_source','battery','dc_source','switch','open_switch','closed_switch','bulb','lamp','capacitor'}
+VOLTAGE_SOURCE_TYPES = {'voltage_source', 'battery', 'dc_source'}
 
 
 def validate_circuit_integrity(book):
@@ -79,6 +80,8 @@ def validate_circuit_integrity(book):
         nn=c.get('nodes',[])
         if len(nn)!=2 or any(n not in nids for n in nn):
             fail('DANGLING_COMPONENT_NODE',f'{cid} requires two declared terminal nodes.',cid)
+        elif nn[0] == nn[1] and c.get('type') in VOLTAGE_SOURCE_TYPES:
+            fail('SHORTED_CIRCUIT_SOURCE', f'Voltage source {cid} is shorted to one node.', cid)
         if c.get('type')=='switch' and (c.get('state') not in {'open','closed'} or not c.get('state_verified')):
             fail('SWITCH_STATE_UNVERIFIED',f'Verify the visible state of {cid}.',cid)
         tt=c.get('terminals',[])

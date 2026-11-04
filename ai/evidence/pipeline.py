@@ -234,8 +234,14 @@ class EvidenceExtractionPipeline:
                 semantic_types = {e.type.lower() for e in getattr(book_ir, 'entities', []) if getattr(e, 'type', None)}
                 import inspect
                 fn = getattr(extractor, "extract_candidates", None) or getattr(extractor, "extract")
-                if "semantic_types" in inspect.signature(fn).parameters:
+                extract_params = inspect.signature(fn).parameters
+                if "semantic_types" in extract_params:
                     extract_kwargs["semantic_types"] = semantic_types
+                if "symbol_regions" in extract_params and book_ir.provenance.get("pipeline") == "circuit_v2":
+                    extract_kwargs["symbol_regions"] = [
+                        (entity.type, SourceBBox.from_dict(entity.attributes["circuitV2BBox"]))
+                        for entity in book_ir.entities
+                    ]
                 cv_candidates = fn(img_bgr, **extract_kwargs)
             except Exception as e:
                 logger.warning("[EvidenceExtractionPipeline] CV candidate extraction error for %s: %s", subtype_key, e)
@@ -318,6 +324,16 @@ class EvidenceExtractionPipeline:
         if src_h and not grounded_ir.provenance.get("source_height"):
             grounded_ir.provenance["source_height"] = src_h
         grounded_ir.provenance["evidence_pipeline_latency_ms"] = (time.perf_counter() - start_time) * 1000.0
+        # Preserve failures even when missing numeric values can use policies.
+        # Experiment diagnostics must distinguish missing OCR from model errors.
+        grounded_ir.provenance["ocr_diagnostics"] = {
+            "provider": ocr_result.provider if ocr_result else None,
+            "status": ocr_result.status.value if ocr_result else "unavailable",
+            "token_count": len(ocr_result.tokens) if ocr_result else 0,
+            "error": ocr_result.error if ocr_result else None,
+        }
+        if cv_candidates.get("error"):
+            grounded_ir.provenance["cv_error"] = cv_candidates["error"]
 
         return grounded_ir
 
