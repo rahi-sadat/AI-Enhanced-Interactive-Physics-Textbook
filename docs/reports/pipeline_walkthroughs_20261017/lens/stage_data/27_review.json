@@ -1,0 +1,29 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 27,
+  "component": "Review / explicit compile request branch",
+  "execution": "NOT EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/features/simulations/core/SimulationOrchestrator.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "Frontend receives result and selects next state",
+  "downstream_stage": "InteractiveFigure receives the compiled scene",
+  "actual_input": {
+    "records": [],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "A needs-review BookIR and subsequent actual browser review/compile requests, if any.",
+  "actual_output": {
+    "records": [],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Review should list blockers; compile must reject unresolved evidence and keep scene=null. No synthetic user corrections are supplied in this trace.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "NOT EXECUTED",
+  "finding": "No output exists for this diagram at this component. The expected contract is described for debugging, not reported as an executed result.",
+  "change_or_loss": "No transformation, mutation or output was produced by this component for this diagram: the branch was not reached. Expected behavior above is a contract, not an observed result."
+}

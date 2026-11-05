@@ -72,23 +72,25 @@ Before completing any task or proposing changes:
 | PR-03 | ✅ | Source-aligned rendering, RendererRegistry, SimulationCapabilityRegistry, bidirectional manipulation. |
 | PR-04 | ✅ | Real upload ingestion: `SourceAsset → PageIR → BookIR`. Gate Zero anti-fabrication UI. 36 tests. |
 | PR-05 | ✅ | Multimodal VLM semantic understanding (Gemini). Conservative confidence policy, enriched roles, debug metadata, asserted acceptance test. |
-| PR-06 | 🔄 | Classical CV + OCR parameter grounding. SAM 2 geometry, Tesseract OCR, spatial-semantic parameter binding. |
-| PR-07 | 🔄 | End-to-end simulation bootstrapping: PR-05 + PR-06 → `BookIR(RESOLVED)` → runnable PhysicsScene. |
+| PR-06 | ✅ | Classical CV + OCR parameter grounding. SAM 2 geometry, Tesseract/EasyOCR, spatial-semantic parameter binding. |
+| PR-07 | ✅ | Evidence resolution, user review, explicit defaults policy registry, calibration derivation, and strict compilation readiness (`READY_TO_COMPILE`). |
+| PR-08 | ✅ | Interactive evidence review dialog, deterministic SimulationOrchestrator state machine, student-facing review UX, decoupled simulation activation, evidence vs exploration separation. |
 
-### PR-05 Active Boundary (CRITICAL — Do Not Cross Until PR-06)
+### PR-08 Active Boundary (Frontend Orchestration & Review)
 
 ```
-VLM Output Boundary                CV/OCR Grounding Boundary (PR-06+)
------------------------            -----------------------------------
-classification       ✅            position_source_px          ❌ (null)
-isPhysics            ✅            geometry                     ❌ (null)
-domain               ✅            parameters (numeric)         ❌ (empty {})
-subtype              ✅
-confidence (< 1.0)   ✅
-entities (coarse)    ✅ → quarantined in vlmApproxBBox only
-visibleLabels        ✅ → verified=False only (unverified evidence)
+PR-07 Resolution Boundary          PR-08 Frontend Orchestration
+--------------------------          ----------------------------
+POST /api/ingest             ──►    ANALYZING / NEEDS_REVIEW
+POST /api/resolution/review  ──►    PhysicsReviewModal (human-readable issues)
+POST /api/resolution/resolve ──►    Candidate confirm / correct / policy assumptions
+POST /api/resolution/compile ──►    READY_TO_SIMULATE (gated by backend only)
+Compiled PhysicsScene        ──►    InteractiveFigure (CoordinateMapper + source_px)
+Slider exploration           ──►    Runtime state only (BookIR evidence immutable)
 ```
 
-- `BookIR.status` **must** remain non-runnable at end of PR-05 pipeline (`NEEDS_REVIEW` for supported, `UNSUPPORTED` for unsupported, `UNRESOLVED` for non-physics/unknown).
-- `PhysicsCompiler` **must** return `scene=null` (`NEEDS_REVIEW` for supported; never `READY`).
-- Any agent that sets `BookIR.status = RESOLVED` or populates `position_source_px` from VLM output is violating the PR-05 boundary.
+- **Backend Authoritative Readiness**: The frontend never declares `READY_TO_COMPILE` independently. All transitions are governed by backend `ReadinessEvaluator`.
+- **Evidence vs Exploration Separation**: Grounded BookIR contains resolved source evidence. Transient parameter modifications during simulation only mutate the live simulation instance, leaving BookIR pristine. "Reset to textbook values" restores the initial compiled scene.
+- **Decoupled Simulation Activation**: Successful compilation transitions to `READY_TO_SIMULATE`; simulation overlay is rendered and started only upon explicit user action ("Start Simulation").
+- **Native Coordinate Preservation**: Native `source_px` geometry is never altered or replaced by CSS/viewport pixels. All canvas transformations use `CoordinateMapper.js`.
+

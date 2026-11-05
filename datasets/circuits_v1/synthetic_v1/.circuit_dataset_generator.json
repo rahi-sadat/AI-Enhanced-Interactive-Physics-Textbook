@@ -1,0 +1,12 @@
+{
+  "generator_version": "synthetic-circuits-1.0",
+  "seed": 20261030,
+  "count": 600,
+  "environment": {
+    "python": "3.13.5",
+    "schemdraw": "0.23",
+    "matplotlib": "3.11.1",
+    "pillow": "12.3.0",
+    "numpy": "2.5.2"
+  }
+}

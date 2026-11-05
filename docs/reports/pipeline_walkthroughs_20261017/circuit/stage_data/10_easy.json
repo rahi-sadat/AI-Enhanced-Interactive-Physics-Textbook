@@ -1,0 +1,304 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 10,
+  "component": "EasyOCR: independent OCR candidates",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 116,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\bangla.py",
+      "function": "EasyOCRBanglaProvider.extract",
+      "line": 103,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 177
+      }
+    }
+  ],
+  "upstream_stage": "RapidOCR: first text/box observations",
+  "downstream_stage": "Symbol candidates, deduplication and final OCR",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00116_EasyOCRBanglaProvider.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "region": null
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The same source image and dimensional contract.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00116_EasyOCRBanglaProvider.extract",
+        "return_value": {
+          "status": "success",
+          "tokens": [
+            {
+              "id": "bn_tok_001",
+              "raw_text": "R1 = 10 `2",
+              "normalized_text": "R1 = 10 `2",
+              "bbox_source_px": {
+                "x": 642.0,
+                "y": 151.0,
+                "width": 233.0,
+                "height": 66.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 642.0,
+                    "y": 151.0
+                  },
+                  {
+                    "x": 875.0,
+                    "y": 151.0
+                  },
+                  {
+                    "x": 875.0,
+                    "y": 217.0
+                  },
+                  {
+                    "x": 642.0,
+                    "y": 217.0
+                  }
+                ]
+              },
+              "confidence": 0.46127750970800835,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_001"
+            },
+            {
+              "id": "bn_tok_002",
+              "raw_text": "12 `",
+              "normalized_text": "12 `",
+              "bbox_source_px": {
+                "x": 42.0,
+                "y": 432.0,
+                "width": 122.0,
+                "height": 54.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 42.0,
+                    "y": 432.0
+                  },
+                  {
+                    "x": 164.0,
+                    "y": 432.0
+                  },
+                  {
+                    "x": 164.0,
+                    "y": 486.0
+                  },
+                  {
+                    "x": 42.0,
+                    "y": 486.0
+                  }
+                ]
+              },
+              "confidence": 0.3936148122970558,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_002"
+            },
+            {
+              "id": "bn_tok_003",
+              "raw_text": "R2 = 20 2",
+              "normalized_text": "R2 = 20 2",
+              "bbox_source_px": {
+                "x": 1035.0,
+                "y": 427.0,
+                "width": 232.0,
+                "height": 68.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1035.0,
+                    "y": 427.0
+                  },
+                  {
+                    "x": 1267.0,
+                    "y": 427.0
+                  },
+                  {
+                    "x": 1267.0,
+                    "y": 495.0
+                  },
+                  {
+                    "x": 1035.0,
+                    "y": 495.0
+                  }
+                ]
+              },
+              "confidence": 0.43002614643260995,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_003"
+            },
+            {
+              "id": "bn_tok_004",
+              "raw_text": "9",
+              "normalized_text": "9",
+              "bbox_source_px": {
+                "x": 451.0,
+                "y": 825.0,
+                "width": 38.0,
+                "height": 48.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 451.0,
+                    "y": 825.0
+                  },
+                  {
+                    "x": 489.0,
+                    "y": 825.0
+                  },
+                  {
+                    "x": 489.0,
+                    "y": 873.0
+                  },
+                  {
+                    "x": 451.0,
+                    "y": 873.0
+                  }
+                ]
+              },
+              "confidence": 0.9999800921477267,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_004"
+            },
+            {
+              "id": "bn_tok_005",
+              "raw_text": "Series DC Circuit",
+              "normalized_text": "Series DC Circuit",
+              "bbox_source_px": {
+                "x": 515.0,
+                "y": 821.0,
+                "width": 424.0,
+                "height": 60.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 515.0,
+                    "y": 821.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 821.0
+                  },
+                  {
+                    "x": 939.0,
+                    "y": 881.0
+                  },
+                  {
+                    "x": 515.0,
+                    "y": 881.0
+                  }
+                ]
+              },
+              "confidence": 0.5601091971201398,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_005"
+            },
+            {
+              "id": "bn_tok_006",
+              "raw_text": "Fig",
+              "normalized_text": "Fig",
+              "bbox_source_px": {
+                "x": 332.34095141343704,
+                "y": 813.0766894303488,
+                "width": 121.31809717312592,
+                "height": 80.84662113930244
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 345.96667006423115,
+                    "y": 813.0766894303488
+                  },
+                  {
+                    "x": 453.65904858656296,
+                    "y": 833.8419749950954
+                  },
+                  {
+                    "x": 440.03332993576885,
+                    "y": 893.9233105696512
+                  },
+                  {
+                    "x": 332.34095141343704,
+                    "y": 873.1580250049046
+                  }
+                ]
+              },
+              "confidence": 0.9334288835525513,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_006"
+            }
+          ],
+          "provider": "easyocr_bangla",
+          "model": "bengali.pth",
+          "package": "easyocr",
+          "package_version": "1.7.2",
+          "detector_model": "craft_mlt_25k.pth",
+          "recognizer_model": "bengali.pth",
+          "recognizer_language": "bn+en",
+          "latency_ms": 12240.185100003146,
+          "error": null,
+          "metadata": {}
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Independent text alternatives with confidence and source positions; uncertain alternatives should not silently overwrite stronger evidence.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "OBSERVED / REVIEW ALTERNATIVES",
+  "finding": "Compare the literal source labels with the retained tokens below. A wrong alternative is not necessarily the selected output. 12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "change_or_loss": "Alternative OCR supplies competing evidence. Its errors are distinct from whichever result the router actually selects."
+}

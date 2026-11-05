@@ -1,0 +1,2387 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 11,
+  "component": "Symbol candidates, deduplication and final OCR",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 60,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+      "function": "MultiOCRRouter.extract",
+      "line": 150,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 159
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 169,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+      "function": "deduplicate_spatial_tokens",
+      "line": 46,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 319
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 178,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "GreekSymbolVisualOCR.extract_symbols",
+      "line": 208,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 323
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 179,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 181,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 183,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 185,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 187,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 189,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 191,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 193,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\greek_symbols.py",
+      "function": "PhysicsSymbolCandidateResolver.enrich_token",
+      "line": 175,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 336
+      }
+    }
+  ],
+  "upstream_stage": "EasyOCR: independent OCR candidates",
+  "downstream_stage": "Grayscale, blur and edge extraction",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00060_MultiOCRRouter.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "region": null
+        }
+      },
+      {
+        "call": "00169_deduplicate_spatial_tokens",
+        "value": {
+          "tokens": [
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "f = 15 cm",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 933.0,
+                "y": 189.0,
+                "width": 208.0,
+                "height": 55.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 933.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 244.0
+                  },
+                  {
+                    "x": 933.0,
+                    "y": 244.0
+                  }
+                ]
+              },
+              "confidence": 0.96641,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "- = 15 cn",
+                  "script": "latin",
+                  "confidence": 0.4512488601263927,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "Object",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 188.0,
+                "y": 220.0,
+                "width": 135.0,
+                "height": 57.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 189.0,
+                    "y": 220.0
+                  },
+                  {
+                    "x": 323.0,
+                    "y": 223.0
+                  },
+                  {
+                    "x": 322.0,
+                    "y": 277.0
+                  },
+                  {
+                    "x": 188.0,
+                    "y": 274.0
+                  }
+                ]
+              },
+              "confidence": 0.9999,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Object",
+                  "script": "latin",
+                  "confidence": 0.9914211626769536,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 102.0,
+                "y": 449.0,
+                "width": 70.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99964,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "2F",
+                  "script": "latin",
+                  "confidence": 0.8996179578342532,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            },
+            {
+              "id": "ocr_tok_004",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 356.0,
+                "y": 451.0,
+                "width": 42.0,
+                "height": 47.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 361.0,
+                    "y": 451.0
+                  },
+                  {
+                    "x": 398.0,
+                    "y": 455.0
+                  },
+                  {
+                    "x": 393.0,
+                    "y": 498.0
+                  },
+                  {
+                    "x": 356.0,
+                    "y": 494.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_004"
+            },
+            {
+              "id": "ocr_tok_005",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 849.0,
+                "y": 449.0,
+                "width": 38.0,
+                "height": 43.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 849.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 492.0
+                  },
+                  {
+                    "x": 849.0,
+                    "y": 492.0
+                  }
+                ]
+              },
+              "confidence": 0.9994,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_005"
+            },
+            {
+              "id": "ocr_tok_006",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1102.0,
+                "y": 449.0,
+                "width": 69.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 1102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99972,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "2F'",
+                  "script": "latin",
+                  "confidence": 0.44663277239076066,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_006"
+            },
+            {
+              "id": "ocr_tok_007",
+              "raw_text": "Image",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1118.0,
+                "y": 646.0,
+                "width": 129.0,
+                "height": 56.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1120.0,
+                    "y": 646.0
+                  },
+                  {
+                    "x": 1247.0,
+                    "y": 652.0
+                  },
+                  {
+                    "x": 1245.0,
+                    "y": 702.0
+                  },
+                  {
+                    "x": 1118.0,
+                    "y": 696.0
+                  }
+                ]
+              },
+              "confidence": 0.99991,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Image",
+                  "script": "latin",
+                  "confidence": 0.9998692785481457,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_007"
+            },
+            {
+              "id": "ocr_tok_008",
+              "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 197.0,
+                "y": 748.0,
+                "width": 859.0,
+                "height": 62.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 197.0,
+                    "y": 748.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 751.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 810.0
+                  },
+                  {
+                    "x": 197.0,
+                    "y": 807.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig. 5 Image Formation by a Convex Lens",
+                  "script": "latin",
+                  "confidence": 0.4902960533785318,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_008"
+            }
+          ]
+        }
+      },
+      {
+        "call": "00178_GreekSymbolVisualOCR.extract_symbols",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.png"
+          },
+          "existing_tokens": [
+            {
+              "id": "ocr_tok_008",
+              "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 197.0,
+                "y": 748.0,
+                "width": 859.0,
+                "height": 62.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 197.0,
+                    "y": 748.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 751.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 810.0
+                  },
+                  {
+                    "x": 197.0,
+                    "y": 807.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig. 5 Image Formation by a Convex Lens",
+                  "script": "latin",
+                  "confidence": 0.4902960533785318,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_008"
+            },
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "f = 15 cm",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 933.0,
+                "y": 189.0,
+                "width": 208.0,
+                "height": 55.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 933.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 244.0
+                  },
+                  {
+                    "x": 933.0,
+                    "y": 244.0
+                  }
+                ]
+              },
+              "confidence": 0.96641,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "- = 15 cn",
+                  "script": "latin",
+                  "confidence": 0.4512488601263927,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "Object",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 188.0,
+                "y": 220.0,
+                "width": 135.0,
+                "height": 57.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 189.0,
+                    "y": 220.0
+                  },
+                  {
+                    "x": 323.0,
+                    "y": 223.0
+                  },
+                  {
+                    "x": 322.0,
+                    "y": 277.0
+                  },
+                  {
+                    "x": 188.0,
+                    "y": 274.0
+                  }
+                ]
+              },
+              "confidence": 0.9999,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Object",
+                  "script": "latin",
+                  "confidence": 0.9914211626769536,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_007",
+              "raw_text": "Image",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1118.0,
+                "y": 646.0,
+                "width": 129.0,
+                "height": 56.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1120.0,
+                    "y": 646.0
+                  },
+                  {
+                    "x": 1247.0,
+                    "y": 652.0
+                  },
+                  {
+                    "x": 1245.0,
+                    "y": 702.0
+                  },
+                  {
+                    "x": 1118.0,
+                    "y": 696.0
+                  }
+                ]
+              },
+              "confidence": 0.99991,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Image",
+                  "script": "latin",
+                  "confidence": 0.9998692785481457,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_007"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 102.0,
+                "y": 449.0,
+                "width": 70.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99964,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "2F",
+                  "script": "latin",
+                  "confidence": 0.8996179578342532,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            },
+            {
+              "id": "ocr_tok_006",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1102.0,
+                "y": 449.0,
+                "width": 69.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 1102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99972,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "2F'",
+                  "script": "latin",
+                  "confidence": 0.44663277239076066,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_006"
+            },
+            {
+              "id": "ocr_tok_004",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 356.0,
+                "y": 451.0,
+                "width": 42.0,
+                "height": 47.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 361.0,
+                    "y": 451.0
+                  },
+                  {
+                    "x": 398.0,
+                    "y": 455.0
+                  },
+                  {
+                    "x": 393.0,
+                    "y": 498.0
+                  },
+                  {
+                    "x": 356.0,
+                    "y": 494.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_004"
+            },
+            {
+              "id": "ocr_tok_005",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 849.0,
+                "y": 449.0,
+                "width": 38.0,
+                "height": 43.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 849.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 492.0
+                  },
+                  {
+                    "x": 849.0,
+                    "y": 492.0
+                  }
+                ]
+              },
+              "confidence": 0.9994,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_005"
+            }
+          ],
+          "source_width": 1280,
+          "source_height": 960
+        }
+      },
+      {
+        "call": "00179_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_008",
+            "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 197.0,
+              "y": 748.0,
+              "width": 859.0,
+              "height": 62.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 197.0,
+                  "y": 748.0
+                },
+                {
+                  "x": 1056.0,
+                  "y": 751.0
+                },
+                {
+                  "x": 1056.0,
+                  "y": 810.0
+                },
+                {
+                  "x": 197.0,
+                  "y": 807.0
+                }
+              ]
+            },
+            "confidence": 0.99927,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Fig. 5 Image Formation by a Convex Lens",
+                "script": "latin",
+                "confidence": 0.4902960533785318,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_008"
+          }
+        }
+      },
+      {
+        "call": "00181_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_001",
+            "raw_text": "f = 15 cm",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 933.0,
+              "y": 189.0,
+              "width": 208.0,
+              "height": 55.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 933.0,
+                  "y": 189.0
+                },
+                {
+                  "x": 1141.0,
+                  "y": 189.0
+                },
+                {
+                  "x": 1141.0,
+                  "y": 244.0
+                },
+                {
+                  "x": 933.0,
+                  "y": 244.0
+                }
+              ]
+            },
+            "confidence": 0.96641,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "- = 15 cn",
+                "script": "latin",
+                "confidence": 0.4512488601263927,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_001"
+          }
+        }
+      },
+      {
+        "call": "00183_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_002",
+            "raw_text": "Object",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 188.0,
+              "y": 220.0,
+              "width": 135.0,
+              "height": 57.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 189.0,
+                  "y": 220.0
+                },
+                {
+                  "x": 323.0,
+                  "y": 223.0
+                },
+                {
+                  "x": 322.0,
+                  "y": 277.0
+                },
+                {
+                  "x": 188.0,
+                  "y": 274.0
+                }
+              ]
+            },
+            "confidence": 0.9999,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Object",
+                "script": "latin",
+                "confidence": 0.9914211626769536,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_002"
+          }
+        }
+      },
+      {
+        "call": "00185_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_007",
+            "raw_text": "Image",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 1118.0,
+              "y": 646.0,
+              "width": 129.0,
+              "height": 56.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 1120.0,
+                  "y": 646.0
+                },
+                {
+                  "x": 1247.0,
+                  "y": 652.0
+                },
+                {
+                  "x": 1245.0,
+                  "y": 702.0
+                },
+                {
+                  "x": 1118.0,
+                  "y": 696.0
+                }
+              ]
+            },
+            "confidence": 0.99991,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Image",
+                "script": "latin",
+                "confidence": 0.9998692785481457,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_007"
+          }
+        }
+      },
+      {
+        "call": "00187_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_003",
+            "raw_text": "2F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 102.0,
+              "y": 449.0,
+              "width": 70.0,
+              "height": 51.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 102.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 172.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 172.0,
+                  "y": 500.0
+                },
+                {
+                  "x": 102.0,
+                  "y": 500.0
+                }
+              ]
+            },
+            "confidence": 0.99964,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "2F",
+                "script": "latin",
+                "confidence": 0.8996179578342532,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_003"
+          }
+        }
+      },
+      {
+        "call": "00189_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_006",
+            "raw_text": "2F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 1102.0,
+              "y": 449.0,
+              "width": 69.0,
+              "height": 51.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 1102.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 1171.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 1171.0,
+                  "y": 500.0
+                },
+                {
+                  "x": 1102.0,
+                  "y": 500.0
+                }
+              ]
+            },
+            "confidence": 0.99972,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "2F'",
+                "script": "latin",
+                "confidence": 0.44663277239076066,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_006"
+          }
+        }
+      },
+      {
+        "call": "00191_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_004",
+            "raw_text": "F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 356.0,
+              "y": 451.0,
+              "width": 42.0,
+              "height": 47.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 361.0,
+                  "y": 451.0
+                },
+                {
+                  "x": 398.0,
+                  "y": 455.0
+                },
+                {
+                  "x": 393.0,
+                  "y": 498.0
+                },
+                {
+                  "x": 356.0,
+                  "y": 494.0
+                }
+              ]
+            },
+            "confidence": 0.99927,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_004"
+          }
+        }
+      },
+      {
+        "call": "00193_PhysicsSymbolCandidateResolver.enrich_token",
+        "value": {
+          "token": {
+            "id": "ocr_tok_005",
+            "raw_text": "F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 849.0,
+              "y": 449.0,
+              "width": 38.0,
+              "height": 43.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 849.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 887.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 887.0,
+                  "y": 492.0
+                },
+                {
+                  "x": 849.0,
+                  "y": 492.0
+                }
+              ]
+            },
+            "confidence": 0.9994,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_005"
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Provider token candidates, spatial overlap information and symbol alternatives.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00060_MultiOCRRouter.extract",
+        "return_value": {
+          "status": "success",
+          "tokens": [
+            {
+              "id": "ocr_tok_008",
+              "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 197.0,
+                "y": 748.0,
+                "width": 859.0,
+                "height": 62.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 197.0,
+                    "y": 748.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 751.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 810.0
+                  },
+                  {
+                    "x": 197.0,
+                    "y": 807.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Fig. 5 Image Formation by a Convex Lens",
+                  "script": "latin",
+                  "confidence": 0.4902960533785318,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_008"
+            },
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "f = 15 cm",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 933.0,
+                "y": 189.0,
+                "width": 208.0,
+                "height": 55.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 933.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 244.0
+                  },
+                  {
+                    "x": 933.0,
+                    "y": 244.0
+                  }
+                ]
+              },
+              "confidence": 0.96641,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "- = 15 cn",
+                  "script": "latin",
+                  "confidence": 0.4512488601263927,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "Object",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 188.0,
+                "y": 220.0,
+                "width": 135.0,
+                "height": 57.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 189.0,
+                    "y": 220.0
+                  },
+                  {
+                    "x": 323.0,
+                    "y": 223.0
+                  },
+                  {
+                    "x": 322.0,
+                    "y": 277.0
+                  },
+                  {
+                    "x": 188.0,
+                    "y": 274.0
+                  }
+                ]
+              },
+              "confidence": 0.9999,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Object",
+                  "script": "latin",
+                  "confidence": 0.9914211626769536,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_007",
+              "raw_text": "Image",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1118.0,
+                "y": 646.0,
+                "width": 129.0,
+                "height": 56.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1120.0,
+                    "y": 646.0
+                  },
+                  {
+                    "x": 1247.0,
+                    "y": 652.0
+                  },
+                  {
+                    "x": 1245.0,
+                    "y": 702.0
+                  },
+                  {
+                    "x": 1118.0,
+                    "y": 696.0
+                  }
+                ]
+              },
+              "confidence": 0.99991,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "Image",
+                  "script": "latin",
+                  "confidence": 0.9998692785481457,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_007"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 102.0,
+                "y": 449.0,
+                "width": 70.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99964,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "2F",
+                  "script": "latin",
+                  "confidence": 0.8996179578342532,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            },
+            {
+              "id": "ocr_tok_006",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1102.0,
+                "y": 449.0,
+                "width": 69.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 1102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99972,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [
+                {
+                  "text": "2F'",
+                  "script": "latin",
+                  "confidence": 0.44663277239076066,
+                  "provider": "easyocr_bangla"
+                }
+              ],
+              "evidence_ref": "evidence_ocr_ocr_tok_006"
+            },
+            {
+              "id": "ocr_tok_004",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 356.0,
+                "y": 451.0,
+                "width": 42.0,
+                "height": 47.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 361.0,
+                    "y": 451.0
+                  },
+                  {
+                    "x": 398.0,
+                    "y": 455.0
+                  },
+                  {
+                    "x": 393.0,
+                    "y": 498.0
+                  },
+                  {
+                    "x": 356.0,
+                    "y": 494.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_004"
+            },
+            {
+              "id": "ocr_tok_005",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 849.0,
+                "y": 449.0,
+                "width": 38.0,
+                "height": 43.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 849.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 492.0
+                  },
+                  {
+                    "x": 849.0,
+                    "y": 492.0
+                  }
+                ]
+              },
+              "confidence": 0.9994,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_005"
+            }
+          ],
+          "provider": "multi_ocr_router",
+          "model": "PP-OCRv6-onnx",
+          "package": "rapidocr+easyocr+greek_ocr",
+          "package_version": "3.9.2",
+          "detector_model": "PP-OCRv6_det_small.onnx",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx+bengali.pth",
+          "recognizer_language": "en+bn+el",
+          "latency_ms": 35514.12680000067,
+          "error": null,
+          "metadata": {
+            "bangla_available": true,
+            "greek_available": true,
+            "formula_available": false,
+            "regions_count": 8,
+            "token_count": 8
+          }
+        }
+      },
+      {
+        "call": "00169_deduplicate_spatial_tokens",
+        "return_value": [
+          {
+            "id": "ocr_tok_008",
+            "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 197.0,
+              "y": 748.0,
+              "width": 859.0,
+              "height": 62.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 197.0,
+                  "y": 748.0
+                },
+                {
+                  "x": 1056.0,
+                  "y": 751.0
+                },
+                {
+                  "x": 1056.0,
+                  "y": 810.0
+                },
+                {
+                  "x": 197.0,
+                  "y": 807.0
+                }
+              ]
+            },
+            "confidence": 0.99927,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Fig. 5 Image Formation by a Convex Lens",
+                "script": "latin",
+                "confidence": 0.4902960533785318,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_008"
+          },
+          {
+            "id": "ocr_tok_001",
+            "raw_text": "f = 15 cm",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 933.0,
+              "y": 189.0,
+              "width": 208.0,
+              "height": 55.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 933.0,
+                  "y": 189.0
+                },
+                {
+                  "x": 1141.0,
+                  "y": 189.0
+                },
+                {
+                  "x": 1141.0,
+                  "y": 244.0
+                },
+                {
+                  "x": 933.0,
+                  "y": 244.0
+                }
+              ]
+            },
+            "confidence": 0.96641,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "- = 15 cn",
+                "script": "latin",
+                "confidence": 0.4512488601263927,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_001"
+          },
+          {
+            "id": "ocr_tok_002",
+            "raw_text": "Object",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 188.0,
+              "y": 220.0,
+              "width": 135.0,
+              "height": 57.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 189.0,
+                  "y": 220.0
+                },
+                {
+                  "x": 323.0,
+                  "y": 223.0
+                },
+                {
+                  "x": 322.0,
+                  "y": 277.0
+                },
+                {
+                  "x": 188.0,
+                  "y": 274.0
+                }
+              ]
+            },
+            "confidence": 0.9999,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Object",
+                "script": "latin",
+                "confidence": 0.9914211626769536,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_002"
+          },
+          {
+            "id": "ocr_tok_007",
+            "raw_text": "Image",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 1118.0,
+              "y": 646.0,
+              "width": 129.0,
+              "height": 56.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 1120.0,
+                  "y": 646.0
+                },
+                {
+                  "x": 1247.0,
+                  "y": 652.0
+                },
+                {
+                  "x": 1245.0,
+                  "y": 702.0
+                },
+                {
+                  "x": 1118.0,
+                  "y": 696.0
+                }
+              ]
+            },
+            "confidence": 0.99991,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "Image",
+                "script": "latin",
+                "confidence": 0.9998692785481457,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_007"
+          },
+          {
+            "id": "ocr_tok_003",
+            "raw_text": "2F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 102.0,
+              "y": 449.0,
+              "width": 70.0,
+              "height": 51.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 102.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 172.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 172.0,
+                  "y": 500.0
+                },
+                {
+                  "x": 102.0,
+                  "y": 500.0
+                }
+              ]
+            },
+            "confidence": 0.99964,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "2F",
+                "script": "latin",
+                "confidence": 0.8996179578342532,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_003"
+          },
+          {
+            "id": "ocr_tok_006",
+            "raw_text": "2F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 1102.0,
+              "y": 449.0,
+              "width": 69.0,
+              "height": 51.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 1102.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 1171.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 1171.0,
+                  "y": 500.0
+                },
+                {
+                  "x": 1102.0,
+                  "y": 500.0
+                }
+              ]
+            },
+            "confidence": 0.99972,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [
+              {
+                "text": "2F'",
+                "script": "latin",
+                "confidence": 0.44663277239076066,
+                "provider": "easyocr_bangla"
+              }
+            ],
+            "evidence_ref": "evidence_ocr_ocr_tok_006"
+          },
+          {
+            "id": "ocr_tok_004",
+            "raw_text": "F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 356.0,
+              "y": 451.0,
+              "width": 42.0,
+              "height": 47.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 361.0,
+                  "y": 451.0
+                },
+                {
+                  "x": 398.0,
+                  "y": 455.0
+                },
+                {
+                  "x": 393.0,
+                  "y": 498.0
+                },
+                {
+                  "x": 356.0,
+                  "y": 494.0
+                }
+              ]
+            },
+            "confidence": 0.99927,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_004"
+          },
+          {
+            "id": "ocr_tok_005",
+            "raw_text": "F",
+            "normalized_text": null,
+            "bbox_source_px": {
+              "x": 849.0,
+              "y": 449.0,
+              "width": 38.0,
+              "height": 43.0
+            },
+            "polygon_source_px": {
+              "points": [
+                {
+                  "x": 849.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 887.0,
+                  "y": 449.0
+                },
+                {
+                  "x": 887.0,
+                  "y": 492.0
+                },
+                {
+                  "x": 849.0,
+                  "y": 492.0
+                }
+              ]
+            },
+            "confidence": 0.9994,
+            "script_candidate": "latin",
+            "language_candidate": "en",
+            "provider": "rapidocr",
+            "recognizer_model": "PP-OCRv6_rec_small.onnx",
+            "candidate_alternatives": [],
+            "evidence_ref": "evidence_ocr_ocr_tok_005"
+          }
+        ]
+      },
+      {
+        "call": "00178_GreekSymbolVisualOCR.extract_symbols",
+        "return_value": []
+      },
+      {
+        "call": "00179_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_008",
+          "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 197.0,
+            "y": 748.0,
+            "width": 859.0,
+            "height": 62.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 197.0,
+                "y": 748.0
+              },
+              {
+                "x": 1056.0,
+                "y": 751.0
+              },
+              {
+                "x": 1056.0,
+                "y": 810.0
+              },
+              {
+                "x": 197.0,
+                "y": 807.0
+              }
+            ]
+          },
+          "confidence": 0.99927,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "Fig. 5 Image Formation by a Convex Lens",
+              "script": "latin",
+              "confidence": 0.4902960533785318,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_008"
+        }
+      },
+      {
+        "call": "00181_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_001",
+          "raw_text": "f = 15 cm",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 933.0,
+            "y": 189.0,
+            "width": 208.0,
+            "height": 55.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 933.0,
+                "y": 189.0
+              },
+              {
+                "x": 1141.0,
+                "y": 189.0
+              },
+              {
+                "x": 1141.0,
+                "y": 244.0
+              },
+              {
+                "x": 933.0,
+                "y": 244.0
+              }
+            ]
+          },
+          "confidence": 0.96641,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "- = 15 cn",
+              "script": "latin",
+              "confidence": 0.4512488601263927,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_001"
+        }
+      },
+      {
+        "call": "00183_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_002",
+          "raw_text": "Object",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 188.0,
+            "y": 220.0,
+            "width": 135.0,
+            "height": 57.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 189.0,
+                "y": 220.0
+              },
+              {
+                "x": 323.0,
+                "y": 223.0
+              },
+              {
+                "x": 322.0,
+                "y": 277.0
+              },
+              {
+                "x": 188.0,
+                "y": 274.0
+              }
+            ]
+          },
+          "confidence": 0.9999,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "Object",
+              "script": "latin",
+              "confidence": 0.9914211626769536,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_002"
+        }
+      },
+      {
+        "call": "00185_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_007",
+          "raw_text": "Image",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 1118.0,
+            "y": 646.0,
+            "width": 129.0,
+            "height": 56.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 1120.0,
+                "y": 646.0
+              },
+              {
+                "x": 1247.0,
+                "y": 652.0
+              },
+              {
+                "x": 1245.0,
+                "y": 702.0
+              },
+              {
+                "x": 1118.0,
+                "y": 696.0
+              }
+            ]
+          },
+          "confidence": 0.99991,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "Image",
+              "script": "latin",
+              "confidence": 0.9998692785481457,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_007"
+        }
+      },
+      {
+        "call": "00187_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_003",
+          "raw_text": "2F",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 102.0,
+            "y": 449.0,
+            "width": 70.0,
+            "height": 51.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 102.0,
+                "y": 449.0
+              },
+              {
+                "x": 172.0,
+                "y": 449.0
+              },
+              {
+                "x": 172.0,
+                "y": 500.0
+              },
+              {
+                "x": 102.0,
+                "y": 500.0
+              }
+            ]
+          },
+          "confidence": 0.99964,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "2F",
+              "script": "latin",
+              "confidence": 0.8996179578342532,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_003"
+        }
+      },
+      {
+        "call": "00189_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_006",
+          "raw_text": "2F",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 1102.0,
+            "y": 449.0,
+            "width": 69.0,
+            "height": 51.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 1102.0,
+                "y": 449.0
+              },
+              {
+                "x": 1171.0,
+                "y": 449.0
+              },
+              {
+                "x": 1171.0,
+                "y": 500.0
+              },
+              {
+                "x": 1102.0,
+                "y": 500.0
+              }
+            ]
+          },
+          "confidence": 0.99972,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [
+            {
+              "text": "2F'",
+              "script": "latin",
+              "confidence": 0.44663277239076066,
+              "provider": "easyocr_bangla"
+            }
+          ],
+          "evidence_ref": "evidence_ocr_ocr_tok_006"
+        }
+      },
+      {
+        "call": "00191_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_004",
+          "raw_text": "F",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 356.0,
+            "y": 451.0,
+            "width": 42.0,
+            "height": 47.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 361.0,
+                "y": 451.0
+              },
+              {
+                "x": 398.0,
+                "y": 455.0
+              },
+              {
+                "x": 393.0,
+                "y": 498.0
+              },
+              {
+                "x": 356.0,
+                "y": 494.0
+              }
+            ]
+          },
+          "confidence": 0.99927,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [],
+          "evidence_ref": "evidence_ocr_ocr_tok_004"
+        }
+      },
+      {
+        "call": "00193_PhysicsSymbolCandidateResolver.enrich_token",
+        "return_value": {
+          "id": "ocr_tok_005",
+          "raw_text": "F",
+          "normalized_text": null,
+          "bbox_source_px": {
+            "x": 849.0,
+            "y": 449.0,
+            "width": 38.0,
+            "height": 43.0
+          },
+          "polygon_source_px": {
+            "points": [
+              {
+                "x": 849.0,
+                "y": 449.0
+              },
+              {
+                "x": 887.0,
+                "y": 449.0
+              },
+              {
+                "x": 887.0,
+                "y": 492.0
+              },
+              {
+                "x": 849.0,
+                "y": 492.0
+              }
+            ]
+          },
+          "confidence": 0.9994,
+          "script_candidate": "latin",
+          "language_candidate": "en",
+          "provider": "rapidocr",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "candidate_alternatives": [],
+          "evidence_ref": "evidence_ocr_ocr_tok_005"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Merged tokens with retained provenance/alternatives. Preserve literal printed values and symbolic quantities. Do not turn L or m into a numerical length or mass.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "OBSERVED / REVIEW ALTERNATIVES",
+  "finding": "Compare the literal source labels with the retained tokens below. A wrong alternative is not necessarily the selected output. 15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "change_or_loss": "OCR alternatives → selected token set. PageIR text blocks are filled from these tokens inside the evidence pipeline."
+}

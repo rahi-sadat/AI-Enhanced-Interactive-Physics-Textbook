@@ -3,11 +3,14 @@ import './style.css';
 import { loadScene }        from '@engine/core/sceneLoader.js';
 import { createLegacySimulation } from './features/simulations/legacy/legacySceneRouter.js';
 import { OverlayStage }     from './features/simulations/core/overlayStage.js';
-import { uploadDiagramFile, analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
+import { analyzeDiagram } from './features/simulations/core/diagramAnalyzer.js';
 import { InteractiveFigure } from './components/InteractiveFigure.js';
 // PR-04: Real image ingestion pipeline
 import { UploadService }    from './features/simulations/core/UploadService.js';
 import { IRDebugPanel }     from './features/simulations/core/IRDebugPanel.js';
+// PR-08: Interactive evidence review & automatic simulation orchestration
+import { SimulationOrchestrator, OrchestratorState } from './features/simulations/core/SimulationOrchestrator.js';
+import { PhysicsReviewModal } from './components/PhysicsReviewModal.js';
 
 const SCENES = {
   mechanics: '/scenes/kinematics/physics_scene.json',
@@ -101,6 +104,58 @@ const btnCloseModal = document.getElementById('btn-close-modal');
 const btnCancelModal = document.getElementById('btn-cancel-modal');
 const btnGenerateSim = document.getElementById('btn-generate-sim');
 
+// PR-08: Orchestrator & Evidence Review Dialog
+export const orchestrator = new SimulationOrchestrator();
+export const reviewModal = new PhysicsReviewModal(document.body, orchestrator, {
+  onStartSimulation: async (scene) => {
+    await loadAugmentedScene(scene);
+    closeModal();
+  },
+  onClose: () => {
+    if (btnGenerateSim) btnGenerateSim.disabled = false;
+  }
+});
+
+// Resolving a structural issue resumes the diagram automatically when the
+// backend produces a scene; review is a recovery tool, not an activation gate.
+orchestrator.onStateChange((state) => {
+  if (state === OrchestratorState.READY_TO_SIMULATE && reviewModal.isOpen) {
+    void reviewModal._startSimulation();
+  }
+});
+
+// PR-04: IR Debug Panel (development/debug-only — guarded from students)
+function isDevOrDebugMode() {
+  if (typeof window === 'undefined') return false;
+  if (window.__AUGMENTED_PHYSICS_DEBUG__ === true) return true;
+  if (new URLSearchParams(window.location.search).get('debug') === 'true') return true;
+  if (localStorage.getItem('augmented_physics_debug') === 'true') return true;
+  if (import.meta.env && import.meta.env.DEV) return true;
+  return false;
+}
+
+const irDebugHost = document.getElementById('ir-debug-panel');
+const irDebugSection = document.getElementById('ir-debug-section');
+let irDebugPanel = null;
+if (irDebugHost) {
+  irDebugPanel = new IRDebugPanel(irDebugHost);
+  const _origUpdate = irDebugPanel.update.bind(irDebugPanel);
+  irDebugPanel.update = (result) => {
+    _origUpdate(result);
+    // Explicit safeguard: only reveal debug section in dev or debug mode
+    if (irDebugSection && isDevOrDebugMode()) {
+      irDebugSection.style.display = 'block';
+    }
+  };
+}
+
+// Dev & Testing inspection handles
+if (typeof window !== 'undefined') {
+  window.__orchestrator = orchestrator;
+  window.__reviewModal = reviewModal;
+  window.__irDebugPanel = irDebugPanel;
+}
+
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
 const dropzonePrompt = document.getElementById('dropzone-prompt');
@@ -128,9 +183,12 @@ function closeModal() {
   resetUploadState();
 }
 
+let selectedPreset = null;
+
 function resetUploadState() {
   uploadedFile = null;
   uploadedImageUrl = null;
+  selectedPreset = null;
   if (fileInput) fileInput.value = '';
   dropzonePrompt.style.display = 'block';
   dropzonePreview.style.display = 'none';
@@ -221,6 +279,7 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
     uploadedFile = null; // Clear real uploaded file so presets use legacy path
     if (fileInput) fileInput.value = '';
     const preset = pill.dataset.preset;
+    selectedPreset = preset;
     if (preset === 'circuit1') {
       setPreview('circuit1.png', '/uploads/circuit1.png', 484, 399);
       domainSelect.value = 'circuits';
@@ -262,7 +321,7 @@ document.querySelectorAll('.preset-pill').forEach(pill => {
       domainSelect.value = 'mechanics';
       if (scenarioSelect) scenarioSelect.value = 'projectile';
     } else if (preset === 'prism') {
-      setPreview('prism_diagram.png', '/scenes/optics/prism_scene.json', 800, 600);
+      setPreview('prism_diagram.png', '/uploads/prism_diagram.png', 800, 600);
       domainSelect.value = 'optics';
       if (scenarioSelect) scenarioSelect.value = 'prism';
     } else if (preset === 'spring') {
@@ -291,49 +350,76 @@ btnGenerateSim?.addEventListener('click', async () => {
 
   try {
     // ---------------------------------------------------------------
-    // PR-04 PATH: actual uploaded File → /api/ingest (real bytes sent)
+    // PR-08 PATH: actual uploaded File -> SimulationOrchestrator -> Review UI / Simulation
     // ---------------------------------------------------------------
     if (uploadedFile) {
       updateProgress('Sending image to ingestion pipeline...', 15);
-      let ingestResult;
       try {
-        ingestResult = await UploadService.ingest(uploadedFile, updateProgress);
+        await orchestrator.startWithFile(uploadedFile, updateProgress);
+        if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
+          updateProgress('Applying standard values for missing parameters...', 85);
+          await orchestrator.useStandardDefaults();
+        }
       } catch (ingestErr) {
-        // FATAL FOR USER UPLOAD: NEVER fall through to legacy analysis!
-        console.error('[PR-04] Ingestion failed:', ingestErr);
+        console.error('[PR-08] Ingestion failed:', ingestErr);
         btnGenerateSim.disabled = false;
         progressStatus.textContent = `Upload / analysis failed: ${ingestErr.message || ingestErr}`;
-        return; // STOP! No legacy rescue for uploaded files.
+        progressStatus.scrollIntoView({ block: 'nearest' });
+        return;
       }
 
       // Update debug panel
-      if (irDebugPanel) irDebugPanel.update(ingestResult);
+      const ctx = orchestrator.getSessionContext();
+      if (irDebugPanel) {
+        irDebugPanel.update({
+          bookIR: ctx.bookIR,
+          book_ir: ctx.bookIR,
+          pageIR: ctx.pageIR,
+          page_ir: ctx.pageIR,
+          sourceAsset: ctx.sourceAsset,
+          source_asset: ctx.sourceAsset,
+          confidence: ctx.bookIR?.confidence || {},
+          compiler: ctx.bookIR?.compiler || { status: orchestrator.state },
+          status: orchestrator.state.toLowerCase().replace('_', '-'),
+          issues: ctx.reviewState?.issues || []
+        });
+      }
 
-      updateProgress(ingestResult.statusMessage, 100);
-
-      if (ingestResult.isReady && ingestResult.scene) {
-        // Backend understood the physics — launch simulation
-        const scene = ingestResult.scene;
-        if (!scene.visual) scene.visual = {};
-        if (!scene.visual.background_url) {
-          scene.visual.background_url = ingestResult.imageUrl;
+      if (orchestrator.state === OrchestratorState.READY_TO_SIMULATE) {
+        updateProgress('Building simulation...', 95);
+        if (!activeFigure || !orchestrator.compiledScene) {
+          throw new Error('The compiled simulation is unavailable.');
         }
-        setTimeout(() => {
-          closeModal();
-          if (activeFigure && (ingestResult.domain === 'optics' || ingestResult.domain === 'circuits')) {
-            setPlatformMode('runtime');
-            activeFigure.load(scene);
-          } else {
-            bootstrap(ingestResult.domain, scene);
+        await loadAugmentedScene(orchestrator.compiledScene);
+        orchestrator.startSimulation();
+        closeModal();
+        updateProgress('Simulation ready!', 100);
+      } else if (orchestrator.state === OrchestratorState.READY_TO_COMPILE) {
+        updateProgress('Compiling simulation with resolved textbook defaults...', 90);
+        try {
+          await orchestrator.compile();
+          if (!activeFigure || !orchestrator.compiledScene) {
+            throw new Error('The compiled simulation is unavailable.');
           }
-        }, 400);
-      } else {
-        // Honest non-ready response — show informative message without fabricating
+          await loadAugmentedScene(orchestrator.compiledScene);
+          orchestrator.startSimulation();
+          closeModal();
+        } catch (compErr) {
+          console.warn('[Main] Auto-compile note:', compErr);
+          btnGenerateSim.disabled = false;
+          progressStatus.textContent = 'Could not reliably interpret this diagram.';
+        }
+      } else if (orchestrator.state === OrchestratorState.NEEDS_REVIEW) {
+        // Numerical assumptions are already applied. Remaining issues describe
+        // diagram structure that must be identified before source-aligned playback.
         btnGenerateSim.disabled = false;
-        const issueTexts = ingestResult.issues.map(i => i.message || i.code).join('; ');
-        progressStatus.textContent =
-          ingestResult.statusMessage +
-          (issueTexts ? ` (${issueTexts})` : '');
+        progressStatus.textContent = orchestrator.currentError || 'Review the highlighted items to prepare your simulation.';
+        closeModal();
+        reviewModal.open();
+      } else if (orchestrator.state === OrchestratorState.UNSUPPORTED || orchestrator.state === OrchestratorState.ERROR) {
+        btnGenerateSim.disabled = false;
+        progressStatus.textContent = ctx.currentError || 'Analysis could not proceed.';
+        progressStatus.scrollIntoView({ block: 'nearest' });
       }
       return; // STOP! Complete path for user-uploaded file.
     }
@@ -341,16 +427,7 @@ btnGenerateSim?.addEventListener('click', async () => {
     // ---------------------------------------------------------------
     // LEGACY PATH: pre-compiled preset scenes (no uploaded file)
     // ---------------------------------------------------------------
-    let finalImageUrl = uploadedImageUrl;
-
-    // If actual file was uploaded, upload it to the backend
-    if (uploadedFile) {
-      updateProgress('Uploading diagram to backend...', 20);
-      const upRes = await uploadDiagramFile(uploadedFile);
-      if (upRes.success && upRes.image_url) {
-        finalImageUrl = upRes.image_url;
-      }
-    }
+    const finalImageUrl = uploadedImageUrl;
 
     // Check if selecting a pre-compiled textbook scene without custom file upload
     const PRESET_SCENES = {
@@ -362,9 +439,20 @@ btnGenerateSim?.addEventListener('click', async () => {
       series_parallel: { domain: 'circuits', url: '/scenes/circuits/series_parallel_scene.json' },
       newtons_cradle: { domain: 'mechanics', url: '/scenes/kinematics/newtons_cradle_scene.json' },
       incline: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
+      prism: { domain: 'optics', url: '/scenes/optics/prism_scene.json' },
+      mirror: { domain: 'optics', url: '/scenes/optics/mirror_scene.json' },
+      mirror_cff: { domain: 'optics', url: '/scenes/optics/mirror_scene.json' },
+      thin_lens: { domain: 'optics', url: '/scenes/optics/thin_lens_scene.json' },
+      lens_cece: { domain: 'optics', url: '/scenes/optics/thin_lens_scene.json' },
+      interface_refraction: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
+      snell: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
+      snell_water: { domain: 'optics', url: '/scenes/optics/interface_refraction_scene.json' },
+      projectile: { domain: 'mechanics', url: '/scenes/canonical/projectile_figure.json' },
+      projectile_test: { domain: 'mechanics', url: '/scenes/canonical/projectile_figure.json' },
+      spring: { domain: 'mechanics', url: '/scenes/kinematics/physics_scene.json' },
     };
 
-    const scenarioChoice = scenarioSelect?.value || 'auto';
+    const scenarioChoice = selectedPreset || scenarioSelect?.value || 'auto';
 
     if (!uploadedFile && PRESET_SCENES[scenarioChoice]) {
       updateProgress('Loading pre-compiled textbook scenario...', 80);
@@ -373,9 +461,11 @@ btnGenerateSim?.addEventListener('click', async () => {
       const pScene = await pRes.json();
       setTimeout(() => {
         closeModal();
-        if (activeFigure && (presetInfo.domain === 'optics' || presetInfo.domain === 'circuits')) {
+        if (activeFigure) {
           setPlatformMode('runtime');
-          activeFigure.load(pScene);
+          activeFigure.load(pScene).then(() => {
+            activeFigure.play();
+          });
         } else {
           bootstrap(presetInfo.domain, pScene);
         }
@@ -434,7 +524,9 @@ btnGenerateSim?.addEventListener('click', async () => {
       }
       if (activeFigure && (result.domain === 'optics' || result.domain === 'circuits')) {
         setPlatformMode('runtime');
-        activeFigure.load(result.scene);
+        activeFigure.load(result.scene).then(() => {
+          activeFigure.play();
+        });
       } else {
         bootstrap(result.domain, result.scene);
       }
@@ -457,33 +549,27 @@ const figureHost = document.getElementById('interactive-figure-container');
 let activeFigure = null;
 
 if (figureHost) {
-  activeFigure = new InteractiveFigure(figureHost);
-  activeFigure.load('/scenes/canonical/pendulum_figure.json');
-}
-
-// PR-04: IR Debug Panel (development/debug-only — guarded from students)
-function isDevOrDebugMode() {
-  if (typeof window === 'undefined') return false;
-  if (window.__AUGMENTED_PHYSICS_DEBUG__ === true) return true;
-  if (new URLSearchParams(window.location.search).get('debug') === 'true') return true;
-  if (localStorage.getItem('augmented_physics_debug') === 'true') return true;
-  if (import.meta.env && import.meta.env.DEV) return true;
-  return false;
-}
-
-const irDebugHost = document.getElementById('ir-debug-panel');
-const irDebugSection = document.getElementById('ir-debug-section');
-let irDebugPanel = null;
-if (irDebugHost) {
-  irDebugPanel = new IRDebugPanel(irDebugHost);
-  const _origUpdate = irDebugPanel.update.bind(irDebugPanel);
-  irDebugPanel.update = (result) => {
-    _origUpdate(result);
-    // Explicit safeguard: only reveal debug section in dev or debug mode
-    if (irDebugSection && isDevOrDebugMode()) {
-      irDebugSection.style.display = 'block';
+  activeFigure = new InteractiveFigure(figureHost, {
+    onOpenReview: () => {
+      if (orchestrator.bookIR && orchestrator.bookIR.domain !== 'circuits') {
+        reviewModal.open();
+      }
     }
-  };
+  });
+  if (typeof window !== 'undefined') {
+    window.__activeFigure = activeFigure;
+  }
+  activeFigure.load('/scenes/canonical/pendulum_figure.json')
+    .then(() => activeFigure.play())
+    .catch((error) => console.error('[Simulation] Could not load the example:', error));
+}
+
+async function loadAugmentedScene(scene) {
+  if (!activeFigure) throw new Error('The simulation view is unavailable.');
+  setPlatformMode('runtime');
+  await activeFigure.load(scene);
+  activeFigure.play();
+  figureHost?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 
@@ -533,7 +619,8 @@ figPills.forEach(({ id, url }) => {
         b.style.color = (p.id === id) ? '#ffffff' : '#e2e8f0';
       }
     });
-    activeFigure?.load(url);
+    activeFigure?.load(url).then(() => activeFigure.play())
+      .catch((error) => console.error('[Simulation] Could not load the example:', error));
   });
 });
 

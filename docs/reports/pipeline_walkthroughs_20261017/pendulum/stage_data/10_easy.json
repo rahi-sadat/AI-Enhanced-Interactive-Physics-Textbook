@@ -1,0 +1,266 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 10,
+  "component": "EasyOCR: independent OCR candidates",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 76,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\bangla.py",
+      "function": "EasyOCRBanglaProvider.extract",
+      "line": 103,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 177
+      }
+    }
+  ],
+  "upstream_stage": "RapidOCR: first text/box observations",
+  "downstream_stage": "Symbol candidates, deduplication and final OCR",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00076_EasyOCRBanglaProvider.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "region": null
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The same source image and dimensional contract.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00076_EasyOCRBanglaProvider.extract",
+        "return_value": {
+          "status": "success",
+          "tokens": [
+            {
+              "id": "bn_tok_001",
+              "raw_text": "]",
+              "normalized_text": "]",
+              "bbox_source_px": {
+                "x": 745.0,
+                "y": 365.0,
+                "width": 42.0,
+                "height": 46.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 745.0,
+                    "y": 365.0
+                  },
+                  {
+                    "x": 787.0,
+                    "y": 365.0
+                  },
+                  {
+                    "x": 787.0,
+                    "y": 411.0
+                  },
+                  {
+                    "x": 745.0,
+                    "y": 411.0
+                  }
+                ]
+              },
+              "confidence": 0.47404840130162995,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_001"
+            },
+            {
+              "id": "bn_tok_002",
+              "raw_text": "171",
+              "normalized_text": "171",
+              "bbox_source_px": {
+                "x": 901.0,
+                "y": 637.0,
+                "width": 54.0,
+                "height": 40.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 901.0,
+                    "y": 637.0
+                  },
+                  {
+                    "x": 955.0,
+                    "y": 637.0
+                  },
+                  {
+                    "x": 955.0,
+                    "y": 677.0
+                  },
+                  {
+                    "x": 901.0,
+                    "y": 677.0
+                  }
+                ]
+              },
+              "confidence": 0.5532381496450604,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_002"
+            },
+            {
+              "id": "bn_tok_003",
+              "raw_text": "1",
+              "normalized_text": "1",
+              "bbox_source_px": {
+                "x": 460.0,
+                "y": 842.0,
+                "width": 30.0,
+                "height": 44.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 460.0,
+                    "y": 842.0
+                  },
+                  {
+                    "x": 490.0,
+                    "y": 842.0
+                  },
+                  {
+                    "x": 490.0,
+                    "y": 886.0
+                  },
+                  {
+                    "x": 460.0,
+                    "y": 886.0
+                  }
+                ]
+              },
+              "confidence": 0.9184493511196798,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_003"
+            },
+            {
+              "id": "bn_tok_004",
+              "raw_text": "Simple Pendulum",
+              "normalized_text": "Simple Pendulum",
+              "bbox_source_px": {
+                "x": 515.0,
+                "y": 833.0,
+                "width": 419.0,
+                "height": 72.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 515.0,
+                    "y": 833.0
+                  },
+                  {
+                    "x": 934.0,
+                    "y": 833.0
+                  },
+                  {
+                    "x": 934.0,
+                    "y": 905.0
+                  },
+                  {
+                    "x": 515.0,
+                    "y": 905.0
+                  }
+                ]
+              },
+              "confidence": 0.6770280394889222,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_004"
+            },
+            {
+              "id": "bn_tok_005",
+              "raw_text": "Fig",
+              "normalized_text": "Fig",
+              "bbox_source_px": {
+                "x": 336.3652731356703,
+                "y": 827.0766894303488,
+                "width": 123.26945372865941,
+                "height": 80.84662113930244
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 349.96667006423115,
+                    "y": 827.0766894303488
+                  },
+                  {
+                    "x": 459.6347268643297,
+                    "y": 846.7683191456346
+                  },
+                  {
+                    "x": 446.03332993576885,
+                    "y": 907.9233105696512
+                  },
+                  {
+                    "x": 336.3652731356703,
+                    "y": 888.2316808543654
+                  }
+                ]
+              },
+              "confidence": 0.9781465020509537,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "easyocr_bangla",
+              "recognizer_model": "bengali.pth",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_bn_tok_005"
+            }
+          ],
+          "provider": "easyocr_bangla",
+          "model": "bengali.pth",
+          "package": "easyocr",
+          "package_version": "1.7.2",
+          "detector_model": "craft_mlt_25k.pth",
+          "recognizer_model": "bengali.pth",
+          "recognizer_language": "bn+en",
+          "latency_ms": 11361.621800024295,
+          "error": null,
+          "metadata": {}
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Independent text alternatives with confidence and source positions; uncertain alternatives should not silently overwrite stronger evidence.",
+  "expected_diagram": "The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "status": "OBSERVED / REVIEW ALTERNATIVES",
+  "finding": "Compare the literal source labels with the retained tokens below. A wrong alternative is not necessarily the selected output. The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "change_or_loss": "Alternative OCR supplies competing evidence. Its errors are distinct from whichever result the router actually selects."
+}

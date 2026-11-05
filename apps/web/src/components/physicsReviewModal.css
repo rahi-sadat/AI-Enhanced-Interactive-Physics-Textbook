@@ -1,0 +1,552 @@
+/**
+ * apps/web/src/components/physicsReviewModal.css
+ *
+ * Glassmorphic, accessible, student-friendly review modal styling.
+ * Supports candidate confirmation, policy assumptions, manual entry,
+ * provenance badges, and simulation launch.
+ */
+
+.prm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.prm-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.prm-dialog {
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.12);
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  max-width: 680px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.prm-backdrop.open .prm-dialog {
+  transform: translateY(0) scale(1);
+}
+
+/* Header */
+.prm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: rgba(30, 41, 59, 0.75);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  gap: 12px;
+}
+
+.prm-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prm-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.prm-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prm-subtype-chip {
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: capitalize;
+}
+
+.prm-subtitle {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.prm-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.prm-close-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Body */
+.prm-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Ready Hero Banner */
+.prm-ready-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.25));
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+  animation: prmPulse 2s infinite ease-in-out;
+}
+
+@keyframes prmPulse {
+  0%, 100% { border-color: rgba(16, 185, 129, 0.4); }
+  50% { border-color: rgba(52, 211, 153, 0.8); }
+}
+
+.prm-ready-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prm-ready-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prm-ready-desc {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* Error Notice */
+.prm-error-notice {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #fca5a5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Section Containers */
+.prm-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prm-issue-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.prm-issue-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.prm-issue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.prm-param-name {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prm-issue-question {
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* Candidate Display */
+.prm-candidate-box {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.prm-candidate-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prm-candidate-label {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.prm-candidate-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #38bdf8;
+  font-family: monospace;
+}
+
+.prm-candidate-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Policy Card */
+.prm-policy-box {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prm-policy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.prm-policy-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fbbf24;
+}
+
+.prm-policy-val {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: monospace;
+  background: rgba(30, 41, 59, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.prm-policy-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Manual Entry Form */
+.prm-manual-form {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.prm-input {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.88rem;
+  padding: 8px 12px;
+  font-family: monospace;
+  flex: 1;
+  min-width: 120px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.prm-input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.prm-select {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.84rem;
+  padding: 8px 10px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Buttons */
+.prm-btn {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.prm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.prm-btn-primary {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.prm-btn-primary:hover:not(:disabled) {
+  background: #0369a1;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.prm-btn-success {
+  background: #059669;
+  color: #ffffff;
+  padding: 10px 18px;
+  font-size: 0.92rem;
+}
+
+.prm-btn-success:hover:not(:disabled) {
+  background: #047857;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+}
+
+.prm-btn-secondary {
+  background: rgba(51, 65, 85, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+}
+
+.prm-btn-secondary:hover:not(:disabled) {
+  background: rgba(71, 85, 105, 0.9);
+  color: #ffffff;
+}
+
+.prm-btn-warning {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+
+.prm-btn-warning:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fef08a;
+}
+
+/* Provenance Tags */
+.prm-prov-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.prm-prov-tag.detected {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.prm-prov-tag.confirmed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.prm-prov-tag.corrected {
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(129, 140, 248, 0.3);
+}
+
+.prm-prov-tag.assumption {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Resolved History / Active Parameters */
+.prm-resolved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prm-resolved-item {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.prm-resolved-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prm-resolved-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.prm-resolved-val {
+  font-size: 0.84rem;
+  font-family: monospace;
+  color: #38bdf8;
+}
+
+.prm-btn-link {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  padding: 2px 6px;
+}
+
+.prm-btn-link:hover {
+  color: #ef4444;
+}
+
+/* Footer */
+.prm-footer {
+  padding: 16px 24px;
+  background: rgba(30, 41, 59, 0.75);
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.prm-footer-status {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prm-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(56, 189, 248, 0.3);
+  border-radius: 50%;
+  border-top-color: #38bdf8;
+  animation: prmSpin 0.8s linear infinite;
+}
+
+@keyframes prmSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .prm-dialog {
+    max-height: 95vh;
+  }
+  .prm-candidate-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .prm-candidate-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

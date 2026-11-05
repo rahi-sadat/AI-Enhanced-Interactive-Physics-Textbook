@@ -1,0 +1,190 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 9,
+  "component": "RapidOCR: first text/box observations",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+      "sequence": 51,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\rapidocr.py",
+      "function": "RapidOCRProvider.extract",
+      "line": 82,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 161
+      }
+    }
+  ],
+  "upstream_stage": "Evidence dispatch and source decode",
+  "downstream_stage": "EasyOCR: independent OCR candidates",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00051_RapidOCRProvider.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.npy",
+            "image": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017\\arrays\\3e310ca53c41125e946e53b1d45a74ab931279617dc9f54b348d1e3e17353371.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "region": null
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Native image array and source dimensions, with any region transform explicit.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00051_RapidOCRProvider.extract",
+        "return_value": {
+          "status": "success",
+          "tokens": [
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "L",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 738.0,
+                "y": 357.0,
+                "width": 55.0,
+                "height": 61.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 738.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 357.0
+                  },
+                  {
+                    "x": 793.0,
+                    "y": 418.0
+                  },
+                  {
+                    "x": 738.0,
+                    "y": 418.0
+                  }
+                ]
+              },
+              "confidence": 0.99996,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "m",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 896.0,
+                "y": 632.0,
+                "width": 63.0,
+                "height": 50.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 896.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 632.0
+                  },
+                  {
+                    "x": 959.0,
+                    "y": 682.0
+                  },
+                  {
+                    "x": 896.0,
+                    "y": 682.0
+                  }
+                ]
+              },
+              "confidence": 0.99987,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "Fig. 1 Simple Pendulum",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 338.0,
+                "y": 827.0,
+                "width": 599.0,
+                "height": 78.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 338.0,
+                    "y": 827.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 829.0
+                  },
+                  {
+                    "x": 937.0,
+                    "y": 905.0
+                  },
+                  {
+                    "x": 338.0,
+                    "y": 903.0
+                  }
+                ]
+              },
+              "confidence": 0.98953,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            }
+          ],
+          "provider": "rapidocr",
+          "model": "PP-OCRv6-onnx",
+          "package": "rapidocr",
+          "package_version": "3.9.2",
+          "detector_model": "PP-OCRv6_det_small.onnx",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "recognizer_language": "latin_digits_ch",
+          "latency_ms": 1312.7447000006214,
+          "error": null,
+          "metadata": {}
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Observed strings, confidence, source-space polygons/boxes and recognizer metadata. Text recognition alone does not locate the physical component represented by a label.",
+  "expected_diagram": "The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "status": "OBSERVED / REVIEW ALTERNATIVES",
+  "finding": "Compare the literal source labels with the retained tokens below. A wrong alternative is not necessarily the selected output. The source supplies no numerical L, m or θ. Pivot, bob, radius and initial visual angle can be grounded geometrically. Meter scale, mass and gravity require explicit assumptions or other evidence.",
+  "change_or_loss": "Image → text candidates. Inspect exact source boxes; a correct string can still have a box overlapping diagram geometry."
+}

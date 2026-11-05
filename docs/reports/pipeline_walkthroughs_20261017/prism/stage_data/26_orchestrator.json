@@ -1,0 +1,559 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 26,
+  "component": "Frontend receives result and selects next state",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/features/simulations/core/SimulationOrchestrator.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "API response delivered to the browser",
+  "downstream_stage": "Review / explicit compile request branch",
+  "actual_input": {
+    "records": [
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 3191.2000000178814,
+        "data": [
+          "UPLOADING"
+        ]
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 34126.70000001788,
+        "data": [
+          "ANALYZING"
+        ]
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._normalizeSceneBackground",
+        "phase": "input",
+        "wallTime": 34130.59999999404,
+        "data": [
+          {
+            "schemaVersion": "1.0",
+            "id": "PHY-OPTI-figure_001",
+            "domain": "optics",
+            "subtype": "prism",
+            "source": {
+              "type": "book_figure",
+              "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+              "figure_id": "figure_001",
+              "width": 1280,
+              "height": 960,
+              "image_width_px": 1280,
+              "image_height_px": 960
+            },
+            "coordinateSpace": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "image_width_px": 1280,
+              "image_height_px": 960,
+              "unit": "px"
+            },
+            "coordinateSystem": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "image_width_px": 1280,
+              "image_height_px": 960,
+              "unit": "px"
+            },
+            "parameters": {
+              "refractiveIndex": {
+                "value": 1.52,
+                "unit": "",
+                "provenance": "auto_policy",
+                "evidenceProvenance": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0.8,
+                  "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                  "policyId": "policy_crown_glass_refractive_index",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "apexAngle": {
+                "value": 60,
+                "unit": "deg",
+                "provenance": "ocr",
+                "evidenceProvenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_001"
+                  ],
+                  "confidence": 0.889,
+                  "notes": ""
+                }
+              }
+            },
+            "assumptions": [
+              {
+                "parameter": "n",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "value": 1.52,
+                "unit": null,
+                "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+                "provenance": "auto_policy",
+                "confidence": 0.8
+              }
+            ],
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757
+                }
+              ],
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757
+                }
+              ],
+              "ray_origin": {
+                "x": 47,
+                "y": 456
+              },
+              "rayOrigin": {
+                "x": 47,
+                "y": 456
+              },
+              "ray_direction": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "rayDirection": {
+                "x": 0.9825,
+                "y": -0.1862
+              },
+              "apex_angle_deg": 60
+            },
+            "objects": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47,
+                    "y": 456
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ],
+            "render": {
+              "coordinate_space": "source_px"
+            },
+            "elements": [
+              {
+                "id": "element_prism",
+                "type": "prism",
+                "role": "fixed",
+                "label": "Optical Prism",
+                "evidence_refs": [],
+                "optics": {
+                  "model": "prism",
+                  "vertices": [
+                    {
+                      "x": 621.3,
+                      "y": 80.9
+                    },
+                    {
+                      "x": 229.2,
+                      "y": 757
+                    },
+                    {
+                      "x": 1003.9,
+                      "y": 757
+                    }
+                  ],
+                  "refractiveIndex": 1.52,
+                  "apex_angle_deg": 60
+                }
+              },
+              {
+                "id": "element_ray_source",
+                "type": "ray_source",
+                "role": "dynamic",
+                "optics": {
+                  "model": "ray_source",
+                  "position": {
+                    "x": 47,
+                    "y": 456
+                  },
+                  "direction": {
+                    "x": 0.9825,
+                    "y": -0.1862
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 34133.20000001788,
+        "data": [
+          "READY_TO_SIMULATE"
+        ]
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 34336,
+        "data": [
+          "SIMULATING"
+        ]
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The actual API response for this upload, not the startup demo scene.",
+  "actual_output": {
+    "records": [
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 3191.4000000059605,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 34126.90000000596,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._normalizeSceneBackground",
+        "phase": "output",
+        "wallTime": 34133,
+        "data": {
+          "schemaVersion": "1.0",
+          "id": "PHY-OPTI-figure_001",
+          "domain": "optics",
+          "subtype": "prism",
+          "source": {
+            "type": "book_figure",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "figure_id": "figure_001",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "image": "/uploads/diagram_2a50897a.jpg"
+          },
+          "coordinateSpace": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "coordinateSystem": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "parameters": {
+            "refractiveIndex": {
+              "value": 1.52,
+              "unit": "",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "apexAngle": {
+              "value": 60,
+              "unit": "deg",
+              "provenance": "ocr",
+              "evidenceProvenance": {
+                "source": "ocr",
+                "evidenceRefs": [
+                  "ev_ocr_ocr_tok_001"
+                ],
+                "derivedFrom": [
+                  "ev_ocr_ocr_tok_001"
+                ],
+                "confidence": 0.889,
+                "notes": ""
+              }
+            }
+          },
+          "assumptions": [
+            {
+              "parameter": "n",
+              "policyId": "policy_crown_glass_refractive_index",
+              "policyVersion": "1.0",
+              "value": 1.52,
+              "unit": null,
+              "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            }
+          ],
+          "geometry": {
+            "width": 1280,
+            "height": 960,
+            "coordinate_space": "source_px",
+            "vertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "prismVertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "ray_origin": {
+              "x": 47,
+              "y": 456
+            },
+            "rayOrigin": {
+              "x": 47,
+              "y": 456
+            },
+            "ray_direction": {
+              "x": 0.9825,
+              "y": -0.1862
+            },
+            "rayDirection": {
+              "x": 0.9825,
+              "y": -0.1862
+            },
+            "apex_angle_deg": 60
+          },
+          "objects": [
+            {
+              "id": "element_prism",
+              "type": "prism",
+              "role": "fixed",
+              "label": "Optical Prism",
+              "evidence_refs": [],
+              "optics": {
+                "model": "prism",
+                "vertices": [
+                  {
+                    "x": 621.3,
+                    "y": 80.9
+                  },
+                  {
+                    "x": 229.2,
+                    "y": 757
+                  },
+                  {
+                    "x": 1003.9,
+                    "y": 757
+                  }
+                ],
+                "refractiveIndex": 1.52,
+                "apex_angle_deg": 60
+              }
+            },
+            {
+              "id": "element_ray_source",
+              "type": "ray_source",
+              "role": "dynamic",
+              "optics": {
+                "model": "ray_source",
+                "position": {
+                  "x": 47,
+                  "y": 456
+                },
+                "direction": {
+                  "x": 0.9825,
+                  "y": -0.1862
+                }
+              }
+            }
+          ],
+          "render": {
+            "coordinate_space": "source_px"
+          },
+          "elements": [
+            {
+              "id": "element_prism",
+              "type": "prism",
+              "role": "fixed",
+              "label": "Optical Prism",
+              "evidence_refs": [],
+              "optics": {
+                "model": "prism",
+                "vertices": [
+                  {
+                    "x": 621.3,
+                    "y": 80.9
+                  },
+                  {
+                    "x": 229.2,
+                    "y": 757
+                  },
+                  {
+                    "x": 1003.9,
+                    "y": 757
+                  }
+                ],
+                "refractiveIndex": 1.52,
+                "apex_angle_deg": 60
+              }
+            },
+            {
+              "id": "element_ray_source",
+              "type": "ray_source",
+              "role": "dynamic",
+              "optics": {
+                "model": "ray_source",
+                "position": {
+                  "x": 47,
+                  "y": 456
+                },
+                "direction": {
+                  "x": 0.9825,
+                  "y": -0.1862
+                }
+              }
+            }
+          ],
+          "visual": {
+            "background_url": "/uploads/diagram_2a50897a.jpg"
+          }
+        }
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 34133.30000001192,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 34336,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "final_orchestrator_state": "SIMULATING",
+        "currentError": null
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Preserved source URL/frame and readiness-governed state. Needs-review cases should expose review issues without falsely activating an uploaded simulation.",
+  "expected_diagram": "60° is printed apex-angle evidence. Vertices and rays require source measurement. No numerical refractive index is printed. An assumed index must not be described as measured from this diagram.",
+  "status": "SCENE ACCEPTED",
+  "finding": "Compiler preserves CV vertices and incident input. Runtime recomputes refraction using n=1.52: hit1=(447.8163870862532,380.0386653684882), hit2=(807.0350434576367,409.11605562391077). The computed internal/emergent rays disagree visibly with the source. This is model re-synthesis from assumptions and incomplete observed ray constraints, not a proven Snell-law implementation error.",
+  "change_or_loss": "Only events after startWithFile for this trace are used here. Startup/demo events remain in the raw log but are excluded from this diagram’s runtime evidence."
+}

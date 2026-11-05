@@ -1,0 +1,380 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 9,
+  "component": "RapidOCR: first text/box observations",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 61,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\rapidocr.py",
+      "function": "RapidOCRProvider.extract",
+      "line": 82,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\ocr\\router.py",
+        "function": "extract",
+        "line": 161
+      }
+    }
+  ],
+  "upstream_stage": "Evidence dispatch and source decode",
+  "downstream_stage": "EasyOCR: independent OCR candidates",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00061_RapidOCRProvider.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "region": null
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Native image array and source dimensions, with any region transform explicit.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00061_RapidOCRProvider.extract",
+        "return_value": {
+          "status": "success",
+          "tokens": [
+            {
+              "id": "ocr_tok_001",
+              "raw_text": "f = 15 cm",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 933.0,
+                "y": 189.0,
+                "width": 208.0,
+                "height": 55.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 933.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 189.0
+                  },
+                  {
+                    "x": 1141.0,
+                    "y": 244.0
+                  },
+                  {
+                    "x": 933.0,
+                    "y": 244.0
+                  }
+                ]
+              },
+              "confidence": 0.96641,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_001"
+            },
+            {
+              "id": "ocr_tok_002",
+              "raw_text": "Object",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 188.0,
+                "y": 220.0,
+                "width": 135.0,
+                "height": 57.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 189.0,
+                    "y": 220.0
+                  },
+                  {
+                    "x": 323.0,
+                    "y": 223.0
+                  },
+                  {
+                    "x": 322.0,
+                    "y": 277.0
+                  },
+                  {
+                    "x": 188.0,
+                    "y": 274.0
+                  }
+                ]
+              },
+              "confidence": 0.9999,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_002"
+            },
+            {
+              "id": "ocr_tok_003",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 102.0,
+                "y": 449.0,
+                "width": 70.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 172.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99964,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_003"
+            },
+            {
+              "id": "ocr_tok_004",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 356.0,
+                "y": 451.0,
+                "width": 42.0,
+                "height": 47.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 361.0,
+                    "y": 451.0
+                  },
+                  {
+                    "x": 398.0,
+                    "y": 455.0
+                  },
+                  {
+                    "x": 393.0,
+                    "y": 498.0
+                  },
+                  {
+                    "x": 356.0,
+                    "y": 494.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_004"
+            },
+            {
+              "id": "ocr_tok_005",
+              "raw_text": "F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 849.0,
+                "y": 449.0,
+                "width": 38.0,
+                "height": 43.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 849.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 887.0,
+                    "y": 492.0
+                  },
+                  {
+                    "x": 849.0,
+                    "y": 492.0
+                  }
+                ]
+              },
+              "confidence": 0.9994,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_005"
+            },
+            {
+              "id": "ocr_tok_006",
+              "raw_text": "2F",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1102.0,
+                "y": 449.0,
+                "width": 69.0,
+                "height": 51.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1102.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 449.0
+                  },
+                  {
+                    "x": 1171.0,
+                    "y": 500.0
+                  },
+                  {
+                    "x": 1102.0,
+                    "y": 500.0
+                  }
+                ]
+              },
+              "confidence": 0.99972,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_006"
+            },
+            {
+              "id": "ocr_tok_007",
+              "raw_text": "Image",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 1118.0,
+                "y": 646.0,
+                "width": 129.0,
+                "height": 56.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 1120.0,
+                    "y": 646.0
+                  },
+                  {
+                    "x": 1247.0,
+                    "y": 652.0
+                  },
+                  {
+                    "x": 1245.0,
+                    "y": 702.0
+                  },
+                  {
+                    "x": 1118.0,
+                    "y": 696.0
+                  }
+                ]
+              },
+              "confidence": 0.99991,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_007"
+            },
+            {
+              "id": "ocr_tok_008",
+              "raw_text": "Fig. 5 Image Formation by a Convex Lens",
+              "normalized_text": null,
+              "bbox_source_px": {
+                "x": 197.0,
+                "y": 748.0,
+                "width": 859.0,
+                "height": 62.0
+              },
+              "polygon_source_px": {
+                "points": [
+                  {
+                    "x": 197.0,
+                    "y": 748.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 751.0
+                  },
+                  {
+                    "x": 1056.0,
+                    "y": 810.0
+                  },
+                  {
+                    "x": 197.0,
+                    "y": 807.0
+                  }
+                ]
+              },
+              "confidence": 0.99927,
+              "script_candidate": "latin",
+              "language_candidate": "en",
+              "provider": "rapidocr",
+              "recognizer_model": "PP-OCRv6_rec_small.onnx",
+              "candidate_alternatives": [],
+              "evidence_ref": "evidence_ocr_ocr_tok_008"
+            }
+          ],
+          "provider": "rapidocr",
+          "model": "PP-OCRv6-onnx",
+          "package": "rapidocr",
+          "package_version": "3.9.2",
+          "detector_model": "PP-OCRv6_det_small.onnx",
+          "recognizer_model": "PP-OCRv6_rec_small.onnx",
+          "recognizer_language": "latin_digits_ch",
+          "latency_ms": 10999.672900012229,
+          "error": null,
+          "metadata": {}
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Observed strings, confidence, source-space polygons/boxes and recognizer metadata. Text recognition alone does not locate the physical component represented by a label.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "OBSERVED / REVIEW ALTERNATIVES",
+  "finding": "Compare the literal source labels with the retained tokens below. A wrong alternative is not necessarily the selected output. 15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "change_or_loss": "Image → text candidates. Inspect exact source boxes; a correct string can still have a box overlapping diagram geometry."
+}

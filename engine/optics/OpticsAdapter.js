@@ -514,21 +514,32 @@ export class OpticsAdapter extends SimulationAdapter {
       }
     }
 
+    const _normPt = (p) => {
+      if (!p) return null;
+      if (Array.isArray(p)) return { x: Number(p[0]), y: Number(p[1]) };
+      return { x: Number(p.x ?? 0), y: Number(p.y ?? 0) };
+    };
+
+    const normVertices = prismVertices.map(_normPt);
+
     let rayOrigin = geom.rayOrigin;
     let rayDirection = geom.rayDirection;
 
     if (!rayOrigin) {
       const srcEl = this.scene.objects?.find(e => e.optics?.model === 'ray_source');
       if (srcEl?.optics?.position) {
-        rayOrigin = { x: Number(srcEl.optics.position.x), y: Number(srcEl.optics.position.y) };
+        rayOrigin = srcEl.optics.position;
       }
     }
     if (!rayDirection) {
       const srcEl = this.scene.objects?.find(e => e.optics?.model === 'ray_source');
       if (srcEl?.optics?.direction) {
-        rayDirection = { x: Number(srcEl.optics.direction.x), y: Number(srcEl.optics.direction.y) };
+        rayDirection = srcEl.optics.direction;
       }
     }
+
+    rayOrigin = _normPt(rayOrigin);
+    rayDirection = _normPt(rayDirection);
 
     if (!rayOrigin || !Number.isFinite(rayOrigin.x) || !Number.isFinite(rayOrigin.y)) {
       throw new MissingRequiredParameterError('rayOrigin', 'geometry.rayOrigin');
@@ -538,14 +549,17 @@ export class OpticsAdapter extends SimulationAdapter {
     }
 
     this.solution = solvePrismRefraction({
-      prismVertices,
+      prismVertices: normVertices,
       refractiveIndex: n,
       rayOrigin,
       rayDirection,
       bounds
     });
-    if (this.solution && !this.solution.rays && this.solution.segments) {
-      this.solution.rays = this.solution.segments;
+    if (this.solution) {
+      if (!this.solution.rays && this.solution.segments) {
+        this.solution.rays = this.solution.segments;
+      }
+      this.solution.prismVertices = normVertices;
     }
   }
 
@@ -773,6 +787,12 @@ export class OpticsAdapter extends SimulationAdapter {
       apertureHeight: this.scene.geometry?.apertureHeight || this.scene.geometry?.aperture_px || null
     } : null;
 
+    const normVertices = (this.scene?.geometry?.prismVertices || this.scene?.geometry?.vertices || (this.scene?.objects?.find(e => e.optics?.model === 'prism')?.optics?.vertices) || sol.prismVertices)?.map(v => {
+      if (!v) return null;
+      if (Array.isArray(v)) return { x: Number(v[0]), y: Number(v[1]) };
+      return { x: Number(v.x ?? 0), y: Number(v.y ?? 0) };
+    }).filter(Boolean);
+
     const geometry = {
       ...sol,
       opticalAxis,
@@ -781,19 +801,37 @@ export class OpticsAdapter extends SimulationAdapter {
       mirror: mirrorGeom,
       object,
       image,
-      rays,
-      prismPolygon: this.scene?.geometry?.prismVertices || this.scene?.geometry?.vertices || (this.scene?.objects?.find(e => e.optics?.model === 'prism')?.optics?.vertices),
+      rays: sol.rays || sol.segments || rays,
+      prismVertices: normVertices,
+      prismPolygon: normVertices,
+      prism: normVertices ? { vertices: normVertices, refractiveIndex: this.scene.parameters?.refractiveIndex?.value ?? 1.52 } : null,
       handles
     };
 
-    const telemetry = {
-      ...sol,
-      imageDistance: Number.isFinite(sol.v) ? this._pixelsToParam(sol.v, uUnit) : 'Infinity',
-      objectDistance: sol.u !== undefined ? this._pixelsToParam(sol.u, uUnit) : null,
-      focalLength: f !== null ? this._pixelsToParam(f, fUnit) : null,
-      refractedAngle_deg: sol.theta2Deg !== undefined ? sol.theta2Deg : sol.refractedAngle_deg,
-      tir: sol.isTIR !== undefined ? sol.isTIR : Boolean(sol.tir)
-    };
+    let telemetry;
+    if (this.subtype === 'prism') {
+      const nPrism = this.scene.parameters?.refractiveIndex?.value !== undefined
+        ? Number(this.scene.parameters.refractiveIndex.value)
+        : (this.scene.parameters?.n?.value !== undefined ? Number(this.scene.parameters.n.value) : 1.52);
+      telemetry = {
+        ...sol,
+        incidenceAngle_deg: sol.angles?.i1Deg ?? null,
+        refractedAngle_deg: sol.angles?.r1Deg ?? null,
+        deviationAngle_deg: sol.angles?.deviationDeg ?? null,
+        refractiveIndex: nPrism,
+        criticalAngle_deg: sol.angles?.criticalAngleDeg ?? null,
+        tir: Boolean(sol.tir)
+      };
+    } else {
+      telemetry = {
+        ...sol,
+        imageDistance: Number.isFinite(sol.v) ? this._pixelsToParam(sol.v, uUnit) : 'Infinity',
+        objectDistance: sol.u !== undefined ? this._pixelsToParam(sol.u, uUnit) : null,
+        focalLength: f !== null ? this._pixelsToParam(f, fUnit) : null,
+        refractedAngle_deg: sol.theta2Deg !== undefined ? sol.theta2Deg : sol.refractedAngle_deg,
+        tir: sol.isTIR !== undefined ? sol.isTIR : Boolean(sol.tir)
+      };
+    }
 
     return {
       domain: 'optics',
@@ -808,6 +846,25 @@ export class OpticsAdapter extends SimulationAdapter {
   }
 
   getState() {
+    if (this.subtype === 'prism') {
+      const nPrism = this.scene?.parameters?.refractiveIndex?.value !== undefined
+        ? Number(this.scene.parameters.refractiveIndex.value)
+        : (this.scene?.parameters?.n?.value !== undefined ? Number(this.scene.parameters.n.value) : 1.52);
+      return {
+        domain: 'optics',
+        subtype: 'prism',
+        type: 'prism',
+        running: this.running,
+        incidenceAngle_deg: this.solution?.angles?.i1Deg ?? null,
+        refractedAngle_deg: this.solution?.angles?.r1Deg ?? null,
+        deviationAngle_deg: this.solution?.angles?.deviationDeg ?? null,
+        refractiveIndex: nPrism,
+        criticalAngle_deg: this.solution?.angles?.criticalAngleDeg ?? null,
+        tir: Boolean(this.solution?.tir),
+        rayCount: this.solution?.rays?.length || this.solution?.segments?.length || 0,
+        solution: this.solution
+      };
+    }
     return {
       domain: 'optics',
       subtype: this.subtype,

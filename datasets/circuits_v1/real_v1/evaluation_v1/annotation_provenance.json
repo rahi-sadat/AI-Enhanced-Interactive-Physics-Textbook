@@ -1,0 +1,17 @@
+{
+  "source": "CVAT task 2727411, assistant-drawn symbol-body boxes; no predictions imported",
+  "archive": "outputs/circuits_real_eval_v1_cvat_draft_20261031.zip",
+  "archive_sha256": "d57826c7933b9515c8d408c7ed3ca9590eab4d3303156f0341a88e495d6608c8",
+  "human_review_approved": true,
+  "approval_date": "2026-10-31",
+  "approval_evidence": "User: I reviewed and approved all 59 annotations",
+  "images": 59,
+  "instances": 282,
+  "class_names": {
+    "0": "resistor",
+    "1": "voltage_source",
+    "2": "capacitor",
+    "3": "switch"
+  },
+  "current_role": "All 59 used for v2 training after v1 baseline evaluation; new independent real test set pending"
+}

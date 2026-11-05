@@ -1,0 +1,1251 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 32,
+  "component": "CoordinateMapper: source → overlay → browser",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "engine/core/coordinateMapper.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "Domain solver and actual initial state",
+  "downstream_stage": "Actual renderer at t=0 over the original",
+  "actual_input": {
+    "records": [
+      {
+        "mapper": {
+          "sourceW": 1280,
+          "sourceH": 960,
+          "viewW": 1010,
+          "viewH": 600,
+          "dpr": 1,
+          "scale": 0.625,
+          "renderedW": 800,
+          "renderedH": 600,
+          "offsetX": 105,
+          "offsetY": 0
+        },
+        "image_rect": {
+          "x": 139,
+          "y": 227,
+          "width": 800,
+          "height": 600,
+          "top": 227,
+          "right": 939,
+          "bottom": 827,
+          "left": 139
+        },
+        "browser": {
+          "devicePixelRatio": 1,
+          "innerWidth": 1418,
+          "innerHeight": 1002,
+          "outerWidth": 1440,
+          "outerHeight": 1100,
+          "scrollX": 0,
+          "scrollY": 0,
+          "visualViewport": {
+            "width": 1418,
+            "height": 1002,
+            "scale": 1,
+            "offsetLeft": 0,
+            "offsetTop": 0
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Native source coordinates, source dimensions, viewport dimensions, DPR and image rectangle.",
+  "actual_output": {
+    "records": [
+      {
+        "landmarks": [
+          {
+            "label": "scene.geometry.lens_center",
+            "source": {
+              "x": 641,
+              "y": 432
+            },
+            "view": {
+              "x": 505.625,
+              "y": 270
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 270
+            },
+            "inverse": {
+              "x": 641,
+              "y": 432
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[0].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[0].points[1]",
+            "source": {
+              "x": 641,
+              "y": 350.1
+            },
+            "view": {
+              "x": 505.625,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 641,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[0].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 797.4
+            },
+            "view": {
+              "x": 905,
+              "y": 498.375
+            },
+            "overlay": {
+              "x": 800,
+              "y": 498.375
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 797.4
+            },
+            "browser": {
+              "x": 939,
+              "y": 725.375
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[1].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[1].points[1]",
+            "source": {
+              "x": 641,
+              "y": 432
+            },
+            "view": {
+              "x": 505.625,
+              "y": 270
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 270
+            },
+            "inverse": {
+              "x": 641,
+              "y": 432
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[1].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 655.65
+            },
+            "view": {
+              "x": 905,
+              "y": 409.78125
+            },
+            "overlay": {
+              "x": 800,
+              "y": 409.78125
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 655.65
+            },
+            "browser": {
+              "x": 939,
+              "y": 636.78125
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[2].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[2].points[1]",
+            "source": {
+              "x": 641,
+              "y": 513.9
+            },
+            "view": {
+              "x": 505.625,
+              "y": 321.1875
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 321.1875
+            },
+            "inverse": {
+              "x": 641,
+              "y": 513.9
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 548.1875
+            }
+          },
+          {
+            "label": "runtime.output.state.solution.rays[2].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 513.9
+            },
+            "view": {
+              "x": 905,
+              "y": 321.1875
+            },
+            "overlay": {
+              "x": 800,
+              "y": 321.1875
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 513.9
+            },
+            "browser": {
+              "x": 939,
+              "y": 548.1875
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[0].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[0].points[1]",
+            "source": {
+              "x": 641,
+              "y": 350.1
+            },
+            "view": {
+              "x": 505.625,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 641,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[0].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 797.4
+            },
+            "view": {
+              "x": 905,
+              "y": 498.375
+            },
+            "overlay": {
+              "x": 800,
+              "y": 498.375
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 797.4
+            },
+            "browser": {
+              "x": 939,
+              "y": 725.375
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[1].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[1].points[1]",
+            "source": {
+              "x": 641,
+              "y": 432
+            },
+            "view": {
+              "x": 505.625,
+              "y": 270
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 270
+            },
+            "inverse": {
+              "x": 641,
+              "y": 432
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[1].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 655.65
+            },
+            "view": {
+              "x": 905,
+              "y": 409.78125
+            },
+            "overlay": {
+              "x": 800,
+              "y": 409.78125
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 655.65
+            },
+            "browser": {
+              "x": 939,
+              "y": 636.78125
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[2].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[2].points[1]",
+            "source": {
+              "x": 641,
+              "y": 513.9
+            },
+            "view": {
+              "x": 505.625,
+              "y": 321.1875
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 321.1875
+            },
+            "inverse": {
+              "x": 641,
+              "y": 513.9
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 548.1875
+            }
+          },
+          {
+            "label": "runtime.output.geometry.rays[2].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 513.9
+            },
+            "view": {
+              "x": 905,
+              "y": 321.1875
+            },
+            "overlay": {
+              "x": 800,
+              "y": 321.1875
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 513.9
+            },
+            "browser": {
+              "x": 939,
+              "y": 548.1875
+            }
+          },
+          {
+            "label": "runtime.output.geometry.landmarks.lensCenter",
+            "source": {
+              "x": 641,
+              "y": 432
+            },
+            "view": {
+              "x": 505.625,
+              "y": 270
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 270
+            },
+            "inverse": {
+              "x": 641,
+              "y": 432
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.landmarks.focalPoints[0]",
+            "source": {
+              "id": "f1",
+              "label": "F₁",
+              "x": 524,
+              "y": 432
+            },
+            "view": {
+              "x": 432.5,
+              "y": 270
+            },
+            "overlay": {
+              "x": 327.5,
+              "y": 270
+            },
+            "inverse": {
+              "x": 524,
+              "y": 432
+            },
+            "browser": {
+              "x": 466.5,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.landmarks.focalPoints[1]",
+            "source": {
+              "id": "f2",
+              "label": "F₂",
+              "x": 758,
+              "y": 432
+            },
+            "view": {
+              "x": 578.75,
+              "y": 270
+            },
+            "overlay": {
+              "x": 473.75,
+              "y": 270
+            },
+            "inverse": {
+              "x": 758,
+              "y": 432
+            },
+            "browser": {
+              "x": 612.75,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.landmarks.focalPoints[2]",
+            "source": {
+              "id": "2f1",
+              "label": "2F₁",
+              "x": 407,
+              "y": 432
+            },
+            "view": {
+              "x": 359.375,
+              "y": 270
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 270
+            },
+            "inverse": {
+              "x": 407,
+              "y": 432
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.landmarks.focalPoints[3]",
+            "source": {
+              "id": "2f2",
+              "label": "2F₂",
+              "x": 875,
+              "y": 432
+            },
+            "view": {
+              "x": 651.875,
+              "y": 270
+            },
+            "overlay": {
+              "x": 546.875,
+              "y": 270
+            },
+            "inverse": {
+              "x": 875,
+              "y": 432
+            },
+            "browser": {
+              "x": 685.875,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.object.base",
+            "source": {
+              "x": 407,
+              "y": 432
+            },
+            "view": {
+              "x": 359.375,
+              "y": 270
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 270
+            },
+            "inverse": {
+              "x": 407,
+              "y": 432
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.object.tip",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.geometry.image.base",
+            "source": {
+              "x": 875,
+              "y": 432
+            },
+            "view": {
+              "x": 651.875,
+              "y": 270
+            },
+            "overlay": {
+              "x": 546.875,
+              "y": 270
+            },
+            "inverse": {
+              "x": 875,
+              "y": 432
+            },
+            "browser": {
+              "x": 685.875,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.geometry.image.tip",
+            "source": {
+              "x": 875,
+              "y": 513.9
+            },
+            "view": {
+              "x": 651.875,
+              "y": 321.1875
+            },
+            "overlay": {
+              "x": 546.875,
+              "y": 321.1875
+            },
+            "inverse": {
+              "x": 875,
+              "y": 513.9
+            },
+            "browser": {
+              "x": 685.875,
+              "y": 548.1875
+            }
+          },
+          {
+            "label": "runtime.output.geometry.handles.objectArrow",
+            "source": {
+              "id": "object_1",
+              "targetId": "object_1",
+              "type": "drag",
+              "x": 407,
+              "y": 350.1,
+              "lensX": 641,
+              "axisY": 432,
+              "pixelsPerUnit": 1,
+              "axes": {
+                "x": {
+                  "parameter": "objectDistance",
+                  "parameterKey": "objectDistance",
+                  "editable": true,
+                  "unit": "px",
+                  "pixelsPerUnit": 1,
+                  "min": 10,
+                  "max": 500,
+                  "step": 1
+                },
+                "y": {
+                  "parameter": "objectHeight",
+                  "parameterKey": "objectHeight",
+                  "editable": true,
+                  "unit": "px",
+                  "pixelsPerUnit": 1,
+                  "min": -200,
+                  "max": 200,
+                  "step": 1
+                }
+              }
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[0].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[0].points[1]",
+            "source": {
+              "x": 641,
+              "y": 350.1
+            },
+            "view": {
+              "x": 505.625,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 641,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[0].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 797.4
+            },
+            "view": {
+              "x": 905,
+              "y": 498.375
+            },
+            "overlay": {
+              "x": 800,
+              "y": 498.375
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 797.4
+            },
+            "browser": {
+              "x": 939,
+              "y": 725.375
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[1].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[1].points[1]",
+            "source": {
+              "x": 641,
+              "y": 432
+            },
+            "view": {
+              "x": 505.625,
+              "y": 270
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 270
+            },
+            "inverse": {
+              "x": 641,
+              "y": 432
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 497
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[1].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 655.65
+            },
+            "view": {
+              "x": 905,
+              "y": 409.78125
+            },
+            "overlay": {
+              "x": 800,
+              "y": 409.78125
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 655.65
+            },
+            "browser": {
+              "x": 939,
+              "y": 636.78125
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[2].points[0]",
+            "source": {
+              "x": 407,
+              "y": 350.1
+            },
+            "view": {
+              "x": 359.375,
+              "y": 218.8125
+            },
+            "overlay": {
+              "x": 254.375,
+              "y": 218.8125
+            },
+            "inverse": {
+              "x": 407,
+              "y": 350.1
+            },
+            "browser": {
+              "x": 393.375,
+              "y": 445.8125
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[2].points[1]",
+            "source": {
+              "x": 641,
+              "y": 513.9
+            },
+            "view": {
+              "x": 505.625,
+              "y": 321.1875
+            },
+            "overlay": {
+              "x": 400.625,
+              "y": 321.1875
+            },
+            "inverse": {
+              "x": 641,
+              "y": 513.9
+            },
+            "browser": {
+              "x": 539.625,
+              "y": 548.1875
+            }
+          },
+          {
+            "label": "runtime.output.telemetry.rays[2].points[2]",
+            "source": {
+              "x": 1280,
+              "y": 513.9
+            },
+            "view": {
+              "x": 905,
+              "y": 321.1875
+            },
+            "overlay": {
+              "x": 800,
+              "y": 321.1875
+            },
+            "inverse": {
+              "x": 1280,
+              "y": 513.9
+            },
+            "browser": {
+              "x": 939,
+              "y": 548.1875
+            }
+          }
+        ],
+        "DOM_elements": [
+          {
+            "tag": "DIV",
+            "id": "",
+            "className": "if-viewport-host",
+            "src": null,
+            "viewBox": null,
+            "rect": {
+              "x": 34,
+              "y": 227,
+              "width": 1010,
+              "height": 600,
+              "top": 227,
+              "right": 1044,
+              "bottom": 827,
+              "left": 34
+            },
+            "css": {
+              "width": "1010px",
+              "height": "600px",
+              "objectFit": "fill",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "0px none rgb(248, 250, 252)",
+              "transform": "none",
+              "transformOrigin": "505px 300px",
+              "zoom": "1",
+              "display": "flex",
+              "position": "relative"
+            }
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "className": "figure-viewport",
+            "src": null,
+            "viewBox": null,
+            "rect": {
+              "x": 34,
+              "y": 227,
+              "width": 1010,
+              "height": 600,
+              "top": 227,
+              "right": 1044,
+              "bottom": 827,
+              "left": 34
+            },
+            "css": {
+              "width": "1010px",
+              "height": "600px",
+              "objectFit": "fill",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "0px none rgb(248, 250, 252)",
+              "transform": "none",
+              "transformOrigin": "505px 300px",
+              "zoom": "1",
+              "display": "block",
+              "position": "relative"
+            }
+          },
+          {
+            "tag": "IMG",
+            "id": "",
+            "className": "figure-viewport-img",
+            "src": "http://127.0.0.1:5173/uploads/diagram_dd013d21.jpg",
+            "naturalWidth": 1280,
+            "naturalHeight": 960,
+            "width": 800,
+            "height": 600,
+            "viewBox": null,
+            "rect": {
+              "x": 139,
+              "y": 227,
+              "width": 800,
+              "height": 600,
+              "top": 227,
+              "right": 939,
+              "bottom": 827,
+              "left": 139
+            },
+            "css": {
+              "width": "800px",
+              "height": "600px",
+              "objectFit": "fill",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "0px none rgb(248, 250, 252)",
+              "transform": "none",
+              "transformOrigin": "400px 300px",
+              "zoom": "1",
+              "display": "block",
+              "position": "absolute"
+            }
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "className": "figure-viewport-overlay",
+            "src": null,
+            "viewBox": null,
+            "rect": {
+              "x": 139,
+              "y": 227,
+              "width": 800,
+              "height": 600,
+              "top": 227,
+              "right": 939,
+              "bottom": 827,
+              "left": 139
+            },
+            "css": {
+              "width": "800px",
+              "height": "600px",
+              "objectFit": "fill",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "0px none rgb(248, 250, 252)",
+              "transform": "none",
+              "transformOrigin": "400px 300px",
+              "zoom": "1",
+              "display": "block",
+              "position": "absolute"
+            }
+          },
+          {
+            "tag": "svg",
+            "id": "",
+            "className": "optics-overlay-svg",
+            "src": null,
+            "width": {},
+            "height": {},
+            "viewBox": "0 0 1280 960",
+            "rect": {
+              "x": 139,
+              "y": 227,
+              "width": 800,
+              "height": 600,
+              "top": 227,
+              "right": 939,
+              "bottom": 827,
+              "left": 139
+            },
+            "css": {
+              "width": "800px",
+              "height": "600px",
+              "objectFit": "fill",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "0px none rgb(248, 250, 252)",
+              "transform": "none",
+              "transformOrigin": "400px 300px",
+              "zoom": "1",
+              "display": "block",
+              "position": "absolute"
+            }
+          },
+          {
+            "tag": "IMG",
+            "id": "diagram-image",
+            "className": "diagram-image",
+            "src": "http://127.0.0.1:5173/scenes/kinematics/with_spring.png?t=1792207572089",
+            "naturalWidth": 855,
+            "naturalHeight": 686,
+            "width": 855,
+            "height": 686,
+            "viewBox": null,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "css": {
+              "width": "747.813px",
+              "height": "600px",
+              "objectFit": "fill",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "0px none rgba(0, 0, 0, 0)",
+              "transform": "none",
+              "transformOrigin": "50% 50%",
+              "zoom": "1",
+              "display": "block",
+              "position": "absolute"
+            }
+          },
+          {
+            "tag": "CANVAS",
+            "id": "",
+            "className": null,
+            "src": null,
+            "width": 855,
+            "height": 686,
+            "viewBox": null,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "css": {
+              "width": "100%",
+              "height": "100%",
+              "objectFit": "fill",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "0px none rgb(241, 245, 249)",
+              "transform": "none",
+              "transformOrigin": "50% 50%",
+              "zoom": "1",
+              "display": "block",
+              "position": "static"
+            }
+          },
+          {
+            "tag": "IMG",
+            "id": "preview-image",
+            "className": null,
+            "src": "blob:http://127.0.0.1:5173/643e338b-5bfb-43b1-ba53-dab43b65cd1a",
+            "naturalWidth": 1280,
+            "naturalHeight": 960,
+            "width": 1280,
+            "height": 960,
+            "viewBox": null,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "css": {
+              "width": "auto",
+              "height": "auto",
+              "objectFit": "contain",
+              "objectPosition": "50% 50%",
+              "padding": "0px",
+              "margin": "0px",
+              "border": "1px solid rgba(255, 255, 255, 0.07)",
+              "transform": "none",
+              "transformOrigin": "50% 50%",
+              "zoom": "1",
+              "display": "inline",
+              "position": "static"
+            }
+          }
+        ]
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Invertible mapping with the same image/overlay scale and offsets. Applying viewToSource(sourceToView(p)) should recover the supplied point within floating-point precision.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "MAPPING PASS FOR CAPTURED LANDMARKS",
+  "finding": "Actual sourceToView/sourceToOverlay and inverse results preserve supplied points. This does not validate the input coordinates against the source.",
+  "change_or_loss": "sourceToView includes viewport letterboxing; sourceToOverlay omits it because the overlay is already image-aligned. Browser coordinates add the measured image origin. Do not add letterboxing twice."
+}

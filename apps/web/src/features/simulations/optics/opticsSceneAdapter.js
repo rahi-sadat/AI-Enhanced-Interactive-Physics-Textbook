@@ -38,11 +38,19 @@ export function adaptOpticsScene(scene, options = {}) {
   const all = [...(scene.elements || []), ...(scene.sources || [])];
   const ann = scene.annotations || [];
 
-  const sourceWidth = scene.source?.image_width_px ??
+  const sourceWidth = scene.coordinateSpace?.width ??
+    scene.coordinate_system?.width ??
+    scene.source?.width ??
+    scene.source?.image_width_px ??
+    scene.geometry?.source_width ??
     scene.render?.source_width_px ??
     scene.coordinate_system?.render?.source_width_px ??
     800;
-  const sourceHeight = scene.source?.image_height_px ??
+  const sourceHeight = scene.coordinateSpace?.height ??
+    scene.coordinate_system?.height ??
+    scene.source?.height ??
+    scene.source?.image_height_px ??
+    scene.geometry?.source_height ??
     scene.render?.source_height_px ??
     scene.coordinate_system?.render?.source_height_px ??
     600;

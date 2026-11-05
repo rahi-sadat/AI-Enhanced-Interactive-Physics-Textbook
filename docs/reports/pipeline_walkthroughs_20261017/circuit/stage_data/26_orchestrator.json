@@ -1,0 +1,126 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 26,
+  "component": "Frontend receives result and selects next state",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/features/simulations/core/SimulationOrchestrator.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "API response delivered to the browser",
+  "downstream_stage": "Review / explicit compile request branch",
+  "actual_input": {
+    "records": [
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 4060.5,
+        "data": [
+          "UPLOADING"
+        ]
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 36286.90000000596,
+        "data": [
+          "ANALYZING"
+        ]
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 37146.5,
+        "data": [
+          "NEEDS_REVIEW"
+        ]
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 37151.30000001192,
+        "data": [
+          "COMPILING"
+        ]
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "input",
+        "wallTime": 38341.80000001192,
+        "data": [
+          "ERROR",
+          "The simulation is not ready yet: BookIR is not ready to compile."
+        ]
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The actual API response for this upload, not the startup demo scene.",
+  "actual_output": {
+    "records": [
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 4060.800000011921,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 36287,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 37146.59999999404,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 37151.40000000596,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator._setState",
+        "phase": "output",
+        "wallTime": 38341.90000000596,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "final_orchestrator_state": "ERROR",
+        "currentError": "The simulation is not ready yet: BookIR is not ready to compile."
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Preserved source URL/frame and readiness-governed state. Needs-review cases should expose review issues without falsely activating an uploaded simulation.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "FRONTEND FLOW ISSUE",
+  "finding": "Compiler gate returns scene=null. Browser subsequently calls /api/resolution/compile after NEEDS_REVIEW; HTTP 400 “BookIR is not ready to compile” becomes UI ERROR. This is a separate frontend handling defect after the perception failure.",
+  "change_or_loss": "Only events after startWithFile for this trace are used here. Startup/demo events remain in the raw log but are excluded from this diagram’s runtime evidence."
+}

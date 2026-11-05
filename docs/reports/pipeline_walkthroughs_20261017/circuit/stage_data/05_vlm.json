@@ -1,0 +1,681 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 5,
+  "component": "Actual Gemini request and response",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 10,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\gemini_provider.py",
+      "function": "GeminiVisionProvider.analyze_diagram",
+      "line": 290,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\analyzer.py",
+        "function": "analyze",
+        "line": 72
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 12,
+      "status": "EXECUTED",
+      "file": "C:\\Users\\saher\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\google\\genai\\models.py",
+      "function": "Models.generate_content",
+      "line": 6131,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\gemini_provider.py",
+        "function": "analyze_diagram",
+        "line": 338
+      }
+    }
+  ],
+  "upstream_stage": "PageIR / whole-figure coordinate frame",
+  "downstream_stage": "Semantic validation, confidence caps and thresholds",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00010_GeminiVisionProvider.analyze_diagram",
+        "value": {
+          "image_bytes": {
+            "bytes": 38634,
+            "sha256": "e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63.bin"
+          },
+          "mime_type": "image/jpeg",
+          "page_ir": {
+            "version": "1.0",
+            "source": {
+              "assetId": "9b910bff7ee74e90a1763e5358b474ff",
+              "width_px": 1280,
+              "height_px": 960,
+              "mimeType": "image/jpeg",
+              "url": "/uploads/diagram_9b910bff.jpg",
+              "sha256": "e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63"
+            },
+            "coordinate_space": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "origin": "top_left"
+            },
+            "regions": [
+              {
+                "id": "region_001",
+                "label": "whole_image",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "confidence": 1.0,
+                "detection_method": "user_supplied",
+                "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+              }
+            ],
+            "figures": [
+              {
+                "id": "figure_001",
+                "region_id": "region_001",
+                "page_x": 0.0,
+                "page_y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "detection_method": "user_supplied",
+                "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+              }
+            ],
+            "text_blocks": [],
+            "metadata": {
+              "pipeline": "PR-04-standalone-upload",
+              "note": "Single-diagram upload. figure_001 is the entire image. Text blocks populated downstream by PR-06 evidence pipeline."
+            }
+          }
+        }
+      },
+      {
+        "call": "00012_Models.generate_content",
+        "value": {
+          "model": "gemini-3.1-flash-lite",
+          "contents": [
+            {
+              "media_resolution": null,
+              "code_execution_result": null,
+              "executable_code": null,
+              "file_data": null,
+              "function_call": null,
+              "function_response": null,
+              "inline_data": {
+                "data": {
+                  "bytes": 38634,
+                  "sha256": "e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63",
+                  "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63.bin"
+                },
+                "display_name": null,
+                "mime_type": "image/jpeg"
+              },
+              "text": null,
+              "thought": null,
+              "thought_signature": null,
+              "video_metadata": null,
+              "tool_call": null,
+              "tool_response": null,
+              "part_metadata": null,
+              "audio_transcription": null,
+              "media_processing": null,
+              "speech_metadata": null
+            },
+            "You are an expert multimodal physics diagram semantic analyzer.\nYour task is to observe the provided textbook image and return a strictly structured JSON analysis.\n\nRULES & CONSTRAINTS:\n1. Distinguish between:\n   - \"supported\": Image clearly depicts a physics scenario for which our simulator has a solver:\n       Mechanics: \"pendulum\", \"projectile\"\n       Optics: \"thin_lens\", \"spherical_mirror\", \"interface_refraction\", \"prism\"\n       Circuits: \"dc_linear\"\n   - \"unsupported_physics\": A physics diagram that is NOT in the supported list (e.g. thermodynamics, wave interference, quantum, nuclear, fluid dynamics, electromagnetism).\n       Set: classification=\"unsupported_physics\", isPhysics=true, domain=null, subtype=null.\n   - \"non_physics\": A photograph, cartoon, text-only document, or illustration with no physics scenario (e.g. landscape, animal, person, food).\n       Set: classification=\"non_physics\", isPhysics=false, domain=null, subtype=null.\n   - \"unknown\": Ambiguous, noisy, or indeterminate diagram.\n       Set: classification=\"unknown\", isPhysics=null, domain=null, subtype=null.\n\n2. SUBTYPE VOCABULARY:\n   When classification is \"supported\", domain must be one of [\"mechanics\", \"optics\", \"circuits\"].\n   subtype must be EXACTLY one of:\n     [\"pendulum\", \"projectile\", \"thin_lens\", \"spherical_mirror\", \"interface_refraction\", \"prism\", \"dc_linear\"].\n   Do NOT output any other subtype string.\n\n3. ZERO FABRICATED PARAMETERS:\n   - Do NOT invent or assume numerical parameters (such as gravity = 9.81 m/s², focal length = 20 cm, resistance = 10 Ω).\n   - Only report visible textual/numerical labels in visibleLabels if they are explicitly visible in the image.\n\n4. SEMANTIC OBJECT ROLES:\n   - Identify visual components and assign clear roles:\n     - For pendulum: \"pivot\", \"bob\", \"string\", \"rod\", \"support_ceiling\", \"angle_marker\", \"equilibrium_position\", \"force_vector\", \"vertical_reference\", \"extreme_position\".\n     - For projectile: \"projectile_body\", \"launch_platform\", \"trajectory_path\", \"landing_surface\", \"velocity_vector\", \"apex_marker\", \"angle_marker\".\n     - For optics: \"lens\", \"optical_axis\", \"focal_point\", \"mirror\", \"optical_center\", \"object\", \"image\", \"light_ray\", \"interface_boundary\", \"normal_line\", \"incident_ray\", \"refracted_ray\", \"prism_body\".\n     - For circuits: \"resistor\", \"voltage_source\", \"current_source\", \"wire\", \"ground\", \"junction\", \"switch\", \"ammeter\", \"voltmeter\".\n   - If bounding box coordinates are provided, they are understood to be coarse/approximate.\n\n5. CONFIDENCE CALIBRATION & REALISM:\n   - Score confidence conservatively on a realistic scale from 0.0 to 1.0.\n   - Reserve 1.0 ONLY for absolute textbook canonical ground truth certainty.\n   - Standard clear diagrams typically range from 0.85 to 0.95.\n   - Ambiguous, cropped, or hand-drawn diagrams should be 0.50 to 0.80.\n   - For unsupported_physics or non_physics, domain and subtype confidence MUST be 0.0.\n   - Include an \"overall\" confidence score in confidence reflecting your aggregate certainty.\n\n6. OUTPUT FORMAT:\n   Return ONLY a valid JSON object matching this structure:\n{\n  \"classification\": \"supported\" | \"unsupported_physics\" | \"non_physics\" | \"unknown\",\n  \"isPhysics\": true | false | null,\n  \"domain\": \"mechanics\" | \"optics\" | \"circuits\" | null,\n  \"subtype\": \"pendulum\" | \"projectile\" | \"thin_lens\" | \"spherical_mirror\" | \"interface_refraction\" | \"prism\" | \"dc_linear\" | null,\n  \"confidence\": {\n    \"isPhysics\": 0.0 to 1.0,\n    \"domain\": 0.0 to 1.0,\n    \"subtype\": 0.0 to 1.0,\n    \"overall\": 0.0 to 1.0\n  },\n  \"entities\": [\n    {\n      \"temporaryId\": \"entity_1\",\n      \"role\": \"bob\",\n      \"label\": \"m\",\n      \"confidence\": 0.95\n    }\n  ],\n  \"relationships\": [\n    {\n      \"type\": \"connected_to\",\n      \"from\": \"entity_1\",\n      \"to\": \"entity_2\",\n      \"confidence\": 0.90\n    }\n  ],\n  \"visibleLabels\": [\n    {\n      \"text\": \"10 kg\",\n      \"confidence\": 0.85,\n      \"semanticRole\": \"mass_value\"\n    }\n  ],\n  \"candidates\": [],\n  \"notes\": [\"short observation\"]\n}\n"
+          ],
+          "config": {
+            "http_options": null,
+            "should_return_http_response": null,
+            "system_instruction": null,
+            "temperature": 0.1,
+            "top_p": null,
+            "top_k": null,
+            "candidate_count": null,
+            "max_output_tokens": null,
+            "stop_sequences": null,
+            "response_logprobs": null,
+            "logprobs": null,
+            "presence_penalty": null,
+            "frequency_penalty": null,
+            "seed": null,
+            "response_mime_type": "application/json",
+            "response_schema": {
+              "type": "OBJECT",
+              "properties": {
+                "classification": {
+                  "type": "STRING",
+                  "enum": [
+                    "supported",
+                    "unsupported_physics",
+                    "non_physics",
+                    "unknown"
+                  ]
+                },
+                "isPhysics": {
+                  "type": "BOOLEAN"
+                },
+                "domain": {
+                  "type": "STRING",
+                  "enum": [
+                    "mechanics",
+                    "optics",
+                    "circuits"
+                  ]
+                },
+                "subtype": {
+                  "type": "STRING",
+                  "enum": [
+                    "pendulum",
+                    "projectile",
+                    "thin_lens",
+                    "spherical_mirror",
+                    "interface_refraction",
+                    "prism",
+                    "dc_linear"
+                  ]
+                },
+                "confidence": {
+                  "type": "OBJECT",
+                  "properties": {
+                    "isPhysics": {
+                      "type": "NUMBER"
+                    },
+                    "domain": {
+                      "type": "NUMBER"
+                    },
+                    "subtype": {
+                      "type": "NUMBER"
+                    },
+                    "overall": {
+                      "type": "NUMBER"
+                    }
+                  },
+                  "required": [
+                    "isPhysics",
+                    "domain",
+                    "subtype"
+                  ]
+                },
+                "entities": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "temporaryId": {
+                        "type": "STRING"
+                      },
+                      "role": {
+                        "type": "STRING"
+                      },
+                      "label": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      }
+                    },
+                    "required": [
+                      "temporaryId",
+                      "role"
+                    ]
+                  }
+                },
+                "relationships": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "type": {
+                        "type": "STRING"
+                      },
+                      "from": {
+                        "type": "STRING"
+                      },
+                      "to": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "from",
+                      "to"
+                    ]
+                  }
+                },
+                "visibleLabels": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "text": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      },
+                      "semanticRole": {
+                        "type": "STRING"
+                      }
+                    },
+                    "required": [
+                      "text"
+                    ]
+                  }
+                },
+                "candidates": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "domain": {
+                        "type": "STRING"
+                      },
+                      "subtype": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "STRING"
+                  }
+                }
+              },
+              "required": [
+                "classification",
+                "confidence"
+              ]
+            },
+            "response_json_schema": null,
+            "routing_config": null,
+            "model_selection_config": null,
+            "safety_settings": null,
+            "tools": null,
+            "tool_config": null,
+            "labels": null,
+            "cached_content": null,
+            "response_modalities": null,
+            "media_resolution": null,
+            "speech_config": null,
+            "audio_timestamp": null,
+            "automatic_function_calling": null,
+            "thinking_config": null,
+            "image_config": null,
+            "enable_enhanced_civic_answers": null,
+            "model_armor_config": null,
+            "service_tier": null,
+            "audio_transcription_config": null
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The same encoded image, semantic prompt, configured model and response schema. Credentials are redacted.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00010_GeminiVisionProvider.analyze_diagram",
+        "return_value": {
+          "classification": "supported",
+          "is_physics": true,
+          "domain": "circuits",
+          "subtype": "dc_linear",
+          "confidence": {
+            "is_physics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "raw_provider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "entities": [
+            {
+              "temporary_id": "voltage_source_1",
+              "role": "voltage_source",
+              "label": "12 V",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "switch_1",
+              "role": "switch",
+              "label": "S",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_1",
+              "role": "resistor",
+              "label": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_2",
+              "role": "resistor",
+              "label": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "wire_1",
+              "role": "wire",
+              "label": "I",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            }
+          ],
+          "relationships": [
+            {
+              "type": "connected_in_series",
+              "source_id": "voltage_source_1",
+              "target_id": "switch_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "switch_1",
+              "target_id": "resistor_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_1",
+              "target_id": "resistor_2",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_2",
+              "target_id": "voltage_source_1",
+              "confidence": 0.95
+            }
+          ],
+          "visible_labels": [
+            {
+              "text": "12 V",
+              "confidence": 0.95,
+              "semantic_role": "voltage_value",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "S",
+              "confidence": 0.95,
+              "semantic_role": "switch_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "I",
+              "confidence": 0.95,
+              "semantic_role": "current_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "Fig. 9 Series DC Circuit",
+              "confidence": 0.95,
+              "semantic_role": "caption",
+              "source": "vlm",
+              "verified": false
+            }
+          ],
+          "candidates": [],
+          "notes": [
+            "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+          ],
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "prompt_version": "pr05-v1",
+          "timestamp": "2026-10-17T03:28:01.161901+00:00",
+          "latency_ms": 8245,
+          "cache_hit": false,
+          "fallback_used": false,
+          "debug": {}
+        }
+      },
+      {
+        "call": "00012_Models.generate_content",
+        "return_value": {
+          "sdk_http_response": {
+            "headers": {
+              "x-gemini-service-tier": "standard",
+              "content-type": "application/json; charset=UTF-8",
+              "vary": "Origin, X-Origin, Referer",
+              "content-encoding": "gzip",
+              "date": "Sat, 17 Oct 2026 03:28:00 GMT",
+              "server": "scaffolding on HTTPServer2",
+              "x-xss-protection": "0",
+              "x-frame-options": "SAMEORIGIN",
+              "x-content-type-options": "nosniff",
+              "server-timing": "gfet4t7; dur=7862",
+              "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+              "transfer-encoding": "chunked"
+            },
+            "body": null
+          },
+          "candidates": [
+            {
+              "content": {
+                "parts": [
+                  {
+                    "media_resolution": null,
+                    "code_execution_result": null,
+                    "executable_code": null,
+                    "file_data": null,
+                    "function_call": null,
+                    "function_response": null,
+                    "inline_data": null,
+                    "text": "{\n  \"classification\": \"supported\",\n  \"isPhysics\": true,\n  \"domain\": \"circuits\",\n  \"subtype\": \"dc_linear\",\n  \"confidence\": {\n    \"isPhysics\": 1.0,\n    \"domain\": 1.0,\n    \"subtype\": 1.0,\n    \"overall\": 1.0\n  },\n  \"entities\": [\n    {\n      \"temporaryId\": \"voltage_source_1\",\n      \"role\": \"voltage_source\",\n      \"label\": \"12 V\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"switch_1\",\n      \"role\": \"switch\",\n      \"label\": \"S\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"resistor_1\",\n      \"role\": \"resistor\",\n      \"label\": \"R1 = 10 Ω\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"resistor_2\",\n      \"role\": \"resistor\",\n      \"label\": \"R2 = 20 Ω\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"wire_1\",\n      \"role\": \"wire\",\n      \"label\": \"I\",\n      \"confidence\": 0.95\n    }\n  ],\n  \"relationships\": [\n    {\n      \"type\": \"connected_in_series\",\n      \"from\": \"voltage_source_1\",\n      \"to\": \"switch_1\",\n      \"confidence\": 1.0\n    },\n    {\n      \"type\": \"connected_in_series\",\n      \"from\": \"switch_1\",\n      \"to\": \"resistor_1\",\n      \"confidence\": 1.0\n    },\n    {\n      \"type\": \"connected_in_series\",\n      \"from\": \"resistor_1\",\n      \"to\": \"resistor_2\",\n      \"confidence\": 1.0\n    },\n    {\n      \"type\": \"connected_in_series\",\n      \"from\": \"resistor_2\",\n      \"to\": \"voltage_source_1\",\n      \"confidence\": 1.0\n    }\n  ],\n  \"visibleLabels\": [\n    {\n      \"text\": \"12 V\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"voltage_value\"\n    },\n    {\n      \"text\": \"S\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"switch_label\"\n    },\n    {\n      \"text\": \"R1 = 10 Ω\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"resistor_label\"\n    },\n    {\n      \"text\": \"R2 = 20 Ω\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"resistor_label\"\n    },\n    {\n      \"text\": \"I\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"current_label\"\n    },\n    {\n      \"text\": \"Fig. 9 Series DC Circuit\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"caption\"\n    }\n  ],\n  \"candidates\": [],\n  \"notes\": [\n    \"The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors.\"\n  ]\n}",
+                    "thought": null,
+                    "thought_signature": {
+                      "bytes": 117,
+                      "sha256": "5c1a88fb2cb3d3ba40a745c629ff3aa1412fb3bf8f597d95cd622b4a1e1649e7",
+                      "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\5c1a88fb2cb3d3ba40a745c629ff3aa1412fb3bf8f597d95cd622b4a1e1649e7.bin"
+                    },
+                    "video_metadata": null,
+                    "tool_call": null,
+                    "tool_response": null,
+                    "part_metadata": null,
+                    "audio_transcription": null,
+                    "media_processing": null,
+                    "speech_metadata": null
+                  }
+                ],
+                "role": "model"
+              },
+              "citation_metadata": null,
+              "finish_message": null,
+              "token_count": null,
+              "finish_reason": "STOP",
+              "grounding_metadata": null,
+              "avg_logprobs": null,
+              "index": 0,
+              "logprobs_result": null,
+              "safety_ratings": null,
+              "url_context_metadata": null
+            }
+          ],
+          "create_time": null,
+          "model_version": "gemini-3.1-flash-lite",
+          "prompt_feedback": null,
+          "response_id": "OevSatu6OdzFg8UP5ePU-As",
+          "usage_metadata": {
+            "cache_tokens_details": null,
+            "cached_content_token_count": null,
+            "candidates_token_count": 812,
+            "candidates_tokens_details": null,
+            "prompt_token_count": 2233,
+            "prompt_tokens_details": [
+              {
+                "modality": "TEXT",
+                "token_count": 1169
+              },
+              {
+                "modality": "IMAGE",
+                "token_count": 1064
+              }
+            ],
+            "thoughts_token_count": null,
+            "tool_use_prompt_token_count": null,
+            "tool_use_prompt_tokens_details": null,
+            "total_token_count": 3045,
+            "traffic_type": null
+          },
+          "model_status": null,
+          "automatic_function_calling_history": [],
+          "parsed": {
+            "classification": "supported",
+            "isPhysics": true,
+            "domain": "circuits",
+            "subtype": "dc_linear",
+            "confidence": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            },
+            "entities": [
+              {
+                "temporaryId": "voltage_source_1",
+                "role": "voltage_source",
+                "label": "12 V",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "switch_1",
+                "role": "switch",
+                "label": "S",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "resistor_1",
+                "role": "resistor",
+                "label": "R1 = 10 Ω",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "resistor_2",
+                "role": "resistor",
+                "label": "R2 = 20 Ω",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "wire_1",
+                "role": "wire",
+                "label": "I",
+                "confidence": 0.95
+              }
+            ],
+            "relationships": [
+              {
+                "type": "connected_in_series",
+                "from": "voltage_source_1",
+                "to": "switch_1",
+                "confidence": 1.0
+              },
+              {
+                "type": "connected_in_series",
+                "from": "switch_1",
+                "to": "resistor_1",
+                "confidence": 1.0
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_1",
+                "to": "resistor_2",
+                "confidence": 1.0
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_2",
+                "to": "voltage_source_1",
+                "confidence": 1.0
+              }
+            ],
+            "visibleLabels": [
+              {
+                "text": "12 V",
+                "confidence": 1.0,
+                "semanticRole": "voltage_value"
+              },
+              {
+                "text": "S",
+                "confidence": 1.0,
+                "semanticRole": "switch_label"
+              },
+              {
+                "text": "R1 = 10 Ω",
+                "confidence": 1.0,
+                "semanticRole": "resistor_label"
+              },
+              {
+                "text": "R2 = 20 Ω",
+                "confidence": 1.0,
+                "semanticRole": "resistor_label"
+              },
+              {
+                "text": "I",
+                "confidence": 1.0,
+                "semanticRole": "current_label"
+              },
+              {
+                "text": "Fig. 9 Series DC Circuit",
+                "confidence": 1.0,
+                "semanticRole": "caption"
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+            ]
+          }
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Semantic classification, domain/subtype, entity roles and relationships. Numerical physical parameters and authoritative geometry must not originate here.",
+  "expected_diagram": "Expected accepted classification: supported; isPhysics=true; domain/subtype=circuits / dc_linear. Expected semantic content: A 12 V battery with polarity marks, an OPEN switch S, R1=10 Ω on the top branch, R2=20 Ω on the right vertical branch, connecting wires and a current-direction annotation. These are semantic roles/labels, not authorization to supply numerical parameters or precise positions.",
+  "status": "PASS WITH LIMITS",
+  "finding": "Accepted domain/subtype agrees with the source. Semantic-only output is appropriate here; missing source geometry is intentional. Raw provider confidence can be 1.0; accepted confidence is capped by validation.",
+  "change_or_loss": "Image → model response. SDK/provider-internal preprocessing and private tensors were not exposed; no transform is invented for them."
+}

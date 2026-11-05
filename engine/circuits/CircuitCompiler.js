@@ -70,6 +70,7 @@ export class CircuitCompiler {
     // 3. Classify components and assign auxiliary source current variables
     const voltageSources = [];
     const resistors = [];
+    const capacitors = [];
     const switches = [];
     const ammeters = [];
     const voltmeters = [];
@@ -86,8 +87,11 @@ export class CircuitCompiler {
         c.nodes = c.terminals.map(t => t.node).filter(Boolean);
       }
 
-      // Ensure value and unit are populated from parameters if not present
-      if (c.value === undefined && c.parameters) {
+      // Ensure value and unit are populated from scene parameters or component parameters
+      if (scene.parameters?.[c.id]?.value !== undefined) {
+        c.value = Number(scene.parameters[c.id].value);
+        c.unit = scene.parameters[c.id].unit || c.unit;
+      } else if (c.value === undefined && c.parameters) {
         const p = c.parameters.voltage_v || c.parameters.voltage ||
                   c.parameters.resistance_ohm || c.parameters.resistance ||
                   c.parameters.current_a || c.parameters.current ||
@@ -104,6 +108,9 @@ export class CircuitCompiler {
       }
       if (c.bbox_source_px && !c.geometry.bbox_source_px) {
         c.geometry.bbox_source_px = c.bbox_source_px;
+      }
+      if (c.label_bbox_source_px && !c.geometry.label_bbox_source_px) {
+        c.geometry.label_bbox_source_px = c.label_bbox_source_px;
       }
       if (c.geometry.bbox_source_px && !c.geometry.center_source_px) {
         const [x1, y1, x2, y2] = c.geometry.bbox_source_px;
@@ -167,6 +174,10 @@ export class CircuitCompiler {
           switches.push(c);
           break;
 
+        case 'capacitor':
+          capacitors.push(c);
+          break;
+
         case 'ammeter':
           // Ideal ammeter acts as a 0V voltage source to measure series current
           c.sourceVarIndex = nextSourceIdx++;
@@ -193,7 +204,14 @@ export class CircuitCompiler {
     const wireById = new Map();
 
     for (const wire of rawWires) {
-      const pts = wire.polyline_source_px || wire.points || wire.path_source_px || [];
+      let pts = wire.polyline_source_px || wire.points || wire.path_source_px || null;
+      if (!pts && wire.start && wire.end) {
+        pts = [
+          [wire.start.x ?? wire.start[0], wire.start.y ?? wire.start[1]],
+          [wire.end.x ?? wire.end[0], wire.end.y ?? wire.end[1]]
+        ];
+      }
+      if (!pts) pts = [];
       const poly = this._compilePolyline(pts);
 
       let currentReference = wire.currentReference || wire.current_reference || null;
@@ -231,6 +249,14 @@ export class CircuitCompiler {
             }
           }
         }
+
+        if (!currentReference && wire.node) {
+          const comp = Array.from(componentById.values()).find(c => c.terminals?.some(t => t.node === wire.node));
+          if (comp) {
+            const isSource = comp.type === 'voltage_source' || comp.type === 'battery' || comp.type === 'dc_source';
+            currentReference = { componentId: comp.id, sign: isSource ? -1 : 1 };
+          }
+        }
       }
 
       const compiledWire = {
@@ -259,6 +285,7 @@ export class CircuitCompiler {
       matrixSize,
       voltageSources,
       resistors,
+      capacitors,
       switches,
       ammeters,
       voltmeters,

@@ -112,6 +112,10 @@ UNIVERSAL_INVARIANTS = {
     "no_fabricated_parameters": "BookIR parameters must be empty {}",
 }
 
+if __name__ != "__main__":
+    import pytest
+    pytest.skip("Standalone live script: run directly with python tests/acceptance/test_pr05_live_gemini.py", allow_module_level=True)
+
 print("=" * 80)
 print("PR-05 MANDATORY REAL GEMINI ACCEPTANCE TEST SUITE")
 print("=" * 80)

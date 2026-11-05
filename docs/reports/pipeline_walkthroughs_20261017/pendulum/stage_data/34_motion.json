@@ -1,0 +1,1981 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 34,
+  "component": "Activation, motion and reset",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/main.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "Actual renderer at t=0 over the original",
+  "downstream_stage": "Final observed browser state",
+  "actual_input": {
+    "records": [
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator.startSimulation",
+        "phase": "input",
+        "wallTime": 40886.59999999404,
+        "data": []
+      },
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "PhysicsRuntime.start",
+        "phase": "input",
+        "wallTime": 40887.20000001788,
+        "data": []
+      },
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "PhysicsRuntime.reset",
+        "phase": "input",
+        "wallTime": 42441.70000001788,
+        "data": []
+      },
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "PhysicsRuntime.start",
+        "phase": "input",
+        "wallTime": 43056.59999999404,
+        "data": []
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The initialized scene/state and actual Play/Pause/Reset control actions.",
+  "actual_output": {
+    "records": [
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator.startSimulation",
+        "phase": "output",
+        "wallTime": 40887,
+        "data": {
+          "schemaVersion": "1.0",
+          "id": "PHY-MECH-figure_001",
+          "domain": "mechanics",
+          "subtype": "pendulum",
+          "source": {
+            "type": "book_figure",
+            "source_asset_id": "25c3ba19a02041ee9ec790156fc87e44",
+            "figure_id": "figure_001",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "image": "/uploads/diagram_25c3ba19.jpg"
+          },
+          "coordinateSpace": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "coordinateSystem": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "parameters": {
+            "length": {
+              "value": 1,
+              "unit": "m",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                "policyId": "policy_standard_pendulum_length",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "gravity": {
+              "value": 9.80665,
+              "unit": "m/s²",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_earth_gravity)",
+                "policyId": "policy_earth_gravity",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "initialAngle": {
+              "value": 26.117406100584446,
+              "unit": "°",
+              "provenance": "observed"
+            },
+            "mass": {
+              "value": 1,
+              "unit": "kg",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_standard_mass)",
+                "policyId": "policy_standard_mass",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "damping": {
+              "value": 0,
+              "unit": "1/s",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_zero_damping)",
+                "policyId": "policy_zero_damping",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            }
+          },
+          "assumptions": [
+            {
+              "parameter": "gravity",
+              "policyId": "policy_earth_gravity",
+              "policyVersion": "1.0",
+              "value": 9.80665,
+              "unit": "m/s²",
+              "reason": "Standard terrestrial acceleration due to gravity (g = 9.80665 m/s² ~ 9.8 m/s²).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            },
+            {
+              "parameter": "damping",
+              "policyId": "policy_zero_damping",
+              "policyVersion": "1.0",
+              "value": 0,
+              "unit": "1/s",
+              "reason": "Neglect atmospheric drag and pivot mechanical friction (damping = 0.0 1/s).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            },
+            {
+              "parameter": "mass",
+              "policyId": "policy_standard_mass",
+              "policyVersion": "1.0",
+              "value": 1,
+              "unit": "kg",
+              "reason": "Assign 1.0 kg unit bob mass (does not alter ideal pendulum period T = 2π√(L/g)).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            },
+            {
+              "parameter": "length",
+              "policyId": "policy_standard_pendulum_length",
+              "policyVersion": "1.0",
+              "value": 1,
+              "unit": "m",
+              "reason": "Standard 1.0 m simple pendulum string length.",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            }
+          ],
+          "geometry": {
+            "width": 1280,
+            "height": 960,
+            "coordinate_space": "source_px",
+            "pivot": {
+              "x": 562,
+              "y": 79.23811193908072
+            },
+            "bob_center": {
+              "x": 841.3633806409911,
+              "y": 649.0514992664916
+            },
+            "string_length_px": 634.61,
+            "length_px": 634.61,
+            "bob_radius_px": 37.03476174228877
+          },
+          "objects": [
+            {
+              "id": "bob_1",
+              "type": "pendulum",
+              "role": "dynamic",
+              "label": "m",
+              "evidence_refs": [
+                "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                "ev_seg_bob_mask_bob_53389",
+                "ev_ocr_ocr_tok_002"
+              ],
+              "geometry": {
+                "pivot": {
+                  "x": 562,
+                  "y": 79.23811193908072
+                },
+                "string_length_px": 634.61,
+                "length_px": 634.61,
+                "bob_radius_px": 37.03476174228877
+              },
+              "physics": {
+                "length_m": 1,
+                "mass_kg": 1,
+                "damping_s_inv": 0,
+                "theta0_rad": 0.4558347285356519,
+                "omega0_rad_s": 0
+              }
+            }
+          ],
+          "render": {
+            "coordinate_space": "source_px"
+          },
+          "environment": {
+            "gravity": 9.80665,
+            "gravity_m_s2": 9.80665
+          },
+          "visual": {
+            "background_url": "/uploads/diagram_25c3ba19.jpg"
+          }
+        }
+      },
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "PhysicsRuntime.start",
+        "phase": "output",
+        "wallTime": 40888.59999999404,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "PhysicsRuntime.reset",
+        "phase": "output",
+        "wallTime": 42442.90000000596,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+        "component": "PhysicsRuntime.start",
+        "phase": "output",
+        "wallTime": 43057.5,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      },
+      {
+        "after_play": {
+          "traceId": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+          "orchestrator": {
+            "state": "SIMULATING",
+            "currentError": null,
+            "bookIR": {
+              "version": "1.0",
+              "sourceAssetId": "25c3ba19a02041ee9ec790156fc87e44",
+              "pageIRVersion": "1.0",
+              "figureId": "figure_001",
+              "domain": "mechanics",
+              "subtype": "pendulum",
+              "entities": [
+                {
+                  "id": "pivot_1",
+                  "type": "pivot",
+                  "label": "pivot",
+                  "positionSourcePx": {
+                    "x": 562,
+                    "y": 79.23811193908072,
+                    "coordinate_space": "source_px",
+                    "method": "vertical_reference_intersection"
+                  },
+                  "geometry": null,
+                  "attributes": {
+                    "confidence": 0.95,
+                    "precision": "approximate",
+                    "vlmLocalizationVerified": false
+                  },
+                  "evidenceRefs": [
+                    "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44"
+                  ]
+                },
+                {
+                  "id": "bob_1",
+                  "type": "bob",
+                  "label": "m",
+                  "positionSourcePx": {
+                    "x": 841.3633806409911,
+                    "y": 649.0514992664916,
+                    "coordinate_space": "source_px",
+                    "method": "fused_cv_sam",
+                    "center_agreement_distance_px": 1.23
+                  },
+                  "geometry": {
+                    "bounds": {
+                      "x": 804.3286188987023,
+                      "y": 612.0167375242029,
+                      "width": 74.06952348457754,
+                      "height": 74.06952348457754
+                    },
+                    "radius_px": 37.03476174228877,
+                    "mask_ref": "mask_bob_53389",
+                    "area_px": 4625
+                  },
+                  "attributes": {
+                    "confidence": 0.95,
+                    "precision": "approximate",
+                    "vlmLocalizationVerified": false
+                  },
+                  "evidenceRefs": [
+                    "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                    "ev_seg_bob_mask_bob_53389",
+                    "ev_ocr_ocr_tok_002"
+                  ]
+                },
+                {
+                  "id": "string_1",
+                  "type": "string",
+                  "label": "L",
+                  "positionSourcePx": null,
+                  "geometry": {
+                    "start": {
+                      "x": 562,
+                      "y": 79.23811193908072
+                    },
+                    "end": {
+                      "x": 841.3633806409911,
+                      "y": 649.0514992664916
+                    },
+                    "length_px": 634.61,
+                    "visible_string_start": {
+                      "x": 556,
+                      "y": 67
+                    },
+                    "visible_string_end": {
+                      "x": 830,
+                      "y": 617
+                    },
+                    "visible_length_px": 614.47,
+                    "effective_length_px": 634.61,
+                    "attachment_point": {
+                      "x": 824.8323943921771,
+                      "y": 615.910888666359
+                    },
+                    "effective_pendulum": {
+                      "start": {
+                        "x": 562,
+                        "y": 79.23811193908072
+                      },
+                      "end": {
+                        "x": 841.3633806409911,
+                        "y": 649.0514992664916
+                      },
+                      "length_px": 634.61
+                    },
+                    "visible_string": {
+                      "start": {
+                        "x": 556,
+                        "y": 67
+                      },
+                      "end": {
+                        "x": 830,
+                        "y": 617
+                      },
+                      "length_px": 614.47
+                    }
+                  },
+                  "attributes": {
+                    "confidence": 0.95,
+                    "precision": "approximate",
+                    "vlmLocalizationVerified": false
+                  },
+                  "evidenceRefs": [
+                    "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                    "ev_ocr_ocr_tok_001"
+                  ]
+                },
+                {
+                  "id": "ref_1",
+                  "type": "vertical_reference",
+                  "label": "vertical_line",
+                  "positionSourcePx": {
+                    "x": 562,
+                    "y": 61,
+                    "coordinate_space": "source_px",
+                    "method": "line_detection"
+                  },
+                  "geometry": {
+                    "start": {
+                      "x": 562,
+                      "y": 61
+                    },
+                    "end": {
+                      "x": 562,
+                      "y": 774
+                    },
+                    "length_px": 713,
+                    "style": "dashed"
+                  },
+                  "attributes": {
+                    "confidence": 0.95,
+                    "precision": "approximate",
+                    "vlmLocalizationVerified": false
+                  },
+                  "evidenceRefs": [
+                    "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44"
+                  ]
+                }
+              ],
+              "relationships": [
+                {
+                  "type": "connected_to",
+                  "from": "bob_1",
+                  "to": "string_1",
+                  "confidence": 0.95
+                },
+                {
+                  "type": "connected_to",
+                  "from": "string_1",
+                  "to": "pivot_1",
+                  "confidence": 0.95
+                }
+              ],
+              "parameters": {
+                "bob_radius_px": {
+                  "value": 37.03476174228877,
+                  "unit": "px",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "cv",
+                    "evidenceRefs": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                      "ev_seg_bob_mask_bob_53389"
+                    ],
+                    "derivedFrom": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                      "ev_seg_bob_mask_bob_53389"
+                    ],
+                    "confidence": 0.92,
+                    "notes": ""
+                  }
+                },
+                "bob_position": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916,
+                  "provenance": {
+                    "source": "cv_sam_fused",
+                    "evidence_refs": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                      "ev_seg_bob_mask_bob_53389"
+                    ],
+                    "confidence": 0.95
+                  }
+                },
+                "string_length_px": {
+                  "value": 634.61,
+                  "unit": "px",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "derived",
+                    "evidenceRefs": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                      "ev_seg_bob_mask_bob_53389"
+                    ],
+                    "derivedFrom": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                      "ev_seg_bob_mask_bob_53389"
+                    ],
+                    "confidence": 0.92,
+                    "notes": "Derived from verified pivot and bob center."
+                  }
+                },
+                "pivot": {
+                  "x": 562,
+                  "y": 79.23811193908072,
+                  "provenance": {
+                    "source": "cv",
+                    "evidence_refs": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44"
+                    ],
+                    "confidence": 0.92
+                  }
+                },
+                "visual_angle_deg": {
+                  "value": 26.12,
+                  "unit": "deg",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "derived",
+                    "evidenceRefs": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44"
+                    ],
+                    "derivedFrom": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44"
+                    ],
+                    "confidence": 0.88,
+                    "notes": "Derived geometrically from pivot-to-bob vector relative to downward vertical."
+                  }
+                },
+                "gravity": 9.80665,
+                "damping": 0,
+                "mass": 1,
+                "length": 1,
+                "pixels_per_meter": 634.61
+              },
+              "geometry": {
+                "width": 1280,
+                "height": 960,
+                "coordinate_space": "source_px"
+              },
+              "assumptions": [
+                {
+                  "parameter": "gravity",
+                  "policyId": "policy_earth_gravity",
+                  "policyVersion": "1.0",
+                  "value": 9.80665,
+                  "unit": "m/s²",
+                  "reason": "Standard terrestrial acceleration due to gravity (g = 9.80665 m/s² ~ 9.8 m/s²).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "damping",
+                  "policyId": "policy_zero_damping",
+                  "policyVersion": "1.0",
+                  "value": 0,
+                  "unit": "1/s",
+                  "reason": "Neglect atmospheric drag and pivot mechanical friction (damping = 0.0 1/s).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "mass",
+                  "policyId": "policy_standard_mass",
+                  "policyVersion": "1.0",
+                  "value": 1,
+                  "unit": "kg",
+                  "reason": "Assign 1.0 kg unit bob mass (does not alter ideal pendulum period T = 2π√(L/g)).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "length",
+                  "policyId": "policy_standard_pendulum_length",
+                  "policyVersion": "1.0",
+                  "value": 1,
+                  "unit": "m",
+                  "reason": "Standard 1.0 m simple pendulum string length.",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                }
+              ],
+              "provenance": {
+                "pipeline": "PR-05-vlm",
+                "provider": "gemini",
+                "model": "gemini-3.1-flash-lite",
+                "prompt_version": "pr05-v1",
+                "timestamp": "2026-10-17T03:28:45.104214+00:00",
+                "classification": "supported",
+                "visible_labels": [
+                  {
+                    "text": "θ",
+                    "confidence": 0.95,
+                    "semanticRole": "angle",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "L",
+                    "confidence": 0.95,
+                    "semanticRole": "length",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "m",
+                    "confidence": 0.95,
+                    "semanticRole": "mass",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "Fig. 1 Simple Pendulum",
+                    "confidence": 0.95,
+                    "semanticRole": "caption",
+                    "source": "vlm",
+                    "verified": false
+                  }
+                ],
+                "candidates": [],
+                "notes": [
+                  "The image is a standard textbook diagram of a simple pendulum."
+                ],
+                "latency_ms": 3541,
+                "cache_hit": false,
+                "fallback_used": false,
+                "source_width": 1280,
+                "source_height": 960,
+                "grounding_diagnostics": [
+                  {
+                    "entityId": "bob_1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                      "ev_seg_bob_mask_bob_53389",
+                      "ev_ocr_ocr_tok_002"
+                    ],
+                    "checks": {
+                      "cv_center": {
+                        "x": 841.3633806409911,
+                        "y": 649.0514992664916
+                      },
+                      "sam_centroid": {
+                        "x": 841.8054054054054,
+                        "y": 650.2034594594595
+                      },
+                      "center_distance_px": 1.23,
+                      "tolerance_px": 14.81
+                    },
+                    "conflicts": [],
+                    "notes": "CV circle and SAM 2 mask centroids agree within tolerance and pass consistency checks."
+                  },
+                  {
+                    "entityId": "string_1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                      "ev_ocr_ocr_tok_001"
+                    ],
+                    "checks": {
+                      "start": {
+                        "x": 562,
+                        "y": 79.23811193908072
+                      },
+                      "end": {
+                        "x": 841.3633806409911,
+                        "y": 649.0514992664916
+                      },
+                      "visible_length_px": 614.47,
+                      "effective_length_px": 634.61
+                    },
+                    "conflicts": [],
+                    "notes": "String verified and connected to bob candidate."
+                  },
+                  {
+                    "entityId": "pivot_1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44"
+                    ],
+                    "checks": {
+                      "pivot": {
+                        "x": 562,
+                        "y": 79.23811193908072
+                      },
+                      "vertical_reference_x": 562,
+                      "vref_residual_px": 0,
+                      "support_residual_px": 16.761888060919276,
+                      "string_fit_residual_px": 0
+                    },
+                    "conflicts": [],
+                    "notes": "Pivot grounded at multi-constraint suspension junction."
+                  },
+                  {
+                    "entityId": "ref_1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44"
+                    ],
+                    "checks": {
+                      "start": {
+                        "x": 562,
+                        "y": 61
+                      },
+                      "end": {
+                        "x": 562,
+                        "y": 774
+                      },
+                      "length_px": 713
+                    },
+                    "conflicts": [],
+                    "notes": "Vertical reference dashed line detected and grounded."
+                  }
+                ],
+                "candidate_parameters": [
+                  {
+                    "rawText": "L",
+                    "numericValue": null,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": "length_symbol",
+                    "sourceOcrTokenId": "ocr_tok_001",
+                    "confidence": 0.99996
+                  },
+                  {
+                    "rawText": "m",
+                    "numericValue": null,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": "mass_symbol",
+                    "sourceOcrTokenId": "ocr_tok_002",
+                    "confidence": 0.99987
+                  },
+                  {
+                    "rawText": "θ",
+                    "numericValue": null,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": "angle_symbol",
+                    "sourceOcrTokenId": "ocr_tok_greek_theta_597_270",
+                    "confidence": 0.96
+                  }
+                ],
+                "evidence_pipeline_latency_ms": 28625.551899982383
+              },
+              "evidence": {
+                "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44": {
+                  "id": "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                  "method": "classical_cv",
+                  "sourceAssetId": "25c3ba19a02041ee9ec790156fc87e44",
+                  "figureId": "figure_001",
+                  "confidence": 0.85,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "opencv_hough_tls",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "bob_center": {
+                      "x": 841.3633806409911,
+                      "y": 649.0514992664916
+                    },
+                    "bob_radius_px": 37.03476174228877,
+                    "string_start": {
+                      "x": 562,
+                      "y": 79.23811193908072
+                    },
+                    "string_end": {
+                      "x": 841.3633806409911,
+                      "y": 649.0514992664916
+                    },
+                    "string_length_px": 634.6110579092531,
+                    "pivot": {
+                      "x": 562,
+                      "y": 79.23811193908072
+                    },
+                    "vertical_reference": {
+                      "start": {
+                        "x": 562,
+                        "y": 61
+                      },
+                      "end": {
+                        "x": 562,
+                        "y": 774
+                      },
+                      "length_px": 713
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_seg_bob_mask_bob_53389": {
+                  "id": "ev_seg_bob_mask_bob_53389",
+                  "method": "segmentation",
+                  "sourceAssetId": "25c3ba19a02041ee9ec790156fc87e44",
+                  "figureId": "figure_001",
+                  "confidence": 0.9772201180458069,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "sam2.1",
+                  "model": "sam2.1_hiera_tiny",
+                  "version": null,
+                  "payload": {
+                    "centroid": {
+                      "x": 841.8054054054054,
+                      "y": 650.2034594594595
+                    },
+                    "area_px": 4625,
+                    "bounds": {
+                      "x": 804,
+                      "y": 612,
+                      "width": 75,
+                      "height": 76
+                    },
+                    "mask_id": "mask_bob_53389"
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_003": {
+                  "id": "ev_ocr_ocr_tok_003",
+                  "method": "ocr",
+                  "sourceAssetId": "25c3ba19a02041ee9ec790156fc87e44",
+                  "figureId": "figure_001",
+                  "confidence": 0.98953,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "Fig. 1 Simple Pendulum",
+                    "normalized_text": null,
+                    "bbox": {
+                      "x": 338,
+                      "y": 827,
+                      "width": 599,
+                      "height": 78
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_001": {
+                  "id": "ev_ocr_ocr_tok_001",
+                  "method": "ocr",
+                  "sourceAssetId": "25c3ba19a02041ee9ec790156fc87e44",
+                  "figureId": "figure_001",
+                  "confidence": 0.99996,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "L",
+                    "normalized_text": null,
+                    "bbox": {
+                      "x": 738,
+                      "y": 357,
+                      "width": 55,
+                      "height": 61
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_002": {
+                  "id": "ev_ocr_ocr_tok_002",
+                  "method": "ocr",
+                  "sourceAssetId": "25c3ba19a02041ee9ec790156fc87e44",
+                  "figureId": "figure_001",
+                  "confidence": 0.99987,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "m",
+                    "normalized_text": null,
+                    "bbox": {
+                      "x": 896,
+                      "y": 632,
+                      "width": 63,
+                      "height": 50
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_greek_theta_597_270": {
+                  "id": "ev_ocr_ocr_tok_greek_theta_597_270",
+                  "method": "ocr",
+                  "sourceAssetId": "25c3ba19a02041ee9ec790156fc87e44",
+                  "figureId": "figure_001",
+                  "confidence": 0.96,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "θ",
+                    "normalized_text": "θ",
+                    "bbox": {
+                      "x": 597,
+                      "y": 270,
+                      "width": 28,
+                      "height": 43
+                    }
+                  },
+                  "metadata": {}
+                }
+              },
+              "confidence": {
+                "isPhysics": 0.99,
+                "domain": 0.98,
+                "subtype": 0.96,
+                "overall": 0.96,
+                "rawProvider": {
+                  "isPhysics": 1,
+                  "domain": 1,
+                  "subtype": 1,
+                  "overall": 1
+                }
+              },
+              "status": "READY_TO_COMPILE",
+              "statusNotes": "Visual evidence extracted; ready for compiler parameter verification.",
+              "resolutions": {
+                "gravity": {
+                  "id": "auto_policy_earth_gravity",
+                  "requirementId": "",
+                  "parameterName": "gravity",
+                  "value": 9.80665,
+                  "resolvedValue": 9.80665,
+                  "unit": "m/s²",
+                  "canonicalUnit": "m/s²",
+                  "rawInput": "9.80665",
+                  "originalEnteredValue": "9.80665",
+                  "source": "policy_default",
+                  "resolutionSource": "policy_default",
+                  "policyId": "policy_earth_gravity",
+                  "policyVersion": "1.0",
+                  "supersededValue": null,
+                  "evidenceRefs": [],
+                  "timestamp": "",
+                  "notes": "Automatic model assumption: Standard terrestrial acceleration due to gravity (g = 9.80665 m/s² ~ 9.8 m/s²).",
+                  "userAccepted": false,
+                  "resolvedBy": "auto_policy"
+                },
+                "damping": {
+                  "id": "auto_policy_zero_damping",
+                  "requirementId": "",
+                  "parameterName": "damping",
+                  "value": 0,
+                  "resolvedValue": 0,
+                  "unit": "1/s",
+                  "canonicalUnit": "1/s",
+                  "rawInput": "0.0",
+                  "originalEnteredValue": "0.0",
+                  "source": "policy_default",
+                  "resolutionSource": "policy_default",
+                  "policyId": "policy_zero_damping",
+                  "policyVersion": "1.0",
+                  "supersededValue": null,
+                  "evidenceRefs": [],
+                  "timestamp": "",
+                  "notes": "Automatic model assumption: Neglect atmospheric drag and pivot mechanical friction (damping = 0.0 1/s).",
+                  "userAccepted": false,
+                  "resolvedBy": "auto_policy"
+                },
+                "mass": {
+                  "id": "auto_policy_standard_mass",
+                  "requirementId": "",
+                  "parameterName": "mass",
+                  "value": 1,
+                  "resolvedValue": 1,
+                  "unit": "kg",
+                  "canonicalUnit": "kg",
+                  "rawInput": "1.0",
+                  "originalEnteredValue": "1.0",
+                  "source": "policy_default",
+                  "resolutionSource": "policy_default",
+                  "policyId": "policy_standard_mass",
+                  "policyVersion": "1.0",
+                  "supersededValue": null,
+                  "evidenceRefs": [],
+                  "timestamp": "",
+                  "notes": "Automatic model assumption: Assign 1.0 kg unit bob mass (does not alter ideal pendulum period T = 2π√(L/g)).",
+                  "userAccepted": false,
+                  "resolvedBy": "auto_policy"
+                },
+                "length": {
+                  "id": "auto_policy_standard_pendulum_length",
+                  "requirementId": "",
+                  "parameterName": "length",
+                  "value": 1,
+                  "resolvedValue": 1,
+                  "unit": "m",
+                  "canonicalUnit": "m",
+                  "rawInput": "1.0",
+                  "originalEnteredValue": "1.0",
+                  "source": "policy_default",
+                  "resolutionSource": "policy_default",
+                  "policyId": "policy_standard_pendulum_length",
+                  "policyVersion": "1.0",
+                  "supersededValue": null,
+                  "evidenceRefs": [],
+                  "timestamp": "",
+                  "notes": "Automatic model assumption: Standard 1.0 m simple pendulum string length.",
+                  "userAccepted": false,
+                  "resolvedBy": "auto_policy"
+                }
+              },
+              "reviewIssues": [],
+              "parameterProvenance": {
+                "gravity": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0.8,
+                  "notes": "Resolved via policy_default (policy: policy_earth_gravity)",
+                  "policyId": "policy_earth_gravity",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                },
+                "damping": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0.8,
+                  "notes": "Resolved via policy_default (policy: policy_zero_damping)",
+                  "policyId": "policy_zero_damping",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                },
+                "mass": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0.8,
+                  "notes": "Resolved via policy_default (policy: policy_standard_mass)",
+                  "policyId": "policy_standard_mass",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                },
+                "length": {
+                  "source": "auto_policy",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0.8,
+                  "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                  "policyId": "policy_standard_pendulum_length",
+                  "policyVersion": "1.0",
+                  "userAccepted": false
+                }
+              },
+              "calibration": {
+                "pixels_per_meter": 634.61,
+                "meters_per_pixel": 0.0015757709459352988,
+                "reference_pixel_span": 634.61,
+                "reference_physical_m": 1,
+                "reference_parameter": "length",
+                "provenance": {
+                  "source": "derived_calibration",
+                  "evidenceRefs": [
+                    "string_1",
+                    "auto_policy_standard_pendulum_length"
+                  ],
+                  "derivedFrom": [
+                    "string_1",
+                    "auto_policy_standard_pendulum_length"
+                  ],
+                  "confidence": 0.99,
+                  "notes": "Derived scale: 634.61 px/m (x: 634.61, y: 634.61) from 634.6 px = 1.0 m (length)"
+                },
+                "pixels_per_meter_x": 634.61,
+                "pixels_per_meter_y": 634.61
+              },
+              "id": "25c3ba19a02041ee9ec790156fc87e44_figure_001",
+              "isPhysics": true
+            },
+            "pageIR": {
+              "version": "1.0",
+              "source": {
+                "assetId": "25c3ba19a02041ee9ec790156fc87e44",
+                "width_px": 1280,
+                "height_px": 960,
+                "mimeType": "image/jpeg",
+                "url": "/uploads/diagram_25c3ba19.jpg",
+                "sha256": "b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd"
+              },
+              "coordinateSpace": {
+                "type": "source_px",
+                "width": 1280,
+                "height": 960,
+                "origin": "top_left"
+              },
+              "regions": [
+                {
+                  "id": "region_001",
+                  "label": "whole_image",
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 960,
+                  "confidence": 1,
+                  "detectionMethod": "user_supplied",
+                  "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+                }
+              ],
+              "figures": [
+                {
+                  "id": "figure_001",
+                  "regionId": "region_001",
+                  "pageX": 0,
+                  "pageY": 0,
+                  "width": 1280,
+                  "height": 960,
+                  "detectionMethod": "user_supplied",
+                  "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+                }
+              ],
+              "textBlocks": [
+                {
+                  "id": "ocr_tok_003",
+                  "text": "Fig. 1 Simple Pendulum",
+                  "x": 338,
+                  "y": 827,
+                  "width": 599,
+                  "height": 78,
+                  "confidence": 0.98953,
+                  "extractionMethod": "ocr"
+                },
+                {
+                  "id": "ocr_tok_001",
+                  "text": "L",
+                  "x": 738,
+                  "y": 357,
+                  "width": 55,
+                  "height": 61,
+                  "confidence": 0.99996,
+                  "extractionMethod": "ocr"
+                },
+                {
+                  "id": "ocr_tok_002",
+                  "text": "m",
+                  "x": 896,
+                  "y": 632,
+                  "width": 63,
+                  "height": 50,
+                  "confidence": 0.99987,
+                  "extractionMethod": "ocr"
+                },
+                {
+                  "id": "ocr_tok_greek_theta_597_270",
+                  "text": "θ",
+                  "x": 597,
+                  "y": 270,
+                  "width": 28,
+                  "height": 43,
+                  "confidence": 0.96,
+                  "extractionMethod": "ocr"
+                }
+              ],
+              "metadata": {
+                "pipeline": "PR-06",
+                "note": "Single-diagram upload. Text blocks populated via PR-06 OCR pipeline.",
+                "ocr_provider": "multi_ocr_router"
+              }
+            },
+            "compiledScene": {
+              "schemaVersion": "1.0",
+              "id": "PHY-MECH-figure_001",
+              "domain": "mechanics",
+              "subtype": "pendulum",
+              "source": {
+                "type": "book_figure",
+                "source_asset_id": "25c3ba19a02041ee9ec790156fc87e44",
+                "figure_id": "figure_001",
+                "width": 1280,
+                "height": 960,
+                "image_width_px": 1280,
+                "image_height_px": 960,
+                "image": "/uploads/diagram_25c3ba19.jpg"
+              },
+              "coordinateSpace": {
+                "type": "source_px",
+                "width": 1280,
+                "height": 960,
+                "image_width_px": 1280,
+                "image_height_px": 960,
+                "unit": "px"
+              },
+              "coordinateSystem": {
+                "type": "source_px",
+                "width": 1280,
+                "height": 960,
+                "image_width_px": 1280,
+                "image_height_px": 960,
+                "unit": "px"
+              },
+              "parameters": {
+                "length": {
+                  "value": 1,
+                  "unit": "m",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                    "policyId": "policy_standard_pendulum_length",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "gravity": {
+                  "value": 9.80665,
+                  "unit": "m/s²",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_earth_gravity)",
+                    "policyId": "policy_earth_gravity",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "initialAngle": {
+                  "value": 26.117406100584446,
+                  "unit": "°",
+                  "provenance": "observed"
+                },
+                "mass": {
+                  "value": 1,
+                  "unit": "kg",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_standard_mass)",
+                    "policyId": "policy_standard_mass",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "damping": {
+                  "value": 0,
+                  "unit": "1/s",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_zero_damping)",
+                    "policyId": "policy_zero_damping",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                }
+              },
+              "assumptions": [
+                {
+                  "parameter": "gravity",
+                  "policyId": "policy_earth_gravity",
+                  "policyVersion": "1.0",
+                  "value": 9.80665,
+                  "unit": "m/s²",
+                  "reason": "Standard terrestrial acceleration due to gravity (g = 9.80665 m/s² ~ 9.8 m/s²).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "damping",
+                  "policyId": "policy_zero_damping",
+                  "policyVersion": "1.0",
+                  "value": 0,
+                  "unit": "1/s",
+                  "reason": "Neglect atmospheric drag and pivot mechanical friction (damping = 0.0 1/s).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "mass",
+                  "policyId": "policy_standard_mass",
+                  "policyVersion": "1.0",
+                  "value": 1,
+                  "unit": "kg",
+                  "reason": "Assign 1.0 kg unit bob mass (does not alter ideal pendulum period T = 2π√(L/g)).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "length",
+                  "policyId": "policy_standard_pendulum_length",
+                  "policyVersion": "1.0",
+                  "value": 1,
+                  "unit": "m",
+                  "reason": "Standard 1.0 m simple pendulum string length.",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                }
+              ],
+              "geometry": {
+                "width": 1280,
+                "height": 960,
+                "coordinate_space": "source_px",
+                "pivot": {
+                  "x": 562,
+                  "y": 79.23811193908072
+                },
+                "bob_center": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "string_length_px": 634.61,
+                "length_px": 634.61,
+                "bob_radius_px": 37.03476174228877
+              },
+              "objects": [
+                {
+                  "id": "bob_1",
+                  "type": "pendulum",
+                  "role": "dynamic",
+                  "label": "m",
+                  "evidence_refs": [
+                    "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                    "ev_seg_bob_mask_bob_53389",
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "geometry": {
+                    "pivot": {
+                      "x": 562,
+                      "y": 79.23811193908072
+                    },
+                    "string_length_px": 634.61,
+                    "length_px": 634.61,
+                    "bob_radius_px": 37.03476174228877
+                  },
+                  "physics": {
+                    "length_m": 1,
+                    "mass_kg": 1,
+                    "damping_s_inv": 0,
+                    "theta0_rad": 0.4558347285356519,
+                    "omega0_rad_s": 0
+                  }
+                }
+              ],
+              "render": {
+                "coordinate_space": "source_px"
+              },
+              "environment": {
+                "gravity": 9.80665,
+                "gravity_m_s2": 9.80665
+              },
+              "visual": {
+                "background_url": "/uploads/diagram_25c3ba19.jpg"
+              }
+            },
+            "sourceAsset": {
+              "id": "25c3ba19a02041ee9ec790156fc87e44",
+              "mimeType": "image/jpeg",
+              "originalFilename": "photo_2026-10-10_12-06-38 (2).jpg",
+              "byteSize": 35941,
+              "width_px": 1280,
+              "height_px": 960,
+              "sha256": "b5341f3eb014fc45df72b93b37fefc2de5adee3e4db4e11ec3949bc9475a78fd"
+            },
+            "reviewState": null,
+            "readinessReport": null
+          },
+          "figure": {
+            "scene": {
+              "schemaVersion": "1.0",
+              "id": "PHY-MECH-figure_001",
+              "domain": "mechanics",
+              "subtype": "pendulum",
+              "source": {
+                "type": "book_figure",
+                "source_asset_id": "25c3ba19a02041ee9ec790156fc87e44",
+                "figure_id": "figure_001",
+                "width": 1280,
+                "height": 960,
+                "image_width_px": 1280,
+                "image_height_px": 960,
+                "image": "/uploads/diagram_25c3ba19.jpg"
+              },
+              "coordinateSpace": {
+                "type": "source_px",
+                "width": 1280,
+                "height": 960,
+                "image_width_px": 1280,
+                "image_height_px": 960,
+                "unit": "px"
+              },
+              "coordinateSystem": {
+                "type": "source_px",
+                "width": 1280,
+                "height": 960,
+                "image_width_px": 1280,
+                "image_height_px": 960,
+                "unit": "px"
+              },
+              "parameters": {
+                "length": {
+                  "value": 1,
+                  "unit": "m",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                    "policyId": "policy_standard_pendulum_length",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "gravity": {
+                  "value": 9.80665,
+                  "unit": "m/s²",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_earth_gravity)",
+                    "policyId": "policy_earth_gravity",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "initialAngle": {
+                  "value": 26.117406100584446,
+                  "unit": "°",
+                  "provenance": "observed"
+                },
+                "mass": {
+                  "value": 1,
+                  "unit": "kg",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_standard_mass)",
+                    "policyId": "policy_standard_mass",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                },
+                "damping": {
+                  "value": 0,
+                  "unit": "1/s",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_zero_damping)",
+                    "policyId": "policy_zero_damping",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  }
+                }
+              },
+              "assumptions": [
+                {
+                  "parameter": "gravity",
+                  "policyId": "policy_earth_gravity",
+                  "policyVersion": "1.0",
+                  "value": 9.80665,
+                  "unit": "m/s²",
+                  "reason": "Standard terrestrial acceleration due to gravity (g = 9.80665 m/s² ~ 9.8 m/s²).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "damping",
+                  "policyId": "policy_zero_damping",
+                  "policyVersion": "1.0",
+                  "value": 0,
+                  "unit": "1/s",
+                  "reason": "Neglect atmospheric drag and pivot mechanical friction (damping = 0.0 1/s).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "mass",
+                  "policyId": "policy_standard_mass",
+                  "policyVersion": "1.0",
+                  "value": 1,
+                  "unit": "kg",
+                  "reason": "Assign 1.0 kg unit bob mass (does not alter ideal pendulum period T = 2π√(L/g)).",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                },
+                {
+                  "parameter": "length",
+                  "policyId": "policy_standard_pendulum_length",
+                  "policyVersion": "1.0",
+                  "value": 1,
+                  "unit": "m",
+                  "reason": "Standard 1.0 m simple pendulum string length.",
+                  "provenance": "auto_policy",
+                  "confidence": 0.8
+                }
+              ],
+              "geometry": {
+                "width": 1280,
+                "height": 960,
+                "coordinate_space": "source_px",
+                "pivot": {
+                  "x": 562,
+                  "y": 79.23811193908072
+                },
+                "bob_center": {
+                  "x": 841.3633806409911,
+                  "y": 649.0514992664916
+                },
+                "string_length_px": 634.61,
+                "length_px": 634.61,
+                "bob_radius_px": 37.03476174228877
+              },
+              "objects": [
+                {
+                  "id": "bob_1",
+                  "type": "pendulum",
+                  "role": "dynamic",
+                  "label": "m",
+                  "evidence_refs": [
+                    "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                    "ev_seg_bob_mask_bob_53389",
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "geometry": {
+                    "pivot": {
+                      "x": 562,
+                      "y": 79.23811193908072
+                    },
+                    "string_length_px": 634.61,
+                    "length_px": 634.61,
+                    "bob_radius_px": 37.03476174228877
+                  },
+                  "physics": {
+                    "length_m": 1,
+                    "mass_kg": 1,
+                    "damping_s_inv": 0,
+                    "theta0_rad": 0.4558347285356519,
+                    "omega0_rad_s": 0
+                  }
+                }
+              ],
+              "render": {
+                "coordinate_space": "source_px"
+              },
+              "environment": {
+                "gravity": 9.80665,
+                "gravity_m_s2": 9.80665
+              },
+              "visual": {
+                "background_url": "/uploads/diagram_25c3ba19.jpg"
+              }
+            },
+            "output": {
+              "domain": "mechanics",
+              "subtype": "pendulum",
+              "time": 0.47,
+              "state": {
+                "domain": "mechanics",
+                "type": "pendulum",
+                "subtype": "pendulum",
+                "running": true,
+                "time": 0.47,
+                "thetaDeg": 3.4,
+                "thetaRad": 0.0586,
+                "omega": -1.4032,
+                "speed": 1.4,
+                "length": 1,
+                "gravity": 9.81,
+                "potentialEnergy": 0.02,
+                "kineticEnergy": 0.98,
+                "totalEnergy": 1,
+                "calibrated": true
+              },
+              "geometry": {
+                "thetaRad": 0.059341194567807204,
+                "lengthM": 1,
+                "xM": 0,
+                "yM": 0
+              },
+              "telemetry": {
+                "domain": "mechanics",
+                "type": "pendulum",
+                "subtype": "pendulum",
+                "running": true,
+                "time": 0.47,
+                "thetaDeg": 3.4,
+                "thetaRad": 0.0586,
+                "omega": -1.4032,
+                "speed": 1.4,
+                "length": 1,
+                "gravity": 9.81,
+                "potentialEnergy": 0.02,
+                "kineticEnergy": 0.98,
+                "totalEnergy": 1,
+                "calibrated": true
+              },
+              "events": [],
+              "editableParameters": {
+                "length": {
+                  "value": 1,
+                  "unit": "m",
+                  "provenance": "auto_policy",
+                  "evidenceProvenance": {
+                    "source": "auto_policy",
+                    "evidenceRefs": [],
+                    "derivedFrom": [],
+                    "confidence": 0.8,
+                    "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                    "policyId": "policy_standard_pendulum_length",
+                    "policyVersion": "1.0",
+                    "userAccepted": false
+                  },
+                  "editable": true,
+                  "control": {
+                    "type": "slider",
+                    "min": 0.2,
+                    "max": 5,
+                    "step": 0.05
+                  }
+                },
+                "initialAngle": {
+                  "value": 26.117406100584446,
+                  "unit": "°",
+                  "provenance": "observed",
+                  "editable": true,
+                  "control": {
+                    "type": "slider",
+                    "min": -80,
+                    "max": 80,
+                    "step": 1
+                  },
+                  "targetId": "bob_1"
+                }
+              }
+            },
+            "state": {
+              "domain": "mechanics",
+              "type": "pendulum",
+              "subtype": "pendulum",
+              "running": true,
+              "time": 0.47,
+              "thetaDeg": 3.4,
+              "thetaRad": 0.0586,
+              "omega": -1.4032,
+              "speed": 1.4,
+              "length": 1,
+              "gravity": 9.81,
+              "potentialEnergy": 0.02,
+              "kineticEnergy": 0.98,
+              "totalEnergy": 1,
+              "calibrated": true
+            },
+            "mapper": {
+              "sourceW": 1280,
+              "sourceH": 960,
+              "viewW": 1010,
+              "viewH": 480,
+              "dpr": 1,
+              "scale": 0.5,
+              "renderedW": 640,
+              "renderedH": 480,
+              "offsetX": 185,
+              "offsetY": 0
+            },
+            "sourceW": 1280,
+            "sourceH": 960
+          },
+          "browser": {
+            "devicePixelRatio": 1,
+            "innerWidth": 1418,
+            "innerHeight": 1002,
+            "outerWidth": 1440,
+            "outerHeight": 1100,
+            "scrollX": 0,
+            "scrollY": 0,
+            "visualViewport": {
+              "width": 1418,
+              "height": 1002,
+              "scale": 1,
+              "offsetLeft": 0,
+              "offsetTop": 0
+            }
+          },
+          "elements": [
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "if-viewport-host",
+              "src": null,
+              "viewBox": null,
+              "rect": {
+                "x": 34,
+                "y": 227,
+                "width": 1010,
+                "height": 480,
+                "top": 227,
+                "right": 1044,
+                "bottom": 707,
+                "left": 34
+              },
+              "css": {
+                "width": "1010px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "505px 240px",
+                "zoom": "1",
+                "display": "flex",
+                "position": "relative"
+              }
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "figure-viewport",
+              "src": null,
+              "viewBox": null,
+              "rect": {
+                "x": 34,
+                "y": 227,
+                "width": 1010,
+                "height": 480,
+                "top": 227,
+                "right": 1044,
+                "bottom": 707,
+                "left": 34
+              },
+              "css": {
+                "width": "1010px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "505px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "relative"
+              }
+            },
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "figure-viewport-img",
+              "src": "http://127.0.0.1:5173/uploads/diagram_25c3ba19.jpg",
+              "naturalWidth": 1280,
+              "naturalHeight": 960,
+              "width": 640,
+              "height": 480,
+              "viewBox": null,
+              "rect": {
+                "x": 219,
+                "y": 227,
+                "width": 640,
+                "height": 480,
+                "top": 227,
+                "right": 859,
+                "bottom": 707,
+                "left": 219
+              },
+              "css": {
+                "width": "640px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "320px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "figure-viewport-overlay",
+              "src": null,
+              "viewBox": null,
+              "rect": {
+                "x": 219,
+                "y": 227,
+                "width": 640,
+                "height": 480,
+                "top": 227,
+                "right": 859,
+                "bottom": 707,
+                "left": 219
+              },
+              "css": {
+                "width": "640px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "320px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "CANVAS",
+              "id": "",
+              "className": "pendulum-overlay-canvas",
+              "src": null,
+              "width": 640,
+              "height": 480,
+              "viewBox": null,
+              "rect": {
+                "x": 219,
+                "y": 227,
+                "width": 640,
+                "height": 480,
+                "top": 227,
+                "right": 859,
+                "bottom": 707,
+                "left": 219
+              },
+              "css": {
+                "width": "640px",
+                "height": "480px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(248, 250, 252)",
+                "transform": "none",
+                "transformOrigin": "320px 240px",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "IMG",
+              "id": "diagram-image",
+              "className": "diagram-image",
+              "src": "http://127.0.0.1:5173/scenes/kinematics/with_spring.png?t=1792207719361",
+              "naturalWidth": 855,
+              "naturalHeight": 686,
+              "width": 855,
+              "height": 686,
+              "viewBox": null,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "css": {
+                "width": "747.813px",
+                "height": "600px",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgba(0, 0, 0, 0)",
+                "transform": "none",
+                "transformOrigin": "50% 50%",
+                "zoom": "1",
+                "display": "block",
+                "position": "absolute"
+              }
+            },
+            {
+              "tag": "CANVAS",
+              "id": "",
+              "className": null,
+              "src": null,
+              "width": 855,
+              "height": 686,
+              "viewBox": null,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "css": {
+                "width": "100%",
+                "height": "100%",
+                "objectFit": "fill",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "0px none rgb(241, 245, 249)",
+                "transform": "none",
+                "transformOrigin": "50% 50%",
+                "zoom": "1",
+                "display": "block",
+                "position": "static"
+              }
+            },
+            {
+              "tag": "IMG",
+              "id": "preview-image",
+              "className": null,
+              "src": "blob:http://127.0.0.1:5173/f8ff3d99-1bd9-49c8-a52e-2d44432341f5",
+              "naturalWidth": 1280,
+              "naturalHeight": 960,
+              "width": 1280,
+              "height": 960,
+              "viewBox": null,
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "css": {
+                "width": "auto",
+                "height": "auto",
+                "objectFit": "contain",
+                "objectPosition": "50% 50%",
+                "padding": "0px",
+                "margin": "0px",
+                "border": "1px solid rgba(255, 255, 255, 0.07)",
+                "transform": "none",
+                "transformOrigin": "50% 50%",
+                "zoom": "1",
+                "display": "inline",
+                "position": "static"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Motion evolves runtime state only; reset restores initial compiled values. Exact 0.5 s / 1 s states cannot be asserted unless their saved timestamps say so.",
+  "expected_diagram": "At t=0 pivot and bob should register to their printed locations. Motion should pivot around that fixed point. No exact period can be asserted from the symbolic source alone.",
+  "status": "ACTUAL STATE CAPTURED",
+  "finding": "Automatic activation is observed in this checkout. Later frame time is whatever the runtime snapshot records, not an invented exact timestamp.",
+  "change_or_loss": "The executed main.js path automatically starts after a successful load. Later frames are saved at their actual times. Optics results are static ray solutions rather than pendulum-like time evolution."
+}

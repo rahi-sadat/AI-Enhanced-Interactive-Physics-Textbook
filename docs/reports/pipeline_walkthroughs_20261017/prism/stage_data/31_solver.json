@@ -1,0 +1,916 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 31,
+  "component": "Domain solver and actual initial state",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "engine/optics/prismEngine.js",
+      "capture": "Boundary/runtime output observed; exact solver-call object not separately captured"
+    }
+  ],
+  "upstream_stage": "PhysicsRuntime normalization and adapter initialization",
+  "downstream_stage": "CoordinateMapper: source → overlay → browser",
+  "actual_input": {
+    "records": [
+      {
+        "scene_used_by_runtime": {
+          "schemaVersion": "1.0",
+          "id": "PHY-OPTI-figure_001",
+          "domain": "optics",
+          "subtype": "prism",
+          "source": {
+            "type": "book_figure",
+            "source_asset_id": "2a50897a2e704e7aa51642dab568571b",
+            "figure_id": "figure_001",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "image": "/uploads/diagram_2a50897a.jpg"
+          },
+          "coordinateSpace": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "coordinateSystem": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "parameters": {
+            "refractiveIndex": {
+              "value": 1.52,
+              "unit": "",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "apexAngle": {
+              "value": 60,
+              "unit": "deg",
+              "provenance": "ocr",
+              "evidenceProvenance": {
+                "source": "ocr",
+                "evidenceRefs": [
+                  "ev_ocr_ocr_tok_001"
+                ],
+                "derivedFrom": [
+                  "ev_ocr_ocr_tok_001"
+                ],
+                "confidence": 0.889,
+                "notes": ""
+              }
+            }
+          },
+          "assumptions": [
+            {
+              "parameter": "n",
+              "policyId": "policy_crown_glass_refractive_index",
+              "policyVersion": "1.0",
+              "value": 1.52,
+              "unit": null,
+              "reason": "Refractive index of standard optical crown glass (n = 1.52).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            }
+          ],
+          "geometry": {
+            "width": 1280,
+            "height": 960,
+            "coordinate_space": "source_px",
+            "vertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "prismVertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "ray_origin": {
+              "x": 47,
+              "y": 456
+            },
+            "rayOrigin": {
+              "x": 47,
+              "y": 456
+            },
+            "ray_direction": {
+              "x": 0.9825,
+              "y": -0.1862
+            },
+            "rayDirection": {
+              "x": 0.9825,
+              "y": -0.1862
+            },
+            "apex_angle_deg": 60
+          },
+          "objects": [
+            {
+              "id": "element_prism",
+              "type": "prism",
+              "role": "fixed",
+              "label": "Optical Prism",
+              "evidence_refs": [],
+              "optics": {
+                "model": "prism",
+                "vertices": [
+                  {
+                    "x": 621.3,
+                    "y": 80.9
+                  },
+                  {
+                    "x": 229.2,
+                    "y": 757
+                  },
+                  {
+                    "x": 1003.9,
+                    "y": 757
+                  }
+                ],
+                "refractiveIndex": 1.52,
+                "apex_angle_deg": 60
+              }
+            },
+            {
+              "id": "element_ray_source",
+              "type": "ray_source",
+              "role": "dynamic",
+              "optics": {
+                "model": "ray_source",
+                "position": {
+                  "x": 47,
+                  "y": 456
+                },
+                "direction": {
+                  "x": 0.9825,
+                  "y": -0.1862
+                }
+              }
+            }
+          ],
+          "render": {
+            "coordinate_space": "source_px"
+          },
+          "elements": [
+            {
+              "id": "element_prism",
+              "type": "prism",
+              "role": "fixed",
+              "label": "Optical Prism",
+              "evidence_refs": [],
+              "optics": {
+                "model": "prism",
+                "vertices": [
+                  {
+                    "x": 621.3,
+                    "y": 80.9
+                  },
+                  {
+                    "x": 229.2,
+                    "y": 757
+                  },
+                  {
+                    "x": 1003.9,
+                    "y": 757
+                  }
+                ],
+                "refractiveIndex": 1.52,
+                "apex_angle_deg": 60
+              }
+            },
+            {
+              "id": "element_ray_source",
+              "type": "ray_source",
+              "role": "dynamic",
+              "optics": {
+                "model": "ray_source",
+                "position": {
+                  "x": 47,
+                  "y": 456
+                },
+                "direction": {
+                  "x": 0.9825,
+                  "y": -0.1862
+                }
+              }
+            }
+          ],
+          "visual": {
+            "background_url": "/uploads/diagram_2a50897a.jpg"
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The actual scene-derived model parameters, source geometry and any explicit policy values.",
+  "actual_output": {
+    "records": [
+      {
+        "state": {
+          "domain": "optics",
+          "subtype": "prism",
+          "type": "prism",
+          "running": false,
+          "incidenceAngle_deg": 40.842553023013416,
+          "refractedAngle_deg": 25.48353691375652,
+          "deviationAngle_deg": 39.754070946628936,
+          "refractiveIndex": 1.52,
+          "criticalAngle_deg": 41.139510414899156,
+          "tir": false,
+          "rayCount": 3,
+          "solution": {
+            "hitPrism": true,
+            "prismVertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "tir": false,
+            "hit1": {
+              "x": 447.8163870862532,
+              "y": 380.0386653684882
+            },
+            "hit2": {
+              "x": 807.0350434576367,
+              "y": 409.11605562391077
+            },
+            "N1": {
+              "x": -0.8650522896672732,
+              "y": -0.5016817079996121
+            },
+            "N2": {
+              "x": 0.870310991441359,
+              "y": -0.49250256666981806
+            },
+            "I0": {
+              "x": 0.9825114512376967,
+              "y": -0.1862021701989406
+            },
+            "I_internal": {
+              "x": 0.9967398674939832,
+              "y": 0.0806823186830715
+            },
+            "segments": [
+              {
+                "type": "incident",
+                "start": {
+                  "x": 47,
+                  "y": 456
+                },
+                "end": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                }
+              },
+              {
+                "type": "internal",
+                "start": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                },
+                "end": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                }
+              },
+              {
+                "type": "emergent",
+                "start": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                },
+                "end": {
+                  "x": 1280,
+                  "y": 671.531350909933
+                }
+              }
+            ],
+            "normals": [
+              {
+                "p1": {
+                  "x": 417.53955694789863,
+                  "y": 362.47980558850173
+                },
+                "p2": {
+                  "x": 478.09321722460777,
+                  "y": 397.59752514847463
+                }
+              },
+              {
+                "p1": {
+                  "x": 837.4959281580842,
+                  "y": 391.87846579046715
+                },
+                "p2": {
+                  "x": 776.5741587571891,
+                  "y": 426.3536454573544
+                }
+              }
+            ],
+            "angles": {
+              "i1Deg": 40.842553023013416,
+              "r1Deg": 25.48353691375652,
+              "deviationDeg": 39.754070946628936,
+              "criticalAngleDeg": 41.139510414899156
+            },
+            "rays": [
+              {
+                "type": "incident",
+                "start": {
+                  "x": 47,
+                  "y": 456
+                },
+                "end": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                }
+              },
+              {
+                "type": "internal",
+                "start": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                },
+                "end": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                }
+              },
+              {
+                "type": "emergent",
+                "start": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                },
+                "end": {
+                  "x": 1280,
+                  "y": 671.531350909933
+                }
+              }
+            ]
+          }
+        },
+        "output": {
+          "domain": "optics",
+          "subtype": "prism",
+          "time": 0,
+          "state": {
+            "domain": "optics",
+            "subtype": "prism",
+            "type": "prism",
+            "running": false,
+            "incidenceAngle_deg": 40.842553023013416,
+            "refractedAngle_deg": 25.48353691375652,
+            "deviationAngle_deg": 39.754070946628936,
+            "refractiveIndex": 1.52,
+            "criticalAngle_deg": 41.139510414899156,
+            "tir": false,
+            "rayCount": 3,
+            "solution": {
+              "hitPrism": true,
+              "prismVertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757
+                }
+              ],
+              "tir": false,
+              "hit1": {
+                "x": 447.8163870862532,
+                "y": 380.0386653684882
+              },
+              "hit2": {
+                "x": 807.0350434576367,
+                "y": 409.11605562391077
+              },
+              "N1": {
+                "x": -0.8650522896672732,
+                "y": -0.5016817079996121
+              },
+              "N2": {
+                "x": 0.870310991441359,
+                "y": -0.49250256666981806
+              },
+              "I0": {
+                "x": 0.9825114512376967,
+                "y": -0.1862021701989406
+              },
+              "I_internal": {
+                "x": 0.9967398674939832,
+                "y": 0.0806823186830715
+              },
+              "segments": [
+                {
+                  "type": "incident",
+                  "start": {
+                    "x": 47,
+                    "y": 456
+                  },
+                  "end": {
+                    "x": 447.8163870862532,
+                    "y": 380.0386653684882
+                  }
+                },
+                {
+                  "type": "internal",
+                  "start": {
+                    "x": 447.8163870862532,
+                    "y": 380.0386653684882
+                  },
+                  "end": {
+                    "x": 807.0350434576367,
+                    "y": 409.11605562391077
+                  }
+                },
+                {
+                  "type": "emergent",
+                  "start": {
+                    "x": 807.0350434576367,
+                    "y": 409.11605562391077
+                  },
+                  "end": {
+                    "x": 1280,
+                    "y": 671.531350909933
+                  }
+                }
+              ],
+              "normals": [
+                {
+                  "p1": {
+                    "x": 417.53955694789863,
+                    "y": 362.47980558850173
+                  },
+                  "p2": {
+                    "x": 478.09321722460777,
+                    "y": 397.59752514847463
+                  }
+                },
+                {
+                  "p1": {
+                    "x": 837.4959281580842,
+                    "y": 391.87846579046715
+                  },
+                  "p2": {
+                    "x": 776.5741587571891,
+                    "y": 426.3536454573544
+                  }
+                }
+              ],
+              "angles": {
+                "i1Deg": 40.842553023013416,
+                "r1Deg": 25.48353691375652,
+                "deviationDeg": 39.754070946628936,
+                "criticalAngleDeg": 41.139510414899156
+              },
+              "rays": [
+                {
+                  "type": "incident",
+                  "start": {
+                    "x": 47,
+                    "y": 456
+                  },
+                  "end": {
+                    "x": 447.8163870862532,
+                    "y": 380.0386653684882
+                  }
+                },
+                {
+                  "type": "internal",
+                  "start": {
+                    "x": 447.8163870862532,
+                    "y": 380.0386653684882
+                  },
+                  "end": {
+                    "x": 807.0350434576367,
+                    "y": 409.11605562391077
+                  }
+                },
+                {
+                  "type": "emergent",
+                  "start": {
+                    "x": 807.0350434576367,
+                    "y": 409.11605562391077
+                  },
+                  "end": {
+                    "x": 1280,
+                    "y": 671.531350909933
+                  }
+                }
+              ]
+            }
+          },
+          "geometry": {
+            "hitPrism": true,
+            "prismVertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "tir": false,
+            "hit1": {
+              "x": 447.8163870862532,
+              "y": 380.0386653684882
+            },
+            "hit2": {
+              "x": 807.0350434576367,
+              "y": 409.11605562391077
+            },
+            "N1": {
+              "x": -0.8650522896672732,
+              "y": -0.5016817079996121
+            },
+            "N2": {
+              "x": 0.870310991441359,
+              "y": -0.49250256666981806
+            },
+            "I0": {
+              "x": 0.9825114512376967,
+              "y": -0.1862021701989406
+            },
+            "I_internal": {
+              "x": 0.9967398674939832,
+              "y": 0.0806823186830715
+            },
+            "segments": [
+              {
+                "type": "incident",
+                "start": {
+                  "x": 47,
+                  "y": 456
+                },
+                "end": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                }
+              },
+              {
+                "type": "internal",
+                "start": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                },
+                "end": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                }
+              },
+              {
+                "type": "emergent",
+                "start": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                },
+                "end": {
+                  "x": 1280,
+                  "y": 671.531350909933
+                }
+              }
+            ],
+            "normals": [
+              {
+                "p1": {
+                  "x": 417.53955694789863,
+                  "y": 362.47980558850173
+                },
+                "p2": {
+                  "x": 478.09321722460777,
+                  "y": 397.59752514847463
+                }
+              },
+              {
+                "p1": {
+                  "x": 837.4959281580842,
+                  "y": 391.87846579046715
+                },
+                "p2": {
+                  "x": 776.5741587571891,
+                  "y": 426.3536454573544
+                }
+              }
+            ],
+            "angles": {
+              "i1Deg": 40.842553023013416,
+              "r1Deg": 25.48353691375652,
+              "deviationDeg": 39.754070946628936,
+              "criticalAngleDeg": 41.139510414899156
+            },
+            "rays": [
+              {
+                "type": "incident",
+                "start": {
+                  "x": 47,
+                  "y": 456
+                },
+                "end": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                }
+              },
+              {
+                "type": "internal",
+                "start": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                },
+                "end": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                }
+              },
+              {
+                "type": "emergent",
+                "start": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                },
+                "end": {
+                  "x": 1280,
+                  "y": 671.531350909933
+                }
+              }
+            ],
+            "opticalAxis": null,
+            "landmarks": {},
+            "lens": null,
+            "mirror": null,
+            "object": null,
+            "image": null,
+            "prismPolygon": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "prism": {
+              "vertices": [
+                {
+                  "x": 621.3,
+                  "y": 80.9
+                },
+                {
+                  "x": 229.2,
+                  "y": 757
+                },
+                {
+                  "x": 1003.9,
+                  "y": 757
+                }
+              ],
+              "refractiveIndex": 1.52
+            },
+            "handles": {}
+          },
+          "telemetry": {
+            "hitPrism": true,
+            "prismVertices": [
+              {
+                "x": 621.3,
+                "y": 80.9
+              },
+              {
+                "x": 229.2,
+                "y": 757
+              },
+              {
+                "x": 1003.9,
+                "y": 757
+              }
+            ],
+            "tir": false,
+            "hit1": {
+              "x": 447.8163870862532,
+              "y": 380.0386653684882
+            },
+            "hit2": {
+              "x": 807.0350434576367,
+              "y": 409.11605562391077
+            },
+            "N1": {
+              "x": -0.8650522896672732,
+              "y": -0.5016817079996121
+            },
+            "N2": {
+              "x": 0.870310991441359,
+              "y": -0.49250256666981806
+            },
+            "I0": {
+              "x": 0.9825114512376967,
+              "y": -0.1862021701989406
+            },
+            "I_internal": {
+              "x": 0.9967398674939832,
+              "y": 0.0806823186830715
+            },
+            "segments": [
+              {
+                "type": "incident",
+                "start": {
+                  "x": 47,
+                  "y": 456
+                },
+                "end": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                }
+              },
+              {
+                "type": "internal",
+                "start": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                },
+                "end": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                }
+              },
+              {
+                "type": "emergent",
+                "start": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                },
+                "end": {
+                  "x": 1280,
+                  "y": 671.531350909933
+                }
+              }
+            ],
+            "normals": [
+              {
+                "p1": {
+                  "x": 417.53955694789863,
+                  "y": 362.47980558850173
+                },
+                "p2": {
+                  "x": 478.09321722460777,
+                  "y": 397.59752514847463
+                }
+              },
+              {
+                "p1": {
+                  "x": 837.4959281580842,
+                  "y": 391.87846579046715
+                },
+                "p2": {
+                  "x": 776.5741587571891,
+                  "y": 426.3536454573544
+                }
+              }
+            ],
+            "angles": {
+              "i1Deg": 40.842553023013416,
+              "r1Deg": 25.48353691375652,
+              "deviationDeg": 39.754070946628936,
+              "criticalAngleDeg": 41.139510414899156
+            },
+            "rays": [
+              {
+                "type": "incident",
+                "start": {
+                  "x": 47,
+                  "y": 456
+                },
+                "end": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                }
+              },
+              {
+                "type": "internal",
+                "start": {
+                  "x": 447.8163870862532,
+                  "y": 380.0386653684882
+                },
+                "end": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                }
+              },
+              {
+                "type": "emergent",
+                "start": {
+                  "x": 807.0350434576367,
+                  "y": 409.11605562391077
+                },
+                "end": {
+                  "x": 1280,
+                  "y": 671.531350909933
+                }
+              }
+            ],
+            "incidenceAngle_deg": 40.842553023013416,
+            "refractedAngle_deg": 25.48353691375652,
+            "deviationAngle_deg": 39.754070946628936,
+            "refractiveIndex": 1.52,
+            "criticalAngle_deg": 41.139510414899156
+          },
+          "events": [],
+          "editableParameters": {
+            "refractiveIndex": {
+              "value": 1.52,
+              "unit": "",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_crown_glass_refractive_index)",
+                "policyId": "policy_crown_glass_refractive_index",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": 1,
+                "max": 2.5,
+                "step": 0.01
+              }
+            }
+          }
+        },
+        "mechanics_internal_capture": null
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Mathematically consistent state/output for those inputs. Correct computation is separate from whether those inputs reconstruct this diagram.",
+  "expected_diagram": "At t=0 the prism polygon and ray segments should be compared with the printed paths. If a physical model with assumed n disagrees with the schematic, expose that disagreement; do not claim the computed path is observed source geometry.",
+  "status": "OUTPUT OBSERVED; NO NUMERICAL DEFECT PROVEN",
+  "finding": "Optics runtime reports incidence=40.842553023013416°, refraction=25.48353691375652°, deviation=39.754070946628936°, no TIR. Exact solver output and actual SVG are saved.",
+  "change_or_loss": "Scene/state/output are actual captures. Exact internal solver-call argument objects were not individually intercepted; no replay or hand-computed replacement is labeled as runtime evidence."
+}

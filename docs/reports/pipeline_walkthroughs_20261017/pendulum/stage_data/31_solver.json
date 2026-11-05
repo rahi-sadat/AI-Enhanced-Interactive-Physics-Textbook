@@ -1,0 +1,379 @@
+{
+  "trace_id": "TRACE-PENDULUM-20261016-003-NATIVE-RETRY-20261017",
+  "logical_stage": 31,
+  "component": "Domain solver and actual initial state",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "engine/mechanics/MechanicsAdapter.js",
+      "capture": "Boundary/runtime output observed; exact solver-call object not separately captured"
+    }
+  ],
+  "upstream_stage": "PhysicsRuntime normalization and adapter initialization",
+  "downstream_stage": "CoordinateMapper: source → overlay → browser",
+  "actual_input": {
+    "records": [
+      {
+        "scene_used_by_runtime": {
+          "schemaVersion": "1.0",
+          "id": "PHY-MECH-figure_001",
+          "domain": "mechanics",
+          "subtype": "pendulum",
+          "source": {
+            "type": "book_figure",
+            "source_asset_id": "25c3ba19a02041ee9ec790156fc87e44",
+            "figure_id": "figure_001",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "image": "/uploads/diagram_25c3ba19.jpg"
+          },
+          "coordinateSpace": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "coordinateSystem": {
+            "type": "source_px",
+            "width": 1280,
+            "height": 960,
+            "image_width_px": 1280,
+            "image_height_px": 960,
+            "unit": "px"
+          },
+          "parameters": {
+            "length": {
+              "value": 1,
+              "unit": "m",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                "policyId": "policy_standard_pendulum_length",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "gravity": {
+              "value": 9.80665,
+              "unit": "m/s²",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_earth_gravity)",
+                "policyId": "policy_earth_gravity",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "initialAngle": {
+              "value": 26.117406100584446,
+              "unit": "°",
+              "provenance": "observed"
+            },
+            "mass": {
+              "value": 1,
+              "unit": "kg",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_standard_mass)",
+                "policyId": "policy_standard_mass",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            },
+            "damping": {
+              "value": 0,
+              "unit": "1/s",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_zero_damping)",
+                "policyId": "policy_zero_damping",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              }
+            }
+          },
+          "assumptions": [
+            {
+              "parameter": "gravity",
+              "policyId": "policy_earth_gravity",
+              "policyVersion": "1.0",
+              "value": 9.80665,
+              "unit": "m/s²",
+              "reason": "Standard terrestrial acceleration due to gravity (g = 9.80665 m/s² ~ 9.8 m/s²).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            },
+            {
+              "parameter": "damping",
+              "policyId": "policy_zero_damping",
+              "policyVersion": "1.0",
+              "value": 0,
+              "unit": "1/s",
+              "reason": "Neglect atmospheric drag and pivot mechanical friction (damping = 0.0 1/s).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            },
+            {
+              "parameter": "mass",
+              "policyId": "policy_standard_mass",
+              "policyVersion": "1.0",
+              "value": 1,
+              "unit": "kg",
+              "reason": "Assign 1.0 kg unit bob mass (does not alter ideal pendulum period T = 2π√(L/g)).",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            },
+            {
+              "parameter": "length",
+              "policyId": "policy_standard_pendulum_length",
+              "policyVersion": "1.0",
+              "value": 1,
+              "unit": "m",
+              "reason": "Standard 1.0 m simple pendulum string length.",
+              "provenance": "auto_policy",
+              "confidence": 0.8
+            }
+          ],
+          "geometry": {
+            "width": 1280,
+            "height": 960,
+            "coordinate_space": "source_px",
+            "pivot": {
+              "x": 562,
+              "y": 79.23811193908072
+            },
+            "bob_center": {
+              "x": 841.3633806409911,
+              "y": 649.0514992664916
+            },
+            "string_length_px": 634.61,
+            "length_px": 634.61,
+            "bob_radius_px": 37.03476174228877
+          },
+          "objects": [
+            {
+              "id": "bob_1",
+              "type": "pendulum",
+              "role": "dynamic",
+              "label": "m",
+              "evidence_refs": [
+                "ev_cv_pendulum_25c3ba19a02041ee9ec790156fc87e44",
+                "ev_seg_bob_mask_bob_53389",
+                "ev_ocr_ocr_tok_002"
+              ],
+              "geometry": {
+                "pivot": {
+                  "x": 562,
+                  "y": 79.23811193908072
+                },
+                "string_length_px": 634.61,
+                "length_px": 634.61,
+                "bob_radius_px": 37.03476174228877
+              },
+              "physics": {
+                "length_m": 1,
+                "mass_kg": 1,
+                "damping_s_inv": 0,
+                "theta0_rad": 0.4558347285356519,
+                "omega0_rad_s": 0
+              }
+            }
+          ],
+          "render": {
+            "coordinate_space": "source_px"
+          },
+          "environment": {
+            "gravity": 9.80665,
+            "gravity_m_s2": 9.80665
+          },
+          "visual": {
+            "background_url": "/uploads/diagram_25c3ba19.jpg"
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The actual scene-derived model parameters, source geometry and any explicit policy values.",
+  "actual_output": {
+    "records": [
+      {
+        "state": {
+          "domain": "mechanics",
+          "type": "pendulum",
+          "subtype": "pendulum",
+          "running": false,
+          "time": 0,
+          "thetaDeg": 26.1,
+          "thetaRad": 0.4558,
+          "omega": 0,
+          "speed": 0,
+          "length": 1,
+          "gravity": 9.81,
+          "potentialEnergy": 1,
+          "kineticEnergy": 0,
+          "totalEnergy": 1,
+          "calibrated": true
+        },
+        "output": {
+          "domain": "mechanics",
+          "subtype": "pendulum",
+          "time": 0,
+          "state": {
+            "domain": "mechanics",
+            "type": "pendulum",
+            "subtype": "pendulum",
+            "running": false,
+            "time": 0,
+            "thetaDeg": 26.1,
+            "thetaRad": 0.4558,
+            "omega": 0,
+            "speed": 0,
+            "length": 1,
+            "gravity": 9.81,
+            "potentialEnergy": 1,
+            "kineticEnergy": 0,
+            "totalEnergy": 1,
+            "calibrated": true
+          },
+          "geometry": {
+            "thetaRad": 0.45553093477052004,
+            "lengthM": 1,
+            "xM": 0,
+            "yM": 0
+          },
+          "telemetry": {
+            "domain": "mechanics",
+            "type": "pendulum",
+            "subtype": "pendulum",
+            "running": false,
+            "time": 0,
+            "thetaDeg": 26.1,
+            "thetaRad": 0.4558,
+            "omega": 0,
+            "speed": 0,
+            "length": 1,
+            "gravity": 9.81,
+            "potentialEnergy": 1,
+            "kineticEnergy": 0,
+            "totalEnergy": 1,
+            "calibrated": true
+          },
+          "events": [],
+          "editableParameters": {
+            "length": {
+              "value": 1,
+              "unit": "m",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0.8,
+                "notes": "Resolved via policy_default (policy: policy_standard_pendulum_length)",
+                "policyId": "policy_standard_pendulum_length",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": 0.2,
+                "max": 5,
+                "step": 0.05
+              }
+            },
+            "initialAngle": {
+              "value": 26.117406100584446,
+              "unit": "°",
+              "provenance": "observed",
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": -80,
+                "max": 80,
+                "step": 1
+              },
+              "targetId": "bob_1"
+            }
+          }
+        },
+        "mechanics_internal_capture": {
+          "geometry": {
+            "pivot": {
+              "x": 562,
+              "y": 79.23811193908072
+            },
+            "bob_radius_px": 37.03476174228877,
+            "string_length_px": 634.61,
+            "length_px": 634.61
+          },
+          "theta": 0.45583472853565193,
+          "bobSource": {
+            "x": 841.3629149366802,
+            "y": 649.0505493762439
+          },
+          "mapper": {
+            "scale": 0.5,
+            "scaleX": 0.5,
+            "scaleY": 0.5,
+            "offsetX": 0,
+            "offsetY": 0,
+            "sourceW": 1280,
+            "sourceH": 960,
+            "viewW": 640,
+            "viewH": 480,
+            "sourceToView": {},
+            "viewToSource": {},
+            "sourceLengthToView": {},
+            "viewLengthToSource": {}
+          },
+          "kernel": {
+            "lengthM": 1,
+            "g": 9.80665,
+            "theta0": 0.45583472853565193,
+            "omega0": 0,
+            "massKg": 1,
+            "damping": 0,
+            "theta": 0.45583472853565193,
+            "omega": 0,
+            "simTime": 0,
+            "pivot": {
+              "x": 562,
+              "y": 79.23811193908072
+            },
+            "stringLengthPx": 634.61,
+            "bobRadiusPx": 37.03476174228877
+          }
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Mathematically consistent state/output for those inputs. Correct computation is separate from whether those inputs reconstruct this diagram.",
+  "expected_diagram": "At t=0 pivot and bob should register to their printed locations. Motion should pivot around that fixed point. No exact period can be asserted from the symbolic source alone.",
+  "status": "OUTPUT OBSERVED; NO NUMERICAL DEFECT PROVEN",
+  "finding": "MechanicsAdapter → PendulumKernel / PendulumSimulation. t=0 bob is source-aligned while pivot is above the printed support. No integration defect is established; physical time-scale accuracy has no numeric source ground truth.",
+  "change_or_loss": "Scene/state/output are actual captures. Exact internal solver-call argument objects were not individually intercepted; no replay or hand-computed replacement is labeled as runtime evidence."
+}

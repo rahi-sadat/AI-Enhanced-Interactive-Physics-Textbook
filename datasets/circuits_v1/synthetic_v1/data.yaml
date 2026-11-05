@@ -1,0 +1,7 @@
+train: images/train
+val: images/val
+names:
+  0: resistor
+  1: voltage_source
+  2: capacitor
+  3: switch

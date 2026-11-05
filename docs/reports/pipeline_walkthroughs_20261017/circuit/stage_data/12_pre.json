@@ -1,0 +1,94 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 12,
+  "component": "Grayscale, blur and edge extraction",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 197,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+      "function": "preprocess_diagram",
+      "line": 16,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+        "function": "preprocess_for_geometry",
+        "line": 77
+      }
+    }
+  ],
+  "upstream_stage": "Symbol candidates, deduplication and final OCR",
+  "downstream_stage": "OCR-region suppression before geometry detection",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00197_preprocess_diagram",
+        "value": {
+          "img_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\3d3e7d615137463287492abb8fbf1567d972805989fc625bf6bd0cec8af40ab7.png"
+          },
+          "blur_ksize": [
+            5,
+            5
+          ],
+          "blur_sigma": 1.0,
+          "canny_thresh1": 50.0,
+          "canny_thresh2": 150.0
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Native BGR array and actual Canny/blur settings.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00197_preprocess_diagram",
+        "return_value": [
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\0ba8a7e5778191cf5390046b7b11e82d1f0afacfc94a2d90b4adca826f66d795.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\0ba8a7e5778191cf5390046b7b11e82d1f0afacfc94a2d90b4adca826f66d795.png"
+          },
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\638c1df586d32feda06d9944317fc908dc89cb609c3d4234da3429f0591dfc3e.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\638c1df586d32feda06d9944317fc908dc89cb609c3d4234da3429f0591dfc3e.png"
+          },
+          {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\c4e36da9d2001992b7a9a749be2d9134bd440ff858c17f6a70cac952eb884a27.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\c4e36da9d2001992b7a9a749be2d9134bd440ff858c17f6a70cac952eb884a27.png"
+          }
+        ]
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Grayscale/blur/edge arrays in the same 1280×960 source frame. Image processing may change intensities, but must not imply a spatial crop/scale that was not performed.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "FRAME PASS / LOSSY PROCESSING",
+  "finding": "Arrays preserve the source frame. Blur and Canny change image information; no detector correctness is inferred from shape alone.",
+  "change_or_loss": "Color/intensity information becomes an edge representation. Exact arrays are retained. OpenCV internal per-operation frames were not separately profiled."
+}

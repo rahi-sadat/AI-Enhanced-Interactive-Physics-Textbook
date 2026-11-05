@@ -1,0 +1,4877 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 27,
+  "component": "Review / explicit compile request branch",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 1281,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\apps\\api\\main.py",
+      "function": "review_book_ir",
+      "line": 1873,
+      "caller": {
+        "file": "C:\\Users\\saher\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\fastapi\\routing.py",
+        "function": "run_endpoint_function",
+        "line": 191
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 1326,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\apps\\api\\main.py",
+      "function": "compile_resolved",
+      "line": 1962,
+      "caller": {
+        "file": "C:\\Users\\saher\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\fastapi\\routing.py",
+        "function": "run_endpoint_function",
+        "line": 191
+      }
+    },
+    {
+      "file": "apps/web/src/features/simulations/core/SimulationOrchestrator.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "Frontend receives result and selects next state",
+  "downstream_stage": "InteractiveFigure receives the compiled scene",
+  "actual_input": {
+    "records": [
+      {
+        "call": "01281_review_book_ir",
+        "value": {
+          "req": {
+            "book_ir": {
+              "version": "1.0",
+              "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+              "pageIRVersion": "1.0",
+              "figureId": "figure_001",
+              "domain": "circuits",
+              "subtype": "dc_linear",
+              "entities": [
+                {
+                  "id": "R2",
+                  "type": "resistor",
+                  "label": null,
+                  "positionSourcePx": {
+                    "x": 1149,
+                    "y": 416,
+                    "coordinate_space": "source_px",
+                    "method": "cv_circuit_component"
+                  },
+                  "geometry": {
+                    "bounds": {
+                      "x": 1119,
+                      "y": 391,
+                      "width": 60,
+                      "height": 50
+                    },
+                    "terminal_1": {
+                      "x": 1115,
+                      "y": 416
+                    },
+                    "terminal_2": {
+                      "x": 1183,
+                      "y": 416
+                    },
+                    "wire_connected": true
+                  },
+                  "attributes": {},
+                  "evidenceRefs": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_005"
+                  ]
+                },
+                {
+                  "id": "R1",
+                  "type": "resistor",
+                  "label": null,
+                  "positionSourcePx": {
+                    "x": 757,
+                    "y": 255,
+                    "coordinate_space": "source_px",
+                    "method": "cv_circuit_component"
+                  },
+                  "geometry": {
+                    "bounds": {
+                      "x": 727,
+                      "y": 230,
+                      "width": 60,
+                      "height": 50
+                    },
+                    "terminal_1": {
+                      "x": 723,
+                      "y": 255
+                    },
+                    "terminal_2": {
+                      "x": 791,
+                      "y": 255
+                    },
+                    "wire_connected": true
+                  },
+                  "attributes": {},
+                  "evidenceRefs": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_002"
+                  ]
+                },
+                {
+                  "id": "V1",
+                  "type": "voltage_source",
+                  "label": null,
+                  "positionSourcePx": {
+                    "x": 231,
+                    "y": 457,
+                    "coordinate_space": "source_px",
+                    "method": "cv_circuit_component"
+                  },
+                  "geometry": {
+                    "bounds": {
+                      "x": 206,
+                      "y": 427,
+                      "width": 50,
+                      "height": 60
+                    },
+                    "terminal_1": {
+                      "x": 231,
+                      "y": 423
+                    },
+                    "terminal_2": {
+                      "x": 231,
+                      "y": 491
+                    },
+                    "wire_connected": true
+                  },
+                  "attributes": {},
+                  "evidenceRefs": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_004"
+                  ]
+                },
+                {
+                  "id": "switch_1",
+                  "type": "switch",
+                  "label": "S",
+                  "positionSourcePx": null,
+                  "geometry": null,
+                  "attributes": {
+                    "confidence": 0.95,
+                    "precision": "approximate",
+                    "vlmLocalizationVerified": false
+                  },
+                  "evidenceRefs": [
+                    "figure_001"
+                  ]
+                }
+              ],
+              "relationships": [
+                {
+                  "type": "connected_in_series",
+                  "from": "voltage_source_1",
+                  "to": "switch_1",
+                  "confidence": 0.95
+                },
+                {
+                  "type": "connected_in_series",
+                  "from": "switch_1",
+                  "to": "resistor_1",
+                  "confidence": 0.95
+                },
+                {
+                  "type": "connected_in_series",
+                  "from": "resistor_1",
+                  "to": "resistor_2",
+                  "confidence": 0.95
+                },
+                {
+                  "type": "connected_in_series",
+                  "from": "resistor_2",
+                  "to": "voltage_source_1",
+                  "confidence": 0.95
+                }
+              ],
+              "parameters": {
+                "R2_resistance": {
+                  "value": 20,
+                  "unit": "ohm",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "ocr",
+                    "evidenceRefs": [
+                      "ev_ocr_ocr_tok_005"
+                    ],
+                    "derivedFrom": [
+                      "ev_ocr_ocr_tok_005"
+                    ],
+                    "confidence": 0.95,
+                    "notes": ""
+                  }
+                },
+                "R1_resistance": {
+                  "value": 10,
+                  "unit": "ohm",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "ocr",
+                    "evidenceRefs": [
+                      "ev_ocr_ocr_tok_002"
+                    ],
+                    "derivedFrom": [
+                      "ev_ocr_ocr_tok_002"
+                    ],
+                    "confidence": 0.95,
+                    "notes": ""
+                  }
+                },
+                "V1_voltage": {
+                  "value": 12,
+                  "unit": "V",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "ocr",
+                    "evidenceRefs": [
+                      "ev_ocr_ocr_tok_004"
+                    ],
+                    "derivedFrom": [
+                      "ev_ocr_ocr_tok_004"
+                    ],
+                    "confidence": 0.95,
+                    "notes": ""
+                  }
+                },
+                "components": [
+                  {
+                    "id": "R2",
+                    "type": "resistor",
+                    "nodes": [],
+                    "value": 20,
+                    "unit": "ohm",
+                    "label_bbox_source_px": [
+                      1029,
+                      421,
+                      241,
+                      71
+                    ],
+                    "terminals": [
+                      {
+                        "id": "R2.t1",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          1115,
+                          416
+                        ]
+                      },
+                      {
+                        "id": "R2.t2",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          1183,
+                          416
+                        ]
+                      }
+                    ],
+                    "geometry": {
+                      "bbox_source_px": [
+                        1119,
+                        391,
+                        1179,
+                        441
+                      ],
+                      "center_source_px": [
+                        1149,
+                        416
+                      ],
+                      "label_bbox_source_px": [
+                        1029,
+                        421,
+                        241,
+                        71
+                      ]
+                    }
+                  },
+                  {
+                    "id": "R1",
+                    "type": "resistor",
+                    "nodes": [],
+                    "value": 10,
+                    "unit": "ohm",
+                    "label_bbox_source_px": [
+                      636,
+                      148,
+                      242,
+                      68
+                    ],
+                    "terminals": [
+                      {
+                        "id": "R1.t1",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          723,
+                          255
+                        ]
+                      },
+                      {
+                        "id": "R1.t2",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          791,
+                          255
+                        ]
+                      }
+                    ],
+                    "geometry": {
+                      "bbox_source_px": [
+                        727,
+                        230,
+                        787,
+                        280
+                      ],
+                      "center_source_px": [
+                        757,
+                        255
+                      ],
+                      "label_bbox_source_px": [
+                        636,
+                        148,
+                        242,
+                        68
+                      ]
+                    }
+                  },
+                  {
+                    "id": "V1",
+                    "type": "voltage_source",
+                    "nodes": [],
+                    "value": 12,
+                    "unit": "V",
+                    "label_bbox_source_px": [
+                      39,
+                      426,
+                      123,
+                      63
+                    ],
+                    "terminals": [
+                      {
+                        "id": "V1.t1",
+                        "node": null,
+                        "polarity": "+",
+                        "source_px": [
+                          231,
+                          423
+                        ]
+                      },
+                      {
+                        "id": "V1.t2",
+                        "node": null,
+                        "polarity": "-",
+                        "source_px": [
+                          231,
+                          491
+                        ]
+                      }
+                    ],
+                    "geometry": {
+                      "bbox_source_px": [
+                        206,
+                        427,
+                        256,
+                        487
+                      ],
+                      "center_source_px": [
+                        231,
+                        457
+                      ],
+                      "label_bbox_source_px": [
+                        39,
+                        426,
+                        123,
+                        63
+                      ]
+                    }
+                  }
+                ],
+                "nodes": [],
+                "wires": [
+                  {
+                    "id": "wire_1",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        230,
+                        253
+                      ],
+                      [
+                        345,
+                        253
+                      ]
+                    ],
+                    "points": [
+                      [
+                        230,
+                        253
+                      ],
+                      [
+                        345,
+                        253
+                      ]
+                    ],
+                    "length_px": 115
+                  },
+                  {
+                    "id": "wire_2",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        230,
+                        672
+                      ],
+                      [
+                        993,
+                        672
+                      ]
+                    ],
+                    "points": [
+                      [
+                        230,
+                        672
+                      ],
+                      [
+                        993,
+                        672
+                      ]
+                    ],
+                    "length_px": 763
+                  },
+                  {
+                    "id": "wire_3",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        228,
+                        669
+                      ],
+                      [
+                        228,
+                        508
+                      ]
+                    ],
+                    "points": [
+                      [
+                        228,
+                        669
+                      ],
+                      [
+                        228,
+                        508
+                      ]
+                    ],
+                    "length_px": 161
+                  },
+                  {
+                    "id": "wire_4",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        473,
+                        666
+                      ],
+                      [
+                        591,
+                        666
+                      ]
+                    ],
+                    "points": [
+                      [
+                        473,
+                        666
+                      ],
+                      [
+                        591,
+                        666
+                      ]
+                    ],
+                    "length_px": 118
+                  },
+                  {
+                    "id": "wire_5",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        234,
+                        421
+                      ],
+                      [
+                        234,
+                        259
+                      ]
+                    ],
+                    "points": [
+                      [
+                        234,
+                        421
+                      ],
+                      [
+                        234,
+                        259
+                      ]
+                    ],
+                    "length_px": 162
+                  },
+                  {
+                    "id": "wire_6",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        989,
+                        386
+                      ],
+                      [
+                        989,
+                        253
+                      ]
+                    ],
+                    "points": [
+                      [
+                        989,
+                        386
+                      ],
+                      [
+                        989,
+                        253
+                      ]
+                    ],
+                    "length_px": 133
+                  },
+                  {
+                    "id": "wire_7",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        547,
+                        697
+                      ],
+                      [
+                        713,
+                        697
+                      ]
+                    ],
+                    "points": [
+                      [
+                        547,
+                        697
+                      ],
+                      [
+                        713,
+                        697
+                      ]
+                    ],
+                    "length_px": 166
+                  },
+                  {
+                    "id": "wire_8",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        995,
+                        669
+                      ],
+                      [
+                        995,
+                        543
+                      ]
+                    ],
+                    "points": [
+                      [
+                        995,
+                        669
+                      ],
+                      [
+                        995,
+                        543
+                      ]
+                    ],
+                    "length_px": 126
+                  },
+                  {
+                    "id": "wire_9",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        627,
+                        253
+                      ],
+                      [
+                        686,
+                        254
+                      ]
+                    ],
+                    "points": [
+                      [
+                        627,
+                        253
+                      ],
+                      [
+                        686,
+                        254
+                      ]
+                    ],
+                    "length_px": 59.00847396772772
+                  },
+                  {
+                    "id": "wire_10",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        224,
+                        421
+                      ],
+                      [
+                        289,
+                        421
+                      ]
+                    ],
+                    "points": [
+                      [
+                        224,
+                        421
+                      ],
+                      [
+                        289,
+                        421
+                      ]
+                    ],
+                    "length_px": 65
+                  },
+                  {
+                    "id": "wire_11",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        184,
+                        493
+                      ],
+                      [
+                        278,
+                        493
+                      ]
+                    ],
+                    "points": [
+                      [
+                        184,
+                        493
+                      ],
+                      [
+                        278,
+                        493
+                      ]
+                    ],
+                    "length_px": 94
+                  },
+                  {
+                    "id": "wire_12",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        357,
+                        255
+                      ],
+                      [
+                        438,
+                        216
+                      ]
+                    ],
+                    "points": [
+                      [
+                        357,
+                        255
+                      ],
+                      [
+                        438,
+                        216
+                      ]
+                    ],
+                    "length_px": 89.89994438263018
+                  },
+                  {
+                    "id": "wire_13",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        231,
+                        255
+                      ],
+                      [
+                        992,
+                        255
+                      ]
+                    ],
+                    "points": [
+                      [
+                        231,
+                        255
+                      ],
+                      [
+                        992,
+                        255
+                      ]
+                    ],
+                    "length_px": 761
+                  },
+                  {
+                    "id": "wire_14",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        231,
+                        416
+                      ],
+                      [
+                        992,
+                        416
+                      ]
+                    ],
+                    "points": [
+                      [
+                        231,
+                        416
+                      ],
+                      [
+                        992,
+                        416
+                      ]
+                    ],
+                    "length_px": 761
+                  },
+                  {
+                    "id": "wire_15",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        231,
+                        668
+                      ],
+                      [
+                        992,
+                        668
+                      ]
+                    ],
+                    "points": [
+                      [
+                        231,
+                        668
+                      ],
+                      [
+                        992,
+                        668
+                      ]
+                    ],
+                    "length_px": 761
+                  }
+                ],
+                "reference_node": "N0"
+              },
+              "geometry": {
+                "width": 1280,
+                "height": 960,
+                "coordinate_space": "source_px",
+                "circuit_topology": {
+                  "verified_connectivity": false,
+                  "node_count": 0
+                }
+              },
+              "assumptions": [],
+              "provenance": {
+                "pipeline": "PR-05-vlm",
+                "provider": "gemini",
+                "model": "gemini-3.1-flash-lite",
+                "prompt_version": "pr05-v1",
+                "timestamp": "2026-10-17T03:28:01.161901+00:00",
+                "classification": "supported",
+                "visible_labels": [
+                  {
+                    "text": "12 V",
+                    "confidence": 0.95,
+                    "semanticRole": "voltage_value",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "S",
+                    "confidence": 0.95,
+                    "semanticRole": "switch_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "R1 = 10 Ω",
+                    "confidence": 0.95,
+                    "semanticRole": "resistor_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "R2 = 20 Ω",
+                    "confidence": 0.95,
+                    "semanticRole": "resistor_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "I",
+                    "confidence": 0.95,
+                    "semanticRole": "current_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "Fig. 9 Series DC Circuit",
+                    "confidence": 0.95,
+                    "semanticRole": "caption",
+                    "source": "vlm",
+                    "verified": false
+                  }
+                ],
+                "candidates": [],
+                "notes": [
+                  "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+                ],
+                "latency_ms": 8245,
+                "cache_hit": false,
+                "fallback_used": false,
+                "source_width": 1280,
+                "source_height": 960,
+                "grounding_diagnostics": [
+                  {
+                    "entityId": "R2",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                      "ev_ocr_ocr_tok_005"
+                    ],
+                    "checks": {
+                      "wire_connected": true
+                    },
+                    "conflicts": [],
+                    "notes": "Component grounded as R2 (resistor) with visual leads at (1149.0, 416.0)."
+                  },
+                  {
+                    "entityId": "R1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                      "ev_ocr_ocr_tok_002"
+                    ],
+                    "checks": {
+                      "wire_connected": true
+                    },
+                    "conflicts": [],
+                    "notes": "Component grounded as R1 (resistor) with visual leads at (757.0, 255.0)."
+                  },
+                  {
+                    "entityId": "V1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                      "ev_ocr_ocr_tok_004"
+                    ],
+                    "checks": {
+                      "wire_connected": true
+                    },
+                    "conflicts": [],
+                    "notes": "Component grounded as V1 (voltage_source) with visual leads at (231.0, 457.0)."
+                  }
+                ],
+                "candidate_parameters": [
+                  {
+                    "rawText": "R2 = 20 Ω",
+                    "numericValue": 20,
+                    "rawUnit": "Ω",
+                    "canonicalUnit": "ohm",
+                    "quantityCandidate": "resistance",
+                    "sourceOcrTokenId": "ocr_tok_005",
+                    "confidence": 0.90339
+                  },
+                  {
+                    "rawText": "R2 = 20 2",
+                    "numericValue": 20,
+                    "rawUnit": "2",
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_005",
+                    "confidence": 0.813
+                  },
+                  {
+                    "rawText": "R1 = 10 Ω",
+                    "numericValue": 10,
+                    "rawUnit": "Ω",
+                    "canonicalUnit": "ohm",
+                    "quantityCandidate": "resistance",
+                    "sourceOcrTokenId": "ocr_tok_002",
+                    "confidence": 0.86803
+                  },
+                  {
+                    "rawText": "R1 = 10 `2",
+                    "numericValue": 10,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_002",
+                    "confidence": 0.781
+                  },
+                  {
+                    "rawText": "R1 = 10 `2",
+                    "numericValue": 2,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_002",
+                    "confidence": 0.781
+                  },
+                  {
+                    "rawText": "12 V",
+                    "numericValue": 12,
+                    "rawUnit": "V",
+                    "canonicalUnit": "V",
+                    "quantityCandidate": "voltage",
+                    "sourceOcrTokenId": "ocr_tok_004",
+                    "confidence": 0.98113
+                  },
+                  {
+                    "rawText": "12 `",
+                    "numericValue": 12,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_004",
+                    "confidence": 0.883
+                  },
+                  {
+                    "rawText": "1",
+                    "numericValue": 1,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_006",
+                    "confidence": 0.895
+                  }
+                ],
+                "evidence_pipeline_latency_ms": 22097.135399992112
+              },
+              "evidence": {
+                "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff": {
+                  "id": "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "method": "classical_cv",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": null,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "circuit_cv_extractor",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "component_count": 0,
+                    "wire_count": 15,
+                    "junction_count": 4
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_007": {
+                  "id": "ev_ocr_ocr_tok_007",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.97378,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "Fig. 9 Series DC Circuit",
+                    "bbox": {
+                      "x": 336,
+                      "y": 817,
+                      "width": 603,
+                      "height": 70
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_005": {
+                  "id": "ev_ocr_ocr_tok_005",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.90339,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "R2 = 20 Ω",
+                    "bbox": {
+                      "x": 1029,
+                      "y": 421,
+                      "width": 241,
+                      "height": 71
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_002": {
+                  "id": "ev_ocr_ocr_tok_002",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.86803,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "R1 = 10 Ω",
+                    "bbox": {
+                      "x": 636,
+                      "y": 148,
+                      "width": 242,
+                      "height": 68
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_004": {
+                  "id": "ev_ocr_ocr_tok_004",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.98113,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "12 V",
+                    "bbox": {
+                      "x": 39,
+                      "y": 426,
+                      "width": 123,
+                      "height": 63
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_001": {
+                  "id": "ev_ocr_ocr_tok_001",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.99926,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "S",
+                    "bbox": {
+                      "x": 378,
+                      "y": 159,
+                      "width": 47,
+                      "height": 53
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_006": {
+                  "id": "ev_ocr_ocr_tok_006",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.99429,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "I",
+                    "bbox": {
+                      "x": 613,
+                      "y": 706,
+                      "width": 39,
+                      "height": 52
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_003": {
+                  "id": "ev_ocr_ocr_tok_003",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.72651,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "十",
+                    "bbox": {
+                      "x": 175,
+                      "y": 362,
+                      "width": 40,
+                      "height": 40
+                    }
+                  },
+                  "metadata": {}
+                }
+              },
+              "confidence": {
+                "isPhysics": 0.99,
+                "domain": 0.98,
+                "subtype": 0.96,
+                "overall": 0.96,
+                "rawProvider": {
+                  "isPhysics": 1,
+                  "domain": 1,
+                  "subtype": 1,
+                  "overall": 1
+                }
+              },
+              "status": "NEEDS_REVIEW",
+              "statusNotes": "Circuit source, component values, or wire continuity require review.",
+              "resolutions": {},
+              "reviewIssues": [],
+              "parameterProvenance": {
+                "R2_resistance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "confidence": 0.95
+                },
+                "R1_resistance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "confidence": 0.95
+                },
+                "V1_voltage": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "confidence": 0.95
+                },
+                "components": {
+                  "source": "ocr_and_cv",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0,
+                  "notes": "Extracted from schematic visual features and OCR labels."
+                },
+                "nodes": {
+                  "source": "ocr_and_cv",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0,
+                  "notes": "Derived from wire continuity network."
+                }
+              },
+              "calibration": null,
+              "id": "9b910bff7ee74e90a1763e5358b474ff_figure_001",
+              "isPhysics": true
+            }
+          }
+        }
+      },
+      {
+        "call": "01326_compile_resolved",
+        "value": {
+          "req": {
+            "book_ir": {
+              "version": "1.0",
+              "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+              "pageIRVersion": "1.0",
+              "figureId": "figure_001",
+              "domain": "circuits",
+              "subtype": "dc_linear",
+              "entities": [
+                {
+                  "id": "R2",
+                  "type": "resistor",
+                  "label": null,
+                  "positionSourcePx": {
+                    "x": 1149,
+                    "y": 416,
+                    "coordinate_space": "source_px",
+                    "method": "cv_circuit_component"
+                  },
+                  "geometry": {
+                    "bounds": {
+                      "x": 1119,
+                      "y": 391,
+                      "width": 60,
+                      "height": 50
+                    },
+                    "terminal_1": {
+                      "x": 1115,
+                      "y": 416
+                    },
+                    "terminal_2": {
+                      "x": 1183,
+                      "y": 416
+                    },
+                    "wire_connected": true
+                  },
+                  "attributes": {},
+                  "evidenceRefs": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_005"
+                  ]
+                },
+                {
+                  "id": "R1",
+                  "type": "resistor",
+                  "label": null,
+                  "positionSourcePx": {
+                    "x": 757,
+                    "y": 255,
+                    "coordinate_space": "source_px",
+                    "method": "cv_circuit_component"
+                  },
+                  "geometry": {
+                    "bounds": {
+                      "x": 727,
+                      "y": 230,
+                      "width": 60,
+                      "height": 50
+                    },
+                    "terminal_1": {
+                      "x": 723,
+                      "y": 255
+                    },
+                    "terminal_2": {
+                      "x": 791,
+                      "y": 255
+                    },
+                    "wire_connected": true
+                  },
+                  "attributes": {},
+                  "evidenceRefs": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_002"
+                  ]
+                },
+                {
+                  "id": "V1",
+                  "type": "voltage_source",
+                  "label": null,
+                  "positionSourcePx": {
+                    "x": 231,
+                    "y": 457,
+                    "coordinate_space": "source_px",
+                    "method": "cv_circuit_component"
+                  },
+                  "geometry": {
+                    "bounds": {
+                      "x": 206,
+                      "y": 427,
+                      "width": 50,
+                      "height": 60
+                    },
+                    "terminal_1": {
+                      "x": 231,
+                      "y": 423
+                    },
+                    "terminal_2": {
+                      "x": 231,
+                      "y": 491
+                    },
+                    "wire_connected": true
+                  },
+                  "attributes": {},
+                  "evidenceRefs": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_004"
+                  ]
+                },
+                {
+                  "id": "switch_1",
+                  "type": "switch",
+                  "label": "S",
+                  "positionSourcePx": null,
+                  "geometry": null,
+                  "attributes": {
+                    "confidence": 0.95,
+                    "precision": "approximate",
+                    "vlmLocalizationVerified": false
+                  },
+                  "evidenceRefs": [
+                    "figure_001"
+                  ]
+                }
+              ],
+              "relationships": [
+                {
+                  "type": "connected_in_series",
+                  "from": "voltage_source_1",
+                  "to": "switch_1",
+                  "confidence": 0.95
+                },
+                {
+                  "type": "connected_in_series",
+                  "from": "switch_1",
+                  "to": "resistor_1",
+                  "confidence": 0.95
+                },
+                {
+                  "type": "connected_in_series",
+                  "from": "resistor_1",
+                  "to": "resistor_2",
+                  "confidence": 0.95
+                },
+                {
+                  "type": "connected_in_series",
+                  "from": "resistor_2",
+                  "to": "voltage_source_1",
+                  "confidence": 0.95
+                }
+              ],
+              "parameters": {
+                "R2_resistance": {
+                  "value": 20,
+                  "unit": "ohm",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "ocr",
+                    "evidenceRefs": [
+                      "ev_ocr_ocr_tok_005"
+                    ],
+                    "derivedFrom": [
+                      "ev_ocr_ocr_tok_005"
+                    ],
+                    "confidence": 0.95,
+                    "notes": ""
+                  }
+                },
+                "R1_resistance": {
+                  "value": 10,
+                  "unit": "ohm",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "ocr",
+                    "evidenceRefs": [
+                      "ev_ocr_ocr_tok_002"
+                    ],
+                    "derivedFrom": [
+                      "ev_ocr_ocr_tok_002"
+                    ],
+                    "confidence": 0.95,
+                    "notes": ""
+                  }
+                },
+                "V1_voltage": {
+                  "value": 12,
+                  "unit": "V",
+                  "status": "observed",
+                  "provenance": {
+                    "source": "ocr",
+                    "evidenceRefs": [
+                      "ev_ocr_ocr_tok_004"
+                    ],
+                    "derivedFrom": [
+                      "ev_ocr_ocr_tok_004"
+                    ],
+                    "confidence": 0.95,
+                    "notes": ""
+                  }
+                },
+                "components": [
+                  {
+                    "id": "R2",
+                    "type": "resistor",
+                    "nodes": [],
+                    "value": 20,
+                    "unit": "ohm",
+                    "label_bbox_source_px": [
+                      1029,
+                      421,
+                      241,
+                      71
+                    ],
+                    "terminals": [
+                      {
+                        "id": "R2.t1",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          1115,
+                          416
+                        ]
+                      },
+                      {
+                        "id": "R2.t2",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          1183,
+                          416
+                        ]
+                      }
+                    ],
+                    "geometry": {
+                      "bbox_source_px": [
+                        1119,
+                        391,
+                        1179,
+                        441
+                      ],
+                      "center_source_px": [
+                        1149,
+                        416
+                      ],
+                      "label_bbox_source_px": [
+                        1029,
+                        421,
+                        241,
+                        71
+                      ]
+                    }
+                  },
+                  {
+                    "id": "R1",
+                    "type": "resistor",
+                    "nodes": [],
+                    "value": 10,
+                    "unit": "ohm",
+                    "label_bbox_source_px": [
+                      636,
+                      148,
+                      242,
+                      68
+                    ],
+                    "terminals": [
+                      {
+                        "id": "R1.t1",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          723,
+                          255
+                        ]
+                      },
+                      {
+                        "id": "R1.t2",
+                        "node": null,
+                        "polarity": null,
+                        "source_px": [
+                          791,
+                          255
+                        ]
+                      }
+                    ],
+                    "geometry": {
+                      "bbox_source_px": [
+                        727,
+                        230,
+                        787,
+                        280
+                      ],
+                      "center_source_px": [
+                        757,
+                        255
+                      ],
+                      "label_bbox_source_px": [
+                        636,
+                        148,
+                        242,
+                        68
+                      ]
+                    }
+                  },
+                  {
+                    "id": "V1",
+                    "type": "voltage_source",
+                    "nodes": [],
+                    "value": 12,
+                    "unit": "V",
+                    "label_bbox_source_px": [
+                      39,
+                      426,
+                      123,
+                      63
+                    ],
+                    "terminals": [
+                      {
+                        "id": "V1.t1",
+                        "node": null,
+                        "polarity": "+",
+                        "source_px": [
+                          231,
+                          423
+                        ]
+                      },
+                      {
+                        "id": "V1.t2",
+                        "node": null,
+                        "polarity": "-",
+                        "source_px": [
+                          231,
+                          491
+                        ]
+                      }
+                    ],
+                    "geometry": {
+                      "bbox_source_px": [
+                        206,
+                        427,
+                        256,
+                        487
+                      ],
+                      "center_source_px": [
+                        231,
+                        457
+                      ],
+                      "label_bbox_source_px": [
+                        39,
+                        426,
+                        123,
+                        63
+                      ]
+                    }
+                  }
+                ],
+                "nodes": [],
+                "wires": [
+                  {
+                    "id": "wire_1",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        230,
+                        253
+                      ],
+                      [
+                        345,
+                        253
+                      ]
+                    ],
+                    "points": [
+                      [
+                        230,
+                        253
+                      ],
+                      [
+                        345,
+                        253
+                      ]
+                    ],
+                    "length_px": 115
+                  },
+                  {
+                    "id": "wire_2",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        230,
+                        672
+                      ],
+                      [
+                        993,
+                        672
+                      ]
+                    ],
+                    "points": [
+                      [
+                        230,
+                        672
+                      ],
+                      [
+                        993,
+                        672
+                      ]
+                    ],
+                    "length_px": 763
+                  },
+                  {
+                    "id": "wire_3",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        228,
+                        669
+                      ],
+                      [
+                        228,
+                        508
+                      ]
+                    ],
+                    "points": [
+                      [
+                        228,
+                        669
+                      ],
+                      [
+                        228,
+                        508
+                      ]
+                    ],
+                    "length_px": 161
+                  },
+                  {
+                    "id": "wire_4",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        473,
+                        666
+                      ],
+                      [
+                        591,
+                        666
+                      ]
+                    ],
+                    "points": [
+                      [
+                        473,
+                        666
+                      ],
+                      [
+                        591,
+                        666
+                      ]
+                    ],
+                    "length_px": 118
+                  },
+                  {
+                    "id": "wire_5",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        234,
+                        421
+                      ],
+                      [
+                        234,
+                        259
+                      ]
+                    ],
+                    "points": [
+                      [
+                        234,
+                        421
+                      ],
+                      [
+                        234,
+                        259
+                      ]
+                    ],
+                    "length_px": 162
+                  },
+                  {
+                    "id": "wire_6",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        989,
+                        386
+                      ],
+                      [
+                        989,
+                        253
+                      ]
+                    ],
+                    "points": [
+                      [
+                        989,
+                        386
+                      ],
+                      [
+                        989,
+                        253
+                      ]
+                    ],
+                    "length_px": 133
+                  },
+                  {
+                    "id": "wire_7",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        547,
+                        697
+                      ],
+                      [
+                        713,
+                        697
+                      ]
+                    ],
+                    "points": [
+                      [
+                        547,
+                        697
+                      ],
+                      [
+                        713,
+                        697
+                      ]
+                    ],
+                    "length_px": 166
+                  },
+                  {
+                    "id": "wire_8",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        995,
+                        669
+                      ],
+                      [
+                        995,
+                        543
+                      ]
+                    ],
+                    "points": [
+                      [
+                        995,
+                        669
+                      ],
+                      [
+                        995,
+                        543
+                      ]
+                    ],
+                    "length_px": 126
+                  },
+                  {
+                    "id": "wire_9",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        627,
+                        253
+                      ],
+                      [
+                        686,
+                        254
+                      ]
+                    ],
+                    "points": [
+                      [
+                        627,
+                        253
+                      ],
+                      [
+                        686,
+                        254
+                      ]
+                    ],
+                    "length_px": 59.00847396772772
+                  },
+                  {
+                    "id": "wire_10",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        224,
+                        421
+                      ],
+                      [
+                        289,
+                        421
+                      ]
+                    ],
+                    "points": [
+                      [
+                        224,
+                        421
+                      ],
+                      [
+                        289,
+                        421
+                      ]
+                    ],
+                    "length_px": 65
+                  },
+                  {
+                    "id": "wire_11",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        184,
+                        493
+                      ],
+                      [
+                        278,
+                        493
+                      ]
+                    ],
+                    "points": [
+                      [
+                        184,
+                        493
+                      ],
+                      [
+                        278,
+                        493
+                      ]
+                    ],
+                    "length_px": 94
+                  },
+                  {
+                    "id": "wire_12",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        357,
+                        255
+                      ],
+                      [
+                        438,
+                        216
+                      ]
+                    ],
+                    "points": [
+                      [
+                        357,
+                        255
+                      ],
+                      [
+                        438,
+                        216
+                      ]
+                    ],
+                    "length_px": 89.89994438263018
+                  },
+                  {
+                    "id": "wire_13",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        231,
+                        255
+                      ],
+                      [
+                        992,
+                        255
+                      ]
+                    ],
+                    "points": [
+                      [
+                        231,
+                        255
+                      ],
+                      [
+                        992,
+                        255
+                      ]
+                    ],
+                    "length_px": 761
+                  },
+                  {
+                    "id": "wire_14",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        231,
+                        416
+                      ],
+                      [
+                        992,
+                        416
+                      ]
+                    ],
+                    "points": [
+                      [
+                        231,
+                        416
+                      ],
+                      [
+                        992,
+                        416
+                      ]
+                    ],
+                    "length_px": 761
+                  },
+                  {
+                    "id": "wire_15",
+                    "node": null,
+                    "polyline_source_px": [
+                      [
+                        231,
+                        668
+                      ],
+                      [
+                        992,
+                        668
+                      ]
+                    ],
+                    "points": [
+                      [
+                        231,
+                        668
+                      ],
+                      [
+                        992,
+                        668
+                      ]
+                    ],
+                    "length_px": 761
+                  }
+                ],
+                "reference_node": "N0"
+              },
+              "geometry": {
+                "width": 1280,
+                "height": 960,
+                "coordinate_space": "source_px",
+                "circuit_topology": {
+                  "verified_connectivity": false,
+                  "node_count": 0
+                }
+              },
+              "assumptions": [],
+              "provenance": {
+                "pipeline": "PR-05-vlm",
+                "provider": "gemini",
+                "model": "gemini-3.1-flash-lite",
+                "prompt_version": "pr05-v1",
+                "timestamp": "2026-10-17T03:28:01.161901+00:00",
+                "classification": "supported",
+                "visible_labels": [
+                  {
+                    "text": "12 V",
+                    "confidence": 0.95,
+                    "semanticRole": "voltage_value",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "S",
+                    "confidence": 0.95,
+                    "semanticRole": "switch_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "R1 = 10 Ω",
+                    "confidence": 0.95,
+                    "semanticRole": "resistor_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "R2 = 20 Ω",
+                    "confidence": 0.95,
+                    "semanticRole": "resistor_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "I",
+                    "confidence": 0.95,
+                    "semanticRole": "current_label",
+                    "source": "vlm",
+                    "verified": false
+                  },
+                  {
+                    "text": "Fig. 9 Series DC Circuit",
+                    "confidence": 0.95,
+                    "semanticRole": "caption",
+                    "source": "vlm",
+                    "verified": false
+                  }
+                ],
+                "candidates": [],
+                "notes": [
+                  "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+                ],
+                "latency_ms": 8245,
+                "cache_hit": false,
+                "fallback_used": false,
+                "source_width": 1280,
+                "source_height": 960,
+                "grounding_diagnostics": [
+                  {
+                    "entityId": "R2",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                      "ev_ocr_ocr_tok_005"
+                    ],
+                    "checks": {
+                      "wire_connected": true
+                    },
+                    "conflicts": [],
+                    "notes": "Component grounded as R2 (resistor) with visual leads at (1149.0, 416.0)."
+                  },
+                  {
+                    "entityId": "R1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                      "ev_ocr_ocr_tok_002"
+                    ],
+                    "checks": {
+                      "wire_connected": true
+                    },
+                    "conflicts": [],
+                    "notes": "Component grounded as R1 (resistor) with visual leads at (757.0, 255.0)."
+                  },
+                  {
+                    "entityId": "V1",
+                    "groundingState": "grounded",
+                    "supportingEvidence": [
+                      "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                      "ev_ocr_ocr_tok_004"
+                    ],
+                    "checks": {
+                      "wire_connected": true
+                    },
+                    "conflicts": [],
+                    "notes": "Component grounded as V1 (voltage_source) with visual leads at (231.0, 457.0)."
+                  }
+                ],
+                "candidate_parameters": [
+                  {
+                    "rawText": "R2 = 20 Ω",
+                    "numericValue": 20,
+                    "rawUnit": "Ω",
+                    "canonicalUnit": "ohm",
+                    "quantityCandidate": "resistance",
+                    "sourceOcrTokenId": "ocr_tok_005",
+                    "confidence": 0.90339
+                  },
+                  {
+                    "rawText": "R2 = 20 2",
+                    "numericValue": 20,
+                    "rawUnit": "2",
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_005",
+                    "confidence": 0.813
+                  },
+                  {
+                    "rawText": "R1 = 10 Ω",
+                    "numericValue": 10,
+                    "rawUnit": "Ω",
+                    "canonicalUnit": "ohm",
+                    "quantityCandidate": "resistance",
+                    "sourceOcrTokenId": "ocr_tok_002",
+                    "confidence": 0.86803
+                  },
+                  {
+                    "rawText": "R1 = 10 `2",
+                    "numericValue": 10,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_002",
+                    "confidence": 0.781
+                  },
+                  {
+                    "rawText": "R1 = 10 `2",
+                    "numericValue": 2,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_002",
+                    "confidence": 0.781
+                  },
+                  {
+                    "rawText": "12 V",
+                    "numericValue": 12,
+                    "rawUnit": "V",
+                    "canonicalUnit": "V",
+                    "quantityCandidate": "voltage",
+                    "sourceOcrTokenId": "ocr_tok_004",
+                    "confidence": 0.98113
+                  },
+                  {
+                    "rawText": "12 `",
+                    "numericValue": 12,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_004",
+                    "confidence": 0.883
+                  },
+                  {
+                    "rawText": "1",
+                    "numericValue": 1,
+                    "rawUnit": null,
+                    "canonicalUnit": null,
+                    "quantityCandidate": null,
+                    "sourceOcrTokenId": "ocr_tok_006",
+                    "confidence": 0.895
+                  }
+                ],
+                "evidence_pipeline_latency_ms": 22097.135399992112
+              },
+              "evidence": {
+                "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff": {
+                  "id": "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "method": "classical_cv",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": null,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "circuit_cv_extractor",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "component_count": 0,
+                    "wire_count": 15,
+                    "junction_count": 4
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_007": {
+                  "id": "ev_ocr_ocr_tok_007",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.97378,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "Fig. 9 Series DC Circuit",
+                    "bbox": {
+                      "x": 336,
+                      "y": 817,
+                      "width": 603,
+                      "height": 70
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_005": {
+                  "id": "ev_ocr_ocr_tok_005",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.90339,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "R2 = 20 Ω",
+                    "bbox": {
+                      "x": 1029,
+                      "y": 421,
+                      "width": 241,
+                      "height": 71
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_002": {
+                  "id": "ev_ocr_ocr_tok_002",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.86803,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "R1 = 10 Ω",
+                    "bbox": {
+                      "x": 636,
+                      "y": 148,
+                      "width": 242,
+                      "height": 68
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_004": {
+                  "id": "ev_ocr_ocr_tok_004",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.98113,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "12 V",
+                    "bbox": {
+                      "x": 39,
+                      "y": 426,
+                      "width": 123,
+                      "height": 63
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_001": {
+                  "id": "ev_ocr_ocr_tok_001",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.99926,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "S",
+                    "bbox": {
+                      "x": 378,
+                      "y": 159,
+                      "width": 47,
+                      "height": 53
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_006": {
+                  "id": "ev_ocr_ocr_tok_006",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.99429,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "I",
+                    "bbox": {
+                      "x": 613,
+                      "y": 706,
+                      "width": 39,
+                      "height": 52
+                    }
+                  },
+                  "metadata": {}
+                },
+                "ev_ocr_ocr_tok_003": {
+                  "id": "ev_ocr_ocr_tok_003",
+                  "method": "ocr",
+                  "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                  "figureId": "figure_001",
+                  "confidence": 0.72651,
+                  "verified": false,
+                  "coordinateSpace": "source_px",
+                  "provider": "multi_ocr_router",
+                  "model": null,
+                  "version": null,
+                  "payload": {
+                    "raw_text": "十",
+                    "bbox": {
+                      "x": 175,
+                      "y": 362,
+                      "width": 40,
+                      "height": 40
+                    }
+                  },
+                  "metadata": {}
+                }
+              },
+              "confidence": {
+                "isPhysics": 0.99,
+                "domain": 0.98,
+                "subtype": 0.96,
+                "overall": 0.96,
+                "rawProvider": {
+                  "isPhysics": 1,
+                  "domain": 1,
+                  "subtype": 1,
+                  "overall": 1
+                }
+              },
+              "status": "NEEDS_REVIEW",
+              "statusNotes": "Circuit source, component values, or wire continuity require review.",
+              "resolutions": {},
+              "reviewIssues": [],
+              "parameterProvenance": {
+                "R2_resistance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "confidence": 0.95
+                },
+                "R1_resistance": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "confidence": 0.95
+                },
+                "V1_voltage": {
+                  "source": "ocr",
+                  "evidence_refs": [
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "confidence": 0.95
+                },
+                "components": {
+                  "source": "ocr_and_cv",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0,
+                  "notes": "Extracted from schematic visual features and OCR labels."
+                },
+                "nodes": {
+                  "source": "ocr_and_cv",
+                  "evidenceRefs": [],
+                  "derivedFrom": [],
+                  "confidence": 0,
+                  "notes": "Derived from wire continuity network."
+                }
+              },
+              "calibration": null,
+              "id": "9b910bff7ee74e90a1763e5358b474ff_figure_001",
+              "isPhysics": true
+            }
+          }
+        }
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator.compile",
+        "phase": "input",
+        "wallTime": 37151.09999999404,
+        "data": []
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "A needs-review BookIR and subsequent actual browser review/compile requests, if any.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "01281_review_book_ir",
+        "return_value": {
+          "success": true,
+          "review_state": {
+            "bookIRStatus": "NEEDS_REVIEW",
+            "bookIrId": "9b910bff7ee74e90a1763e5358b474ff_figure_001",
+            "subtype": "dc_linear",
+            "readyToCompile": false,
+            "satisfiedRequirements": [
+              "nodes",
+              "components"
+            ],
+            "missingRequirements": [],
+            "ambiguousRequirements": [],
+            "blockers": [
+              "Circuit component R2 has no valid two-node connection.",
+              "Circuit component R1 has no valid two-node connection.",
+              "Circuit component V1 has no valid two-node connection."
+            ],
+            "blockersCount": 3,
+            "warnings": [
+              "A switch is present and will be initialized in the interactive simulation."
+            ],
+            "warningsCount": 1,
+            "issues": [
+              {
+                "id": "issue_circuit_switch_state_unverified",
+                "requirementId": "",
+                "parameterName": "",
+                "entityId": null,
+                "issueType": "ungrounded_geometry",
+                "question": "Switch can be toggled interactively during simulation.",
+                "questionBn": null,
+                "candidates": [],
+                "allowedActions": [
+                  "select_option"
+                ],
+                "defaultPolicyId": null,
+                "blocking": false,
+                "helpText": "",
+                "targetUnit": null,
+                "allowedUnits": [],
+                "evidenceRefs": []
+              },
+              {
+                "id": "issue_circuit_connection_R2",
+                "requirementId": "",
+                "parameterName": "",
+                "entityId": null,
+                "issueType": "ungrounded_geometry",
+                "question": "Verify both terminals of R2 against the diagram.",
+                "questionBn": null,
+                "candidates": [],
+                "allowedActions": [
+                  "select_option"
+                ],
+                "defaultPolicyId": null,
+                "blocking": true,
+                "helpText": "",
+                "targetUnit": null,
+                "allowedUnits": [],
+                "evidenceRefs": []
+              },
+              {
+                "id": "issue_circuit_connection_R1",
+                "requirementId": "",
+                "parameterName": "",
+                "entityId": null,
+                "issueType": "ungrounded_geometry",
+                "question": "Verify both terminals of R1 against the diagram.",
+                "questionBn": null,
+                "candidates": [],
+                "allowedActions": [
+                  "select_option"
+                ],
+                "defaultPolicyId": null,
+                "blocking": true,
+                "helpText": "",
+                "targetUnit": null,
+                "allowedUnits": [],
+                "evidenceRefs": []
+              },
+              {
+                "id": "issue_circuit_connection_V1",
+                "requirementId": "",
+                "parameterName": "",
+                "entityId": null,
+                "issueType": "ungrounded_geometry",
+                "question": "Verify both terminals of V1 against the diagram.",
+                "questionBn": null,
+                "candidates": [],
+                "allowedActions": [
+                  "select_option"
+                ],
+                "defaultPolicyId": null,
+                "blocking": true,
+                "helpText": "",
+                "targetUnit": null,
+                "allowedUnits": [],
+                "evidenceRefs": []
+              }
+            ],
+            "availablePolicies": [
+              {
+                "id": "policy_standard_dc_voltage",
+                "policyId": "policy_standard_dc_voltage",
+                "name": "Standard DC Source Voltage",
+                "description": "Standard 10.0 V DC bench power supply voltage.",
+                "domain": "circuits",
+                "targetSubtype": "dc_linear",
+                "targetParameter": "source_voltage",
+                "parameterName": "source_voltage",
+                "value": 10.0,
+                "unit": "V",
+                "version": "1.0",
+                "requiresUserOptIn": true,
+                "educationalRationale": "Standard 10V bench voltage source for introductory DC circuit network analysis.",
+                "metadata": {}
+              },
+              {
+                "id": "policy_standard_dc_resistance",
+                "policyId": "policy_standard_dc_resistance",
+                "name": "Standard Load Resistor Value",
+                "description": "Standard 100.0 Ω load resistance.",
+                "domain": "circuits",
+                "targetSubtype": "dc_linear",
+                "targetParameter": "resistance",
+                "parameterName": "resistance",
+                "value": 100.0,
+                "unit": "Ω",
+                "version": "1.0",
+                "requiresUserOptIn": true,
+                "educationalRationale": "Standard 100 Ohm load resistor for manageable branch currents.",
+                "metadata": {}
+              }
+            ],
+            "diagnostics": {}
+          },
+          "ready_to_compile": false,
+          "blockers_count": 3,
+          "warnings_count": 1,
+          "book_ir": {
+            "version": "1.0",
+            "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+            "pageIRVersion": "1.0",
+            "figureId": "figure_001",
+            "domain": "circuits",
+            "subtype": "dc_linear",
+            "entities": [
+              {
+                "id": "R2",
+                "type": "resistor",
+                "label": null,
+                "positionSourcePx": {
+                  "x": 1149,
+                  "y": 416,
+                  "coordinate_space": "source_px",
+                  "method": "cv_circuit_component"
+                },
+                "geometry": {
+                  "bounds": {
+                    "x": 1119,
+                    "y": 391,
+                    "width": 60,
+                    "height": 50
+                  },
+                  "terminal_1": {
+                    "x": 1115,
+                    "y": 416
+                  },
+                  "terminal_2": {
+                    "x": 1183,
+                    "y": 416
+                  },
+                  "wire_connected": true
+                },
+                "attributes": {},
+                "evidenceRefs": [
+                  "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "ev_ocr_ocr_tok_005"
+                ]
+              },
+              {
+                "id": "R1",
+                "type": "resistor",
+                "label": null,
+                "positionSourcePx": {
+                  "x": 757,
+                  "y": 255,
+                  "coordinate_space": "source_px",
+                  "method": "cv_circuit_component"
+                },
+                "geometry": {
+                  "bounds": {
+                    "x": 727,
+                    "y": 230,
+                    "width": 60,
+                    "height": 50
+                  },
+                  "terminal_1": {
+                    "x": 723,
+                    "y": 255
+                  },
+                  "terminal_2": {
+                    "x": 791,
+                    "y": 255
+                  },
+                  "wire_connected": true
+                },
+                "attributes": {},
+                "evidenceRefs": [
+                  "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "ev_ocr_ocr_tok_002"
+                ]
+              },
+              {
+                "id": "V1",
+                "type": "voltage_source",
+                "label": null,
+                "positionSourcePx": {
+                  "x": 231,
+                  "y": 457,
+                  "coordinate_space": "source_px",
+                  "method": "cv_circuit_component"
+                },
+                "geometry": {
+                  "bounds": {
+                    "x": 206,
+                    "y": 427,
+                    "width": 50,
+                    "height": 60
+                  },
+                  "terminal_1": {
+                    "x": 231,
+                    "y": 423
+                  },
+                  "terminal_2": {
+                    "x": 231,
+                    "y": 491
+                  },
+                  "wire_connected": true
+                },
+                "attributes": {},
+                "evidenceRefs": [
+                  "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "ev_ocr_ocr_tok_004"
+                ]
+              },
+              {
+                "id": "switch_1",
+                "type": "switch",
+                "label": "S",
+                "positionSourcePx": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidenceRefs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "connected_in_series",
+                "from": "voltage_source_1",
+                "to": "switch_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "from": "switch_1",
+                "to": "resistor_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_1",
+                "to": "resistor_2",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_2",
+                "to": "voltage_source_1",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "R2_resistance": {
+                "value": 20,
+                "unit": "ohm",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "confidence": 0.95,
+                  "notes": ""
+                }
+              },
+              "R1_resistance": {
+                "value": 10,
+                "unit": "ohm",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "confidence": 0.95,
+                  "notes": ""
+                }
+              },
+              "V1_voltage": {
+                "value": 12,
+                "unit": "V",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "confidence": 0.95,
+                  "notes": ""
+                }
+              },
+              "components": [
+                {
+                  "id": "R2",
+                  "type": "resistor",
+                  "nodes": [],
+                  "value": 20,
+                  "unit": "ohm",
+                  "label_bbox_source_px": [
+                    1029,
+                    421,
+                    241,
+                    71
+                  ],
+                  "terminals": [
+                    {
+                      "id": "R2.t1",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        1115,
+                        416
+                      ]
+                    },
+                    {
+                      "id": "R2.t2",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        1183,
+                        416
+                      ]
+                    }
+                  ],
+                  "geometry": {
+                    "bbox_source_px": [
+                      1119,
+                      391,
+                      1179,
+                      441
+                    ],
+                    "center_source_px": [
+                      1149,
+                      416
+                    ],
+                    "label_bbox_source_px": [
+                      1029,
+                      421,
+                      241,
+                      71
+                    ]
+                  }
+                },
+                {
+                  "id": "R1",
+                  "type": "resistor",
+                  "nodes": [],
+                  "value": 10,
+                  "unit": "ohm",
+                  "label_bbox_source_px": [
+                    636,
+                    148,
+                    242,
+                    68
+                  ],
+                  "terminals": [
+                    {
+                      "id": "R1.t1",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        723,
+                        255
+                      ]
+                    },
+                    {
+                      "id": "R1.t2",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        791,
+                        255
+                      ]
+                    }
+                  ],
+                  "geometry": {
+                    "bbox_source_px": [
+                      727,
+                      230,
+                      787,
+                      280
+                    ],
+                    "center_source_px": [
+                      757,
+                      255
+                    ],
+                    "label_bbox_source_px": [
+                      636,
+                      148,
+                      242,
+                      68
+                    ]
+                  }
+                },
+                {
+                  "id": "V1",
+                  "type": "voltage_source",
+                  "nodes": [],
+                  "value": 12,
+                  "unit": "V",
+                  "label_bbox_source_px": [
+                    39,
+                    426,
+                    123,
+                    63
+                  ],
+                  "terminals": [
+                    {
+                      "id": "V1.t1",
+                      "node": null,
+                      "polarity": "+",
+                      "source_px": [
+                        231,
+                        423
+                      ]
+                    },
+                    {
+                      "id": "V1.t2",
+                      "node": null,
+                      "polarity": "-",
+                      "source_px": [
+                        231,
+                        491
+                      ]
+                    }
+                  ],
+                  "geometry": {
+                    "bbox_source_px": [
+                      206,
+                      427,
+                      256,
+                      487
+                    ],
+                    "center_source_px": [
+                      231,
+                      457
+                    ],
+                    "label_bbox_source_px": [
+                      39,
+                      426,
+                      123,
+                      63
+                    ]
+                  }
+                }
+              ],
+              "nodes": [],
+              "wires": [
+                {
+                  "id": "wire_1",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      230,
+                      253
+                    ],
+                    [
+                      345,
+                      253
+                    ]
+                  ],
+                  "points": [
+                    [
+                      230,
+                      253
+                    ],
+                    [
+                      345,
+                      253
+                    ]
+                  ],
+                  "length_px": 115
+                },
+                {
+                  "id": "wire_2",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      230,
+                      672
+                    ],
+                    [
+                      993,
+                      672
+                    ]
+                  ],
+                  "points": [
+                    [
+                      230,
+                      672
+                    ],
+                    [
+                      993,
+                      672
+                    ]
+                  ],
+                  "length_px": 763
+                },
+                {
+                  "id": "wire_3",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      228,
+                      669
+                    ],
+                    [
+                      228,
+                      508
+                    ]
+                  ],
+                  "points": [
+                    [
+                      228,
+                      669
+                    ],
+                    [
+                      228,
+                      508
+                    ]
+                  ],
+                  "length_px": 161
+                },
+                {
+                  "id": "wire_4",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      473,
+                      666
+                    ],
+                    [
+                      591,
+                      666
+                    ]
+                  ],
+                  "points": [
+                    [
+                      473,
+                      666
+                    ],
+                    [
+                      591,
+                      666
+                    ]
+                  ],
+                  "length_px": 118
+                },
+                {
+                  "id": "wire_5",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      234,
+                      421
+                    ],
+                    [
+                      234,
+                      259
+                    ]
+                  ],
+                  "points": [
+                    [
+                      234,
+                      421
+                    ],
+                    [
+                      234,
+                      259
+                    ]
+                  ],
+                  "length_px": 162
+                },
+                {
+                  "id": "wire_6",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      989,
+                      386
+                    ],
+                    [
+                      989,
+                      253
+                    ]
+                  ],
+                  "points": [
+                    [
+                      989,
+                      386
+                    ],
+                    [
+                      989,
+                      253
+                    ]
+                  ],
+                  "length_px": 133
+                },
+                {
+                  "id": "wire_7",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      547,
+                      697
+                    ],
+                    [
+                      713,
+                      697
+                    ]
+                  ],
+                  "points": [
+                    [
+                      547,
+                      697
+                    ],
+                    [
+                      713,
+                      697
+                    ]
+                  ],
+                  "length_px": 166
+                },
+                {
+                  "id": "wire_8",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      995,
+                      669
+                    ],
+                    [
+                      995,
+                      543
+                    ]
+                  ],
+                  "points": [
+                    [
+                      995,
+                      669
+                    ],
+                    [
+                      995,
+                      543
+                    ]
+                  ],
+                  "length_px": 126
+                },
+                {
+                  "id": "wire_9",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      627,
+                      253
+                    ],
+                    [
+                      686,
+                      254
+                    ]
+                  ],
+                  "points": [
+                    [
+                      627,
+                      253
+                    ],
+                    [
+                      686,
+                      254
+                    ]
+                  ],
+                  "length_px": 59.00847396772772
+                },
+                {
+                  "id": "wire_10",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      224,
+                      421
+                    ],
+                    [
+                      289,
+                      421
+                    ]
+                  ],
+                  "points": [
+                    [
+                      224,
+                      421
+                    ],
+                    [
+                      289,
+                      421
+                    ]
+                  ],
+                  "length_px": 65
+                },
+                {
+                  "id": "wire_11",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      184,
+                      493
+                    ],
+                    [
+                      278,
+                      493
+                    ]
+                  ],
+                  "points": [
+                    [
+                      184,
+                      493
+                    ],
+                    [
+                      278,
+                      493
+                    ]
+                  ],
+                  "length_px": 94
+                },
+                {
+                  "id": "wire_12",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      357,
+                      255
+                    ],
+                    [
+                      438,
+                      216
+                    ]
+                  ],
+                  "points": [
+                    [
+                      357,
+                      255
+                    ],
+                    [
+                      438,
+                      216
+                    ]
+                  ],
+                  "length_px": 89.89994438263018
+                },
+                {
+                  "id": "wire_13",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      231,
+                      255
+                    ],
+                    [
+                      992,
+                      255
+                    ]
+                  ],
+                  "points": [
+                    [
+                      231,
+                      255
+                    ],
+                    [
+                      992,
+                      255
+                    ]
+                  ],
+                  "length_px": 761
+                },
+                {
+                  "id": "wire_14",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      231,
+                      416
+                    ],
+                    [
+                      992,
+                      416
+                    ]
+                  ],
+                  "points": [
+                    [
+                      231,
+                      416
+                    ],
+                    [
+                      992,
+                      416
+                    ]
+                  ],
+                  "length_px": 761
+                },
+                {
+                  "id": "wire_15",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      231,
+                      668
+                    ],
+                    [
+                      992,
+                      668
+                    ]
+                  ],
+                  "points": [
+                    [
+                      231,
+                      668
+                    ],
+                    [
+                      992,
+                      668
+                    ]
+                  ],
+                  "length_px": 761
+                }
+              ],
+              "reference_node": "N0"
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "circuit_topology": {
+                "verified_connectivity": false,
+                "node_count": 0
+              }
+            },
+            "assumptions": [],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:28:01.161901+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "12 V",
+                  "confidence": 0.95,
+                  "semanticRole": "voltage_value",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "S",
+                  "confidence": 0.95,
+                  "semanticRole": "switch_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "R1 = 10 Ω",
+                  "confidence": 0.95,
+                  "semanticRole": "resistor_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "R2 = 20 Ω",
+                  "confidence": 0.95,
+                  "semanticRole": "resistor_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "I",
+                  "confidence": 0.95,
+                  "semanticRole": "current_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Fig. 9 Series DC Circuit",
+                  "confidence": 0.95,
+                  "semanticRole": "caption",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+              ],
+              "latency_ms": 8245,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "R2",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "checks": {
+                    "wire_connected": true
+                  },
+                  "conflicts": [],
+                  "notes": "Component grounded as R2 (resistor) with visual leads at (1149.0, 416.0)."
+                },
+                {
+                  "entityId": "R1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "checks": {
+                    "wire_connected": true
+                  },
+                  "conflicts": [],
+                  "notes": "Component grounded as R1 (resistor) with visual leads at (757.0, 255.0)."
+                },
+                {
+                  "entityId": "V1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "checks": {
+                    "wire_connected": true
+                  },
+                  "conflicts": [],
+                  "notes": "Component grounded as V1 (voltage_source) with visual leads at (231.0, 457.0)."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "R2 = 20 Ω",
+                  "numericValue": 20,
+                  "rawUnit": "Ω",
+                  "canonicalUnit": "ohm",
+                  "quantityCandidate": "resistance",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.90339
+                },
+                {
+                  "rawText": "R2 = 20 2",
+                  "numericValue": 20,
+                  "rawUnit": "2",
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.813
+                },
+                {
+                  "rawText": "R1 = 10 Ω",
+                  "numericValue": 10,
+                  "rawUnit": "Ω",
+                  "canonicalUnit": "ohm",
+                  "quantityCandidate": "resistance",
+                  "sourceOcrTokenId": "ocr_tok_002",
+                  "confidence": 0.86803
+                },
+                {
+                  "rawText": "R1 = 10 `2",
+                  "numericValue": 10,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_002",
+                  "confidence": 0.781
+                },
+                {
+                  "rawText": "R1 = 10 `2",
+                  "numericValue": 2,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_002",
+                  "confidence": 0.781
+                },
+                {
+                  "rawText": "12 V",
+                  "numericValue": 12,
+                  "rawUnit": "V",
+                  "canonicalUnit": "V",
+                  "quantityCandidate": "voltage",
+                  "sourceOcrTokenId": "ocr_tok_004",
+                  "confidence": 0.98113
+                },
+                {
+                  "rawText": "12 `",
+                  "numericValue": 12,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_004",
+                  "confidence": 0.883
+                },
+                {
+                  "rawText": "1",
+                  "numericValue": 1,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.895
+                }
+              ],
+              "evidence_pipeline_latency_ms": 22097.135399992112
+            },
+            "evidence": {
+              "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff": {
+                "id": "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                "method": "classical_cv",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "circuit_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "component_count": 0,
+                  "wire_count": 15,
+                  "junction_count": 4
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.97378,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 9 Series DC Circuit",
+                  "bbox": {
+                    "x": 336,
+                    "y": 817,
+                    "width": 603,
+                    "height": 70
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.90339,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "R2 = 20 Ω",
+                  "bbox": {
+                    "x": 1029,
+                    "y": 421,
+                    "width": 241,
+                    "height": 71
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.86803,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "R1 = 10 Ω",
+                  "bbox": {
+                    "x": 636,
+                    "y": 148,
+                    "width": 242,
+                    "height": 68
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.98113,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "12 V",
+                  "bbox": {
+                    "x": 39,
+                    "y": 426,
+                    "width": 123,
+                    "height": 63
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.99926,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "S",
+                  "bbox": {
+                    "x": 378,
+                    "y": 159,
+                    "width": 47,
+                    "height": 53
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.99429,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "I",
+                  "bbox": {
+                    "x": 613,
+                    "y": 706,
+                    "width": 39,
+                    "height": 52
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.72651,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "十",
+                  "bbox": {
+                    "x": 175,
+                    "y": 362,
+                    "width": 40,
+                    "height": 40
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1,
+                "domain": 1,
+                "subtype": 1,
+                "overall": 1
+              }
+            },
+            "status": "NEEDS_REVIEW",
+            "statusNotes": "Circuit source, component values, or wire continuity require review.",
+            "resolutions": {},
+            "reviewIssues": [],
+            "parameterProvenance": {
+              "R2_resistance": {
+                "source": "ocr",
+                "evidence_refs": [
+                  "ev_ocr_ocr_tok_005"
+                ],
+                "confidence": 0.95
+              },
+              "R1_resistance": {
+                "source": "ocr",
+                "evidence_refs": [
+                  "ev_ocr_ocr_tok_002"
+                ],
+                "confidence": 0.95
+              },
+              "V1_voltage": {
+                "source": "ocr",
+                "evidence_refs": [
+                  "ev_ocr_ocr_tok_004"
+                ],
+                "confidence": 0.95
+              },
+              "components": {
+                "source": "ocr_and_cv",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0,
+                "notes": "Extracted from schematic visual features and OCR labels."
+              },
+              "nodes": {
+                "source": "ocr_and_cv",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0,
+                "notes": "Derived from wire continuity network."
+              }
+            },
+            "calibration": null,
+            "id": "9b910bff7ee74e90a1763e5358b474ff_figure_001",
+            "isPhysics": true
+          }
+        }
+      },
+      {
+        "call": "01326_compile_resolved",
+        "return_value": null
+      },
+      {
+        "traceId": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+        "component": "SimulationOrchestrator.compile",
+        "phase": "output",
+        "wallTime": 38341.90000000596,
+        "data": {
+          "captureError": "SyntaxError: \"undefined\" is not valid JSON"
+        }
+      }
+    ],
+    "in_place_outputs": [
+      {
+        "call": "01326_compile_resolved",
+        "post_call_locals": {
+          "book_ir": {
+            "version": "1.0",
+            "source_asset_id": "9b910bff7ee74e90a1763e5358b474ff",
+            "page_ir_version": "1.0",
+            "figure_id": "figure_001",
+            "domain": "circuits",
+            "subtype": "dc_linear",
+            "entities": [
+              {
+                "id": "R2",
+                "type": "resistor",
+                "label": null,
+                "position_source_px": {
+                  "x": 1149,
+                  "y": 416,
+                  "coordinate_space": "source_px",
+                  "method": "cv_circuit_component"
+                },
+                "geometry": {
+                  "bounds": {
+                    "x": 1119,
+                    "y": 391,
+                    "width": 60,
+                    "height": 50
+                  },
+                  "terminal_1": {
+                    "x": 1115,
+                    "y": 416
+                  },
+                  "terminal_2": {
+                    "x": 1183,
+                    "y": 416
+                  },
+                  "wire_connected": true
+                },
+                "attributes": {},
+                "evidence_refs": [
+                  "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "ev_ocr_ocr_tok_005"
+                ]
+              },
+              {
+                "id": "R1",
+                "type": "resistor",
+                "label": null,
+                "position_source_px": {
+                  "x": 757,
+                  "y": 255,
+                  "coordinate_space": "source_px",
+                  "method": "cv_circuit_component"
+                },
+                "geometry": {
+                  "bounds": {
+                    "x": 727,
+                    "y": 230,
+                    "width": 60,
+                    "height": 50
+                  },
+                  "terminal_1": {
+                    "x": 723,
+                    "y": 255
+                  },
+                  "terminal_2": {
+                    "x": 791,
+                    "y": 255
+                  },
+                  "wire_connected": true
+                },
+                "attributes": {},
+                "evidence_refs": [
+                  "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "ev_ocr_ocr_tok_002"
+                ]
+              },
+              {
+                "id": "V1",
+                "type": "voltage_source",
+                "label": null,
+                "position_source_px": {
+                  "x": 231,
+                  "y": 457,
+                  "coordinate_space": "source_px",
+                  "method": "cv_circuit_component"
+                },
+                "geometry": {
+                  "bounds": {
+                    "x": 206,
+                    "y": 427,
+                    "width": 50,
+                    "height": 60
+                  },
+                  "terminal_1": {
+                    "x": 231,
+                    "y": 423
+                  },
+                  "terminal_2": {
+                    "x": 231,
+                    "y": 491
+                  },
+                  "wire_connected": true
+                },
+                "attributes": {},
+                "evidence_refs": [
+                  "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                  "ev_ocr_ocr_tok_004"
+                ]
+              },
+              {
+                "id": "switch_1",
+                "type": "switch",
+                "label": "S",
+                "position_source_px": null,
+                "geometry": null,
+                "attributes": {
+                  "confidence": 0.95,
+                  "precision": "approximate",
+                  "vlmLocalizationVerified": false
+                },
+                "evidence_refs": [
+                  "figure_001"
+                ]
+              }
+            ],
+            "relationships": [
+              {
+                "type": "connected_in_series",
+                "from": "voltage_source_1",
+                "to": "switch_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "from": "switch_1",
+                "to": "resistor_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_1",
+                "to": "resistor_2",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_2",
+                "to": "voltage_source_1",
+                "confidence": 0.95
+              }
+            ],
+            "parameters": {
+              "R2_resistance": {
+                "value": 20,
+                "unit": "ohm",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "confidence": 0.95,
+                  "notes": ""
+                }
+              },
+              "R1_resistance": {
+                "value": 10,
+                "unit": "ohm",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "confidence": 0.95,
+                  "notes": ""
+                }
+              },
+              "V1_voltage": {
+                "value": 12,
+                "unit": "V",
+                "status": "observed",
+                "provenance": {
+                  "source": "ocr",
+                  "evidenceRefs": [
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "derivedFrom": [
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "confidence": 0.95,
+                  "notes": ""
+                }
+              },
+              "components": [
+                {
+                  "id": "R2",
+                  "type": "resistor",
+                  "nodes": [],
+                  "value": 20,
+                  "unit": "ohm",
+                  "label_bbox_source_px": [
+                    1029,
+                    421,
+                    241,
+                    71
+                  ],
+                  "terminals": [
+                    {
+                      "id": "R2.t1",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        1115,
+                        416
+                      ]
+                    },
+                    {
+                      "id": "R2.t2",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        1183,
+                        416
+                      ]
+                    }
+                  ],
+                  "geometry": {
+                    "bbox_source_px": [
+                      1119,
+                      391,
+                      1179,
+                      441
+                    ],
+                    "center_source_px": [
+                      1149,
+                      416
+                    ],
+                    "label_bbox_source_px": [
+                      1029,
+                      421,
+                      241,
+                      71
+                    ]
+                  }
+                },
+                {
+                  "id": "R1",
+                  "type": "resistor",
+                  "nodes": [],
+                  "value": 10,
+                  "unit": "ohm",
+                  "label_bbox_source_px": [
+                    636,
+                    148,
+                    242,
+                    68
+                  ],
+                  "terminals": [
+                    {
+                      "id": "R1.t1",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        723,
+                        255
+                      ]
+                    },
+                    {
+                      "id": "R1.t2",
+                      "node": null,
+                      "polarity": null,
+                      "source_px": [
+                        791,
+                        255
+                      ]
+                    }
+                  ],
+                  "geometry": {
+                    "bbox_source_px": [
+                      727,
+                      230,
+                      787,
+                      280
+                    ],
+                    "center_source_px": [
+                      757,
+                      255
+                    ],
+                    "label_bbox_source_px": [
+                      636,
+                      148,
+                      242,
+                      68
+                    ]
+                  }
+                },
+                {
+                  "id": "V1",
+                  "type": "voltage_source",
+                  "nodes": [],
+                  "value": 12,
+                  "unit": "V",
+                  "label_bbox_source_px": [
+                    39,
+                    426,
+                    123,
+                    63
+                  ],
+                  "terminals": [
+                    {
+                      "id": "V1.t1",
+                      "node": null,
+                      "polarity": "+",
+                      "source_px": [
+                        231,
+                        423
+                      ]
+                    },
+                    {
+                      "id": "V1.t2",
+                      "node": null,
+                      "polarity": "-",
+                      "source_px": [
+                        231,
+                        491
+                      ]
+                    }
+                  ],
+                  "geometry": {
+                    "bbox_source_px": [
+                      206,
+                      427,
+                      256,
+                      487
+                    ],
+                    "center_source_px": [
+                      231,
+                      457
+                    ],
+                    "label_bbox_source_px": [
+                      39,
+                      426,
+                      123,
+                      63
+                    ]
+                  }
+                }
+              ],
+              "nodes": [],
+              "wires": [
+                {
+                  "id": "wire_1",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      230,
+                      253
+                    ],
+                    [
+                      345,
+                      253
+                    ]
+                  ],
+                  "points": [
+                    [
+                      230,
+                      253
+                    ],
+                    [
+                      345,
+                      253
+                    ]
+                  ],
+                  "length_px": 115
+                },
+                {
+                  "id": "wire_2",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      230,
+                      672
+                    ],
+                    [
+                      993,
+                      672
+                    ]
+                  ],
+                  "points": [
+                    [
+                      230,
+                      672
+                    ],
+                    [
+                      993,
+                      672
+                    ]
+                  ],
+                  "length_px": 763
+                },
+                {
+                  "id": "wire_3",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      228,
+                      669
+                    ],
+                    [
+                      228,
+                      508
+                    ]
+                  ],
+                  "points": [
+                    [
+                      228,
+                      669
+                    ],
+                    [
+                      228,
+                      508
+                    ]
+                  ],
+                  "length_px": 161
+                },
+                {
+                  "id": "wire_4",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      473,
+                      666
+                    ],
+                    [
+                      591,
+                      666
+                    ]
+                  ],
+                  "points": [
+                    [
+                      473,
+                      666
+                    ],
+                    [
+                      591,
+                      666
+                    ]
+                  ],
+                  "length_px": 118
+                },
+                {
+                  "id": "wire_5",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      234,
+                      421
+                    ],
+                    [
+                      234,
+                      259
+                    ]
+                  ],
+                  "points": [
+                    [
+                      234,
+                      421
+                    ],
+                    [
+                      234,
+                      259
+                    ]
+                  ],
+                  "length_px": 162
+                },
+                {
+                  "id": "wire_6",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      989,
+                      386
+                    ],
+                    [
+                      989,
+                      253
+                    ]
+                  ],
+                  "points": [
+                    [
+                      989,
+                      386
+                    ],
+                    [
+                      989,
+                      253
+                    ]
+                  ],
+                  "length_px": 133
+                },
+                {
+                  "id": "wire_7",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      547,
+                      697
+                    ],
+                    [
+                      713,
+                      697
+                    ]
+                  ],
+                  "points": [
+                    [
+                      547,
+                      697
+                    ],
+                    [
+                      713,
+                      697
+                    ]
+                  ],
+                  "length_px": 166
+                },
+                {
+                  "id": "wire_8",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      995,
+                      669
+                    ],
+                    [
+                      995,
+                      543
+                    ]
+                  ],
+                  "points": [
+                    [
+                      995,
+                      669
+                    ],
+                    [
+                      995,
+                      543
+                    ]
+                  ],
+                  "length_px": 126
+                },
+                {
+                  "id": "wire_9",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      627,
+                      253
+                    ],
+                    [
+                      686,
+                      254
+                    ]
+                  ],
+                  "points": [
+                    [
+                      627,
+                      253
+                    ],
+                    [
+                      686,
+                      254
+                    ]
+                  ],
+                  "length_px": 59.00847396772772
+                },
+                {
+                  "id": "wire_10",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      224,
+                      421
+                    ],
+                    [
+                      289,
+                      421
+                    ]
+                  ],
+                  "points": [
+                    [
+                      224,
+                      421
+                    ],
+                    [
+                      289,
+                      421
+                    ]
+                  ],
+                  "length_px": 65
+                },
+                {
+                  "id": "wire_11",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      184,
+                      493
+                    ],
+                    [
+                      278,
+                      493
+                    ]
+                  ],
+                  "points": [
+                    [
+                      184,
+                      493
+                    ],
+                    [
+                      278,
+                      493
+                    ]
+                  ],
+                  "length_px": 94
+                },
+                {
+                  "id": "wire_12",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      357,
+                      255
+                    ],
+                    [
+                      438,
+                      216
+                    ]
+                  ],
+                  "points": [
+                    [
+                      357,
+                      255
+                    ],
+                    [
+                      438,
+                      216
+                    ]
+                  ],
+                  "length_px": 89.89994438263018
+                },
+                {
+                  "id": "wire_13",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      231,
+                      255
+                    ],
+                    [
+                      992,
+                      255
+                    ]
+                  ],
+                  "points": [
+                    [
+                      231,
+                      255
+                    ],
+                    [
+                      992,
+                      255
+                    ]
+                  ],
+                  "length_px": 761
+                },
+                {
+                  "id": "wire_14",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      231,
+                      416
+                    ],
+                    [
+                      992,
+                      416
+                    ]
+                  ],
+                  "points": [
+                    [
+                      231,
+                      416
+                    ],
+                    [
+                      992,
+                      416
+                    ]
+                  ],
+                  "length_px": 761
+                },
+                {
+                  "id": "wire_15",
+                  "node": null,
+                  "polyline_source_px": [
+                    [
+                      231,
+                      668
+                    ],
+                    [
+                      992,
+                      668
+                    ]
+                  ],
+                  "points": [
+                    [
+                      231,
+                      668
+                    ],
+                    [
+                      992,
+                      668
+                    ]
+                  ],
+                  "length_px": 761
+                }
+              ],
+              "reference_node": "N0"
+            },
+            "geometry": {
+              "width": 1280,
+              "height": 960,
+              "coordinate_space": "source_px",
+              "circuit_topology": {
+                "verified_connectivity": false,
+                "node_count": 0
+              }
+            },
+            "assumptions": [],
+            "provenance": {
+              "pipeline": "PR-05-vlm",
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "prompt_version": "pr05-v1",
+              "timestamp": "2026-10-17T03:28:01.161901+00:00",
+              "classification": "supported",
+              "visible_labels": [
+                {
+                  "text": "12 V",
+                  "confidence": 0.95,
+                  "semanticRole": "voltage_value",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "S",
+                  "confidence": 0.95,
+                  "semanticRole": "switch_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "R1 = 10 Ω",
+                  "confidence": 0.95,
+                  "semanticRole": "resistor_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "R2 = 20 Ω",
+                  "confidence": 0.95,
+                  "semanticRole": "resistor_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "I",
+                  "confidence": 0.95,
+                  "semanticRole": "current_label",
+                  "source": "vlm",
+                  "verified": false
+                },
+                {
+                  "text": "Fig. 9 Series DC Circuit",
+                  "confidence": 0.95,
+                  "semanticRole": "caption",
+                  "source": "vlm",
+                  "verified": false
+                }
+              ],
+              "candidates": [],
+              "notes": [
+                "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+              ],
+              "latency_ms": 8245,
+              "cache_hit": false,
+              "fallback_used": false,
+              "source_width": 1280,
+              "source_height": 960,
+              "grounding_diagnostics": [
+                {
+                  "entityId": "R2",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_005"
+                  ],
+                  "checks": {
+                    "wire_connected": true
+                  },
+                  "conflicts": [],
+                  "notes": "Component grounded as R2 (resistor) with visual leads at (1149.0, 416.0)."
+                },
+                {
+                  "entityId": "R1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_002"
+                  ],
+                  "checks": {
+                    "wire_connected": true
+                  },
+                  "conflicts": [],
+                  "notes": "Component grounded as R1 (resistor) with visual leads at (757.0, 255.0)."
+                },
+                {
+                  "entityId": "V1",
+                  "groundingState": "grounded",
+                  "supportingEvidence": [
+                    "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                    "ev_ocr_ocr_tok_004"
+                  ],
+                  "checks": {
+                    "wire_connected": true
+                  },
+                  "conflicts": [],
+                  "notes": "Component grounded as V1 (voltage_source) with visual leads at (231.0, 457.0)."
+                }
+              ],
+              "candidate_parameters": [
+                {
+                  "rawText": "R2 = 20 Ω",
+                  "numericValue": 20,
+                  "rawUnit": "Ω",
+                  "canonicalUnit": "ohm",
+                  "quantityCandidate": "resistance",
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.90339
+                },
+                {
+                  "rawText": "R2 = 20 2",
+                  "numericValue": 20,
+                  "rawUnit": "2",
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_005",
+                  "confidence": 0.813
+                },
+                {
+                  "rawText": "R1 = 10 Ω",
+                  "numericValue": 10,
+                  "rawUnit": "Ω",
+                  "canonicalUnit": "ohm",
+                  "quantityCandidate": "resistance",
+                  "sourceOcrTokenId": "ocr_tok_002",
+                  "confidence": 0.86803
+                },
+                {
+                  "rawText": "R1 = 10 `2",
+                  "numericValue": 10,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_002",
+                  "confidence": 0.781
+                },
+                {
+                  "rawText": "R1 = 10 `2",
+                  "numericValue": 2,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_002",
+                  "confidence": 0.781
+                },
+                {
+                  "rawText": "12 V",
+                  "numericValue": 12,
+                  "rawUnit": "V",
+                  "canonicalUnit": "V",
+                  "quantityCandidate": "voltage",
+                  "sourceOcrTokenId": "ocr_tok_004",
+                  "confidence": 0.98113
+                },
+                {
+                  "rawText": "12 `",
+                  "numericValue": 12,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_004",
+                  "confidence": 0.883
+                },
+                {
+                  "rawText": "1",
+                  "numericValue": 1,
+                  "rawUnit": null,
+                  "canonicalUnit": null,
+                  "quantityCandidate": null,
+                  "sourceOcrTokenId": "ocr_tok_006",
+                  "confidence": 0.895
+                }
+              ],
+              "evidence_pipeline_latency_ms": 22097.135399992112
+            },
+            "evidence": {
+              "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff": {
+                "id": "ev_cv_circuits_9b910bff7ee74e90a1763e5358b474ff",
+                "method": "classical_cv",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": null,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "circuit_cv_extractor",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "component_count": 0,
+                  "wire_count": 15,
+                  "junction_count": 4
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_007": {
+                "id": "ev_ocr_ocr_tok_007",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.97378,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "Fig. 9 Series DC Circuit",
+                  "bbox": {
+                    "x": 336,
+                    "y": 817,
+                    "width": 603,
+                    "height": 70
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_005": {
+                "id": "ev_ocr_ocr_tok_005",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.90339,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "R2 = 20 Ω",
+                  "bbox": {
+                    "x": 1029,
+                    "y": 421,
+                    "width": 241,
+                    "height": 71
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_002": {
+                "id": "ev_ocr_ocr_tok_002",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.86803,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "R1 = 10 Ω",
+                  "bbox": {
+                    "x": 636,
+                    "y": 148,
+                    "width": 242,
+                    "height": 68
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_004": {
+                "id": "ev_ocr_ocr_tok_004",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.98113,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "12 V",
+                  "bbox": {
+                    "x": 39,
+                    "y": 426,
+                    "width": 123,
+                    "height": 63
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_001": {
+                "id": "ev_ocr_ocr_tok_001",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.99926,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "S",
+                  "bbox": {
+                    "x": 378,
+                    "y": 159,
+                    "width": 47,
+                    "height": 53
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_006": {
+                "id": "ev_ocr_ocr_tok_006",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.99429,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "I",
+                  "bbox": {
+                    "x": 613,
+                    "y": 706,
+                    "width": 39,
+                    "height": 52
+                  }
+                },
+                "metadata": {}
+              },
+              "ev_ocr_ocr_tok_003": {
+                "id": "ev_ocr_ocr_tok_003",
+                "method": "ocr",
+                "sourceAssetId": "9b910bff7ee74e90a1763e5358b474ff",
+                "figureId": "figure_001",
+                "confidence": 0.72651,
+                "verified": false,
+                "coordinateSpace": "source_px",
+                "provider": "multi_ocr_router",
+                "model": null,
+                "version": null,
+                "payload": {
+                  "raw_text": "十",
+                  "bbox": {
+                    "x": 175,
+                    "y": 362,
+                    "width": 40,
+                    "height": 40
+                  }
+                },
+                "metadata": {}
+              }
+            },
+            "confidence": {
+              "isPhysics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "rawProvider": {
+                "isPhysics": 1,
+                "domain": 1,
+                "subtype": 1,
+                "overall": 1
+              }
+            },
+            "status": "NEEDS_REVIEW",
+            "status_notes": "Circuit source, component values, or wire continuity require review.",
+            "resolutions": {},
+            "review_issues": [],
+            "parameter_provenance": {
+              "R2_resistance": {
+                "source": "ocr",
+                "evidence_refs": [
+                  "ev_ocr_ocr_tok_005"
+                ],
+                "confidence": 0.95
+              },
+              "R1_resistance": {
+                "source": "ocr",
+                "evidence_refs": [
+                  "ev_ocr_ocr_tok_002"
+                ],
+                "confidence": 0.95
+              },
+              "V1_voltage": {
+                "source": "ocr",
+                "evidence_refs": [
+                  "ev_ocr_ocr_tok_004"
+                ],
+                "confidence": 0.95
+              },
+              "components": {
+                "source": "ocr_and_cv",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0,
+                "notes": "Extracted from schematic visual features and OCR labels."
+              },
+              "nodes": {
+                "source": "ocr_and_cv",
+                "evidenceRefs": [],
+                "derivedFrom": [],
+                "confidence": 0,
+                "notes": "Derived from wire continuity network."
+              }
+            },
+            "calibration": null,
+            "id": "9b910bff7ee74e90a1763e5358b474ff_figure_001",
+            "isPhysics": true
+          },
+          "readiness": {
+            "ready": false,
+            "book_ir_status": "NEEDS_REVIEW",
+            "status": "NEEDS_REVIEW",
+            "book_ir_id": "9b910bff7ee74e90a1763e5358b474ff_figure_001",
+            "subtype": "dc_linear",
+            "blockers": [
+              "Circuit component R2 has no valid two-node connection.",
+              "Circuit component R1 has no valid two-node connection.",
+              "Circuit component V1 has no valid two-node connection."
+            ],
+            "warnings": [
+              "A switch is present and will be initialized in the interactive simulation."
+            ],
+            "satisfied_requirements": [
+              "nodes",
+              "components"
+            ],
+            "resolved_requirements": [
+              "nodes",
+              "components"
+            ],
+            "missing_requirements": [],
+            "policy_assumptions": [],
+            "unresolved_ambiguities": [
+              "A switch is present and will be initialized in the interactive simulation.",
+              "Circuit component R2 has no valid two-node connection.",
+              "Circuit component R1 has no valid two-node connection.",
+              "Circuit component V1 has no valid two-node connection."
+            ],
+            "calibration_status": null
+          }
+        }
+      }
+    ],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Review should list blockers; compile must reject unresolved evidence and keep scene=null. No synthetic user corrections are supplied in this trace.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "FRONTEND FLOW ISSUE",
+  "finding": "Compiler gate returns scene=null. Browser subsequently calls /api/resolution/compile after NEEDS_REVIEW; HTTP 400 “BookIR is not ready to compile” becomes UI ERROR. This is a separate frontend handling defect after the perception failure.",
+  "change_or_loss": "This branch executes for the circuit. Its rejection is an expected backend gate; the unnecessary frontend compile attempt is a separate issue."
+}

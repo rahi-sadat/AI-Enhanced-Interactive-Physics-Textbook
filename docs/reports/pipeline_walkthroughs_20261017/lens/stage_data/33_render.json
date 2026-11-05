@@ -1,0 +1,578 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 33,
+  "component": "Actual renderer at t=0 over the original",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "file": "apps/web/src/components/InteractiveFigure.js",
+      "capture": "Frontend boundary events and resulting state; source inspected. Internal children not individually intercepted."
+    }
+  ],
+  "upstream_stage": "CoordinateMapper: source → overlay → browser",
+  "downstream_stage": "Activation, motion and reset",
+  "actual_input": {
+    "records": [
+      {
+        "runtime_output": {
+          "domain": "optics",
+          "subtype": "thin_lens",
+          "time": 0,
+          "state": {
+            "domain": "optics",
+            "subtype": "thin_lens",
+            "type": "thin_lens",
+            "running": false,
+            "focalLength": 117,
+            "u": 234,
+            "v": 234,
+            "magnification": -1,
+            "imageType": "real_same_size",
+            "isReal": true,
+            "isInverted": true,
+            "rayCount": 3,
+            "solution": {
+              "u": 234,
+              "v": 234,
+              "magnification": -1,
+              "imageX": 875,
+              "imageHeight": 81.89999999999999,
+              "imageType": "real_same_size",
+              "isReal": true,
+              "isInverted": true,
+              "lensX": 641,
+              "axisY": 432,
+              "lensType": "convex",
+              "rays": [
+                {
+                  "id": "r1",
+                  "dashed": false,
+                  "points": [
+                    {
+                      "x": 407,
+                      "y": 350.1
+                    },
+                    {
+                      "x": 641,
+                      "y": 350.1
+                    },
+                    {
+                      "x": 1280,
+                      "y": 797.4
+                    }
+                  ]
+                },
+                {
+                  "id": "r2",
+                  "dashed": false,
+                  "points": [
+                    {
+                      "x": 407,
+                      "y": 350.1
+                    },
+                    {
+                      "x": 641,
+                      "y": 432
+                    },
+                    {
+                      "x": 1280,
+                      "y": 655.65
+                    }
+                  ]
+                },
+                {
+                  "id": "r3",
+                  "dashed": false,
+                  "points": [
+                    {
+                      "x": 407,
+                      "y": 350.1
+                    },
+                    {
+                      "x": 641,
+                      "y": 513.9
+                    },
+                    {
+                      "x": 1280,
+                      "y": 513.9
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "geometry": {
+            "u": 234,
+            "v": 234,
+            "magnification": -1,
+            "imageX": 875,
+            "imageHeight": 81.89999999999999,
+            "imageType": "real_same_size",
+            "isReal": true,
+            "isInverted": true,
+            "lensX": 641,
+            "axisY": 432,
+            "lensType": "convex",
+            "rays": [
+              {
+                "id": "r1",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 1280,
+                    "y": 797.4
+                  }
+                ]
+              },
+              {
+                "id": "r2",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 432
+                  },
+                  {
+                    "x": 1280,
+                    "y": 655.65
+                  }
+                ]
+              },
+              {
+                "id": "r3",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 513.9
+                  },
+                  {
+                    "x": 1280,
+                    "y": 513.9
+                  }
+                ]
+              }
+            ],
+            "opticalAxis": {
+              "y": 432,
+              "minX": 0,
+              "maxX": 1280
+            },
+            "landmarks": {
+              "lensCenter": {
+                "x": 641,
+                "y": 432
+              },
+              "focalPoints": [
+                {
+                  "id": "f1",
+                  "label": "F₁",
+                  "x": 524,
+                  "y": 432
+                },
+                {
+                  "id": "f2",
+                  "label": "F₂",
+                  "x": 758,
+                  "y": 432
+                },
+                {
+                  "id": "2f1",
+                  "label": "2F₁",
+                  "x": 407,
+                  "y": 432
+                },
+                {
+                  "id": "2f2",
+                  "label": "2F₂",
+                  "x": 875,
+                  "y": 432
+                }
+              ]
+            },
+            "lens": {
+              "x": 641,
+              "axisY": 432,
+              "focalLength": 117,
+              "lensType": "convex",
+              "apertureHeight": null
+            },
+            "mirror": null,
+            "object": {
+              "x": 407,
+              "height": -81.89999999999999,
+              "base": {
+                "x": 407,
+                "y": 432
+              },
+              "tip": {
+                "x": 407,
+                "y": 350.1
+              }
+            },
+            "image": {
+              "x": 875,
+              "height": 81.89999999999999,
+              "isReal": true,
+              "isInverted": true,
+              "magnification": -1,
+              "base": {
+                "x": 875,
+                "y": 432
+              },
+              "tip": {
+                "x": 875,
+                "y": 513.9
+              }
+            },
+            "prism": null,
+            "handles": {
+              "objectArrow": {
+                "id": "object_1",
+                "targetId": "object_1",
+                "type": "drag",
+                "x": 407,
+                "y": 350.1,
+                "lensX": 641,
+                "axisY": 432,
+                "pixelsPerUnit": 1,
+                "axes": {
+                  "x": {
+                    "parameter": "objectDistance",
+                    "parameterKey": "objectDistance",
+                    "editable": true,
+                    "unit": "px",
+                    "pixelsPerUnit": 1,
+                    "min": 10,
+                    "max": 500,
+                    "step": 1
+                  },
+                  "y": {
+                    "parameter": "objectHeight",
+                    "parameterKey": "objectHeight",
+                    "editable": true,
+                    "unit": "px",
+                    "pixelsPerUnit": 1,
+                    "min": -200,
+                    "max": 200,
+                    "step": 1
+                  }
+                }
+              }
+            }
+          },
+          "telemetry": {
+            "u": 234,
+            "v": 234,
+            "magnification": -1,
+            "imageX": 875,
+            "imageHeight": 81.89999999999999,
+            "imageType": "real_same_size",
+            "isReal": true,
+            "isInverted": true,
+            "lensX": 641,
+            "axisY": 432,
+            "lensType": "convex",
+            "rays": [
+              {
+                "id": "r1",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 1280,
+                    "y": 797.4
+                  }
+                ]
+              },
+              {
+                "id": "r2",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 432
+                  },
+                  {
+                    "x": 1280,
+                    "y": 655.65
+                  }
+                ]
+              },
+              {
+                "id": "r3",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 513.9
+                  },
+                  {
+                    "x": 1280,
+                    "y": 513.9
+                  }
+                ]
+              }
+            ],
+            "imageDistance": 234,
+            "objectDistance": 234,
+            "focalLength": 117,
+            "tir": false
+          },
+          "events": [],
+          "editableParameters": {
+            "focalLength": {
+              "value": 117,
+              "unit": "px",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7,
+                "notes": "Use half the observed lens aperture as a normalized display focal length when no focal evidence exists.",
+                "policyId": "policy_normalized_lens_focal_ratio",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": 10,
+                "max": 500,
+                "step": 1
+              }
+            },
+            "objectDistance": {
+              "value": 234,
+              "unit": "px",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7,
+                "notes": "Place an exploration object two observed focal lengths left of the measured lens center when no object is printed.",
+                "policyId": "policy_normalized_lens_object_distance",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": 10,
+                "max": 500,
+                "step": 1
+              },
+              "targetId": "object_1"
+            },
+            "objectHeight": {
+              "value": -81.89999999999999,
+              "unit": "px",
+              "provenance": "auto_policy",
+              "evidenceProvenance": {
+                "source": "auto_policy",
+                "evidenceRefs": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "derivedFrom": [
+                  "ev_cv_lens_dd013d21b8704bd296afcc9dcbc6a750"
+                ],
+                "confidence": 0.7,
+                "notes": "Use 35% of the measured lens aperture for an exploration object not printed in the diagram.",
+                "policyId": "policy_normalized_lens_object_height",
+                "policyVersion": "1.0",
+                "userAccepted": false
+              },
+              "editable": true,
+              "control": {
+                "type": "slider",
+                "min": -200,
+                "max": 200,
+                "step": 1
+              },
+              "targetId": "object_1"
+            }
+          }
+        },
+        "transforms": [
+          {
+            "tag": "svg",
+            "rect": {
+              "x": 139,
+              "y": 227,
+              "width": 800,
+              "height": 600,
+              "top": 227,
+              "right": 939,
+              "bottom": 827,
+              "left": 139
+            },
+            "imageRect": {
+              "x": 139,
+              "y": 227,
+              "width": 800,
+              "height": 600,
+              "top": 227,
+              "right": 939,
+              "bottom": 827,
+              "left": 139
+            },
+            "scaleX": 1.6,
+            "scaleY": 1.6,
+            "dest": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 960
+            }
+          }
+        ]
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Initialized runtime output, original background and the measured mapper/DOM geometry.",
+  "actual_output": {
+    "records": [
+      {
+        "captured_svg": [
+          {
+            "original": "<svg class=\"optics-overlay-svg\" viewBox=\"0 0 1280 960\" width=\"800\" height=\"600\" style=\"position: absolute; overflow: visible; pointer-events: none; user-select: none; left: 0px; top: 0px; width: 100%; height: 100%;\"><g class=\"layer-axis\"><line x1=\"0\" y1=\"432\" x2=\"1280\" y2=\"432\" stroke=\"rgba(148, 163, 184, 0.45)\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\"></line></g><g class=\"layer-landmarks\"><circle cx=\"641\" cy=\"432\" r=\"3.5\" fill=\"#38bdf8\"></circle><text x=\"641\" y=\"448\" fill=\"#38bdf8\" font-size=\"12\" text-anchor=\"middle\">O</text><circle cx=\"524\" cy=\"432\" r=\"3\" fill=\"#34d399\"></circle><text x=\"524\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\">F₁</text><circle cx=\"758\" cy=\"432\" r=\"3\" fill=\"#34d399\"></circle><text x=\"758\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\">F₂</text><circle cx=\"407\" cy=\"432\" r=\"3\" fill=\"#34d399\"></circle><text x=\"407\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\">2F₁</text><circle cx=\"875\" cy=\"432\" r=\"3\" fill=\"#34d399\"></circle><text x=\"875\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\">2F₂</text></g><g class=\"layer-shapes\"></g><g class=\"layer-rays\"><line x1=\"407\" y1=\"350.1\" x2=\"641\" y2=\"350.1\" stroke=\"#f59e0b\" stroke-width=\"2\" opacity=\"0.95\"></line><line x1=\"641\" y1=\"350.1\" x2=\"1280\" y2=\"797.4\" stroke=\"#f59e0b\" stroke-width=\"2\" opacity=\"0.95\"></line><line x1=\"407\" y1=\"350.1\" x2=\"641\" y2=\"432\" stroke=\"#38bdf8\" stroke-width=\"2\" opacity=\"0.95\"></line><line x1=\"641\" y1=\"432\" x2=\"1280\" y2=\"655.65\" stroke=\"#38bdf8\" stroke-width=\"2\" opacity=\"0.95\"></line><line x1=\"407\" y1=\"350.1\" x2=\"641\" y2=\"513.9\" stroke=\"#a855f7\" stroke-width=\"2\" opacity=\"0.95\"></line><line x1=\"641\" y1=\"513.9\" x2=\"1280\" y2=\"513.9\" stroke=\"#a855f7\" stroke-width=\"2\" opacity=\"0.95\"></line></g><g class=\"layer-image\"><g class=\"optics-arrow\"><line x1=\"875\" y1=\"432\" x2=\"875\" y2=\"513.9\" stroke=\"#34d399\" stroke-width=\"3\" opacity=\"0.95\"></line><polyline points=\"869,503.5076951545867 875,513.9 881,503.5076951545867\" stroke=\"#34d399\" stroke-width=\"3\" fill=\"none\"></polyline><text x=\"875\" y=\"531.9\" fill=\"#34d399\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Real Image</text></g></g><g class=\"layer-object\"><g class=\"optics-arrow\"><line x1=\"407\" y1=\"432\" x2=\"407\" y2=\"350.1\" stroke=\"#38bdf8\" stroke-width=\"3\" opacity=\"0.95\"></line><polyline points=\"413,360.4923048454133 407,350.1 401,360.4923048454133\" stroke=\"#38bdf8\" stroke-width=\"3\" fill=\"none\"></polyline><text x=\"407\" y=\"340.1\" fill=\"#38bdf8\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Object</text></g></g><g class=\"layer-handles\" style=\"pointer-events: auto;\"><circle cx=\"407\" cy=\"391.05\" r=\"9\" fill=\"rgba(56, 189, 248, 0.25)\" stroke=\"#38bdf8\" stroke-width=\"2\" cursor=\"ew-resize\" class=\"if-handle if-handle-object-pos\" data-handle=\"object_pos\" data-target-id=\"object_1\" data-param-address=\"objectDistance\"></circle><circle cx=\"407\" cy=\"350.1\" r=\"7\" fill=\"#38bdf8\" stroke=\"#ffffff\" stroke-width=\"2\" cursor=\"ns-resize\" class=\"if-handle if-handle-object-tip\" data-handle=\"object_tip\" data-target-id=\"object_1\" data-param-address=\"objectHeight\"></circle></g></svg>",
+            "rendered": "<svg class=\"optics-overlay-svg\" viewBox=\"0 0 1280 960\" width=\"800\" height=\"600\" style=\"position: absolute; overflow: visible; pointer-events: none; user-select: none; left: 0px; top: 0px; width: 800px; height: 600px; fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: block;\" xmlns=\"http://www.w3.org/2000/svg\"><g class=\"layer-axis\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><line x1=\"0\" y1=\"432\" x2=\"1280\" y2=\"432\" stroke=\"rgba(148, 163, 184, 0.45)\" stroke-width=\"1.5\" stroke-dasharray=\"6 4\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgba(148, 163, 184, 0.45); stroke-width: 1.5px; stroke-opacity: 1; stroke-dasharray: 6px, 4px; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/></g><g class=\"layer-landmarks\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><circle cx=\"641\" cy=\"432\" r=\"3.5\" fill=\"#38bdf8\" style=\"fill: rgb(56, 189, 248); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><text x=\"641\" y=\"448\" fill=\"#38bdf8\" font-size=\"12\" text-anchor=\"middle\" style=\"fill: rgb(56, 189, 248); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 400; text-anchor: middle; visibility: visible; display: block;\">O</text><circle cx=\"524\" cy=\"432\" r=\"3\" fill=\"#34d399\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><text x=\"524\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 400; text-anchor: middle; visibility: visible; display: block;\">F₁</text><circle cx=\"758\" cy=\"432\" r=\"3\" fill=\"#34d399\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><text x=\"758\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 400; text-anchor: middle; visibility: visible; display: block;\">F₂</text><circle cx=\"407\" cy=\"432\" r=\"3\" fill=\"#34d399\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><text x=\"407\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 400; text-anchor: middle; visibility: visible; display: block;\">2F₁</text><circle cx=\"875\" cy=\"432\" r=\"3\" fill=\"#34d399\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><text x=\"875\" y=\"447\" fill=\"#34d399\" font-size=\"11\" text-anchor=\"middle\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 400; text-anchor: middle; visibility: visible; display: block;\">2F₂</text></g><g class=\"layer-shapes\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><g class=\"layer-rays\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><line x1=\"407\" y1=\"350.1\" x2=\"641\" y2=\"350.1\" stroke=\"#f59e0b\" stroke-width=\"2\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(245, 158, 11); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><line x1=\"641\" y1=\"350.1\" x2=\"1280\" y2=\"797.4\" stroke=\"#f59e0b\" stroke-width=\"2\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(245, 158, 11); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><line x1=\"407\" y1=\"350.1\" x2=\"641\" y2=\"432\" stroke=\"#38bdf8\" stroke-width=\"2\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(56, 189, 248); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><line x1=\"641\" y1=\"432\" x2=\"1280\" y2=\"655.65\" stroke=\"#38bdf8\" stroke-width=\"2\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(56, 189, 248); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><line x1=\"407\" y1=\"350.1\" x2=\"641\" y2=\"513.9\" stroke=\"#a855f7\" stroke-width=\"2\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(168, 85, 247); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><line x1=\"641\" y1=\"513.9\" x2=\"1280\" y2=\"513.9\" stroke=\"#a855f7\" stroke-width=\"2\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(168, 85, 247); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/></g><g class=\"layer-image\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><g class=\"optics-arrow\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><line x1=\"875\" y1=\"432\" x2=\"875\" y2=\"513.9\" stroke=\"#34d399\" stroke-width=\"3\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(52, 211, 153); stroke-width: 3px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><polyline points=\"869,503.5076951545867 875,513.9 881,503.5076951545867\" stroke=\"#34d399\" stroke-width=\"3\" fill=\"none\" style=\"fill: none; fill-opacity: 1; stroke: rgb(52, 211, 153); stroke-width: 3px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><text x=\"875\" y=\"531.9\" fill=\"#34d399\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\" style=\"fill: rgb(52, 211, 153); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 700; text-anchor: middle; visibility: visible; display: block;\">Real Image</text></g></g><g class=\"layer-object\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><g class=\"optics-arrow\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><line x1=\"407\" y1=\"432\" x2=\"407\" y2=\"350.1\" stroke=\"#38bdf8\" stroke-width=\"3\" opacity=\"0.95\" style=\"fill: rgb(0, 0, 0); fill-opacity: 1; stroke: rgb(56, 189, 248); stroke-width: 3px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 0.95; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><polyline points=\"413,360.4923048454133 407,350.1 401,360.4923048454133\" stroke=\"#38bdf8\" stroke-width=\"3\" fill=\"none\" style=\"fill: none; fill-opacity: 1; stroke: rgb(56, 189, 248); stroke-width: 3px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><text x=\"407\" y=\"340.1\" fill=\"#38bdf8\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\" style=\"fill: rgb(56, 189, 248); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 700; text-anchor: middle; visibility: visible; display: block;\">Object</text></g></g><g class=\"layer-handles\" style=\"pointer-events: auto; fill: rgb(0, 0, 0); fill-opacity: 1; stroke: none; stroke-width: 1px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"><circle cx=\"407\" cy=\"391.05\" r=\"9\" fill=\"rgba(56, 189, 248, 0.25)\" stroke=\"#38bdf8\" stroke-width=\"2\" cursor=\"ew-resize\" class=\"if-handle if-handle-object-pos\" data-handle=\"object_pos\" data-target-id=\"object_1\" data-param-address=\"objectDistance\" style=\"fill: rgba(56, 189, 248, 0.25); fill-opacity: 1; stroke: rgb(56, 189, 248); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/><circle cx=\"407\" cy=\"350.1\" r=\"7\" fill=\"#38bdf8\" stroke=\"#ffffff\" stroke-width=\"2\" cursor=\"ns-resize\" class=\"if-handle if-handle-object-tip\" data-handle=\"object_tip\" data-target-id=\"object_1\" data-param-address=\"objectHeight\" style=\"fill: rgb(56, 189, 248); fill-opacity: 1; stroke: rgb(255, 255, 255); stroke-width: 2px; stroke-opacity: 1; stroke-dasharray: none; stroke-linecap: butt; opacity: 1; font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 400; text-anchor: start; visibility: visible; display: inline;\"/></g></svg>",
+            "viewBox": "0 0 1280 960"
+          }
+        ],
+        "browser_state": {
+          "domain": "optics",
+          "subtype": "thin_lens",
+          "type": "thin_lens",
+          "running": false,
+          "focalLength": 117,
+          "u": 234,
+          "v": 234,
+          "magnification": -1,
+          "imageType": "real_same_size",
+          "isReal": true,
+          "isInverted": true,
+          "rayCount": 3,
+          "solution": {
+            "u": 234,
+            "v": 234,
+            "magnification": -1,
+            "imageX": 875,
+            "imageHeight": 81.89999999999999,
+            "imageType": "real_same_size",
+            "isReal": true,
+            "isInverted": true,
+            "lensX": 641,
+            "axisY": 432,
+            "lensType": "convex",
+            "rays": [
+              {
+                "id": "r1",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 1280,
+                    "y": 797.4
+                  }
+                ]
+              },
+              {
+                "id": "r2",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 432
+                  },
+                  {
+                    "x": 1280,
+                    "y": 655.65
+                  }
+                ]
+              },
+              {
+                "id": "r3",
+                "dashed": false,
+                "points": [
+                  {
+                    "x": 407,
+                    "y": 350.1
+                  },
+                  {
+                    "x": 641,
+                    "y": 513.9
+                  },
+                  {
+                    "x": 1280,
+                    "y": 513.9
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "The rendered source landmarks should coincide with the printed diagram at t=0. This requires correct upstream geometry as well as correct transforms.",
+  "expected_diagram": "Ground the whole lens/axis, object base and tip, image base and tip, focal markers and ray paths independently. A missing object detection must remain missing evidence, not become an assumed exploration object.",
+  "status": "FAIL — T=0 SOURCE REGISTRATION",
+  "finding": "Thin-lens runtime returns u=234, v=234, magnification=−1. No numerical solver defect is established. The actual t=0 renderer makes already incorrect source geometry visible.",
+  "change_or_loss": "Overlay image is captured from the actual canvas/SVG and projected back using measured DOM-to-source ratios. No objects were manually repositioned."
+}

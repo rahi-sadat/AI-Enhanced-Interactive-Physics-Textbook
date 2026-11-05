@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "files": {
+    "checkpoints/sam2.1_hiera_tiny.pt": {
+      "bytes": 156008466,
+      "sha256": "7402e0d864fa82708a20fbd15bc84245c2f26dff0eb43a4b5b93452deb34be69"
+    },
+    "checkpoints/yolo26n.pt": {
+      "bytes": 5544453,
+      "sha256": "9b09cc8bf347f0fc8a5f7657480587f25db09b34bf33b0652110fb03a8ad4fef"
+    },
+    "runs/augmented_physics/circuits_synthetic_v1/weights/best.pt": {
+      "bytes": 5496133,
+      "sha256": "667371fa86a49cc88f4d50cc6256db26a42c7152c04344b59b976ad3eb0f5e0e"
+    },
+    "runs/augmented_physics/circuits_synthetic_v1/weights/last.pt": {
+      "bytes": 5496133,
+      "sha256": "9f78c82588fce6c90254175f4bc2d3e5d2466727cc8618f0b26df9f3f399d5b4"
+    }
+  }
+}

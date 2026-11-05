@@ -1,0 +1,671 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 5,
+  "component": "Actual Gemini request and response",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 10,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\gemini_provider.py",
+      "function": "GeminiVisionProvider.analyze_diagram",
+      "line": 290,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\analyzer.py",
+        "function": "analyze",
+        "line": 72
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 12,
+      "status": "EXECUTED",
+      "file": "C:\\Users\\saher\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\google\\genai\\models.py",
+      "function": "Models.generate_content",
+      "line": 6131,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\gemini_provider.py",
+        "function": "analyze_diagram",
+        "line": 338
+      }
+    }
+  ],
+  "upstream_stage": "PageIR / whole-figure coordinate frame",
+  "downstream_stage": "Semantic validation, confidence caps and thresholds",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00010_GeminiVisionProvider.analyze_diagram",
+        "value": {
+          "image_bytes": {
+            "bytes": 51136,
+            "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c.bin"
+          },
+          "mime_type": "image/jpeg",
+          "page_ir": {
+            "version": "1.0",
+            "source": {
+              "assetId": "dd013d21b8704bd296afcc9dcbc6a750",
+              "width_px": 1280,
+              "height_px": 960,
+              "mimeType": "image/jpeg",
+              "url": "/uploads/diagram_dd013d21.jpg",
+              "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c"
+            },
+            "coordinate_space": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "origin": "top_left"
+            },
+            "regions": [
+              {
+                "id": "region_001",
+                "label": "whole_image",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "confidence": 1.0,
+                "detection_method": "user_supplied",
+                "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+              }
+            ],
+            "figures": [
+              {
+                "id": "figure_001",
+                "region_id": "region_001",
+                "page_x": 0.0,
+                "page_y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "detection_method": "user_supplied",
+                "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+              }
+            ],
+            "text_blocks": [],
+            "metadata": {
+              "pipeline": "PR-04-standalone-upload",
+              "note": "Single-diagram upload. figure_001 is the entire image. Text blocks populated downstream by PR-06 evidence pipeline."
+            }
+          }
+        }
+      },
+      {
+        "call": "00012_Models.generate_content",
+        "value": {
+          "model": "gemini-3.1-flash-lite",
+          "contents": [
+            {
+              "media_resolution": null,
+              "code_execution_result": null,
+              "executable_code": null,
+              "file_data": null,
+              "function_call": null,
+              "function_response": null,
+              "inline_data": {
+                "data": {
+                  "bytes": 51136,
+                  "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c",
+                  "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c.bin"
+                },
+                "display_name": null,
+                "mime_type": "image/jpeg"
+              },
+              "text": null,
+              "thought": null,
+              "thought_signature": null,
+              "video_metadata": null,
+              "tool_call": null,
+              "tool_response": null,
+              "part_metadata": null,
+              "audio_transcription": null,
+              "media_processing": null,
+              "speech_metadata": null
+            },
+            "You are an expert multimodal physics diagram semantic analyzer.\nYour task is to observe the provided textbook image and return a strictly structured JSON analysis.\n\nRULES & CONSTRAINTS:\n1. Distinguish between:\n   - \"supported\": Image clearly depicts a physics scenario for which our simulator has a solver:\n       Mechanics: \"pendulum\", \"projectile\"\n       Optics: \"thin_lens\", \"spherical_mirror\", \"interface_refraction\", \"prism\"\n       Circuits: \"dc_linear\"\n   - \"unsupported_physics\": A physics diagram that is NOT in the supported list (e.g. thermodynamics, wave interference, quantum, nuclear, fluid dynamics, electromagnetism).\n       Set: classification=\"unsupported_physics\", isPhysics=true, domain=null, subtype=null.\n   - \"non_physics\": A photograph, cartoon, text-only document, or illustration with no physics scenario (e.g. landscape, animal, person, food).\n       Set: classification=\"non_physics\", isPhysics=false, domain=null, subtype=null.\n   - \"unknown\": Ambiguous, noisy, or indeterminate diagram.\n       Set: classification=\"unknown\", isPhysics=null, domain=null, subtype=null.\n\n2. SUBTYPE VOCABULARY:\n   When classification is \"supported\", domain must be one of [\"mechanics\", \"optics\", \"circuits\"].\n   subtype must be EXACTLY one of:\n     [\"pendulum\", \"projectile\", \"thin_lens\", \"spherical_mirror\", \"interface_refraction\", \"prism\", \"dc_linear\"].\n   Do NOT output any other subtype string.\n\n3. ZERO FABRICATED PARAMETERS:\n   - Do NOT invent or assume numerical parameters (such as gravity = 9.81 m/s², focal length = 20 cm, resistance = 10 Ω).\n   - Only report visible textual/numerical labels in visibleLabels if they are explicitly visible in the image.\n\n4. SEMANTIC OBJECT ROLES:\n   - Identify visual components and assign clear roles:\n     - For pendulum: \"pivot\", \"bob\", \"string\", \"rod\", \"support_ceiling\", \"angle_marker\", \"equilibrium_position\", \"force_vector\", \"vertical_reference\", \"extreme_position\".\n     - For projectile: \"projectile_body\", \"launch_platform\", \"trajectory_path\", \"landing_surface\", \"velocity_vector\", \"apex_marker\", \"angle_marker\".\n     - For optics: \"lens\", \"optical_axis\", \"focal_point\", \"mirror\", \"optical_center\", \"object\", \"image\", \"light_ray\", \"interface_boundary\", \"normal_line\", \"incident_ray\", \"refracted_ray\", \"prism_body\".\n     - For circuits: \"resistor\", \"voltage_source\", \"current_source\", \"wire\", \"ground\", \"junction\", \"switch\", \"ammeter\", \"voltmeter\".\n   - If bounding box coordinates are provided, they are understood to be coarse/approximate.\n\n5. CONFIDENCE CALIBRATION & REALISM:\n   - Score confidence conservatively on a realistic scale from 0.0 to 1.0.\n   - Reserve 1.0 ONLY for absolute textbook canonical ground truth certainty.\n   - Standard clear diagrams typically range from 0.85 to 0.95.\n   - Ambiguous, cropped, or hand-drawn diagrams should be 0.50 to 0.80.\n   - For unsupported_physics or non_physics, domain and subtype confidence MUST be 0.0.\n   - Include an \"overall\" confidence score in confidence reflecting your aggregate certainty.\n\n6. OUTPUT FORMAT:\n   Return ONLY a valid JSON object matching this structure:\n{\n  \"classification\": \"supported\" | \"unsupported_physics\" | \"non_physics\" | \"unknown\",\n  \"isPhysics\": true | false | null,\n  \"domain\": \"mechanics\" | \"optics\" | \"circuits\" | null,\n  \"subtype\": \"pendulum\" | \"projectile\" | \"thin_lens\" | \"spherical_mirror\" | \"interface_refraction\" | \"prism\" | \"dc_linear\" | null,\n  \"confidence\": {\n    \"isPhysics\": 0.0 to 1.0,\n    \"domain\": 0.0 to 1.0,\n    \"subtype\": 0.0 to 1.0,\n    \"overall\": 0.0 to 1.0\n  },\n  \"entities\": [\n    {\n      \"temporaryId\": \"entity_1\",\n      \"role\": \"bob\",\n      \"label\": \"m\",\n      \"confidence\": 0.95\n    }\n  ],\n  \"relationships\": [\n    {\n      \"type\": \"connected_to\",\n      \"from\": \"entity_1\",\n      \"to\": \"entity_2\",\n      \"confidence\": 0.90\n    }\n  ],\n  \"visibleLabels\": [\n    {\n      \"text\": \"10 kg\",\n      \"confidence\": 0.85,\n      \"semanticRole\": \"mass_value\"\n    }\n  ],\n  \"candidates\": [],\n  \"notes\": [\"short observation\"]\n}\n"
+          ],
+          "config": {
+            "http_options": null,
+            "should_return_http_response": null,
+            "system_instruction": null,
+            "temperature": 0.1,
+            "top_p": null,
+            "top_k": null,
+            "candidate_count": null,
+            "max_output_tokens": null,
+            "stop_sequences": null,
+            "response_logprobs": null,
+            "logprobs": null,
+            "presence_penalty": null,
+            "frequency_penalty": null,
+            "seed": null,
+            "response_mime_type": "application/json",
+            "response_schema": {
+              "type": "OBJECT",
+              "properties": {
+                "classification": {
+                  "type": "STRING",
+                  "enum": [
+                    "supported",
+                    "unsupported_physics",
+                    "non_physics",
+                    "unknown"
+                  ]
+                },
+                "isPhysics": {
+                  "type": "BOOLEAN"
+                },
+                "domain": {
+                  "type": "STRING",
+                  "enum": [
+                    "mechanics",
+                    "optics",
+                    "circuits"
+                  ]
+                },
+                "subtype": {
+                  "type": "STRING",
+                  "enum": [
+                    "pendulum",
+                    "projectile",
+                    "thin_lens",
+                    "spherical_mirror",
+                    "interface_refraction",
+                    "prism",
+                    "dc_linear"
+                  ]
+                },
+                "confidence": {
+                  "type": "OBJECT",
+                  "properties": {
+                    "isPhysics": {
+                      "type": "NUMBER"
+                    },
+                    "domain": {
+                      "type": "NUMBER"
+                    },
+                    "subtype": {
+                      "type": "NUMBER"
+                    },
+                    "overall": {
+                      "type": "NUMBER"
+                    }
+                  },
+                  "required": [
+                    "isPhysics",
+                    "domain",
+                    "subtype"
+                  ]
+                },
+                "entities": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "temporaryId": {
+                        "type": "STRING"
+                      },
+                      "role": {
+                        "type": "STRING"
+                      },
+                      "label": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      }
+                    },
+                    "required": [
+                      "temporaryId",
+                      "role"
+                    ]
+                  }
+                },
+                "relationships": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "type": {
+                        "type": "STRING"
+                      },
+                      "from": {
+                        "type": "STRING"
+                      },
+                      "to": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "from",
+                      "to"
+                    ]
+                  }
+                },
+                "visibleLabels": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "text": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      },
+                      "semanticRole": {
+                        "type": "STRING"
+                      }
+                    },
+                    "required": [
+                      "text"
+                    ]
+                  }
+                },
+                "candidates": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "domain": {
+                        "type": "STRING"
+                      },
+                      "subtype": {
+                        "type": "STRING"
+                      },
+                      "confidence": {
+                        "type": "NUMBER"
+                      }
+                    }
+                  }
+                },
+                "notes": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "STRING"
+                  }
+                }
+              },
+              "required": [
+                "classification",
+                "confidence"
+              ]
+            },
+            "response_json_schema": null,
+            "routing_config": null,
+            "model_selection_config": null,
+            "safety_settings": null,
+            "tools": null,
+            "tool_config": null,
+            "labels": null,
+            "cached_content": null,
+            "response_modalities": null,
+            "media_resolution": null,
+            "speech_config": null,
+            "audio_timestamp": null,
+            "automatic_function_calling": null,
+            "thinking_config": null,
+            "image_config": null,
+            "enable_enhanced_civic_answers": null,
+            "model_armor_config": null,
+            "service_tier": null,
+            "audio_transcription_config": null
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The same encoded image, semantic prompt, configured model and response schema. Credentials are redacted.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00010_GeminiVisionProvider.analyze_diagram",
+        "return_value": {
+          "classification": "supported",
+          "is_physics": true,
+          "domain": "optics",
+          "subtype": "thin_lens",
+          "confidence": {
+            "is_physics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "raw_provider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "entities": [
+            {
+              "temporary_id": "lens_1",
+              "role": "lens",
+              "label": "convex lens",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "object_1",
+              "role": "object",
+              "label": "Object",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "image_1",
+              "role": "image",
+              "label": "Image",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "axis_1",
+              "role": "optical_axis",
+              "label": "principal axis",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "focal_point_1",
+              "role": "focal_point",
+              "label": "F",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "focal_point_2",
+              "role": "focal_point",
+              "label": "2F",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            }
+          ],
+          "relationships": [
+            {
+              "type": "forms_image",
+              "source_id": "lens_1",
+              "target_id": "image_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "refracts",
+              "source_id": "object_1",
+              "target_id": "lens_1",
+              "confidence": 0.95
+            }
+          ],
+          "visible_labels": [
+            {
+              "text": "Object",
+              "confidence": 0.95,
+              "semantic_role": "object_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "Image",
+              "confidence": 0.95,
+              "semantic_role": "image_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "f = 15 cm",
+              "confidence": 0.95,
+              "semantic_role": "focal_length",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "2F",
+              "confidence": 0.95,
+              "semantic_role": "focal_point_marker",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "F",
+              "confidence": 0.95,
+              "semantic_role": "focal_point_marker",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "O",
+              "confidence": 0.95,
+              "semantic_role": "optical_center",
+              "source": "vlm",
+              "verified": false
+            }
+          ],
+          "candidates": [],
+          "notes": [
+            "Diagram shows image formation by a convex lens with an object placed beyond 2F."
+          ],
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "prompt_version": "pr05-v1",
+          "timestamp": "2026-10-17T03:26:19.538410+00:00",
+          "latency_ms": 4418,
+          "cache_hit": false,
+          "fallback_used": false,
+          "debug": {}
+        }
+      },
+      {
+        "call": "00012_Models.generate_content",
+        "return_value": {
+          "sdk_http_response": {
+            "headers": {
+              "x-gemini-service-tier": "standard",
+              "content-type": "application/json; charset=UTF-8",
+              "vary": "Origin, X-Origin, Referer",
+              "content-encoding": "gzip",
+              "date": "Sat, 17 Oct 2026 03:26:19 GMT",
+              "server": "scaffolding on HTTPServer2",
+              "x-xss-protection": "0",
+              "x-frame-options": "SAMEORIGIN",
+              "x-content-type-options": "nosniff",
+              "server-timing": "gfet4t7; dur=3909",
+              "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+              "transfer-encoding": "chunked"
+            },
+            "body": null
+          },
+          "candidates": [
+            {
+              "content": {
+                "parts": [
+                  {
+                    "media_resolution": null,
+                    "code_execution_result": null,
+                    "executable_code": null,
+                    "file_data": null,
+                    "function_call": null,
+                    "function_response": null,
+                    "inline_data": null,
+                    "text": "{\n  \"classification\": \"supported\",\n  \"isPhysics\": true,\n  \"domain\": \"optics\",\n  \"subtype\": \"thin_lens\",\n  \"confidence\": {\n    \"isPhysics\": 1.0,\n    \"domain\": 1.0,\n    \"subtype\": 1.0,\n    \"overall\": 1.0\n  },\n  \"entities\": [\n    {\n      \"temporaryId\": \"lens_1\",\n      \"role\": \"lens\",\n      \"label\": \"convex lens\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"object_1\",\n      \"role\": \"object\",\n      \"label\": \"Object\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"image_1\",\n      \"role\": \"image\",\n      \"label\": \"Image\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"axis_1\",\n      \"role\": \"optical_axis\",\n      \"label\": \"principal axis\",\n      \"confidence\": 0.95\n    },\n    {\n      \"temporaryId\": \"focal_point_1\",\n      \"role\": \"focal_point\",\n      \"label\": \"F\",\n      \"confidence\": 1.0\n    },\n    {\n      \"temporaryId\": \"focal_point_2\",\n      \"role\": \"focal_point\",\n      \"label\": \"2F\",\n      \"confidence\": 1.0\n    }\n  ],\n  \"relationships\": [\n    {\n      \"type\": \"forms_image\",\n      \"from\": \"lens_1\",\n      \"to\": \"image_1\",\n      \"confidence\": 1.0\n    },\n    {\n      \"type\": \"refracts\",\n      \"from\": \"object_1\",\n      \"to\": \"lens_1\",\n      \"confidence\": 1.0\n    }\n  ],\n  \"visibleLabels\": [\n    {\n      \"text\": \"Object\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"object_label\"\n    },\n    {\n      \"text\": \"Image\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"image_label\"\n    },\n    {\n      \"text\": \"f = 15 cm\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"focal_length\"\n    },\n    {\n      \"text\": \"2F\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"focal_point_marker\"\n    },\n    {\n      \"text\": \"F\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"focal_point_marker\"\n    },\n    {\n      \"text\": \"O\",\n      \"confidence\": 1.0,\n      \"semanticRole\": \"optical_center\"\n    }\n  ],\n  \"candidates\": [],\n  \"notes\": [\n    \"Diagram shows image formation by a convex lens with an object placed beyond 2F.\"\n  ]\n}",
+                    "thought": null,
+                    "thought_signature": {
+                      "bytes": 117,
+                      "sha256": "7736e309c16b2c50352cb62bab9cce7736fb406ac499690d5065f32d478f782c",
+                      "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\7736e309c16b2c50352cb62bab9cce7736fb406ac499690d5065f32d478f782c.bin"
+                    },
+                    "video_metadata": null,
+                    "tool_call": null,
+                    "tool_response": null,
+                    "part_metadata": null,
+                    "audio_transcription": null,
+                    "media_processing": null,
+                    "speech_metadata": null
+                  }
+                ],
+                "role": "model"
+              },
+              "citation_metadata": null,
+              "finish_message": null,
+              "token_count": null,
+              "finish_reason": "STOP",
+              "grounding_metadata": null,
+              "avg_logprobs": null,
+              "index": 0,
+              "logprobs_result": null,
+              "safety_ratings": null,
+              "url_context_metadata": null
+            }
+          ],
+          "create_time": null,
+          "model_version": "gemini-3.1-flash-lite",
+          "prompt_feedback": null,
+          "response_id": "2OrSasbIB9zvg8UP6YC68AU",
+          "usage_metadata": {
+            "cache_tokens_details": null,
+            "cached_content_token_count": null,
+            "candidates_token_count": 734,
+            "candidates_tokens_details": null,
+            "prompt_token_count": 2233,
+            "prompt_tokens_details": [
+              {
+                "modality": "TEXT",
+                "token_count": 1169
+              },
+              {
+                "modality": "IMAGE",
+                "token_count": 1064
+              }
+            ],
+            "thoughts_token_count": null,
+            "tool_use_prompt_token_count": null,
+            "tool_use_prompt_tokens_details": null,
+            "total_token_count": 2967,
+            "traffic_type": null
+          },
+          "model_status": null,
+          "automatic_function_calling_history": [],
+          "parsed": {
+            "classification": "supported",
+            "isPhysics": true,
+            "domain": "optics",
+            "subtype": "thin_lens",
+            "confidence": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            },
+            "entities": [
+              {
+                "temporaryId": "lens_1",
+                "role": "lens",
+                "label": "convex lens",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "object_1",
+                "role": "object",
+                "label": "Object",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "image_1",
+                "role": "image",
+                "label": "Image",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "axis_1",
+                "role": "optical_axis",
+                "label": "principal axis",
+                "confidence": 0.95
+              },
+              {
+                "temporaryId": "focal_point_1",
+                "role": "focal_point",
+                "label": "F",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "focal_point_2",
+                "role": "focal_point",
+                "label": "2F",
+                "confidence": 1.0
+              }
+            ],
+            "relationships": [
+              {
+                "type": "forms_image",
+                "from": "lens_1",
+                "to": "image_1",
+                "confidence": 1.0
+              },
+              {
+                "type": "refracts",
+                "from": "object_1",
+                "to": "lens_1",
+                "confidence": 1.0
+              }
+            ],
+            "visibleLabels": [
+              {
+                "text": "Object",
+                "confidence": 1.0,
+                "semanticRole": "object_label"
+              },
+              {
+                "text": "Image",
+                "confidence": 1.0,
+                "semanticRole": "image_label"
+              },
+              {
+                "text": "f = 15 cm",
+                "confidence": 1.0,
+                "semanticRole": "focal_length"
+              },
+              {
+                "text": "2F",
+                "confidence": 1.0,
+                "semanticRole": "focal_point_marker"
+              },
+              {
+                "text": "F",
+                "confidence": 1.0,
+                "semanticRole": "focal_point_marker"
+              },
+              {
+                "text": "O",
+                "confidence": 1.0,
+                "semanticRole": "optical_center"
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "Diagram shows image formation by a convex lens with an object placed beyond 2F."
+            ]
+          }
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Semantic classification, domain/subtype, entity roles and relationships. Numerical physical parameters and authoritative geometry must not originate here.",
+  "expected_diagram": "Expected accepted classification: supported; isPhysics=true; domain/subtype=optics / thin_lens. Expected semantic content: A convex lens, horizontal principal axis, upright object to the left between F and 2F, inverted enlarged image to the right beyond 2F, focal markers and principal rays. Printed f=15 cm. These are semantic roles/labels, not authorization to supply numerical parameters or precise positions.",
+  "status": "PASS WITH LIMITS",
+  "finding": "Accepted domain/subtype agrees with the source. Semantic-only output is appropriate here; missing source geometry is intentional. Raw provider confidence can be 1.0; accepted confidence is capped by validation.",
+  "change_or_loss": "Image → model response. SDK/provider-internal preprocessing and private tensors were not exposed; no transform is invented for them."
+}

@@ -137,6 +137,15 @@ export class FigureViewport {
 
     await this._waitForImage(img);
 
+    if (!img.naturalWidth || !img.naturalHeight) {
+      throw new Error('[FigureViewport] Background image could not be decoded.');
+    }
+
+    if (sourceW != null && sourceH != null &&
+        (Number(sourceW) !== img.naturalWidth || Number(sourceH) !== img.naturalHeight)) {
+      throw new Error(`[FigureViewport] Scene dimensions ${sourceW}x${sourceH} disagree with image dimensions ${img.naturalWidth}x${img.naturalHeight}.`);
+    }
+
     // If source dimensions were not explicitly passed, infer from natural image
     if ((!sourceW || !sourceH) && img.naturalWidth > 0 && img.naturalHeight > 0) {
       this.sourceW = img.naturalWidth;
@@ -147,7 +156,10 @@ export class FigureViewport {
   }
 
   async _waitForImage(img) {
-    if (img.complete && img.naturalWidth > 0) return;
+    if (img.complete) {
+      if (img.naturalWidth > 0) return;
+      throw new Error('[FigureViewport] Background image could not be loaded.');
+    }
 
     if (typeof img.decode === 'function') {
       try {
@@ -158,11 +170,12 @@ export class FigureViewport {
       }
     }
 
-    await new Promise((resolve) => {
-      const onDone = () => {
+    await new Promise((resolve, reject) => {
+      const onDone = (event) => {
         img.removeEventListener('load', onDone);
         img.removeEventListener('error', onDone);
-        resolve();
+        if (event.type === 'error') reject(new Error('[FigureViewport] Background image could not be loaded.'));
+        else resolve();
       };
       img.addEventListener('load', onDone, { once: true });
       img.addEventListener('error', onDone, { once: true });

@@ -1,0 +1,388 @@
+{
+  "trace": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "stages": [
+    {
+      "stage": 1,
+      "title": "Browser selects the original diagram",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/01_upload.json",
+      "backend_calls": [],
+      "frontend_event_count": 2
+    },
+    {
+      "stage": 2,
+      "title": "HTTP request reaches /api/ingest",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/02_http_in.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 3,
+      "title": "Upload persistence and dimension decoding",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/03_asset.json",
+      "backend_calls": [
+        "00003_UploadService.ingest"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 4,
+      "title": "PageIR / whole-figure coordinate frame",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/04_page.json",
+      "backend_calls": [
+        "00006_PageIRBuilder.build"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 5,
+      "title": "Actual Gemini request and response",
+      "execution": "EXECUTED",
+      "status": "PASS WITH LIMITS",
+      "bundle": "stage_data/05_vlm.json",
+      "backend_calls": [
+        "00010_GeminiVisionProvider.analyze_diagram",
+        "00012_Models.generate_content"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 6,
+      "title": "Semantic validation, confidence caps and thresholds",
+      "execution": "EXECUTED",
+      "status": "PASS WITH LIMITS",
+      "bundle": "stage_data/06_semantic.json",
+      "backend_calls": [
+        "00009_PhysicsVisionAnalyzer.analyze",
+        "00015_validate_semantic_payload",
+        "00049_PhysicsVisionAnalyzer._apply_thresholds"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 7,
+      "title": "Initial semantic BookIR",
+      "execution": "EXECUTED",
+      "status": "PASS WITH LIMITS",
+      "bundle": "stage_data/07_book.json",
+      "backend_calls": [
+        "00007_BookUnderstandingPipeline.analyze",
+        "00050_BookUnderstandingPipeline._build_book_ir_from_result"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 8,
+      "title": "Evidence dispatch and source decode",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/08_route.json",
+      "backend_calls": [
+        "00053_GrounderRegistry.find_grounder",
+        "00057_load_and_validate_source_image"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 9,
+      "title": "RapidOCR: first text/box observations",
+      "execution": "EXECUTED",
+      "status": "OBSERVED / REVIEW ALTERNATIVES",
+      "bundle": "stage_data/09_rapid.json",
+      "backend_calls": [
+        "00061_RapidOCRProvider.extract"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 10,
+      "title": "EasyOCR: independent OCR candidates",
+      "execution": "EXECUTED",
+      "status": "OBSERVED / REVIEW ALTERNATIVES",
+      "bundle": "stage_data/10_easy.json",
+      "backend_calls": [
+        "00116_EasyOCRBanglaProvider.extract"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 11,
+      "title": "Symbol candidates, deduplication and final OCR",
+      "execution": "EXECUTED",
+      "status": "OBSERVED / REVIEW ALTERNATIVES",
+      "bundle": "stage_data/11_ocr.json",
+      "backend_calls": [
+        "00060_MultiOCRRouter.extract",
+        "00169_deduplicate_spatial_tokens",
+        "00178_GreekSymbolVisualOCR.extract_symbols",
+        "00179_PhysicsSymbolCandidateResolver.enrich_token",
+        "00181_PhysicsSymbolCandidateResolver.enrich_token",
+        "00183_PhysicsSymbolCandidateResolver.enrich_token",
+        "00185_PhysicsSymbolCandidateResolver.enrich_token",
+        "00187_PhysicsSymbolCandidateResolver.enrich_token",
+        "00189_PhysicsSymbolCandidateResolver.enrich_token",
+        "00191_PhysicsSymbolCandidateResolver.enrich_token",
+        "00193_PhysicsSymbolCandidateResolver.enrich_token"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 12,
+      "title": "Grayscale, blur and edge extraction",
+      "execution": "EXECUTED",
+      "status": "FRAME PASS / LOSSY PROCESSING",
+      "bundle": "stage_data/12_pre.json",
+      "backend_calls": [
+        "00202_preprocess_diagram"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 13,
+      "title": "OCR-region suppression before geometry detection",
+      "execution": "EXECUTED",
+      "status": "FAIL — FIRST PROVEN GEOMETRY LOSS",
+      "bundle": "stage_data/13_mask.json",
+      "backend_calls": [
+        "00203_mask_out_text_regions"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 14,
+      "title": "Domain CV: raw candidates → selected geometry",
+      "execution": "EXECUTED",
+      "status": "FAIL — PERCEPTION / SELECTION",
+      "bundle": "stage_data/14_cv.json",
+      "backend_calls": [
+        "00200_ThinLensCVCandidateExtractor.extract"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 15,
+      "title": "SAM2 segmentation prompted by CV",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/15_sam.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 16,
+      "title": "Semantic-to-spatial grounding and parameter binding",
+      "execution": "EXECUTED",
+      "status": "FAIL / UPSTREAM DAMAGE PROPAGATES",
+      "bundle": "stage_data/16_ground.json",
+      "backend_calls": [
+        "00283_ThinLensGrounder.ground"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 17,
+      "title": "Grounded BookIR and OCR-enriched PageIR",
+      "execution": "EXECUTED",
+      "status": "FAIL / UPSTREAM DAMAGE PROPAGATES",
+      "bundle": "stage_data/17_fused.json",
+      "backend_calls": [
+        "00052_EvidenceExtractionPipeline.extract_and_fuse"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 18,
+      "title": "Enforce authoritative source dimensions",
+      "execution": "EXECUTED",
+      "status": "FRAME PASS; GEOMETRY STILL WRONG",
+      "bundle": "stage_data/18_dimensions.json",
+      "backend_calls": [
+        "00305_enforce_source_dimensions"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 19,
+      "title": "Automatic resolution and explicit policy values",
+      "execution": "EXECUTED",
+      "status": "ASSUMPTIONS / UNRESOLVED EVIDENCE",
+      "bundle": "stage_data/19_auto.json",
+      "backend_calls": [
+        "00306_AutoResolutionEngine.resolve"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 20,
+      "title": "Resolution decisions, units and calibration",
+      "execution": "EXECUTED",
+      "status": "ASSUMPTIONS / UNRESOLVED EVIDENCE",
+      "bundle": "stage_data/20_calibration.json",
+      "backend_calls": [
+        "00343_ResolutionEngine.auto_resolve",
+        "00345_CalibrationEngine.derive_for_subtype",
+        "00356_CalibrationEngine.derive_for_subtype"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 21,
+      "title": "Requirement and ambiguity analysis",
+      "execution": "EXECUTED",
+      "status": "RUNNABLE ≠ SOURCE-REGISTERED",
+      "bundle": "stage_data/21_requirements.json",
+      "backend_calls": [
+        "00321_ResolutionAnalyzer.analyze",
+        "00323_ResolutionAnalyzer._check_geometry_requirements",
+        "00324_ResolutionAnalyzer._check_parameter_requirements",
+        "00358_ResolutionAnalyzer.analyze",
+        "00360_ResolutionAnalyzer._check_geometry_requirements",
+        "00361_ResolutionAnalyzer._check_parameter_requirements",
+        "00410_ResolutionAnalyzer.analyze",
+        "00412_ResolutionAnalyzer._check_geometry_requirements",
+        "00413_ResolutionAnalyzer._check_parameter_requirements"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 22,
+      "title": "Readiness decision",
+      "execution": "EXECUTED",
+      "status": "RUNNABLE ≠ SOURCE-REGISTERED",
+      "bundle": "stage_data/22_readiness.json",
+      "backend_calls": [
+        "00320_ReadinessEvaluator.evaluate",
+        "00357_ReadinessEvaluator.evaluate",
+        "00409_ReadinessEvaluator.evaluate"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 23,
+      "title": "PhysicsCompiler entry and gate",
+      "execution": "EXECUTED",
+      "status": "PROPAGATED / RECONSTRUCTED GEOMETRY",
+      "bundle": "stage_data/23_gate.json",
+      "backend_calls": [
+        "00380_PhysicsCompiler.compile"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 24,
+      "title": "Canonical scene construction and schema validation",
+      "execution": "EXECUTED",
+      "status": "PROPAGATED / RECONSTRUCTED GEOMETRY",
+      "bundle": "stage_data/24_compile.json",
+      "backend_calls": [
+        "00432_PhysicsCompiler._build_canonical_scene",
+        "00440_PhysicsCompiler._populate_canonical_lens",
+        "00456_PhysicsCompiler._preserve_parameter_provenance",
+        "00457_validate_canonical_scene"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 25,
+      "title": "API response delivered to the browser",
+      "execution": "EXECUTED",
+      "status": "PROPAGATED / RECONSTRUCTED GEOMETRY",
+      "bundle": "stage_data/25_response.json",
+      "backend_calls": [
+        "00001_ingest_diagram"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 26,
+      "title": "Frontend receives result and selects next state",
+      "execution": "EXECUTED",
+      "status": "SCENE ACCEPTED",
+      "bundle": "stage_data/26_orchestrator.json",
+      "backend_calls": [],
+      "frontend_event_count": 10
+    },
+    {
+      "stage": 27,
+      "title": "Review / explicit compile request branch",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/27_review.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 28,
+      "title": "InteractiveFigure receives the compiled scene",
+      "execution": "EXECUTED",
+      "status": "EXECUTED; UPSTREAM REGISTRATION FAILURE",
+      "bundle": "stage_data/28_figure.json",
+      "backend_calls": [],
+      "frontend_event_count": 2
+    },
+    {
+      "stage": 29,
+      "title": "FigureViewport background and layout",
+      "execution": "EXECUTED",
+      "status": "EXECUTED; UPSTREAM REGISTRATION FAILURE",
+      "bundle": "stage_data/29_background.json",
+      "backend_calls": [],
+      "frontend_event_count": 6
+    },
+    {
+      "stage": 30,
+      "title": "PhysicsRuntime normalization and adapter initialization",
+      "execution": "EXECUTED",
+      "status": "EXECUTED; UPSTREAM REGISTRATION FAILURE",
+      "bundle": "stage_data/30_runtime.json",
+      "backend_calls": [],
+      "frontend_event_count": 4
+    },
+    {
+      "stage": 31,
+      "title": "Domain solver and actual initial state",
+      "execution": "EXECUTED",
+      "status": "OUTPUT OBSERVED; NO NUMERICAL DEFECT PROVEN",
+      "bundle": "stage_data/31_solver.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 32,
+      "title": "CoordinateMapper: source → overlay → browser",
+      "execution": "EXECUTED",
+      "status": "MAPPING PASS FOR CAPTURED LANDMARKS",
+      "bundle": "stage_data/32_mapper.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 33,
+      "title": "Actual renderer at t=0 over the original",
+      "execution": "EXECUTED",
+      "status": "FAIL — T=0 SOURCE REGISTRATION",
+      "bundle": "stage_data/33_render.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 34,
+      "title": "Activation, motion and reset",
+      "execution": "EXECUTED",
+      "status": "ACTUAL STATE CAPTURED",
+      "bundle": "stage_data/34_motion.json",
+      "backend_calls": [],
+      "frontend_event_count": 10
+    }
+  ],
+  "backend_calls": 457,
+  "backend_functions": 108,
+  "excluded_startup_events": 13
+}

@@ -465,25 +465,39 @@ export class OpticsRenderer extends SimulationRenderer {
   }
 
   _renderPrism(geom, output) {
-    const { prismVertices, rays, normals } = geom;
+    const prismVertices = geom.prismVertices || geom.prismPolygon || geom.vertices || geom.prism?.vertices || output?.geometry?.prismVertices || output?.solution?.prismVertices;
+    const rays = geom.rays || geom.segments || output?.geometry?.rays || output?.solution?.rays || output?.solution?.segments;
+    const normals = geom.normals || output?.geometry?.normals || output?.solution?.normals;
 
     // 1. Prism Glass Polygon
     if (Array.isArray(prismVertices) && prismVertices.length >= 3) {
       const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-      const ptsStr = prismVertices.map(v => `${v.x},${v.y}`).join(' ');
+      const ptsStr = prismVertices.map(v => {
+        if (!v) return '0,0';
+        if (Array.isArray(v)) return `${v[0]},${v[1]}`;
+        return `${v.x ?? 0},${v.y ?? 0}`;
+      }).join(' ');
       poly.setAttribute('points', ptsStr);
-      poly.setAttribute('fill', 'rgba(56, 189, 248, 0.12)');
-      poly.setAttribute('stroke', 'rgba(56, 189, 248, 0.85)');
+      poly.setAttribute('fill', 'rgba(56, 189, 248, 0.16)');
+      poly.setAttribute('stroke', '#38bdf8');
       poly.setAttribute('stroke-width', '2.5');
+      poly.setAttribute('stroke-linejoin', 'round');
       this.layers.shapes.appendChild(poly);
     }
 
     // 2. Normals
     if (Array.isArray(normals)) {
       for (const n of normals) {
-        if (n.p1 && n.p2) {
-          this.layers.shapes.appendChild(this._createLine(n.p1.x, n.p1.y, n.p2.x, n.p2.y, {
-            stroke: 'rgba(148, 163, 184, 0.45)',
+        const _getPt = (p) => {
+          if (!p) return null;
+          if (Array.isArray(p)) return { x: p[0], y: p[1] };
+          return { x: p.x, y: p.y };
+        };
+        const p1 = _getPt(n.p1);
+        const p2 = _getPt(n.p2);
+        if (p1 && p2) {
+          this.layers.shapes.appendChild(this._createLine(p1.x, p1.y, p2.x, p2.y, {
+            stroke: 'rgba(148, 163, 184, 0.65)',
             strokeWidth: 1.5,
             strokeDasharray: '4 4'
           }));
@@ -493,18 +507,25 @@ export class OpticsRenderer extends SimulationRenderer {
 
     // 3. Rays (Incident, Internal, Emergent)
     if (Array.isArray(rays)) {
+      const _getPt = (p) => {
+        if (!p) return null;
+        if (Array.isArray(p)) return { x: p[0], y: p[1] };
+        return { x: p.x, y: p.y };
+      };
+
       rays.forEach((seg) => {
         let col = '#f59e0b';
         if (seg.type === 'internal') col = '#38bdf8';
         if (seg.type === 'emergent') col = '#34d399';
         if (seg.type === 'tir_reflected') col = '#ef4444';
 
-        const p1 = seg.start || seg.points?.[0];
-        const p2 = seg.end || seg.points?.[1];
+        const p1 = _getPt(seg.start || seg.points?.[0]);
+        const p2 = _getPt(seg.end || seg.points?.[1]);
         if (p1 && p2) {
           this.layers.rays.appendChild(this._createLine(p1.x, p1.y, p2.x, p2.y, {
             stroke: col,
-            strokeWidth: 2.5
+            strokeWidth: 3.0,
+            strokeLinecap: 'round'
           }));
         }
       });

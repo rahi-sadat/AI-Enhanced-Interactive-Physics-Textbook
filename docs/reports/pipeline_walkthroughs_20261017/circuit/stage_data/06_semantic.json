@@ -1,0 +1,821 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 6,
+  "component": "Semantic validation, confidence caps and thresholds",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 9,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\analyzer.py",
+      "function": "PhysicsVisionAnalyzer.analyze",
+      "line": 44,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\BookUnderstandingPipeline.py",
+        "function": "analyze",
+        "line": 120
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 15,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\shared\\schemas\\semantic.py",
+      "function": "validate_semantic_payload",
+      "line": 452,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\gemini_provider.py",
+        "function": "analyze_diagram",
+        "line": 380
+      }
+    },
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 51,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\analyzer.py",
+      "function": "PhysicsVisionAnalyzer._apply_thresholds",
+      "line": 81,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\ingestion\\vision\\analyzer.py",
+        "function": "analyze",
+        "line": 79
+      }
+    }
+  ],
+  "upstream_stage": "Actual Gemini request and response",
+  "downstream_stage": "Initial semantic BookIR",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00009_PhysicsVisionAnalyzer.analyze",
+        "value": {
+          "source_asset": {
+            "id": "9b910bff7ee74e90a1763e5358b474ff",
+            "mime_type": "image/jpeg",
+            "original_filename": "photo_2026-10-10_12-06-37 (2).jpg",
+            "byte_size": 38634,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63",
+            "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_9b910bff.jpg"
+          },
+          "page_ir": {
+            "version": "1.0",
+            "source": {
+              "assetId": "9b910bff7ee74e90a1763e5358b474ff",
+              "width_px": 1280,
+              "height_px": 960,
+              "mimeType": "image/jpeg",
+              "url": "/uploads/diagram_9b910bff.jpg",
+              "sha256": "e5ae133702ba3de2d830330c1bceec2e0d1ea8f97e03f1ce27699b9e1cae1d63"
+            },
+            "coordinate_space": {
+              "type": "source_px",
+              "width": 1280,
+              "height": 960,
+              "origin": "top_left"
+            },
+            "regions": [
+              {
+                "id": "region_001",
+                "label": "whole_image",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "confidence": 1.0,
+                "detection_method": "user_supplied",
+                "notes": "Whole image supplied directly by user; no sub-figure detection performed yet."
+              }
+            ],
+            "figures": [
+              {
+                "id": "figure_001",
+                "region_id": "region_001",
+                "page_x": 0.0,
+                "page_y": 0.0,
+                "width": 1280.0,
+                "height": 960.0,
+                "detection_method": "user_supplied",
+                "notes": "Figure spans the full uploaded image. Automatic figure detection not yet applied."
+              }
+            ],
+            "text_blocks": [],
+            "metadata": {
+              "pipeline": "PR-04-standalone-upload",
+              "note": "Single-diagram upload. figure_001 is the entire image. Text blocks populated downstream by PR-06 evidence pipeline."
+            }
+          }
+        }
+      },
+      {
+        "call": "00015_validate_semantic_payload",
+        "value": {
+          "raw": {
+            "classification": "supported",
+            "isPhysics": true,
+            "domain": "circuits",
+            "subtype": "dc_linear",
+            "confidence": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            },
+            "entities": [
+              {
+                "temporaryId": "voltage_source_1",
+                "role": "voltage_source",
+                "label": "12 V",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "switch_1",
+                "role": "switch",
+                "label": "S",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "resistor_1",
+                "role": "resistor",
+                "label": "R1 = 10 Ω",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "resistor_2",
+                "role": "resistor",
+                "label": "R2 = 20 Ω",
+                "confidence": 1.0
+              },
+              {
+                "temporaryId": "wire_1",
+                "role": "wire",
+                "label": "I",
+                "confidence": 0.95
+              }
+            ],
+            "relationships": [
+              {
+                "type": "connected_in_series",
+                "from": "voltage_source_1",
+                "to": "switch_1",
+                "confidence": 1.0
+              },
+              {
+                "type": "connected_in_series",
+                "from": "switch_1",
+                "to": "resistor_1",
+                "confidence": 1.0
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_1",
+                "to": "resistor_2",
+                "confidence": 1.0
+              },
+              {
+                "type": "connected_in_series",
+                "from": "resistor_2",
+                "to": "voltage_source_1",
+                "confidence": 1.0
+              }
+            ],
+            "visibleLabels": [
+              {
+                "text": "12 V",
+                "confidence": 1.0,
+                "semanticRole": "voltage_value"
+              },
+              {
+                "text": "S",
+                "confidence": 1.0,
+                "semanticRole": "switch_label"
+              },
+              {
+                "text": "R1 = 10 Ω",
+                "confidence": 1.0,
+                "semanticRole": "resistor_label"
+              },
+              {
+                "text": "R2 = 20 Ω",
+                "confidence": 1.0,
+                "semanticRole": "resistor_label"
+              },
+              {
+                "text": "I",
+                "confidence": 1.0,
+                "semanticRole": "current_label"
+              },
+              {
+                "text": "Fig. 9 Series DC Circuit",
+                "confidence": 1.0,
+                "semanticRole": "caption"
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+            ]
+          }
+        }
+      },
+      {
+        "call": "00051_PhysicsVisionAnalyzer._apply_thresholds",
+        "value": {
+          "result": {
+            "classification": "supported",
+            "is_physics": true,
+            "domain": "circuits",
+            "subtype": "dc_linear",
+            "confidence": {
+              "is_physics": 0.99,
+              "domain": 0.98,
+              "subtype": 0.96,
+              "overall": 0.96,
+              "raw_provider": {
+                "isPhysics": 1.0,
+                "domain": 1.0,
+                "subtype": 1.0,
+                "overall": 1.0
+              }
+            },
+            "entities": [
+              {
+                "temporary_id": "voltage_source_1",
+                "role": "voltage_source",
+                "label": "12 V",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "switch_1",
+                "role": "switch",
+                "label": "S",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "resistor_1",
+                "role": "resistor",
+                "label": "R1 = 10 Ω",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "resistor_2",
+                "role": "resistor",
+                "label": "R2 = 20 Ω",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              },
+              {
+                "temporary_id": "wire_1",
+                "role": "wire",
+                "label": "I",
+                "confidence": 0.95,
+                "approx_bbox": null,
+                "precision": "approximate"
+              }
+            ],
+            "relationships": [
+              {
+                "type": "connected_in_series",
+                "source_id": "voltage_source_1",
+                "target_id": "switch_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "source_id": "switch_1",
+                "target_id": "resistor_1",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "source_id": "resistor_1",
+                "target_id": "resistor_2",
+                "confidence": 0.95
+              },
+              {
+                "type": "connected_in_series",
+                "source_id": "resistor_2",
+                "target_id": "voltage_source_1",
+                "confidence": 0.95
+              }
+            ],
+            "visible_labels": [
+              {
+                "text": "12 V",
+                "confidence": 0.95,
+                "semantic_role": "voltage_value",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "S",
+                "confidence": 0.95,
+                "semantic_role": "switch_label",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "R1 = 10 Ω",
+                "confidence": 0.95,
+                "semantic_role": "resistor_label",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "R2 = 20 Ω",
+                "confidence": 0.95,
+                "semantic_role": "resistor_label",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "I",
+                "confidence": 0.95,
+                "semantic_role": "current_label",
+                "source": "vlm",
+                "verified": false
+              },
+              {
+                "text": "Fig. 9 Series DC Circuit",
+                "confidence": 0.95,
+                "semantic_role": "caption",
+                "source": "vlm",
+                "verified": false
+              }
+            ],
+            "candidates": [],
+            "notes": [
+              "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+            ],
+            "provider": "gemini",
+            "model": "gemini-3.1-flash-lite",
+            "prompt_version": "pr05-v1",
+            "timestamp": "2026-10-17T03:28:01.161901+00:00",
+            "latency_ms": 8245,
+            "cache_hit": false,
+            "fallback_used": false,
+            "debug": {}
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "The actual raw provider response, including its confidence values and declared entity IDs.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00009_PhysicsVisionAnalyzer.analyze",
+        "return_value": {
+          "classification": "supported",
+          "is_physics": true,
+          "domain": "circuits",
+          "subtype": "dc_linear",
+          "confidence": {
+            "is_physics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "raw_provider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "entities": [
+            {
+              "temporary_id": "voltage_source_1",
+              "role": "voltage_source",
+              "label": "12 V",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "switch_1",
+              "role": "switch",
+              "label": "S",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_1",
+              "role": "resistor",
+              "label": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_2",
+              "role": "resistor",
+              "label": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "wire_1",
+              "role": "wire",
+              "label": "I",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            }
+          ],
+          "relationships": [
+            {
+              "type": "connected_in_series",
+              "source_id": "voltage_source_1",
+              "target_id": "switch_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "switch_1",
+              "target_id": "resistor_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_1",
+              "target_id": "resistor_2",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_2",
+              "target_id": "voltage_source_1",
+              "confidence": 0.95
+            }
+          ],
+          "visible_labels": [
+            {
+              "text": "12 V",
+              "confidence": 0.95,
+              "semantic_role": "voltage_value",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "S",
+              "confidence": 0.95,
+              "semantic_role": "switch_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "I",
+              "confidence": 0.95,
+              "semantic_role": "current_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "Fig. 9 Series DC Circuit",
+              "confidence": 0.95,
+              "semantic_role": "caption",
+              "source": "vlm",
+              "verified": false
+            }
+          ],
+          "candidates": [],
+          "notes": [
+            "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+          ],
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "prompt_version": "pr05-v1",
+          "timestamp": "2026-10-17T03:28:01.161901+00:00",
+          "latency_ms": 8245,
+          "cache_hit": false,
+          "fallback_used": false,
+          "debug": {}
+        }
+      },
+      {
+        "call": "00015_validate_semantic_payload",
+        "return_value": {
+          "classification": "supported",
+          "is_physics": true,
+          "domain": "circuits",
+          "subtype": "dc_linear",
+          "confidence": {
+            "is_physics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "raw_provider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "entities": [
+            {
+              "temporary_id": "voltage_source_1",
+              "role": "voltage_source",
+              "label": "12 V",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "switch_1",
+              "role": "switch",
+              "label": "S",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_1",
+              "role": "resistor",
+              "label": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_2",
+              "role": "resistor",
+              "label": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "wire_1",
+              "role": "wire",
+              "label": "I",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            }
+          ],
+          "relationships": [
+            {
+              "type": "connected_in_series",
+              "source_id": "voltage_source_1",
+              "target_id": "switch_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "switch_1",
+              "target_id": "resistor_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_1",
+              "target_id": "resistor_2",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_2",
+              "target_id": "voltage_source_1",
+              "confidence": 0.95
+            }
+          ],
+          "visible_labels": [
+            {
+              "text": "12 V",
+              "confidence": 0.95,
+              "semantic_role": "voltage_value",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "S",
+              "confidence": 0.95,
+              "semantic_role": "switch_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "I",
+              "confidence": 0.95,
+              "semantic_role": "current_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "Fig. 9 Series DC Circuit",
+              "confidence": 0.95,
+              "semantic_role": "caption",
+              "source": "vlm",
+              "verified": false
+            }
+          ],
+          "candidates": [],
+          "notes": [
+            "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+          ],
+          "provider": "",
+          "model": "",
+          "prompt_version": "pr05-v1",
+          "timestamp": "",
+          "latency_ms": null,
+          "cache_hit": false,
+          "fallback_used": false,
+          "debug": {}
+        }
+      },
+      {
+        "call": "00051_PhysicsVisionAnalyzer._apply_thresholds",
+        "return_value": {
+          "classification": "supported",
+          "is_physics": true,
+          "domain": "circuits",
+          "subtype": "dc_linear",
+          "confidence": {
+            "is_physics": 0.99,
+            "domain": 0.98,
+            "subtype": 0.96,
+            "overall": 0.96,
+            "raw_provider": {
+              "isPhysics": 1.0,
+              "domain": 1.0,
+              "subtype": 1.0,
+              "overall": 1.0
+            }
+          },
+          "entities": [
+            {
+              "temporary_id": "voltage_source_1",
+              "role": "voltage_source",
+              "label": "12 V",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "switch_1",
+              "role": "switch",
+              "label": "S",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_1",
+              "role": "resistor",
+              "label": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "resistor_2",
+              "role": "resistor",
+              "label": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            },
+            {
+              "temporary_id": "wire_1",
+              "role": "wire",
+              "label": "I",
+              "confidence": 0.95,
+              "approx_bbox": null,
+              "precision": "approximate"
+            }
+          ],
+          "relationships": [
+            {
+              "type": "connected_in_series",
+              "source_id": "voltage_source_1",
+              "target_id": "switch_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "switch_1",
+              "target_id": "resistor_1",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_1",
+              "target_id": "resistor_2",
+              "confidence": 0.95
+            },
+            {
+              "type": "connected_in_series",
+              "source_id": "resistor_2",
+              "target_id": "voltage_source_1",
+              "confidence": 0.95
+            }
+          ],
+          "visible_labels": [
+            {
+              "text": "12 V",
+              "confidence": 0.95,
+              "semantic_role": "voltage_value",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "S",
+              "confidence": 0.95,
+              "semantic_role": "switch_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R1 = 10 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "R2 = 20 Ω",
+              "confidence": 0.95,
+              "semantic_role": "resistor_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "I",
+              "confidence": 0.95,
+              "semantic_role": "current_label",
+              "source": "vlm",
+              "verified": false
+            },
+            {
+              "text": "Fig. 9 Series DC Circuit",
+              "confidence": 0.95,
+              "semantic_role": "caption",
+              "source": "vlm",
+              "verified": false
+            }
+          ],
+          "candidates": [],
+          "notes": [
+            "The diagram shows a simple series DC circuit with a voltage source, a switch, and two resistors."
+          ],
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "prompt_version": "pr05-v1",
+          "timestamp": "2026-10-17T03:28:01.161901+00:00",
+          "latency_ms": 8245,
+          "cache_hit": false,
+          "fallback_used": false,
+          "debug": {}
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Supported domain/subtype pairing, native boolean isPhysics, bounded finite confidence and valid relationship references. Approximate VLM boxes remain non-authoritative.",
+  "expected_diagram": "Expected accepted classification: supported; isPhysics=true; domain/subtype=circuits / dc_linear. Expected semantic content: A 12 V battery with polarity marks, an OPEN switch S, R1=10 Ω on the top branch, R2=20 Ω on the right vertical branch, connecting wires and a current-direction annotation. These are semantic roles/labels, not authorization to supply numerical parameters or precise positions.",
+  "status": "PASS WITH LIMITS",
+  "finding": "Accepted domain/subtype agrees with the source. Semantic-only output is appropriate here; missing source geometry is intentional. Raw provider confidence can be 1.0; accepted confidence is capped by validation.",
+  "change_or_loss": "Raw semantic response → validated semantic representation. Compare raw_provider confidence with the capped accepted values."
+}

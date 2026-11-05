@@ -1,0 +1,110 @@
+{
+  "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+  "logical_stage": 2,
+  "component": "HTTP request reaches /api/ingest",
+  "execution": "EXECUTED",
+  "location_and_callers": [],
+  "upstream_stage": "Browser selects the original diagram",
+  "downstream_stage": "Upload persistence and dimension decoding",
+  "actual_input": {
+    "records": [
+      {
+        "trace_id": "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017",
+        "method": "POST",
+        "path": "/api/ingest",
+        "headers": [
+          [
+            "host",
+            "127.0.0.1:8000"
+          ],
+          [
+            "connection",
+            "close"
+          ],
+          [
+            "content-length",
+            "59546"
+          ],
+          [
+            "x-physics-trace-id",
+            "TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017"
+          ],
+          [
+            "sec-ch-ua-platform",
+            "\"Windows\""
+          ],
+          [
+            "user-agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36"
+          ],
+          [
+            "sec-ch-ua",
+            "\"Google Chrome\";v=\"155\", \"Chromium\";v=\"155\", \"Not(A:Brand\";v=\"24\""
+          ],
+          [
+            "content-type",
+            "multipart/form-data; boundary=----WebKitFormBoundaryJiLVBViOZwT647Df"
+          ],
+          [
+            "sec-ch-ua-mobile",
+            "?0"
+          ],
+          [
+            "accept",
+            "*/*"
+          ],
+          [
+            "origin",
+            "http://127.0.0.1:5173"
+          ],
+          [
+            "sec-fetch-site",
+            "same-origin"
+          ],
+          [
+            "sec-fetch-mode",
+            "cors"
+          ],
+          [
+            "sec-fetch-dest",
+            "empty"
+          ],
+          [
+            "referer",
+            "http://127.0.0.1:5173/?trace=TRACE-PRISM-20261016-004-NATIVE-RETRY-20261017"
+          ],
+          [
+            "accept-encoding",
+            "gzip, deflate, br, zstd"
+          ],
+          [
+            "accept-language",
+            "en-US,en;q=0.9"
+          ]
+        ]
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "POST multipart/form-data with the same image bytes and X-Physics-Trace-ID.",
+  "actual_output": {
+    "records": [
+      {
+        "handler_input": {
+          "file": {
+            "type": "starlette.datastructures.UploadFile",
+            "not_serialized": true
+          }
+        },
+        "note": "UploadFile is opaque in profiler; source and multipart bytes provide exact contents."
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "A parsed UploadFile passed to ingestion. Request transport must not resize or re-encode the source.",
+  "expected_diagram": "60° is printed apex-angle evidence. Vertices and rays require source measurement. No numerical refractive index is printed. An assumed index must not be described as measured from this diagram.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "Browser transport → FastAPI handler. Handler parameter is opaque in the profiler; saved multipart bytes are the authoritative payload."
+}

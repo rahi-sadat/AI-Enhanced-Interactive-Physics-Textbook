@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Circuit repair acceptance</title>
+<style>body{margin:24px;background:#0b1423;color:#eef4ff;font:16px system-ui}button,input{margin:8px}#figure{max-width:1400px}</style></head>
+<body><h1>Circuit source replay</h1>
+<p>Recorded semantic/OCR evidence · fresh CV, grounding and compilation · SAM2 unavailable</p>
+<input id="file" type="file" accept="image/*" aria-label="Circuit diagram">
+<button id="start" disabled>Start Simulation</button><output id="status">IDLE</output>
+<div id="figure"></div>
+<script type="module">
+import {SimulationOrchestrator} from '/src/features/simulations/core/SimulationOrchestrator.js';
+import {InteractiveFigure} from '/src/components/InteractiveFigure.js';
+const orchestrator=window.__orchestrator=new SimulationOrchestrator();
+const figure=window.__activeFigure=new InteractiveFigure(document.querySelector('#figure'));
+orchestrator.onStateChange((state,ctx)=>{
+ document.querySelector('#status').textContent=state+(ctx.currentError?' '+ctx.currentError:'');
+ document.querySelector('#start').disabled=state!=='READY_TO_SIMULATE';
+});
+document.querySelector('#file').addEventListener('change',event=>orchestrator.startWithFile(event.target.files[0]));
+document.querySelector('#start').addEventListener('click',async()=>{
+ await figure.load(orchestrator.startSimulation());
+ window.__figureReady=true;
+});
+</script></body></html>

@@ -1,0 +1,3055 @@
+{
+  "version": 2,
+  "date": "2026-10-31",
+  "classes": {
+    "0": "resistor",
+    "1": "voltage_source",
+    "2": "capacitor",
+    "3": "switch"
+  },
+  "real_annotations": {
+    "human_review_approved": true,
+    "images": 59,
+    "instances": 282,
+    "role_for_v2": "training/regression; new independent test set pending"
+  },
+  "research_archive": "research/handoff/20261031/recorded_research_evidence.zip",
+  "files": {
+    "datasets/circuits_v1/real_v1/evaluation_v1/annotation_provenance.json": {
+      "bytes": 660,
+      "sha256": "ff9d26a7c23726caba619c080fe12fb7a1f81b7101825a21a8b8d6dd1f1fd56b"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 232522.png": {
+      "bytes": 114078,
+      "sha256": "167ebff80d00595c8f56ec3352ccc73165205c1ba2849a758e071247c0e7b6ec"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 232632.png": {
+      "bytes": 81060,
+      "sha256": "21e520de9e4b8ae0d00c44579c2f2c158d9066ebb402eda2c3f3babd90a12775"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 232905.png": {
+      "bytes": 35007,
+      "sha256": "de5707fd01baa68a1d593cca8b37cda8d11fa53952fd1394bb2184877b12734a"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 232921.png": {
+      "bytes": 39793,
+      "sha256": "95e90ba6a79ae2fa47e5b0fc8954cfcf7493913f4d136b57d30f625ef71692e3"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234003.png": {
+      "bytes": 61498,
+      "sha256": "5cf90536ee0df0f09ba2c19705ac579ca2fae4016f98b7ae3646189afec8ed51"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234104.png": {
+      "bytes": 59683,
+      "sha256": "b266375a46383cf35300a5ecbb1a37cc7db7609c5a6d11a24643ec2eaa04c79c"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234210.png": {
+      "bytes": 31849,
+      "sha256": "66e7451aab802065582b2cf89bbe7bca306afd515098a5c2707235362b333223"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234420.png": {
+      "bytes": 45471,
+      "sha256": "e6d0b5f80464218f7a73afe0cf6387537898f9ec11fab229efafa5c01488c097"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234517.png": {
+      "bytes": 51481,
+      "sha256": "c8e35f56ca982589cd813e8e975e95c74ca9b617ed2045fa235734b89bf015d1"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234541.png": {
+      "bytes": 48421,
+      "sha256": "5e80229a7f07286d7500aa5abf956cbc5f6455e26e246256922ee25893110526"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234621.png": {
+      "bytes": 47867,
+      "sha256": "896f0d27f1f73d1b9d9fc0ed2baadab544a106993da133ec344c192d6df35839"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234647.png": {
+      "bytes": 53577,
+      "sha256": "2061c122a149005a4dbcb1e92053ad15918a556d81560e0d764521836206e240"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234712.png": {
+      "bytes": 33301,
+      "sha256": "f4c634c7517a8bc391e860d35a2b878c00065c4477f4d8a185ba753aafe2bfc1"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234759.png": {
+      "bytes": 49937,
+      "sha256": "0b6c5728b2575053073cb6d1d188ee2144c1b2b1c77da655d204c13f4e25ec7a"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234822.png": {
+      "bytes": 45637,
+      "sha256": "7b107f17608cd1cfa939e2a572c7621b67e40dc06de123e95565858bfba8636d"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234851.png": {
+      "bytes": 59725,
+      "sha256": "2db801bdd1351af37b540045140b3e5c3ed05e9299a7cd9dfda9ee3075b8feb1"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234914.png": {
+      "bytes": 42559,
+      "sha256": "68963dbb8a0005a86c132dd55e8bf400c773d28c284dca24d764e244b819a677"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 234939.png": {
+      "bytes": 43942,
+      "sha256": "5bc48a54666d7f098a387c3d2c14f4e3565ad29914673ca43b30abf82dc40e08"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235008.png": {
+      "bytes": 36919,
+      "sha256": "d57b9d03e464e083979460622ed791b67a687fadc8e05444b268514b36c33877"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235028.png": {
+      "bytes": 47362,
+      "sha256": "59f1e73a1e049ea189123e7faad5e2c0041cc84c3141c29564f8f2f558d17155"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235106.png": {
+      "bytes": 46245,
+      "sha256": "c02d1ae391fb15f265d5aa098e54a11fe61456b17437a975eff12fb7b24a216e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235305.png": {
+      "bytes": 49639,
+      "sha256": "4d6b362225042fd5b02879a79a76f2d6d91536f24d83cc6a2dde4b52fb9f44ca"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235329.png": {
+      "bytes": 42103,
+      "sha256": "91c909050e7fc97c38e3564471aa8332e78707efd368463ab7d11f3c23c4eb5f"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235350.png": {
+      "bytes": 43705,
+      "sha256": "71893dda6f87e924d13cfc2e04faa4d32058dd90ff3691bbff9e935e59728508"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235413.png": {
+      "bytes": 51535,
+      "sha256": "7113adc1b6741bd1c7dfc53dd8c04134fbff0244a39b8e795f123b6c819d8b38"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235428.png": {
+      "bytes": 61929,
+      "sha256": "22c42c360bac954898c0354e0ee0eafdeeb9f584ac552a21eb13a6209c5b3467"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235447.png": {
+      "bytes": 49059,
+      "sha256": "043bd3f9dfa894477a620340b82b9d0f63fede61a0630fbdcaa9741a7f755882"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235508.png": {
+      "bytes": 26667,
+      "sha256": "a04541f8b3fcfc96ed3c99e7ee8f95fc5c47283212d9dc0580abd1ac32976c50"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235606.png": {
+      "bytes": 61019,
+      "sha256": "277024a39ff11904791e244f785d991c160fa925a90cd79082b1b0a24d699075"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235636.png": {
+      "bytes": 58792,
+      "sha256": "3b415d71b2285f5755bc7f6c6bc8fbad59e8c79e7d9c2a664042f02aaa0bbd6e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235705.png": {
+      "bytes": 52451,
+      "sha256": "866395d130e6a884a9ae60c0884a6255d9cbc09c2f0aa14e1ca34be2e2f0f96e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235725.png": {
+      "bytes": 70754,
+      "sha256": "3435144be70b31bc13d8531b8444cc8358729eb0bb6c80e94e45f9794f7d87a7"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235808.png": {
+      "bytes": 58573,
+      "sha256": "7cc2af76a4a27c3f280cc8f0eae237683ec7acec8cbceef7a6c1885e1b2ccd1e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235825.png": {
+      "bytes": 68351,
+      "sha256": "ca8a57923a2534e9e25a57143202715894097321176647f35b259182298dad0a"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235847.png": {
+      "bytes": 84089,
+      "sha256": "f454e919513d9f4f2efb419c17b1d03150961225cbdf46d3faf277e3c7a55a57"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-30 235951.png": {
+      "bytes": 65080,
+      "sha256": "49ef8b06116b9d75a8bcefe7d2bfddbf29096189f72c95e8ef51a5f28863f2cc"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000005.png": {
+      "bytes": 65152,
+      "sha256": "a6c50cf3363fd09ae11caa8c26496b198f05728849a90f03d213711073a57c0d"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000027.png": {
+      "bytes": 72276,
+      "sha256": "d7c8bc96fb82c8e12b4d1ea975ed1d0c5fa9ecfe8d19ad94c3ee84beed40e980"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000052.png": {
+      "bytes": 66746,
+      "sha256": "f3722ee31d83d416ae83256b995f594ffc3ef7ad832a9910a6f45eee9aa01222"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000108.png": {
+      "bytes": 36352,
+      "sha256": "13147e5707c9e2135129a4da9988e12e442057a63b7a04b1a476e85d1e1c22a7"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000123.png": {
+      "bytes": 32619,
+      "sha256": "e298d0a7805d5d87100b51ecc1732d2164a0f826bbaed1aa04758ec591e28ebc"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000634.png": {
+      "bytes": 52366,
+      "sha256": "a8a3c8cc143ab366a62cfad140120efb79aa3aca0615538836870950c15d753e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000654.png": {
+      "bytes": 83984,
+      "sha256": "e15413c053fc085a19fbc0cae7b6b30b9c8553c692f83c1fb28dd25a2e33c65e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000742.png": {
+      "bytes": 64824,
+      "sha256": "667d5358680eb4c54edbfb6e07a8f5007b53acae1a4048831e435534dd944d84"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000756.png": {
+      "bytes": 76586,
+      "sha256": "7dac663a1d851763e25b55cd39811648f8b65acd872e2e1ea5b89c9f4ac514f6"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000816.png": {
+      "bytes": 57429,
+      "sha256": "d5fd76718841c704927716980f0c9ac6012044f31eae0d90c48425b04de006a4"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000838.png": {
+      "bytes": 34323,
+      "sha256": "54cef119f362a29acaeb1ffdd366c1131420a51cb903256efa4b95be9b7a9780"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000857.png": {
+      "bytes": 45796,
+      "sha256": "230fc1eae51df550f18ca01e401a9dd924f78dd130a146a7048830401713855a"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000926.png": {
+      "bytes": 60240,
+      "sha256": "dcd116ab9daf34db3e1e6bc5874d9375a7e4e9732e4a76f9524c6044dbf2aa8d"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 000946.png": {
+      "bytes": 60548,
+      "sha256": "feb53035e2391b6056c098fedc7ab7fbf85bb19752fa11a58846784db7759ab6"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001022.png": {
+      "bytes": 40401,
+      "sha256": "e469892ea0fad79a5e7619d9a1a81b743528e54e4be405c25d25c5cdad5285f4"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001102.png": {
+      "bytes": 42352,
+      "sha256": "cf881f7ac1dfd84574c402412055b85ae4e112e51ed0898e7d6be645f8d0922a"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001231.png": {
+      "bytes": 48316,
+      "sha256": "328fbad7784aaed4b06cb9fb4d1c759ab4d53563971ab2218c6459909fc4655e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001314.png": {
+      "bytes": 37015,
+      "sha256": "737d44c37c94b8b0a0e0769ab120c9ee1e27647211e553519034c4a9e12bdb64"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001333.png": {
+      "bytes": 29273,
+      "sha256": "7cce0a682b5b5e5df3b39b778426f60225fd840891142222e77a524030a8fa06"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001404.png": {
+      "bytes": 32670,
+      "sha256": "53f033debc8861d7a9a3bef32d482479684c1bc2626db40d7f2b978e209d873e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001423.png": {
+      "bytes": 34973,
+      "sha256": "92d0c4097aea4617175ed53fa6bd0f2220e6037599dee2a59ce4915d634cbe0b"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001447.png": {
+      "bytes": 55933,
+      "sha256": "1a00bddfa36bb499ea4921526383b04a4a4a23420ab8469458fa468568e258d8"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/images/Screenshot 2026-10-31 001508.png": {
+      "bytes": 45661,
+      "sha256": "65dc8bee96f3080537e887881e9a3e53740eb500b905c6161fe1868be11a1c5c"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/.gitkeep": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 232522.txt": {
+      "bytes": 190,
+      "sha256": "bef5afb68ab82c6db104b236481d9cff59fe72de300a54df8fec9d52a75fc62d"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 232632.txt": {
+      "bytes": 114,
+      "sha256": "938e612ca7cb36fbb99f535f669d1be6d68187b5c543870d82786040d947f93d"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 232905.txt": {
+      "bytes": 266,
+      "sha256": "267354c86b20295f105d9512fd1d0d7db3a616a286f80e6e8492eb1dbc1c51fc"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 232921.txt": {
+      "bytes": 266,
+      "sha256": "d741fa8b1b75fc59b37201eb10fb92c7b6fee3f87880737cae1af117c81a2970"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234003.txt": {
+      "bytes": 266,
+      "sha256": "fc5413a6b76e25a13017df9e8e20c4416444117137f3d8503c32cf81aa0ff37f"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234104.txt": {
+      "bytes": 190,
+      "sha256": "38ece285dc2577547c37f1998a6fa1c1f944b8c8bb24b975113d3c5f3bc74c49"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234210.txt": {
+      "bytes": 152,
+      "sha256": "2f333a81a599e5b6a91ac77406a700f1bdd871f1eb9bcc83d315838961be6944"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234420.txt": {
+      "bytes": 190,
+      "sha256": "cb08763e1d5b371c0ae7362ef36565db0302b4d3b63d7658c74e33b11f95a827"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234517.txt": {
+      "bytes": 304,
+      "sha256": "837dafeb87b7e4e62711e3b5bdc4d8816c4b445b58309dcb13d41bebcfdb0ce2"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234541.txt": {
+      "bytes": 190,
+      "sha256": "ab57646af930462c5ef7f251cd3e9e8560b8221d532bb4e783b8e390b03d29cb"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234621.txt": {
+      "bytes": 228,
+      "sha256": "3c6be023730feb8eaebbe025c9ca4547382a85ac165321806afa8141ec3e6202"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234647.txt": {
+      "bytes": 190,
+      "sha256": "61f5972575b06edb6f185b60b9a5a6654ef1116a93d74fd02fb077bf528685f5"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234712.txt": {
+      "bytes": 114,
+      "sha256": "8f304799988fa0cd757d2142ac0456468652428ac3e828665158fe01be56af12"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234759.txt": {
+      "bytes": 228,
+      "sha256": "ef6476ef918c09eb3ffd8c3d48280f2732325c053263f6fb961a55acce5f80af"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234822.txt": {
+      "bytes": 152,
+      "sha256": "d896f0d1b24898de3b1a050532327b99e66be46dca01b5a7fa215781a8261f0d"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234851.txt": {
+      "bytes": 228,
+      "sha256": "4c52ea4ab1e024b97d01faa7638833a3b8630081713fc336a10937cf8eaaac2e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234914.txt": {
+      "bytes": 190,
+      "sha256": "66daf50983ff80d88cd6644a620e3529b9ade54aaa6e191092c53e5197ede0c4"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 234939.txt": {
+      "bytes": 190,
+      "sha256": "38ee666e8634e6ef7b24234d3f538dab341dcc8abcecaea529dd4c4bc4198309"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235008.txt": {
+      "bytes": 190,
+      "sha256": "1a1b1a910a098f4a0d92a6fa1458a79e7bdc5c406214725c208bc2b3e3e63167"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235028.txt": {
+      "bytes": 152,
+      "sha256": "56353761b7277e6918406fc17c4bd31ca3b4cb0b5dbace0d7b644a2ed3a3f867"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235106.txt": {
+      "bytes": 190,
+      "sha256": "a87372ea587ea79ef3123740215c853efa4e45bedd1627d038138844644532ec"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235305.txt": {
+      "bytes": 190,
+      "sha256": "06177bf72dd966e4b40637a1e4aceac3ab7ae300da4db38bfc416fc465e33c1d"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235329.txt": {
+      "bytes": 114,
+      "sha256": "533d03f4e59d7f3aaa78c5db33a8797341c992be409c2ebe29027e7b6b58fcf9"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235350.txt": {
+      "bytes": 152,
+      "sha256": "477e91f46b8d174cb336bc9a442df3fe7f3c0f3b6fe108fe85f8ecf9440868d6"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235413.txt": {
+      "bytes": 152,
+      "sha256": "19db1534cda6388a4408abb0777ce91d479d0f6907d764ef55ee03e65c205664"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235428.txt": {
+      "bytes": 266,
+      "sha256": "8ad9a1d13a1292084383b1e4c0487416b5ca20107714a12f79a56b017e66fe73"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235447.txt": {
+      "bytes": 190,
+      "sha256": "725b27686ba1650371e1471e4275bb7ffa5c1e699b2b7d28d83f3def538656de"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235508.txt": {
+      "bytes": 190,
+      "sha256": "8f133111d371e57a2638ef62102fd4b91c0a79bda254b4c1f20beccd45b2f39c"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235606.txt": {
+      "bytes": 190,
+      "sha256": "3e34a098dae80941ccbd35ec95708ffb1d2c830d5322b8dfde261fd6b4408ac6"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235636.txt": {
+      "bytes": 114,
+      "sha256": "119328ea5837ff2cb7b4331177ce1c16ce1c4e1cb6b7fea12bbe3faa71e51774"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235705.txt": {
+      "bytes": 114,
+      "sha256": "ba784e9c82b33654c4d563a7bf22d8b0081e920777a7a46622b0fb5a9bfd0e37"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235725.txt": {
+      "bytes": 190,
+      "sha256": "aeee400999e4c4495eb9a0953f501434dd013a34ff788f7553b32097b34092eb"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235808.txt": {
+      "bytes": 190,
+      "sha256": "1c228992949dd0d56c76fd025de17f79405c7c116dcd4bdce9d284c9d77dad24"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235825.txt": {
+      "bytes": 190,
+      "sha256": "8dc58e2ba0c7cf52f57b6292c4e5f8ef9b57abec78a5714041a1c8a7f0eb7349"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235847.txt": {
+      "bytes": 190,
+      "sha256": "1434a943382cbf3d947f8a1efc5f772de931835bf56fd1ebe526eb21c2e3b019"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-30 235951.txt": {
+      "bytes": 190,
+      "sha256": "fd11f249b1931dfd8db57101ff6fe70ce8f789f42fd7f047d6fcfc2a46d8d670"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000005.txt": {
+      "bytes": 190,
+      "sha256": "f19d2bbd364a3b949e9aa8ef8effb57fcf807253e3652ba9f7215fdccaf0ab0a"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000027.txt": {
+      "bytes": 152,
+      "sha256": "4b7d4d7bcf6a612516b1374187175c4e5dff4bff1eafff77c7972496f69fdc8b"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000052.txt": {
+      "bytes": 152,
+      "sha256": "c397de0267f63f21febc564f6cc868783564db6792084095ad3675f72ef1ceaa"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000108.txt": {
+      "bytes": 152,
+      "sha256": "d4430c462e540b7b74dea580ac1a4feaab6d108ed1d221a8a366be868806737f"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000123.txt": {
+      "bytes": 76,
+      "sha256": "2917c15b0af308f251ff5ca7ef1a4f61ffa7ce56493dbe06ce8c864828efa109"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000634.txt": {
+      "bytes": 114,
+      "sha256": "5bdfb1f7d137ece9ebfe8ebcdfd7c51a96528ea57b86594845e8e32c90a8dac7"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000654.txt": {
+      "bytes": 190,
+      "sha256": "d25c06b2faab55c92d78e8f2b6c5b72795347baa832599c486d2e68751c7d5b8"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000742.txt": {
+      "bytes": 190,
+      "sha256": "c037797767961c3a49dc9d962b20babc6f002233ae73ab2066bd920a9c7344e2"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000756.txt": {
+      "bytes": 228,
+      "sha256": "8b5859d29cb08259881e08fc898567f208f5cd4c97ba9ee478fbda07ccf826c4"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000816.txt": {
+      "bytes": 228,
+      "sha256": "ef32851a722a58b5d421686f26dd40e8c6b7514fd0275243675f6ad192acca2b"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000838.txt": {
+      "bytes": 152,
+      "sha256": "24b176973c4340c3b40c3f8ae32c4bcfdcda3fab5e43eb02fa96a9ea5c4cdf15"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000857.txt": {
+      "bytes": 152,
+      "sha256": "d889ad93ee420ac46414a762a9122aaaf53307edf875d1b168482d5981796038"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000926.txt": {
+      "bytes": 228,
+      "sha256": "4d9864c3708970f50a37d7a512e9524640d6369304fd0b5e6c1ea22c05b4d481"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 000946.txt": {
+      "bytes": 228,
+      "sha256": "e2624f0b875f09dfc12ce49b8d072ed9d948037b4979020952057763bd9729ff"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001022.txt": {
+      "bytes": 190,
+      "sha256": "a9530384d1aac4c88a2d1c1126ac2f908fb8a3a4a5ca3b95fa937efaa8a18519"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001102.txt": {
+      "bytes": 190,
+      "sha256": "3d0ab7841f7c973de82de97455db87ada4afb814dba6b6ec2d68e52446743e9f"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001231.txt": {
+      "bytes": 190,
+      "sha256": "6fef431247246e36769471418acd4f4c65c6ae59fb29ca738bb479f40673fd4e"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001314.txt": {
+      "bytes": 152,
+      "sha256": "1192a05df24be5759681fdf0f224b71f52bc7ea5505e58a136f7bfe82fff6983"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001333.txt": {
+      "bytes": 114,
+      "sha256": "7f05a59d6978884f6955360e207ec1b1532520eb438efaa792966e050764332c"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001404.txt": {
+      "bytes": 152,
+      "sha256": "26d01f7b4b147dd0e90039431e9ef0342772fca1f9800cdecf29b48d80a00fc4"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001423.txt": {
+      "bytes": 152,
+      "sha256": "86d43b78710a970d485b956db36e9507cbbdee4b20370429bdb5867e5919f732"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001447.txt": {
+      "bytes": 190,
+      "sha256": "c68f2ca5ee9ce1bdf62dddaafc43825b10ea9950b151279af7bd0d2f7ffbe6e9"
+    },
+    "datasets/circuits_v1/real_v1/evaluation_v1/labels/Screenshot 2026-10-31 001508.txt": {
+      "bytes": 152,
+      "sha256": "28057e34f6c1da1a188b613659ec2f3da38e8db487116998a6a9e1d944493faf"
+    },
+    "outputs/circuits_real_eval_v1_cvat_draft_20261031.zip": {
+      "bytes": 23641,
+      "sha256": "d57826c7933b9515c8d408c7ed3ca9590eab4d3303156f0341a88e495d6608c8"
+    },
+    "outputs/circuits_real_eval_v1_cvat_draft_20261031_README.md": {
+      "bytes": 4127,
+      "sha256": "0e523adb65c1bcc72d94bd3d6149e705e085496f77e26b6e4960172d8daf85c6"
+    },
+    "outputs/circuits_real_eval_v1_cvat_draft_20261031_audit.json": {
+      "bytes": 3325,
+      "sha256": "65ce4df403bddc8231df494d1aafceb51856cff03b9b440c59a3bba07cda0e71"
+    },
+    "outputs/cvat_evaluation_v1_originals_59.zip": {
+      "bytes": 3065899,
+      "sha256": "00a29581a77dad56395c8c47a4e88981bab4f9c31f4d1597af8f6a8234f89c5b"
+    },
+    "research/handoff/20261031/ARCHIVE_README.md": {
+      "bytes": 866,
+      "sha256": "60a4182ff35aec843849997196faf27a5d44d28f85e1859897a841e89310cba0"
+    },
+    "research/handoff/20261031/recorded_research_evidence.zip": {
+      "bytes": 79769783,
+      "sha256": "db5b22493e4eb4cbc2ad0662ff692619c912782a214c71af9ee71876f856fff7"
+    },
+    "research/handoff/20261031/validation/python_unit.log": {
+      "bytes": 14711,
+      "sha256": "5ca5bbf0edaac4fd8c8090634cbc59b0e3279aef467eaf407db090cd0c0a1dc3"
+    },
+    "research/handoff/20261031/validation/web_build.log": {
+      "bytes": 1523,
+      "sha256": "88a15ba5b116b1130bbe8924255b1de6533c6723a85486ebd317cc995db4cff4"
+    },
+    "research/handoff/20261031/validation/web_tests.log": {
+      "bytes": 116958,
+      "sha256": "27982a39d1bf1bedffead1ee7d61552d99702e55284c6f07a1d4216db981d738"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/BoxF1_curve.png": {
+      "bytes": 138144,
+      "sha256": "bcd808e43ce534c27be2bb89a746978b4517b66c8ecf0b14e7f33c1b89d64d74"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/BoxPR_curve.png": {
+      "bytes": 87284,
+      "sha256": "19a37c688aa95519b294d4234393404e227107111fd03c7d915bcf3b66aeb1e1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/BoxP_curve.png": {
+      "bytes": 91463,
+      "sha256": "c68c23ed7a6656813cfe6a42e0464a49dbc898e818ad5699a6ea5eaa8b6920ed"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/BoxR_curve.png": {
+      "bytes": 133503,
+      "sha256": "9e52d377ee3819cbfbf506dc7919f8b2277c0df36a06098d73cbfde4fe2c2306"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/TRAINING_REPORT.md": {
+      "bytes": 1705,
+      "sha256": "8097fde182ed68170dff5318bb628e7f33599f61fc12517d79fc5227656b02af"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/args.yaml": {
+      "bytes": 1991,
+      "sha256": "37d3138678d60764127cc46e81c6e2b358b150372dde343dcbd00552468ad75d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/confusion_matrix.png": {
+      "bytes": 131315,
+      "sha256": "b3586a9758a216c5e210cb401e98dbdce3697c7c429295b306c248379cef0e3f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/confusion_matrix_normalized.png": {
+      "bytes": 136740,
+      "sha256": "e445e3200de7cc3769f083d9ae46067a4876cd95e36fb86a7b5db79a9a967a67"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/data_manifest.json": {
+      "bytes": 128415,
+      "sha256": "2597b32ae7ef6dfaed8403e0412807081a02a18d4f679e1d01ffe7049561419e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/fine_tune_script_snapshot.py": {
+      "bytes": 14834,
+      "sha256": "9a452b1b0e2191d06723f2979b0a326888d39e85e9f7a2d0f77a9d9606aa6d1d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/input_fingerprints_after.json": {
+      "bytes": 193684,
+      "sha256": "5a3009a6f2d911254bcfde53ed79d56211b8f84af401e419c09ec1bf4be6dac3"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/input_fingerprints_before.json": {
+      "bytes": 193684,
+      "sha256": "5a3009a6f2d911254bcfde53ed79d56211b8f84af401e419c09ec1bf4be6dac3"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/labels.jpg": {
+      "bytes": 116130,
+      "sha256": "d8606a5f3d4c3fa7abe357846c0731783decec0cec30ae35905d356b83031143"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/progress.json": {
+      "bytes": 98,
+      "sha256": "116922d0ffafdb3f2814da9b4bb6d9ed9c92a8da3893273254cd74acd13a2b54"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/results.csv": {
+      "bytes": 2480,
+      "sha256": "dc32bf8be808347f1a55e4a7fc2ff3c2ea1dfb986bfd64d5fc70865fc5f1faaa"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/results.png": {
+      "bytes": 205547,
+      "sha256": "134e5181239c47e57c6f7f8b033fd27f6fc9b41fe291150a9387436976930c1f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/BoxF1_curve.png": {
+      "bytes": 189356,
+      "sha256": "ed031f5918717f4a26b126b965c92d9228a893d01f54ea40f0f5a4635dec37b6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/BoxPR_curve.png": {
+      "bytes": 98655,
+      "sha256": "d3eaf7602b2c58d26954c3e91455c7da71a8cafd3156e4380cfea7d97a4f2f16"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/BoxP_curve.png": {
+      "bytes": 149710,
+      "sha256": "4ee5f6b115179454f5b14f1970d0a032291ba2b8c7077a4145329e21f55a44d2"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/BoxR_curve.png": {
+      "bytes": 159494,
+      "sha256": "500d47396c013ab7a7a409c97b22cb4bde0e8469fccb53a2f3df3df33c6e66bf"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/confusion_matrix.png": {
+      "bytes": 128847,
+      "sha256": "6dcd35ee8b8d10c0fb84ea97a08992be21c209a63b52620a1ff37f1fe1e6318a"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/confusion_matrix_normalized.png": {
+      "bytes": 138809,
+      "sha256": "696c69058b460e8ad65c88967693b6f0bc51668f984566937f90127579375a9d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 232522.txt": {
+      "bytes": 749,
+      "sha256": "94ee81496c066c89a7dc6f2c997210164198d81b214a6a7634a9dbc9b067540d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 232632.txt": {
+      "bytes": 706,
+      "sha256": "a9e64d6bd33b6994cd09aecbf5630cb4498e88cfff66b27c42fa8ad3aac99a57"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 232905.txt": {
+      "bytes": 795,
+      "sha256": "3b6674cbb5a6b5d092c45800f99809801e034acbc844f78efbe10c911f736220"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 232921.txt": {
+      "bytes": 753,
+      "sha256": "c2a09d438cdc1d7c9a498a5c2755fa8168339216de25e195eb123014f4ecd00a"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234003.txt": {
+      "bytes": 1728,
+      "sha256": "29aeb30115e8b55dcc6831ad0430130b6f023087d25dfe1b088e702a9980f78f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234104.txt": {
+      "bytes": 647,
+      "sha256": "ca3c1652f02198eb4e311e10392e6c0b974f357c9864764f451500548a9db10b"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234210.txt": {
+      "bytes": 391,
+      "sha256": "1adcc958e98d20ac7b7f95d5b1c6fbf7ef30d0fefbd9d61f3581f4c3ebbf7947"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234420.txt": {
+      "bytes": 792,
+      "sha256": "ec884283aa032eed02d9121f6c3544dd850af98444da2f7693365dec8da01156"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234517.txt": {
+      "bytes": 1385,
+      "sha256": "c30633156e579a4c497260cb94f1be5cd593d5057bcec50ddda35e9e2c69d9f6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234541.txt": {
+      "bytes": 744,
+      "sha256": "e83ed8e67113b9d9f3bb1467748e8726ec1be746637f5450fc7ef8e45cb98a4a"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234621.txt": {
+      "bytes": 744,
+      "sha256": "9426112c2981c954030b5014a0393d96fec59bfe37d80241e03b42c89058d9f0"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234647.txt": {
+      "bytes": 1099,
+      "sha256": "d085b7514f83e0f87b0ebfd61a147f4c2e918068448ae4f2bdc76cdc2d9167c6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234712.txt": {
+      "bytes": 448,
+      "sha256": "a21897f14d567e1624bcde981d0cff1ccfbf8646f99867c317d83a05782ad081"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234759.txt": {
+      "bytes": 848,
+      "sha256": "539c15eb5e456ec346b8156513700e7e852f412d8c575706c76743dd70c77f57"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234822.txt": {
+      "bytes": 346,
+      "sha256": "587532e0fb5337cd64ce7312e351a26f0af9da9892405c8fba5c2645753a1e32"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234851.txt": {
+      "bytes": 747,
+      "sha256": "6b8245bb6c7109a93302b131f1079e8475a83b17ec12c1f6412772a47713dca0"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234914.txt": {
+      "bytes": 397,
+      "sha256": "eab19f34f27e35e4884d19ddd96fc8368eacef289dc034dce802a9dc224732be"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 234939.txt": {
+      "bytes": 396,
+      "sha256": "e0e00ad735812e0d2ed7366bb23b4cf837806614a55965495a8697b691243304"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235008.txt": {
+      "bytes": 543,
+      "sha256": "720684282663c08daacb532d93d0e9933ed8690b6fbb1081225d49ce4bb40333"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235028.txt": {
+      "bytes": 293,
+      "sha256": "867f9e55212f08e4af7af26da198dffa85364b14f80c81830a5de6092760be5f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235106.txt": {
+      "bytes": 794,
+      "sha256": "f5e5e36262bea77febeca7dedefc08352b65be8fe79d834e685e633e4eda87f0"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235305.txt": {
+      "bytes": 1626,
+      "sha256": "588b51d273a70c70a40ff239c4b195d7464f904692fd4feb5619ca62eec52f6e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235329.txt": {
+      "bytes": 397,
+      "sha256": "96a04ebe0efb60404acf284285170672e80f1e28b38410b7dee26e12c4ffa1d6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235350.txt": {
+      "bytes": 549,
+      "sha256": "3382e3f2d350b89b07dca7ff969bb5e51aefa512cec6bedf85afb07679c09807"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235413.txt": {
+      "bytes": 292,
+      "sha256": "32a8f3fc5fd73b17174393c762555c09f8fd28ed8890eed576546ff585b48cf6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235428.txt": {
+      "bytes": 1289,
+      "sha256": "39e5f70c0590687d2fbdc7b66738b3b51dc6bb8fc6c9b092d59fb9337c0958cb"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235447.txt": {
+      "bytes": 941,
+      "sha256": "dafb14b09a20f8087a03c9dcec100f068edd0718311b2bdfb979e73fdb6d8a1c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235508.txt": {
+      "bytes": 386,
+      "sha256": "a9e52721721fb3f8df4e2175b35edd68f6765d68023dfe59891e9974c742e100"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235606.txt": {
+      "bytes": 799,
+      "sha256": "1d9310bc9547cab820e41af1e2478c8066b342c05a0dc45b9fc4a8898392994e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235636.txt": {
+      "bytes": 550,
+      "sha256": "1bc8df0b3a8530410a8559d333f81b3bc5fc5cb161759eeb3abe36ef38bc15c3"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235705.txt": {
+      "bytes": 801,
+      "sha256": "1acc91a5b36ad0d2e94c628cb44c94f0aa9f57c5d237dcfec7397a9a221ff178"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235725.txt": {
+      "bytes": 701,
+      "sha256": "f4ad9e0dfd5d52af9d8c203df9078e83c6618740da4886a7e6f14796f5d11dc4"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235808.txt": {
+      "bytes": 949,
+      "sha256": "94d60506ba009f93a0e7388c7ac792da6c8ac88c5ee6f00ed168c8e07ad02328"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235825.txt": {
+      "bytes": 594,
+      "sha256": "bcdcc344bf15474a99e202086d139d691a73c61186d5dc013abed45f278a16d1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235847.txt": {
+      "bytes": 549,
+      "sha256": "157b812852680b4a9ccfa207f213300ae26944e47ec2f3cd74e55c12b40f69c3"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-30 235951.txt": {
+      "bytes": 589,
+      "sha256": "dd7b9bc1ab6053a9ae69a40cd3aa8811386eaa7b986f20ead91c36e69cce7cf2"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000005.txt": {
+      "bytes": 794,
+      "sha256": "089ad272be7c7ae76ac69c090c9dc253f68555c407ccc13b66c46e63f87f7484"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000027.txt": {
+      "bytes": 549,
+      "sha256": "00166a681e61f2094020e3d647cea7c34318b4ce27ba2bd6d2c063eeb57bdc9d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000052.txt": {
+      "bytes": 603,
+      "sha256": "0ae7cc4b8b06580894956ec639ddff8301d4ef572929e69944008b6fdc3af09b"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000108.txt": {
+      "bytes": 287,
+      "sha256": "86ef6e70ad4dcf661260089bce03aafaf3ade840959e08667ae77a4801faddc5"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000123.txt": {
+      "bytes": 148,
+      "sha256": "a6d1e1f58ea860c143adc00e0b3389a0ed306b8a5c0071e254bb9b7dab3aea82"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000634.txt": {
+      "bytes": 609,
+      "sha256": "b6a0644df4fef72b05d6ab8bf98de64d7f7e250c43f3cbd2b036f0d9af0e30a2"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000654.txt": {
+      "bytes": 793,
+      "sha256": "ab8492d98788ae8a69e1189e568243c66e63c24f9a2d8dc9e4aa76324b65e5d1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000742.txt": {
+      "bytes": 546,
+      "sha256": "39362d36baeed597e77958ecedb02e13877fd10cec687ca22e13e743acc5c450"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000756.txt": {
+      "bytes": 1110,
+      "sha256": "217cd3ca11da621d13374a939a59f0f2a5b248a5983e1a6717a920457ebb4faf"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000816.txt": {
+      "bytes": 443,
+      "sha256": "a52858617cacf5f34743ef6aa6cae86d586156e5c8b3257f3e8a02d6c7a65608"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000838.txt": {
+      "bytes": 442,
+      "sha256": "7011aeca6a96070c76ceeb85ff33ee3f157c753ca07891e43feb139e8bda1da9"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000857.txt": {
+      "bytes": 747,
+      "sha256": "a620a86584ab983c1b35da5a02a48a81727dcfcb2a7fa82b043c1bd4b899afa0"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000926.txt": {
+      "bytes": 835,
+      "sha256": "6b98b8c4a877530acd18a886b26b80b92099a683a65f1dfd7d56cb75e3b282d1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 000946.txt": {
+      "bytes": 1194,
+      "sha256": "088383081b4f32a406d60bddd7fdc9cca415d9f647bbe05be208be279529acc2"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001022.txt": {
+      "bytes": 548,
+      "sha256": "43a0d601d8365355305869914ce179c32090e051c03b9efb7ba2e1a15acedbe1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001102.txt": {
+      "bytes": 597,
+      "sha256": "2d857e519ff6149a129b13678f5d4e06ebbeb2a12a67261b201c6a10e7b6328d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001231.txt": {
+      "bytes": 546,
+      "sha256": "98dfcce69ce2b7657c31d7afa61e7e7b4a4f015287a2fbd8dc7acd56735b9325"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001314.txt": {
+      "bytes": 948,
+      "sha256": "0ced4368434214920db1e092f0672b340948c481cdd84bc090e472c31010e86d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001333.txt": {
+      "bytes": 443,
+      "sha256": "8cda971fb00fee8e152b1a19bf83473750d7f810b90a7a441e31b73cabce8698"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001404.txt": {
+      "bytes": 1215,
+      "sha256": "c2ba978295a0aa6a10e3ec273afef09e73ddca2abc940a16daad93dff5908e14"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001423.txt": {
+      "bytes": 1167,
+      "sha256": "0fae71866e2cb4420dfbb11d2615eb4f673b65a4c167b58c470747b8395efedc"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001447.txt": {
+      "bytes": 847,
+      "sha256": "4acc358024d3d6b3e2de35ff410973ddd537aaf48ba6e735c79892e4249c18f4"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/labels/Screenshot 2026-10-31 001508.txt": {
+      "bytes": 908,
+      "sha256": "a936a3a72d01273b7af648d08146cef5e5f819d248b6670deb8e131ab4e6c105"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/val_batch0_labels.jpg": {
+      "bytes": 32685,
+      "sha256": "ec72fe375b8c991c31869522eda433360ac396028d22d3ea1e9b28d475b65d4e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/val_batch0_pred.jpg": {
+      "bytes": 32173,
+      "sha256": "63c4f1d4f081872efec33dc7a24ef536e8764901980722926abd67de220df347"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/val_batch1_labels.jpg": {
+      "bytes": 29820,
+      "sha256": "e85da5c796effc060de24ec9b8843baefba7ab7f2dbbf413b030efd90d4ada77"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/val_batch1_pred.jpg": {
+      "bytes": 30036,
+      "sha256": "43faa45403448a30aac7804a7c50cd1bdc10179b75465596315db674cf9a81ff"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/val_batch2_labels.jpg": {
+      "bytes": 38204,
+      "sha256": "98c5e34b9b3a884ebebe28d03f92acbdaef794e49eb8ac7ba67a7d5f62e70f27"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fit_validation/val_batch2_pred.jpg": {
+      "bytes": 38737,
+      "sha256": "6ef5aaed81ef0a3eb1ea76b64468e8bcdb6a1bfc77c6cb01baff96c388c6e506"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_fixed_conf025.json": {
+      "bytes": 7841,
+      "sha256": "4b6b61e7bf322476e2d5ca713eb600022ca07b741958d59765776f44066c0ee2"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 232522.jpg": {
+      "bytes": 55836,
+      "sha256": "180ecfe14626ab3ed026aa63c2d4b007e0bf0172f7905c6ba449e8881a8cf39d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 232632.jpg": {
+      "bytes": 40932,
+      "sha256": "ac1c12ec8d7a9f6f0ba9878f774619756048bc9e8a05f2dad98cff36f37299f7"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 232905.jpg": {
+      "bytes": 46123,
+      "sha256": "0f389be2c46530c0e734c073facc1b2d4e10d29078e54ea6d5a3f5c854c95c39"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 232921.jpg": {
+      "bytes": 47001,
+      "sha256": "cb40586f21daea8bb3c79e4dd7364f5bc8290d030dc48dab377f11b69d935b58"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234003.jpg": {
+      "bytes": 40078,
+      "sha256": "2a3ce14b3bcc6843dee64ed3c0d12e500aa03f12ea9edb31640f8ac87872850b"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234104.jpg": {
+      "bytes": 31610,
+      "sha256": "be1203731c90405597e0d184c82d5e82be14d01c7ccfa972862bb34b34718578"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234210.jpg": {
+      "bytes": 18836,
+      "sha256": "3ce9bfd57a472ad96a2529c9d390eab17ea104b3510b151e1655954086f9e0cc"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234420.jpg": {
+      "bytes": 28484,
+      "sha256": "82d1c48f1b8725519a263c06493293990b29dbe8ee57303b24e3f24747baae71"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234517.jpg": {
+      "bytes": 34957,
+      "sha256": "e0ee34d2c8f72634a46db54297bf02d5bb64e347a045f1a9e894462259521811"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234541.jpg": {
+      "bytes": 30342,
+      "sha256": "e6bdb050e7056678e7990a6a9ad4e545f6da9e6b68c9813c1d5f9e90d56db623"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234621.jpg": {
+      "bytes": 33110,
+      "sha256": "c23a0c33e86d7204a2d703c7f0e1a58d3ebb5990d31c5acbab9578295c53e32e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234647.jpg": {
+      "bytes": 30847,
+      "sha256": "9df9affd7bf3e6338a19851451b3841e3c7056b43cc9bd5db880338fc54517ab"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234712.jpg": {
+      "bytes": 21148,
+      "sha256": "f74a3fa62d5cf35e22a9905fc5b9dacb8c9d0c7c14f74d3e89aae1fae4d7f1c9"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234759.jpg": {
+      "bytes": 31671,
+      "sha256": "e66bdaa124e237479a7c8e5963ef8ff2dde18a521f674549620bdc26c9b882ec"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234822.jpg": {
+      "bytes": 26435,
+      "sha256": "f30224213066becf11d3186728aef472af93e3e76cf52e1762d34d5f328370cb"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234851.jpg": {
+      "bytes": 39531,
+      "sha256": "7e37414186002753a9b95f47a8d4eb6f0e6faf45de1681355db2af286ea78402"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234914.jpg": {
+      "bytes": 28385,
+      "sha256": "ecf7fc8d4386e4c5c3fced33c6907289ce18444076820926ee578b26e632872c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 234939.jpg": {
+      "bytes": 29814,
+      "sha256": "40d55bade4a5f9466ffcf881afe5fc52ac3b373fb5c63c022aeb75d3fe03c396"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235008.jpg": {
+      "bytes": 28032,
+      "sha256": "9bb53ce28fd456de7c8d19ddbfa370b574f86c4652e3041f7a4711c266d94855"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235028.jpg": {
+      "bytes": 31947,
+      "sha256": "6d4236e8b6185082020a4401335102aeba58042521fcaf6b7a91097118c6fa4c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235106.jpg": {
+      "bytes": 31351,
+      "sha256": "5433cb33986b5e113ed6824170db0fd459eeb0334395dd65db4ee391c7bc94e7"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235305.jpg": {
+      "bytes": 35993,
+      "sha256": "af26057f7066dc217a355ea88a57b99aa2e229ae5a634398784049125962744a"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235329.jpg": {
+      "bytes": 24341,
+      "sha256": "6b23b8323df47cd7bf4402e5bc8a6043cde071f15177ab506ed8b62c386d46a2"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235350.jpg": {
+      "bytes": 28166,
+      "sha256": "63389f7b69380ad7a6b40187d95e7f11bfbdae9052bb066bd5c5166c5c3ea978"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235413.jpg": {
+      "bytes": 31766,
+      "sha256": "32a1cddd938655b964d2410c3c4ec5779ec07c2e0a92d88010af17f011faadbb"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235428.jpg": {
+      "bytes": 43646,
+      "sha256": "bd500021f27ef4fe4b2f1f86c12d29423c8171b520ec9e44479b1f747f37ba99"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235447.jpg": {
+      "bytes": 35091,
+      "sha256": "4eafd8a1609937874980cedb060ae10d2c1686ceec13a477571394a3ed7f6f1c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235508.jpg": {
+      "bytes": 23717,
+      "sha256": "1bed5827e9d3ef63b8d949cb7a36026bcfb32f90cfee91eda7f084b94a7abcf9"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235606.jpg": {
+      "bytes": 33505,
+      "sha256": "a5691efe1f7ed47c34ae0d3cf1b17a494aa4f9ffd283fec3e6c80308360eeb5b"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235636.jpg": {
+      "bytes": 32143,
+      "sha256": "53d6bb78b20029a5ef1a34ae52ae2a866dd224edf7d3b213863b01359b1eca6c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235705.jpg": {
+      "bytes": 26542,
+      "sha256": "fdc28ad9171490a5769e9114f72f9e04919595437bfd5742b399edaf0de6baa1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235725.jpg": {
+      "bytes": 40104,
+      "sha256": "2908757df1d7a9653caa86f4cfce4af8aa5aadbdeb17ad926d74929dddfd80c7"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235808.jpg": {
+      "bytes": 29737,
+      "sha256": "069165b7f6b3eb383e3d9c29ea97b02ee4413545ee026bf72af3ee92958e1b5c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235825.jpg": {
+      "bytes": 35342,
+      "sha256": "6bd96be60f6796134b51b3b54c7f7cabe3fcf33fee8757920d4705c7300c814c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235847.jpg": {
+      "bytes": 43126,
+      "sha256": "f4e55bf9b23ef211d6cf530d9fab5c960738815d850f483038905882e2598892"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-30 235951.jpg": {
+      "bytes": 33410,
+      "sha256": "81cd51a6deddb5824f00b1220fc9aab16832c53d6e2e7bc51402971a5265283d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000005.jpg": {
+      "bytes": 37144,
+      "sha256": "4ca7fb25039a55fa860616fc19bce52493fd5d042b85824bad248fd5ae601286"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000027.jpg": {
+      "bytes": 38696,
+      "sha256": "6762892d16b2b1024ede7e2c701eb9e5401d81872ad039a9c11424147e4133dd"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000052.jpg": {
+      "bytes": 35407,
+      "sha256": "f85955f5fb4c2622b2f156778a5ae2797527efc8222818f43a3297edce484db6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000108.jpg": {
+      "bytes": 24171,
+      "sha256": "def9dcc7a54e6daeda1f0444d79230f63ee30b61910404dfcca26b86c5939511"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000123.jpg": {
+      "bytes": 18701,
+      "sha256": "3f6cb89ab1251dabcbce28d57b909c6cc38ce1ff7a2014aa012b07188e196c61"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000634.jpg": {
+      "bytes": 28457,
+      "sha256": "029684456f041b8a5d085dfd922c1848197580884a1d1bbc0cf903b944d195ee"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000654.jpg": {
+      "bytes": 46175,
+      "sha256": "60fbcd1af3f20bbc10736fb6c41b3580dea41bebf1d4448f358b66e6c58fabac"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000742.jpg": {
+      "bytes": 34845,
+      "sha256": "eec2bceb09b212219be4a378cee3e06dae4be2d2a199188726ae6fb6fcdbe541"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000756.jpg": {
+      "bytes": 40282,
+      "sha256": "916c294d09334565d0238dad27b5b8bb80b02cbe0e4488d4aa119dd812a16c89"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000816.jpg": {
+      "bytes": 34639,
+      "sha256": "c7533d3d31ffef47e9b526608c02364c77dd624b828a4f6679dbb570628f5afe"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000838.jpg": {
+      "bytes": 19424,
+      "sha256": "ffe3f96546efe34b6f3df74de862b9ac8d6131f5345836c5e2b96426f89404d6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000857.jpg": {
+      "bytes": 28615,
+      "sha256": "84b778d08936f9107fa2ed6b49d3c73c6e6c1619204db6b704bfcc6db0de63ae"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000926.jpg": {
+      "bytes": 38753,
+      "sha256": "c5458af395cbb9b6a5f859b66a590f7dc6f07a08c9f27788533e0a4b967b399c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 000946.jpg": {
+      "bytes": 35080,
+      "sha256": "e3dc827fd6cb11322a9a6f54aa06eb2661459c1079d1c4794c3ba27c76dcc183"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001022.jpg": {
+      "bytes": 27358,
+      "sha256": "3192ddce87c2410ceffbc024557d1b2b14eb74c4f8a46a9c4a0017b0b297cced"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001102.jpg": {
+      "bytes": 25011,
+      "sha256": "ff2539101eadfb8b44f67cde37de10df1eb35c99cd5ff6d3841500932ba8d930"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001231.jpg": {
+      "bytes": 29734,
+      "sha256": "b2de6a6c4097189685f68b68ca6ab5a3ffe68ceb28cc0858ec046e4afed3f66b"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001314.jpg": {
+      "bytes": 24978,
+      "sha256": "36fa7213645ca1480c8369cdd9c018a152319e6b6a9ba0c8a06db85163619f34"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001333.jpg": {
+      "bytes": 18472,
+      "sha256": "c390aff4ff56d13bddf945cb3e25e2a7ab1746d2e5f5c326f830fbf60b29fc6d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001404.jpg": {
+      "bytes": 22978,
+      "sha256": "e734d9e1de79ce6bed8f0f6931437e70382cb273b859327b38edd697856ea823"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001423.jpg": {
+      "bytes": 20785,
+      "sha256": "2b916ab2fbfa10a3750bbe5b5a7f901fc0488ee8000db84a8b749c3caf73830c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001447.jpg": {
+      "bytes": 30600,
+      "sha256": "ed75846a489293f9413ed720f96860f81ff7d1ef461bfbf29ff0b26b08e874c1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/Screenshot 2026-10-31 001508.jpg": {
+      "bytes": 27381,
+      "sha256": "b030b03da48ded34bb37bd35dd039152bbd98e7ee22fc93a9c6b1a4f0927de1c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 232522.txt": {
+      "bytes": 243,
+      "sha256": "3fd1e60d1a3b74c492bed015164b889524765ac729a00c3ba30095a28d5574c0"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 232632.txt": {
+      "bytes": 146,
+      "sha256": "4e74262d8cf4dcb2533caea121cc17a249f4508fe446a1e69c113c3d53ff5892"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 232905.txt": {
+      "bytes": 344,
+      "sha256": "2aede173f37e3ad879bae35e34236ad58a3a560255e4a4749c859633e79fc961"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 232921.txt": {
+      "bytes": 342,
+      "sha256": "48e3d16eef84621ef8c007c6a0f8cee273c21fce590debed153550e4fbfa170d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234003.txt": {
+      "bytes": 482,
+      "sha256": "cf891e3d528d7e07ba1a87dc2ab8db1633f81dcdd887de4a24b52df26384657f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234104.txt": {
+      "bytes": 241,
+      "sha256": "0338f9e14fd072202d2e6c82238c835bdefb91007c284f291eae4be97843f9ff"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234210.txt": {
+      "bytes": 190,
+      "sha256": "60ccc1f815ab7312c27f70f87cf87f810455f03d5024c51496e01d0e492a89fa"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234420.txt": {
+      "bytes": 243,
+      "sha256": "549380b444a126e6fdec1168eab2ddd0fc9e846aa485b3d1f662337cdd2b4bac"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234517.txt": {
+      "bytes": 433,
+      "sha256": "56d9eb1a193e70862f998768ba31dcf49ea06084b085fa5ae2018ffa08852eed"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234541.txt": {
+      "bytes": 243,
+      "sha256": "acebada307b6c1f5c3b543e98040a286f881c3b0811e8d5bcb8b0a40641e1af4"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234621.txt": {
+      "bytes": 293,
+      "sha256": "9d2f77937d5db0af9e7a53b4b6c9cde25fe29aa7c0c29a6a7b7108aac7a3d64a"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234647.txt": {
+      "bytes": 192,
+      "sha256": "e56913d8ff35573a8f66bb92291beaaf30293cdf662c8535271b62e3dd2d270f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234712.txt": {
+      "bytes": 141,
+      "sha256": "5533a960dad9ff468e462265da852b673532ba2ed8064cd3f9b57b2419681946"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234759.txt": {
+      "bytes": 342,
+      "sha256": "ed4e9ec4d41b83ae55bd12dffbf86c7af01db9278acb8643e36cc8dcd8507eac"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234822.txt": {
+      "bytes": 195,
+      "sha256": "3ded5b503e8634262abd217ea6ba9eaefb6cf040e370a876e49ec4cef81ead06"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234851.txt": {
+      "bytes": 237,
+      "sha256": "78fa8eed741f7e9c42f519415cb4791e1b73dee7e3f81522d968194ffdac4886"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234914.txt": {
+      "bytes": 240,
+      "sha256": "94d1ff25e0d11d5a609ad218c344c9dc7c0f4e1af86d62a8d3ff50a43a3542fd"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 234939.txt": {
+      "bytes": 239,
+      "sha256": "a11ae7fcb103d9a219a1f1439ff2ae96058998d759db54d6ee795f5a7c83001e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235008.txt": {
+      "bytes": 239,
+      "sha256": "2e9b29e58bca975934790bad34196bd5448c7f02535acdc568531fb78768b9a9"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235028.txt": {
+      "bytes": 191,
+      "sha256": "ec4a4f3184223dbc24a6959e77ac3042050435bf348dd69b4279d8e509ef4053"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235106.txt": {
+      "bytes": 238,
+      "sha256": "a225d37dee46484c45ff61496d9e72fe2fb90c12cec7b84a5336d5cb4ade0c9c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235305.txt": {
+      "bytes": 290,
+      "sha256": "f8b6a2aa26a33633a35e5fb2a52a646b65d687186cd5ef54ca42a088f262d5e4"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235329.txt": {
+      "bytes": 145,
+      "sha256": "68882abdef2ca589d43e9c228fd4ac952d084c8857a7c13cbc7c07b6792839bb"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235350.txt": {
+      "bytes": 192,
+      "sha256": "d3b1fc4ea4244f9b673af3d6755730a55511a12acd9007dd93252a4b8f6ff8f8"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235413.txt": {
+      "bytes": 194,
+      "sha256": "d42bab623fb67a60bdf81e83f4f2c5a65dce635b535331292ca9c0b1cad07038"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235428.txt": {
+      "bytes": 340,
+      "sha256": "007a6711f37dd2e284d9028b2d46b903b464abe45b480d5d43e1fd0e4c7e20cd"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235447.txt": {
+      "bytes": 242,
+      "sha256": "0c8f2bc1c8222b7d3ef524e78fd540d885ad6e62ecfe8439412d727d8c6a16b0"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235508.txt": {
+      "bytes": 239,
+      "sha256": "3e3007f9749ed334b2fec2eb675c26bfb0c8a4e637744e5b2ad53b585f70fc79"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235606.txt": {
+      "bytes": 241,
+      "sha256": "7bbf8ff32f0c567357aa1c97ee7a5e54e5966356950b8d9ff6ffca1c9f4cd86d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235636.txt": {
+      "bytes": 147,
+      "sha256": "30a4e57dcbad5641c2a5204d8716bc02fa26302111fbc219fe91f43a9f59ad46"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235705.txt": {
+      "bytes": 147,
+      "sha256": "f347fbf216506690aec4d8a6bc9e201724e09457f643a6da14a13e994adbadb6"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235725.txt": {
+      "bytes": 244,
+      "sha256": "c558b44256a66be7258c59c0d42d6c3b6ae8828074b664553d80dafbf62df7a1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235808.txt": {
+      "bytes": 189,
+      "sha256": "30487c249e00d9ebbfa72a5f2a359d49b51b8b750f570744e08cac40a6f61b93"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235825.txt": {
+      "bytes": 244,
+      "sha256": "3b6e801a621a95b42271ab137c7bc9609af89cfcf69652a0e1c7a958309fff78"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235847.txt": {
+      "bytes": 245,
+      "sha256": "55f7f525ab2544b9c96b1c1d7d78740f3d42257aaeaecda709a4e54a90d94f38"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-30 235951.txt": {
+      "bytes": 288,
+      "sha256": "b6e990c244b23242d6af031d51b1e3cc9a725c1cb76b83d3c64b7d90f35d3ee4"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000005.txt": {
+      "bytes": 293,
+      "sha256": "bd30dde01e2e8f4bc18c817223d3803798f97f72b9b470acf25152df6e11ef5a"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000027.txt": {
+      "bytes": 197,
+      "sha256": "6d49e178730ff267d78257afdfd639f2283ba0ec84055ccb449f2b9a70e27c7e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000052.txt": {
+      "bytes": 198,
+      "sha256": "9b932a52767873d0390407ba01fce43686653f64bdc3a8a959479ca69e297de9"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000108.txt": {
+      "bytes": 189,
+      "sha256": "0a74637f812f4e71565a00fddcb300fa685d150fb0ad36b902bddb0b020a244b"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000123.txt": {
+      "bytes": 98,
+      "sha256": "631cc0e57585a73f21d6a2d67e8265f95f00ff1069d08d2d246f967da22abc4d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000634.txt": {
+      "bytes": 144,
+      "sha256": "0e2c28968e90daea3dbc54c844660f1e31a1295d7ca8d583d1238f77d86c8e81"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000654.txt": {
+      "bytes": 237,
+      "sha256": "1d959bea25368fb42c64eabb9d51a159ac6bb042f3d45725fd00967f0f751dac"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000742.txt": {
+      "bytes": 240,
+      "sha256": "8279ed5bf76b2459ae4d19ce9cbb9e5630a0fb8e483cd1a706c4b51f4d5315a8"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000756.txt": {
+      "bytes": 292,
+      "sha256": "d5de2ce030984963bf7aeba466891ae905522716a0f697f33481c4664a340843"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000816.txt": {
+      "bytes": 288,
+      "sha256": "8d01e9a92bf9f9e51b9f0b40867acf4f4b7eb3ecffc44a3912c531d87b06bcc9"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000838.txt": {
+      "bytes": 243,
+      "sha256": "5d1b71f36cf79b5c22e77f6fa1481b337e00bd0f4e412f66a3c45eee4742d974"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000857.txt": {
+      "bytes": 195,
+      "sha256": "d67610ace5c9fe3fd1ab15d30195b11f00b4417aa6d4711399fc5ab9fe5665a1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000926.txt": {
+      "bytes": 340,
+      "sha256": "026796ad44dddadeb588aa6166cc63dd749475c7815ae67cf44e00696a282697"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 000946.txt": {
+      "bytes": 288,
+      "sha256": "dc3ab68fc9fb79ece00cb06db9541011e5f87b9c473995fb7f1225db2ddf9f54"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001022.txt": {
+      "bytes": 239,
+      "sha256": "8effb85bf384bfc8839457c510ea4e5b6fa68320d49de3cd6ffa7234f923dcf3"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001102.txt": {
+      "bytes": 242,
+      "sha256": "813de532cb09c15655d6aa371a7c385034e7e56dff27afd7ec1b825961e9e18c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001231.txt": {
+      "bytes": 243,
+      "sha256": "59d717889d6a83b3219c13665a7f7c28ce9a6bf8e458aba8718e1f7f1523e774"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001314.txt": {
+      "bytes": 194,
+      "sha256": "35b106221ed0562bb66b631fb20c3892ee12bb64576e24748487bc6ff91b2b7f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001333.txt": {
+      "bytes": 140,
+      "sha256": "67ce1fe851957574f92ddc733a3e9cf722a56fa080a227b2c5e6ea03ceb7a314"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001404.txt": {
+      "bytes": 196,
+      "sha256": "dbd3914a7d687c73842b5794a585a44b804d86ff7f8af4ba2e0f1e9ab3fbe65f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001423.txt": {
+      "bytes": 192,
+      "sha256": "d874b64b78cb425bcd4c11ef2be1bcf39d57f6fdb0359f8138cac9ed91045876"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001447.txt": {
+      "bytes": 291,
+      "sha256": "386266f0a45c93d4b948a46c78f98d3d67c45157f25ecb8564f5bd2eea1e8ea4"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/seen_real_predictions/labels/Screenshot 2026-10-31 001508.txt": {
+      "bytes": 197,
+      "sha256": "54acd905b25da0ef964895589c94ef57d9e6376889d66bc487710ab60a45de4e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/train_batch0.jpg": {
+      "bytes": 38498,
+      "sha256": "aecd2c4c26946f811180a9f4d4d62c5f8c633ccd8002d82c616249402c9a2b19"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/train_batch1.jpg": {
+      "bytes": 38121,
+      "sha256": "d04424f4c1c822deeec35e779de67a891b6ca3a3876f0b378ec49d1734f29a39"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/train_batch2.jpg": {
+      "bytes": 43041,
+      "sha256": "2243c61844f7372882335632e031fd9a904aa0bf17f79991ee3b4970a52f3e61"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/train_batch3580.jpg": {
+      "bytes": 39479,
+      "sha256": "e3424627c570610f03594b3e5e6bcd77bc457b444e159be6c4c900452f4b5a0b"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/train_batch3581.jpg": {
+      "bytes": 51998,
+      "sha256": "2edde1bd9fe6f0a0dbd1f0deba5111b68c76d902c8b841dab61b5924e787cff9"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/train_batch3582.jpg": {
+      "bytes": 39857,
+      "sha256": "e94635b469dec87c05fc70bb7ea2a9c27bf6b13f432a70b5c7e89973c28b9e61"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/training.log": {
+      "bytes": 833988,
+      "sha256": "8953c5b80ca361d049fd62684056966b4e0bb3405ba240bd0cc4b795ef40b5fc"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/training_manifest.json": {
+      "bytes": 1723,
+      "sha256": "608af1f5e50c6aa2c9f8b88743e0c82c99399d4596260f6d44a9d98471646c79"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/training_report.json": {
+      "bytes": 2858,
+      "sha256": "7ecbefc4068b557edcd8809b2dec949779f823d0cf40ed05d54e88a0091569e1"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/val_batch0_labels.jpg": {
+      "bytes": 85515,
+      "sha256": "3f81a22070567634f26dd1182fe71aa3c59efd31088d3b5a6c7e5feea8f3abe8"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/val_batch0_pred.jpg": {
+      "bytes": 87260,
+      "sha256": "e29d9dca346bf085a9e5dae3f194f48be417c70c20507fca46516164d8906e6d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/val_batch1_labels.jpg": {
+      "bytes": 86440,
+      "sha256": "eab78ed83bc8d5421ac53d736cdaa8237ef351bc42957d87f60209fa45828ef0"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/val_batch1_pred.jpg": {
+      "bytes": 88585,
+      "sha256": "cd3e9b9d83c88cf138f36a142cc871135e3e371b8109d37cda04925acff8140e"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/val_batch2_labels.jpg": {
+      "bytes": 83746,
+      "sha256": "f583330b27e935eb0ccd71486dfa24cb3ace8d059e4df33bb2915af323e8498d"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/val_batch2_pred.jpg": {
+      "bytes": 84474,
+      "sha256": "1ef96c3546131cf7c6d7388ec90c03f8ff0f05c202d44538edb7fec1fa4a0253"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/best.pt": {
+      "bytes": 5493957,
+      "sha256": "c9dae399753ccaf16c8039cf2b5ec88324ad3412ef4e093f047e77d6c7abbe38"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/epoch0.pt": {
+      "bytes": 17005870,
+      "sha256": "9ad776438b6f4b61ae1371ac52d6b3c4207b4ecceec722e8e5fa5393fc110211"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/epoch10.pt": {
+      "bytes": 17006702,
+      "sha256": "bb564884c34656386b92ae6c7aa1d2ad2f35182d764a569a317d6de9836e2d1f"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/epoch15.pt": {
+      "bytes": 17007086,
+      "sha256": "40275485da0ff9ede6f419c8dde76ad67ff6ecea295715263eb8a75c53dac290"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/epoch20.pt": {
+      "bytes": 17007470,
+      "sha256": "d7ad3b7f8cad06262ed11b4aa65dcd8c6e069bf18380fa7bea029d2f8c85d1da"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/epoch25.pt": {
+      "bytes": 17007854,
+      "sha256": "5f931cf4077df28aa6c9ad21927e802c53166862137c0598bf8c81c96e873990"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/epoch5.pt": {
+      "bytes": 17006254,
+      "sha256": "29ced5640e260f637bfef20f1126b23eb57ce782385fccd124e817911d15c11c"
+    },
+    "runs/augmented_physics/circuits_real_v2_20261031/weights/last.pt": {
+      "bytes": 5493957,
+      "sha256": "95bc8a1f76aaed83ad907e87bdee0255da1837fdb8f9c8405a723779e8ed0c46"
+    },
+    "runs/augmented_physics/circuits_synthetic_v1/weights/best.pt": {
+      "bytes": 5496133,
+      "sha256": "667371fa86a49cc88f4d50cc6256db26a42c7152c04344b59b976ad3eb0f5e0e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/analysis_evaluator_snapshot.py": {
+      "bytes": 50217,
+      "sha256": "e76aa65b1720283898483f3c52181c03c6e237c24f00e6a8bbd45ccf54ea76f1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/analysis_manifest.json": {
+      "bytes": 341,
+      "sha256": "5dd078e84b5bacfc18a6c032291e98f36795bf1093614e9a2730bd02537b67d4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/analysis_verification.json": {
+      "bytes": 1261,
+      "sha256": "7bc38a24f3017cdaf38440dd5b37c5e7d9236d4c273d7017a81d64fc2b2e6146"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/annotation_audit.json": {
+      "bytes": 19206,
+      "sha256": "d8328a20702f5692cdf3ebae53022b90109c742147092cddf2fdd88d53c11233"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/checkpoint_metadata.json": {
+      "bytes": 31149,
+      "sha256": "75ebb9e2d12de9600810d65e66331230bd07adf1bd33d949be4742767b809aef"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparison_gallery.html": {
+      "bytes": 13770,
+      "sha256": "b9817381ed86acdedab746dbcf6016768e713dd362ff7573ce8ba75a4809bbd4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 232522.png": {
+      "bytes": 265216,
+      "sha256": "466eab86c734a5cd7490a901e071d2084f0777cf3a38398be6dfb9c701c4d350"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 232632.png": {
+      "bytes": 196024,
+      "sha256": "6f1639ea6b8bc508baea26665563e11f93e9cb4274fdaa500425849a2ab97cbb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 232905.png": {
+      "bytes": 120984,
+      "sha256": "3450c5508570dbb2e417210a48e1a10907d4dee36f0f0f3358391ef6e0c7263b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 232921.png": {
+      "bytes": 128542,
+      "sha256": "e0fd274698927d91f7f6ed9c77e6182b3c7ed920e49c8249103809fd27ea4ff8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234003.png": {
+      "bytes": 178170,
+      "sha256": "a7b59059f1e96356666d0e6b3541d2456d14380e59775fbea92c6a748692cff1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234104.png": {
+      "bytes": 161588,
+      "sha256": "275bb3adb18122506e92127dd1a1d24611c73a2c52e63f5741fefba2f9d23887"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234210.png": {
+      "bytes": 106082,
+      "sha256": "48fd4db56488a39e03b933599676f8bec54c32d1ef2968b50feb54b12a8f5415"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234420.png": {
+      "bytes": 136825,
+      "sha256": "df0db73957fc3484bc36a85dda54e495d907e39ea7bfcc1cd5e07c940d14dffa"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234517.png": {
+      "bytes": 157335,
+      "sha256": "87db973251e19ab0c2e707093935daccfa65fe64e6730cd5da308817afbbb805"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234541.png": {
+      "bytes": 141976,
+      "sha256": "3e06942238c2b6375a5ad4617ea62c811667fda1d87f14d350a9503395c8dae9"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234621.png": {
+      "bytes": 149268,
+      "sha256": "579313c4ad95bd18d7bb29066fb2c0176de0180c361fce154912f4be0d044532"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234647.png": {
+      "bytes": 152592,
+      "sha256": "aacdc5a8ca7c215290068a02c9025fbf49d31b0148eb258caa743601a0ddf1d4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234712.png": {
+      "bytes": 108193,
+      "sha256": "ec710ec9bdb2277a2ca5176d1aced17758dc2de80b524876f48c5890b88c9a4e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234759.png": {
+      "bytes": 152285,
+      "sha256": "68411c85462d6d45a1a739021e18148cf2f7160edee0f8f876445d9ad73b59a2"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234822.png": {
+      "bytes": 136600,
+      "sha256": "ca423c9508c2e1a1a7520b6114ee05bb15bc7837ffc6c2f5d2fd93915376df1d"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234851.png": {
+      "bytes": 167825,
+      "sha256": "165dafb0dfd022bc7e91b5d773470029b3aa6f5abccb2f30b305450409a60245"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234914.png": {
+      "bytes": 132130,
+      "sha256": "ff692346b912275187be0f008097e722d45dc938183af1f84f9b2a789a1b67e6"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 234939.png": {
+      "bytes": 133332,
+      "sha256": "e9a0adcc69f15b1cb6f7e156eb7158d195b6455609ec4073b5ca286b1ec7d0a1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235008.png": {
+      "bytes": 119528,
+      "sha256": "73d97ccec06becdefd12852c4ef8aa8f699e1b96e6a0d2fe05b6dc760d93e3d5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235028.png": {
+      "bytes": 139501,
+      "sha256": "62415093ebe84d0ba1e11f1b900fa99b125e6f16953429020485995e216f7bfa"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235106.png": {
+      "bytes": 136476,
+      "sha256": "15f87050fa2a6e9a44b96cbb63eaff05ee7288ee82263cd1d4e04c7371ae788e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235305.png": {
+      "bytes": 145900,
+      "sha256": "09375d9d4a0a2e81fc5bb1a57835206b089d019c238be86633b5fef3ec83c1dd"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235329.png": {
+      "bytes": 126473,
+      "sha256": "2d9f7085d47fa3d8e285ba1d31b981a62bf14ebc6f1f8b186ca1bdb552c10014"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235350.png": {
+      "bytes": 128115,
+      "sha256": "efe9c5be26f572da1621fc20a2f06b8749014495bcadc08edb645a9dcb8544ab"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235413.png": {
+      "bytes": 146684,
+      "sha256": "edf54c404be5dcfdba3ce3100c1e06482b06164359aef597f416cc147da9b755"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235428.png": {
+      "bytes": 176910,
+      "sha256": "adda8a4cf2f74628e73441b525c4e6e39e8f440d6b0f64a14906cee3d28e2926"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235447.png": {
+      "bytes": 145974,
+      "sha256": "9265f6a8036ebcd46b2e52d8e676b761db3a2cf549ad30eb33ae3c62ab187914"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235508.png": {
+      "bytes": 98380,
+      "sha256": "254c896aae09784ddb71ee81c94e5ff288a97de54430411d17589559dcf5a6e5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235606.png": {
+      "bytes": 173607,
+      "sha256": "9c64b0e2abb3b75e3dee1d7771916552c92d9021590131afc49897dc4da4ebc1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235636.png": {
+      "bytes": 162919,
+      "sha256": "c675de24458737418c54dc13e5e9d2f2db64e409ea544b4f9ad8d92b7eeecc23"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235705.png": {
+      "bytes": 148778,
+      "sha256": "aed3e2b14e5cf3855191a74900ed2fe95256dcf9d08c87cb5bebaf997ed65f44"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235725.png": {
+      "bytes": 187168,
+      "sha256": "cb7103affcc87c4d5d6ac0caabda43165385a58c65721f2a071252a77c9bbc52"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235808.png": {
+      "bytes": 162022,
+      "sha256": "0a7318afa254232f5bfdd996480d2a7980b51b78fd182edf24b8146f12171bd4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235825.png": {
+      "bytes": 181521,
+      "sha256": "b40bcc86b9bac40b93081e4ee69b28594eff30c336afe5a06124cc27a30d6a46"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235847.png": {
+      "bytes": 215050,
+      "sha256": "1262aea922fca411a2394d09b50123ede86ab07ba3ac0524562c3524608e6221"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-30 235951.png": {
+      "bytes": 177295,
+      "sha256": "9661290682ac652b34024e86b0bdb81a792b85c026cebf29ca59e027139fec34"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000005.png": {
+      "bytes": 178330,
+      "sha256": "f00ad9bb797c04edd0554e50b3f78bc93ee99842f75c54662ad1055a3de41881"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000027.png": {
+      "bytes": 193725,
+      "sha256": "b050b09a0ed527002099955c0a3fa2db0747eed7aee2b31ddd497360b2c27e2f"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000052.png": {
+      "bytes": 184962,
+      "sha256": "ca26c9f208d9746978b2ec85c505ce9bce4e4ac789d0d6903af45b29cb9322f9"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000108.png": {
+      "bytes": 116033,
+      "sha256": "907a6d340a845a2be44d94e7a1b387c66d7a958b793c97f0e05790191f0f46fc"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000123.png": {
+      "bytes": 104443,
+      "sha256": "c924c6671b4bb7481eb2d13e88eeb32e450c91e25784c007b3781d18779b5fa5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000634.png": {
+      "bytes": 153193,
+      "sha256": "699c95727e23bf370228a3e39adc1cb762d64f600c01d0c817962c343d360c72"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000654.png": {
+      "bytes": 222653,
+      "sha256": "29a49f4fad3dfee10b1566b8fbbd5a8afc7e9f6063535553049cde9b42160eea"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000742.png": {
+      "bytes": 175143,
+      "sha256": "de921d951a7c1926f8afb648dca9ce7c8044166431cf52aab80634ab2a163087"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000756.png": {
+      "bytes": 200579,
+      "sha256": "9ce9d5f93c28b61d000e21893ba434bad1350c1e9e05b1aec80a98ba161272b7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000816.png": {
+      "bytes": 163271,
+      "sha256": "e34ba4cf98f21b1f71f8d3da664920ada783def97750d8e4893a10bb24cbcc6b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000838.png": {
+      "bytes": 112775,
+      "sha256": "f5e691e7c2b4ec7fa2bfc13fa1a8f3953ab2f38e949ee1afd7de82d95153a37f"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000857.png": {
+      "bytes": 135328,
+      "sha256": "050e88927d5047478729e8bf00c8a4f08a5c6dffceb40e59ab5cdaf178b8b824"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000926.png": {
+      "bytes": 175417,
+      "sha256": "3fe0d02623dcfbb563552af54e9e2c1a184c59c948debef1eed1f6a441e3cd64"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 000946.png": {
+      "bytes": 175210,
+      "sha256": "61ff311af570bbeddb172ccdcc7cbc1cae597020bf21f23260f9688ced234cc7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001022.png": {
+      "bytes": 128647,
+      "sha256": "feca23694dbab329f3e3f9ea691cd4839a17b6abbcf509338fb6831684a9da53"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001102.png": {
+      "bytes": 130783,
+      "sha256": "b75445610fbf6431ac971026167825f2621aa07c7e24a2c27598d1e84b79d689"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001231.png": {
+      "bytes": 141815,
+      "sha256": "9613e3f9c71abdbde89af5905acb77bb874cd25fc87ea5c311bf8a0bed96fcdd"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001314.png": {
+      "bytes": 119277,
+      "sha256": "e9ac2514bc70f262793089dc043c6f6efe25e80ef0e2a07609c85d94b5fb2858"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001333.png": {
+      "bytes": 102908,
+      "sha256": "40248f4f1a360c4e8dd25df28188e8d10b81217e32b5f005319c5d6b57996ea8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001404.png": {
+      "bytes": 109230,
+      "sha256": "a070de64d2b486ad7e5f15882c6b46a1739e1762252b37ce1d3fd185083d2448"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001423.png": {
+      "bytes": 117540,
+      "sha256": "9b548b2e7c6c85830bebf7eb1c6fe590c3e545567235140c4b32115994a4620f"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001447.png": {
+      "bytes": 155493,
+      "sha256": "2af427c501b5fdfa6c9f52b11017da331fea2e317eda2ba3fa6e4b3094713a37"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/comparisons/Screenshot 2026-10-31 001508.png": {
+      "bytes": 139298,
+      "sha256": "a1bef8736037b72ae51c3dbb9dab51a7a35cff56a5cffd40ac7b2fc4693a1a82"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/confusion_matrix_conf025_iou050.png": {
+      "bytes": 72331,
+      "sha256": "86e777a3f2fc950cdf4ae0f8ea2d9d37caab04994b203a7c0c85d326c2d1f554"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/execution_manifest.json": {
+      "bytes": 765,
+      "sha256": "db1c4a4c7951ec80e638b8cd14bc2c8d598e4c90d4c85dd2ec050bb98f15027c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/fixed_conf025_analysis.json": {
+      "bytes": 265465,
+      "sha256": "b833ebac2cdba42497493ee0f7360a4aa5a409061381f7a368e216c3e3667415"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/input_fingerprints_after.json": {
+      "bytes": 193684,
+      "sha256": "5a3009a6f2d911254bcfde53ed79d56211b8f84af401e419c09ec1bf4be6dac3"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/input_fingerprints_before.json": {
+      "bytes": 193684,
+      "sha256": "5a3009a6f2d911254bcfde53ed79d56211b8f84af401e419c09ec1bf4be6dac3"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/per_image_errors.csv": {
+      "bytes": 2909,
+      "sha256": "96f4edf5967c50189a109e1f3321448fb84ed132248c847260400efc778b53ca"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_ap_by_iou.png": {
+      "bytes": 89270,
+      "sha256": "d3e542a81ac9e7261c66008d12c3cff7bf1dea8fef528fe866ac019951aa852b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/BoxF1_curve.png": {
+      "bytes": 171264,
+      "sha256": "2c67549b4fa3aff06040f5cca84b3ffb1a9794cf89ea2ef7206615cfb30d11cb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/BoxPR_curve.png": {
+      "bytes": 108551,
+      "sha256": "044eb75a4ba66952705b91099adc3e34981164204257a5368ef194b01340ca51"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/BoxP_curve.png": {
+      "bytes": 163312,
+      "sha256": "2bfbe6daa5a8298ca92ecd69c316391b39eedb4c996b08ec0a5e87e3d623579a"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/BoxR_curve.png": {
+      "bytes": 128756,
+      "sha256": "71823fa92424c57aa4048c799a571b9fec3e1668a8314725e9c187ab928bbca4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/confusion_matrix.csv": {
+      "bytes": 66,
+      "sha256": "a96087fbdca511c60b25c07dea24f9e2d469752308a40d2296e706940c93414a"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/confusion_matrix.png": {
+      "bytes": 137939,
+      "sha256": "cac2e14d3e7d986253c0525e3a822697aa52ca398c78ff313165025556a57f1e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/confusion_matrix_normalized.png": {
+      "bytes": 151198,
+      "sha256": "730b5fa40de2a39b59c76124cf34b9c0f8240c0682af7732561909d02c8fd40c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/curves.npz": {
+      "bytes": 53765,
+      "sha256": "9b2b964dc80a432959a44875881252ea4a6d16ed8b0f6d745c1b5fd9f4881470"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 232522.txt": {
+      "bytes": 1821,
+      "sha256": "a1ec3487e8e6a16a8929c3752219175f3bf6b331cc8d3dc01bd7782e2c8b867d"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 232632.txt": {
+      "bytes": 2226,
+      "sha256": "4fe227a13136171bee558872731e32cc8f6f64e4232fa2c0ab12378b1143b7a8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 232905.txt": {
+      "bytes": 340,
+      "sha256": "3185cdd84c9d3118d38ff4fa75d4e06a78931979bd5def22edf9f89e3374d985"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 232921.txt": {
+      "bytes": 446,
+      "sha256": "07ce5dd0c78d6d8d8e3f37f435ce3722702908af36e7f8435775f83de91ef0f2"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234003.txt": {
+      "bytes": 1387,
+      "sha256": "2270a24025a26047b4448a05eb5dab0d7a57baa69f7c66a0cfa5879621fdafeb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234104.txt": {
+      "bytes": 1813,
+      "sha256": "44bc6d08114957ecbafc9fda77ab282178c8995ffffd1228404ca9c0001defb9"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234210.txt": {
+      "bytes": 901,
+      "sha256": "e8f41950cf0e83d35b0762c2d15f90c181af7150d300e5a1fdb28c7ba57fb8ce"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234420.txt": {
+      "bytes": 1346,
+      "sha256": "0de0152ac2b580f3f8dcc2b9dd2f9f3a04d48c54fcdf11649b6a126f120342b4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234517.txt": {
+      "bytes": 1596,
+      "sha256": "f06dd124c7d086a2348146f1d653e58afdd6f3a80a891e76aa88f7191cbd7ddb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234541.txt": {
+      "bytes": 1107,
+      "sha256": "c7db7e33a8c8f5e1935a95a15e1ae086c4f94b2ad53a943ef5abbeef03b5c052"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234621.txt": {
+      "bytes": 1868,
+      "sha256": "e87bfb1900e1b099a0c99165733dc5ac4dd434717fdcdbd5881e5b3d7b2a112b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234647.txt": {
+      "bytes": 1806,
+      "sha256": "1910b5058954942c1e333d86935813eb0299713b95dbae10ec38977a1a6b218a"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234712.txt": {
+      "bytes": 1129,
+      "sha256": "dd8830d8981d60c882f9a79e5a4ea8a23c2230fe747c5910f6c3ac0e050eb35b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234759.txt": {
+      "bytes": 1920,
+      "sha256": "f312da9d67e60bf0bac77a1e6fcf5c424be6de172c7e758041b94554754ce3f0"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234822.txt": {
+      "bytes": 813,
+      "sha256": "633e94bff54b6be58fec60b64ac8d397e23627db510e8da0198de5acb2559159"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234851.txt": {
+      "bytes": 1567,
+      "sha256": "f938e9853d5f2c371b965a1055cecc1bb0621c9307c9c443108a3d7bfe8670e4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234914.txt": {
+      "bytes": 1053,
+      "sha256": "f06f2e792d639f2363530d9cb07e5d30bb2473819a5e527b8b3cc62672722356"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 234939.txt": {
+      "bytes": 696,
+      "sha256": "0e8d658d6dc5b15a7f0af131d3cb9133704e96518f053c9dcd819783ca8ead14"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235008.txt": {
+      "bytes": 294,
+      "sha256": "185f1c35a8de9f28ccb4782df3926017b22cb63ce60c261f1cf27a2fae003f61"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235028.txt": {
+      "bytes": 851,
+      "sha256": "f63cc958b417a9747aa41441df38ad673b1f85189e8087c6e8ab91485a9e4047"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235106.txt": {
+      "bytes": 1147,
+      "sha256": "59f5d092f2bb8c70cf0c616cd9c0d4ea5a4d842fa528a737cda75e38f6a28e70"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235305.txt": {
+      "bytes": 4163,
+      "sha256": "9e6c703abae59340ec87c6a9ad1998d957397048b15d1d16555fbbc761df9d7a"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235329.txt": {
+      "bytes": 1383,
+      "sha256": "39f697d1aa3b2fbd3f6cae6db0a005f4935eb9a47f9517d648b722985afae91e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235350.txt": {
+      "bytes": 1829,
+      "sha256": "76d4540c8361f0b286206285000e9bbf51566e3c6d0ee5560f926a17f6afe739"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235413.txt": {
+      "bytes": 497,
+      "sha256": "91f364b21993e92b283880a304851c86879131fc2730951c13725e737b25cd4d"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235428.txt": {
+      "bytes": 2794,
+      "sha256": "1ba90a0ff8769e05fc3fb49d0bd4132e9d0846e5e75658b8ff5a6503feae093d"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235447.txt": {
+      "bytes": 911,
+      "sha256": "986f75fa2a82a05516e4af0e465f566a0b43c3c905db0c7209b88e2659350dd7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235508.txt": {
+      "bytes": 900,
+      "sha256": "a3ac56eb814acd83a35b7ad075e9883d300ae41eefbd5c7f8008d808f1454051"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235606.txt": {
+      "bytes": 1738,
+      "sha256": "48cdea501ee3e637da2880ee8230e27fb7e9a432ae8ba4418e8168e99aea7579"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235636.txt": {
+      "bytes": 1935,
+      "sha256": "8c8b767728588f97a804f0e1646c7770666f1caf348aa59a1715b3f256b67915"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235705.txt": {
+      "bytes": 1354,
+      "sha256": "e652dd27d0cba618f8637da69561b770c86e3c59ead68c851d2726a794768303"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235725.txt": {
+      "bytes": 2541,
+      "sha256": "ffbe2cdb141fa50e8cb5d6c868c3c963468a7d164218cf55375ba96a095c4611"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235808.txt": {
+      "bytes": 1408,
+      "sha256": "fa5c18d68b595db60c96e0b018b65fb688f2611b045d8abe4a238b88adb824cf"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235825.txt": {
+      "bytes": 1281,
+      "sha256": "0fb16e680f452dc89665a1550e304ea7f37bc301a68a9ded95e02be24ec69433"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235847.txt": {
+      "bytes": 1168,
+      "sha256": "031500878ab788cca04fb4902b8ac55bdfee646f052ad2c3d3b8bdb2f35b42be"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-30 235951.txt": {
+      "bytes": 1942,
+      "sha256": "f814028688b60d4e559d2cd4779d2f50b555d2221e239d8f1e615efc4c3c473d"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000005.txt": {
+      "bytes": 1998,
+      "sha256": "72caec31eafd0f5bf2a3bc228aa083fbaf7120e10b2194057316ac768b9116e1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000027.txt": {
+      "bytes": 653,
+      "sha256": "371ddc960297f5f05da06b00fb0172d9c35e976dfb197a8bdcde053edd470e66"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000052.txt": {
+      "bytes": 2587,
+      "sha256": "9979d37e876d27223baf70a47e68bf47f140b264c4837b296cfd48bab32b5eda"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000108.txt": {
+      "bytes": 1125,
+      "sha256": "4c546f79620bc80d0d19abf94b5090339fb99668737b4cedd1eadc1ba7daa6ff"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000123.txt": {
+      "bytes": 1120,
+      "sha256": "f1ad00277b212a03eb034397d9e96c8105e449cfc8d1362d1105954192a5763a"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000634.txt": {
+      "bytes": 1510,
+      "sha256": "7758fae3a13fc897af3466bbe4e4584560e22e2a2b74a0c14657ffb83b3b4c05"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000654.txt": {
+      "bytes": 3253,
+      "sha256": "8972363641fd44485267b0b6e9d2971ecd3e7e3cf1a65f928c067e1002f89ff5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000742.txt": {
+      "bytes": 3609,
+      "sha256": "2f9f5818d69c3a8880eb5751137b880ea1d2c026b938b9ea84dde47037768b59"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000756.txt": {
+      "bytes": 5279,
+      "sha256": "9eb1a71ed8bedfd8120dc962f563f78ada25600f6c78307f5f79ff6a1381c515"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000816.txt": {
+      "bytes": 2906,
+      "sha256": "9c8de6afd0f099ce6d25acef997cf6c761b2eb89ce0907bb31fc05adef9415de"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000838.txt": {
+      "bytes": 343,
+      "sha256": "4a34728dc120e84051992ec2f194044bfaebae4f6a820dc2afa08023155e8ff7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000857.txt": {
+      "bytes": 1721,
+      "sha256": "b7c4b242cdf9cfd32db2b293b06100bcfecb99a909d397950d609acd7b733b1a"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000926.txt": {
+      "bytes": 1358,
+      "sha256": "8011047472df1fb9a10c1c907952d9c63921ef9f4ff70dcb364e6a4f44e3a1bc"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 000946.txt": {
+      "bytes": 2423,
+      "sha256": "c282d18b1544333f5f8e37c3f094b96f73a5233d5a4ca932d879a7306b9478f0"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001022.txt": {
+      "bytes": 1105,
+      "sha256": "28b7c3b23017e72ca0274fb58de4b0d8e8f24ad4ec0040edfe87cb10d18d6413"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001102.txt": {
+      "bytes": 1370,
+      "sha256": "a80caa44de63c8ef346ce0ec7bbf1ba8f2d43f9522a8d5b7c5756ce2addf88fc"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001231.txt": {
+      "bytes": 752,
+      "sha256": "9e54125d55c75b2066cfd6c2ceefb56f54be84265d4b68dbb224ffa94e5fca7c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001314.txt": {
+      "bytes": 2019,
+      "sha256": "631c3f06996b5a9923f4e56066cdbf2c30503beec0abad186d47c4d8673e11e9"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001333.txt": {
+      "bytes": 1149,
+      "sha256": "7440163c2314ab040ea232519879f19fb911151e8b320c2cc5ce18b5c8569bc8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001404.txt": {
+      "bytes": 2934,
+      "sha256": "9c1985bf1a2196660814639b06286933f1d5c63e619115ce965f97b61ac45329"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001423.txt": {
+      "bytes": 2342,
+      "sha256": "59191d3043a7eeedcb19684c17a4239c42b54e5468e9274a8790bd290d627468"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001447.txt": {
+      "bytes": 1264,
+      "sha256": "04db92178d6997bb1585051e7199bb0fd8ad352175b7f570f522a7bee13586f3"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/labels/Screenshot 2026-10-31 001508.txt": {
+      "bytes": 2422,
+      "sha256": "735002eaa112950b01cdab8acb1ce98c63d18aff39229dfe8b6f98b5d6d7ee61"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/metrics.json": {
+      "bytes": 3825,
+      "sha256": "39e996b675e3f2f642abf30c691efb3898d62989c75d2223dea0d34fabeb0451"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/val_batch0_labels.jpg": {
+      "bytes": 135155,
+      "sha256": "5f9e3ba56b04f04acfbae8aced0d28a180aa1b633ed979606a07d8f48a113389"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/val_batch0_pred.jpg": {
+      "bytes": 133547,
+      "sha256": "6b58127ac16cfb8108c9b1ddf94978befc5c82297be8d09b5d55ce314865ed39"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/val_batch1_labels.jpg": {
+      "bytes": 133984,
+      "sha256": "8d7bab55a5002772244105e61672264d5ec2a4403b7af7ac78f534dead6a1fa6"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/val_batch1_pred.jpg": {
+      "bytes": 133041,
+      "sha256": "f012a405b7ae1f54d31341d342381b83f3b401cd04d7bf96654089f0c8380793"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/val_batch2_labels.jpg": {
+      "bytes": 155639,
+      "sha256": "91844a23b68fdb92503d7862899a4c05bdcedf9fff87988b6a79de7a8b66427f"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/real_validation/val_batch2_pred.jpg": {
+      "bytes": 153187,
+      "sha256": "49c0bf3372196fab418a5d59972da4fbfcad1a0bbd5c65cf24e8a1c6105a4233"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/BoxF1_curve.png": {
+      "bytes": 113574,
+      "sha256": "c52fdd4c3b302d9e18bc58b9fef1c7fd0990d2a08f18f93f4761ec15425c3512"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/BoxPR_curve.png": {
+      "bytes": 87226,
+      "sha256": "e5052b314b78036a8df7423ec66a85fe56eb1789ddc5c01150cc3c1250596804"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/BoxP_curve.png": {
+      "bytes": 79320,
+      "sha256": "a233fc5582b2409b34cab1088c4256c5d80d409a70c7ac9e3dd3a57457ee8c48"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/BoxR_curve.png": {
+      "bytes": 115125,
+      "sha256": "f9945cc6539976b0e8c9509801ea8c473d59b852797b4638bac2d47d4765f22c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/confusion_matrix.csv": {
+      "bytes": 67,
+      "sha256": "c2a518fd0201fb185408cd6ca346fad7640b1e5c8a80f7e282358cf2fe41b9c5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/confusion_matrix.png": {
+      "bytes": 131079,
+      "sha256": "4a131cfffa1cb38d1a97a8c2e42e6c8d593ea117d5095fbece28ec2e6aa2c7c2"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/confusion_matrix_normalized.png": {
+      "bytes": 134828,
+      "sha256": "f9c4ccf9a74a6e2e83369a9120f525db466879d4bb0181d304e797126ea593ae"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/curves.npz": {
+      "bytes": 54725,
+      "sha256": "7ed948ff7093085ead412d75fdb3be689c6ea5d7d6222caf24ffd5b404618e9d"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000003.txt": {
+      "bytes": 299,
+      "sha256": "081d5e811129354f0d11f2cdf351ffa16dd6b060a394e3b60743a3fb354172cb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000006.txt": {
+      "bytes": 346,
+      "sha256": "8eda96b50c3762de79661626ef77befb3618ba21ec2ea2d258cb882657f8e48d"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000009.txt": {
+      "bytes": 297,
+      "sha256": "bf0e43e343d790f453878839c3ccda5c6bf1c56fcbd779fa76dfe9b213d69ff5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000014.txt": {
+      "bytes": 250,
+      "sha256": "439e27a44787ada13bfaeaff4c3b9d42e406bb686785a3a3549845c522e8d5cf"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000016.txt": {
+      "bytes": 348,
+      "sha256": "26ce68bcd60fb9872fac7a8daa43b903aad76f0ca32957adcd394cd7151efb94"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000029.txt": {
+      "bytes": 248,
+      "sha256": "78d0ab4a36cd81e1709663a3980c6f1b89cff76b6010ecd5a2e45ba19140b8b8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000032.txt": {
+      "bytes": 244,
+      "sha256": "0a9d837efc814e4019b2dcbcab766f40f20ac617666e32327888c61b50d6db0e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000037.txt": {
+      "bytes": 298,
+      "sha256": "2e7a55bba791b6ccadb771087e700c476ef90641ec190d53c10cc19f449b3d17"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000041.txt": {
+      "bytes": 147,
+      "sha256": "e7afd36a08c5e0bff2af643ba645681bce800dd729a52908bbe247accafe597f"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000047.txt": {
+      "bytes": 350,
+      "sha256": "dd2781935c3fb09ea335d30658bee426369fcae548f1b77c5396274d71b1c393"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000050.txt": {
+      "bytes": 503,
+      "sha256": "8be07740808bb2710163d9a591b189977e23d6d152b6366fcaf219e2a78a5a89"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000058.txt": {
+      "bytes": 400,
+      "sha256": "25d48493b76e37e9b43e684764336d3daffc1ef087b26be2868f03dd9cc36759"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000063.txt": {
+      "bytes": 341,
+      "sha256": "1e9ee492149197a60fc22b31e5f0d32257b7ea0eb0d1513cc7fbca7e514449c7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000071.txt": {
+      "bytes": 301,
+      "sha256": "ceec167683e4d953549942c72637b9f75fedd98e6d978ae56d448e7ee32bcb7f"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000072.txt": {
+      "bytes": 197,
+      "sha256": "fcde88ac2c4eb08cf4111cb96e5effc6ef2d7ea5fe1118de8799022e44e47934"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000080.txt": {
+      "bytes": 291,
+      "sha256": "21c3bb487f7ef9f3300f68be249b5b0a78f9f4d59fa0aef0f212abf7e45df9e8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000082.txt": {
+      "bytes": 348,
+      "sha256": "df54acbef76d71d77cf200418126f7f553fe8780ec3493e21ff690664c1e4adb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000085.txt": {
+      "bytes": 297,
+      "sha256": "d2624a5549ab7f6a389fb9193b8fa4299e6393497b8ce0edea467c1291bd14a0"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000088.txt": {
+      "bytes": 344,
+      "sha256": "96b6494f35f0c0bc56c5f9f7b375ace74909093df5b7966b6a026cd949646483"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000090.txt": {
+      "bytes": 294,
+      "sha256": "3d8aa787c64f8458a56fc0285c543ac2ee7d17ac54af5cc1cf0e0157da243d4b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000095.txt": {
+      "bytes": 299,
+      "sha256": "9c5176fec1e3212312d084d7710cfdd00a3d54f3f465fb50518275764290598e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000097.txt": {
+      "bytes": 398,
+      "sha256": "1baca08516e362100dee725a907f675eca3f748cce024746978a516c5017f579"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000102.txt": {
+      "bytes": 246,
+      "sha256": "55acc95867f46f0dee5cc73888fde537bfa112563b8b101e2dbc965a00a934cb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000104.txt": {
+      "bytes": 345,
+      "sha256": "e05ec38acda0d2c75cd323ee45d76f3fb766e8bc0a96081b1274d58e532f0898"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000112.txt": {
+      "bytes": 200,
+      "sha256": "8e998185d9d3f9c4fbc32edbc41cb08c12c6ed81ee9627742e5145969aea3fd3"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000116.txt": {
+      "bytes": 397,
+      "sha256": "d0dd1bdb50b632337f9b2c5bb6a45c67bfce91cc469c2052a1c8cb777ac71bd7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000117.txt": {
+      "bytes": 296,
+      "sha256": "e73ce98c1185b38884b30f6dbc4bddf9d68b5329a224b81f9fe094492ff56210"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000120.txt": {
+      "bytes": 390,
+      "sha256": "a97475cc5b5b1aa4b0e6ca57e30514f0d5bfb367475d524520078666acd3a22b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000141.txt": {
+      "bytes": 196,
+      "sha256": "f1b7f442aef09e6ba2881ea95ce8f6c17b11704fab1a68bf51ba9a0ed2977ba8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000142.txt": {
+      "bytes": 246,
+      "sha256": "5b18c35d659b6d7ba1b7bfa79302cb1df2bfd6b3404de22f37f42add08ee8e05"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000145.txt": {
+      "bytes": 241,
+      "sha256": "cc9ca5b5e6bcbc1c2cd6cc1cf02e56c435f38fc734ad6b3de8fb6d2c330c54f1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000152.txt": {
+      "bytes": 142,
+      "sha256": "36bdce4b7d7c43cb12fa9e4f17c8429d67d21745bbbd71ed91c5d4f82a242a50"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000154.txt": {
+      "bytes": 294,
+      "sha256": "c37ec4c2abc32fa42b5df5d86f7905b6f28c4296fdee4823d17090f8c63576d1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000156.txt": {
+      "bytes": 348,
+      "sha256": "9bccef3db95f964dd137ed35d3641595a1cf58fadf217c3dbb27a0ded1d1f4f4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000168.txt": {
+      "bytes": 292,
+      "sha256": "1815783ce7fc7faac05a682cd0dd2909ddc414ce6edc6965be60357fb635b627"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000171.txt": {
+      "bytes": 244,
+      "sha256": "8dfa67c3d2c2212a8d8e292555b25d8012b20efa259cac45347b799e7951d5ed"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000172.txt": {
+      "bytes": 300,
+      "sha256": "5b16f1c64da64f7c4487ecb1ccf9ac8786a9fa2b8a10748e8d095661ac822718"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000173.txt": {
+      "bytes": 400,
+      "sha256": "41afbed006beac1a47db582f33e11f45a3e6f1d6c4fe8f7337eaf623a785ba00"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000188.txt": {
+      "bytes": 294,
+      "sha256": "fcda5d2c55d6a7c621a58a1e0cf3e1d08ee676c74fdbf995574f68b4b01cd640"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000193.txt": {
+      "bytes": 349,
+      "sha256": "589c82755c9e040bf39c3f5f45a9b0910cd71b1f716b5063109552a757c3139a"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000198.txt": {
+      "bytes": 398,
+      "sha256": "517e2713b458c1daa229dd24b00162921b6c60d16235eed11a59f9fc28ebbefe"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000201.txt": {
+      "bytes": 247,
+      "sha256": "95608aae8c6a9e33bcee45fbdf661357d838d243d4a702029e2deec0989759b8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000211.txt": {
+      "bytes": 197,
+      "sha256": "897fc68927b136537b3633027f08aabcf5b0b8c15a8a7051aebae2229d199ab1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000214.txt": {
+      "bytes": 391,
+      "sha256": "ce7f35fe3393854b00a221a4b32b5bffc39ad43a2b8118b53853199de5f31848"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000219.txt": {
+      "bytes": 297,
+      "sha256": "34578c5dc17f5af09f0503345e7a1edc0fd3b2f80f3dc747ef1ca437b976e668"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000221.txt": {
+      "bytes": 244,
+      "sha256": "e43f68b47c5c96094dc331e3727365544443aa9c9ef893a1fcefcad7c1d7a6c5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000222.txt": {
+      "bytes": 248,
+      "sha256": "13d5bc191281a8b345cb6fbe6e1d8db1f1f767510b81d816e1c22d8be35ae999"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000226.txt": {
+      "bytes": 345,
+      "sha256": "8864be131d5b7def0cb04b8724833ec72f15b6aa528486530b6c646b72387ad6"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000228.txt": {
+      "bytes": 196,
+      "sha256": "775fa11a64adbefed8a291ccc7f32990a2d0fe6a322fcd5593ade9fe996aeaff"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000229.txt": {
+      "bytes": 298,
+      "sha256": "a30dcaf995db8c5470d05f837d739d39f61ab544192353bcb30b09ef3d98d8f6"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000230.txt": {
+      "bytes": 296,
+      "sha256": "f2ffd2bc8691bf2dcec2cebaa3186a85796f2a6e78513e5159885970724e5047"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000237.txt": {
+      "bytes": 451,
+      "sha256": "06457143d73b51645668822c2663333c9ec5fe40ce6e2d3bf81d8444cea4e9af"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000245.txt": {
+      "bytes": 299,
+      "sha256": "4e638649a3de59564f85a6afeddb1bad98a740b383af12e27b8a719d366bf7e4"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000246.txt": {
+      "bytes": 452,
+      "sha256": "d38754223f06e6c2676877a1d6187e69e4afc2525aca6e9befefe07836f3ba97"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000247.txt": {
+      "bytes": 241,
+      "sha256": "8178d24db958c6f7541dd3580bb0d53ffcc43ebe65c3cc718d42ae0c4e13e9e3"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000255.txt": {
+      "bytes": 296,
+      "sha256": "26e7bc3501dc492cd1181ec5822b238df6d5f4a276355d43a9ce594bb973dea2"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000257.txt": {
+      "bytes": 245,
+      "sha256": "091e0f5b3ddda797e5a1e36da5d7097110901a095948c5bfe00d1aedcff035d8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000280.txt": {
+      "bytes": 397,
+      "sha256": "314b5cd5da07795706458398c71cb4a97a43686a4b78c6748246c37ec4d82456"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000286.txt": {
+      "bytes": 447,
+      "sha256": "cf5028e106aa1ed99b7bbe1a67e58908f7ef61b48c4576cecfe116cd103cceed"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000301.txt": {
+      "bytes": 147,
+      "sha256": "0f0f757864dba43ace46c9d8c928def9a2ab0aea1fd65d6eeddb7849fb284762"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000307.txt": {
+      "bytes": 344,
+      "sha256": "8a081e5b633d113906920bbe5f8ea892bad7c9055ffae7b6eae5d125442cbef8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000308.txt": {
+      "bytes": 453,
+      "sha256": "bd20cc7974b0e6176cad15c13a4d8c13e873fc4bc3495c01aa9674d439e924c9"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000309.txt": {
+      "bytes": 298,
+      "sha256": "4b66560bc43aa7ed8f44b53d67e1d48c5ab926652136000366153554dd873074"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000310.txt": {
+      "bytes": 396,
+      "sha256": "6048d28ee359b5f1da3320629c461946ff1865fc73af75c1b21d559203f9c8bb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000313.txt": {
+      "bytes": 445,
+      "sha256": "09c2e022d0785cabe7b9ffd6d73a30d5602a8acc4f1cea0828002646577dc894"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000319.txt": {
+      "bytes": 297,
+      "sha256": "de24efe5a3029f0bd4f62a9612a522f962fcab73eac84a51eef3d2b8902dda4e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000326.txt": {
+      "bytes": 344,
+      "sha256": "12079c958695117ec8590fb277263f782e13f662d3a5b53cf8beb042ca2c43bf"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000327.txt": {
+      "bytes": 248,
+      "sha256": "6453d738c015a39610c440cddcac754551a2441dd699e396ec2c9c5c78269223"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000332.txt": {
+      "bytes": 195,
+      "sha256": "1514502e81a05106d68c8f851a785ecbd8e0ab07a54e1de0aa151b0fc0817652"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000339.txt": {
+      "bytes": 352,
+      "sha256": "5df9a024b38a1642f42ab55c8c30191f241ec7aa99f454e90b060dd02162cd29"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000340.txt": {
+      "bytes": 348,
+      "sha256": "ac1e759d5923b9ca3ad0b3195ca6907388c9d560eb0bb2fff6f66e55524e8d2e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000344.txt": {
+      "bytes": 348,
+      "sha256": "c94b751f50e36fef2470cc2c7ef76c5d2a98558bd5ce0f83a64fb7fb21db8410"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000358.txt": {
+      "bytes": 297,
+      "sha256": "2afec9f5b039da90cc09f4e675d25af09ae5028b7e81f03be8960bfac3c02464"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000368.txt": {
+      "bytes": 196,
+      "sha256": "bfed770c8755ec077aa694b5592749430a21c4136429729a23d353db8ad9c1f7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000372.txt": {
+      "bytes": 498,
+      "sha256": "87fd8bcd7f2a00dfb61fa5d05a60ddf8781365e8d011d158fd01ef906b303461"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000374.txt": {
+      "bytes": 247,
+      "sha256": "1299c0822526532610339110df40dfd7614be02fae69d4bbf91ccc92478ca611"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000376.txt": {
+      "bytes": 347,
+      "sha256": "07d84b0f11e786835ab2132b7ee078a8920f19b261a171f43c6e00a5635ab75c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000384.txt": {
+      "bytes": 196,
+      "sha256": "afeaeb3e8b57816a63205b02470a3a81273610e71b3176aed026bfa408595718"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000390.txt": {
+      "bytes": 295,
+      "sha256": "7714f99a627a23c9cc922265205ef7c904a9a21210f1127c8eca235a7317f075"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000394.txt": {
+      "bytes": 447,
+      "sha256": "1168009e23ac8752e9f654aed34a69fa35e3770403c514f0b812f80f2feb8638"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000398.txt": {
+      "bytes": 348,
+      "sha256": "6d0e260812a5633f61047cfaeb64ea7897eae3f24ee09823a79c2533a455829b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000410.txt": {
+      "bytes": 442,
+      "sha256": "0563f48de6f1904fbd5db5ea33efa8fe971adb98930fa2bb20299685491c20d7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000413.txt": {
+      "bytes": 293,
+      "sha256": "66e09ad1cbcffaf02b9053111fd8685f0bd02273b4817782ca2e38c56c1cf149"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000415.txt": {
+      "bytes": 247,
+      "sha256": "8de3df02150123f94a0ef828afefd873551d9c071c856cbd119252716e0b40e9"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000423.txt": {
+      "bytes": 293,
+      "sha256": "6c81828fd2dac0e28e2c2358a3a9a42b5ad7e1acc7178e2539bd739b1294fe4c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000424.txt": {
+      "bytes": 199,
+      "sha256": "08aeb338b08c75b56ffefb8cf511d718a07cb1c990f55f4ada49a7b703473e25"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000426.txt": {
+      "bytes": 349,
+      "sha256": "f935dc9cf17a85cbd0d1ee660732dbd97d18d137b9e048c5f1484fcd395f0278"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000430.txt": {
+      "bytes": 292,
+      "sha256": "afb3784c3f48214bb0fd7191eafbc3810d23679668be2b1d2f5af5f94ba5897f"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000437.txt": {
+      "bytes": 246,
+      "sha256": "c78e21e4159ba620b14dd9aa35f08cf494eb5827fe447dcd984629708599a42c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000449.txt": {
+      "bytes": 346,
+      "sha256": "084207816daf11ada96862fcb7f6630741f93bec36614a6421a8696cb76e25bc"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000452.txt": {
+      "bytes": 197,
+      "sha256": "70caf62e7952717ddb09d6efe9ae76d7bce95043726000f6ded3a7985745a69c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000474.txt": {
+      "bytes": 345,
+      "sha256": "8e9820caa97bd799ffdbec8ac5d4450cfed08484218a1edd3a757c68736403c1"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000478.txt": {
+      "bytes": 395,
+      "sha256": "efc280b4857ead36224d391c91d430e595f2a529070e8839283023c74061dac7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000479.txt": {
+      "bytes": 299,
+      "sha256": "9734ddbf0895c886aaa4e37fbd36155b20133c1578da4c7d50b3b0e496d60de7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000483.txt": {
+      "bytes": 344,
+      "sha256": "7188e339e10421ca7c92c5c1f9933deac34f6cedad03c98bfcb93855bb72e674"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000485.txt": {
+      "bytes": 344,
+      "sha256": "5dabc013f6886670bceca5413d3f6f9a45a47c574bf9eb80c81720a323f6cbe2"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000491.txt": {
+      "bytes": 290,
+      "sha256": "6b8558694776effbe44828f8aab80d0fcb3e78a56ecc7e83c9c79602e6bf89b2"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000495.txt": {
+      "bytes": 349,
+      "sha256": "b06ff1552443f4ba35774a1cf2c0120f24d9e2a6dd93e5cd4e0ad0d2489929c5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000499.txt": {
+      "bytes": 249,
+      "sha256": "799776a33ebbc776623343625773318b4f9a15b14f87718c5c50de81e27c04ad"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000505.txt": {
+      "bytes": 247,
+      "sha256": "4bcedde725523ebbff44d08bc01c7920da1c842dc07c75976a58462f14d5ee4e"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000511.txt": {
+      "bytes": 296,
+      "sha256": "d9ed2b4fd112958322e76deec83bbea5f93fb2084dedac86b1fe661440719917"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000513.txt": {
+      "bytes": 398,
+      "sha256": "5bf493d9f9fd19a99ff02bf884dd6a8afeb0fcff245ce821641a7cd848998d12"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000525.txt": {
+      "bytes": 349,
+      "sha256": "17ec00a751195cf4d2e2c687b07c659f70d81497b9462739eb185078a5e76d22"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000535.txt": {
+      "bytes": 297,
+      "sha256": "34ae18469b7670dc370e63bfaa55d6d5b56abcc0ae26fc813ab75ae880373edf"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000537.txt": {
+      "bytes": 397,
+      "sha256": "2b38680dbf2c601c6ac0b389773f4a757a43821aa495530495a525a39414a212"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000543.txt": {
+      "bytes": 245,
+      "sha256": "36ffb7225eb92c23ba85a420dfb9fd22f2f4e073734855197937beca637e9f47"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000544.txt": {
+      "bytes": 248,
+      "sha256": "53ebb5741f63d98729520312abecc045b548e07b6c84ce4028bd23c59871c376"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000547.txt": {
+      "bytes": 349,
+      "sha256": "ae4bc5d434ef10231755fdbb2997437c1379770661316de876c3323e3196e4f5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000551.txt": {
+      "bytes": 199,
+      "sha256": "7ac6e0ca8bc8aa6d19e5506968b8f61ef026ccdf472977bd2910adf411b5c996"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000553.txt": {
+      "bytes": 346,
+      "sha256": "936cfd3fab5197b142dcfc4947fc0b52230a1a90f3907453620904171c044d62"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000556.txt": {
+      "bytes": 348,
+      "sha256": "ca4f3c88fc28c8fff5a91e9ec46b2655485a63e7aca89a04b57091d459461d42"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000560.txt": {
+      "bytes": 391,
+      "sha256": "3f8bf5b7c3b1dbf996f7fe8f0187da580cd2d42f3d807dbe266843df3b56a5ad"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000563.txt": {
+      "bytes": 291,
+      "sha256": "3bc2abd4e1e613162358d3e6dab51f186f04d9d7e58af4be7daca5d9c5250557"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000564.txt": {
+      "bytes": 347,
+      "sha256": "ae290c81b3aa01c785c71e8c66a10de044d2ff60505cd5fc378c2f52d830839c"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000569.txt": {
+      "bytes": 243,
+      "sha256": "a3329974d2cbad158308ee82f7083611ecc43cd68a0564bfdb851e069db1b3b7"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000575.txt": {
+      "bytes": 300,
+      "sha256": "6e9e93863bb1777c4520dedb171854282cf8ed18e790fcd1acabd82987c7c4f5"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000578.txt": {
+      "bytes": 349,
+      "sha256": "2019ab39b06c1769b732d09efa2820c0fe93ecf39039549bbb66d662b5259960"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000589.txt": {
+      "bytes": 296,
+      "sha256": "4d24415bb89a17826b28c317bec5b2e643b778f00e508217f35926aea6a44990"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000591.txt": {
+      "bytes": 150,
+      "sha256": "48fd079c9b013d16ee70563a4e7c01910911ef4977c2e920c1bb2012d23dea63"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/labels/circuit_000596.txt": {
+      "bytes": 344,
+      "sha256": "4ce2ff82b46f7a66d63498658f42f7ab3252ff62c7be1e5f2a98b8925baf9fcb"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/metrics.json": {
+      "bytes": 3476,
+      "sha256": "6f57f24b6931d5b60388d66aed3b9da47a54cc1648e490f210820628936d8d24"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/val_batch0_labels.jpg": {
+      "bytes": 127878,
+      "sha256": "c763b5c7dcb8b23a34748d1248ad12b247f64237b530c9905145c992202ccb72"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/val_batch0_pred.jpg": {
+      "bytes": 130693,
+      "sha256": "dda53d13d1abce1a0e4d6149ee2453f1a4c81ac2d4ce48461f9f8e65b1d2822b"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/val_batch1_labels.jpg": {
+      "bytes": 129131,
+      "sha256": "3f54a737a9d2bb582d38a42035a62b9e86e871c8a61adb0fbc2db275e95156fc"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/val_batch1_pred.jpg": {
+      "bytes": 130821,
+      "sha256": "509f5e8578b823903bddb8fe8ae9a37f55bf259ac7b9461a7ac31083e1520dc8"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/val_batch2_labels.jpg": {
+      "bytes": 132535,
+      "sha256": "a3f8a4e2afc1b9e81f7616cf3598281f7f8b23ac39355fdbf0e355cb113a3565"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_validation/val_batch2_pred.jpg": {
+      "bytes": 134524,
+      "sha256": "413380611d772857deef930da2ad02e3addaa827120c2277e539883415069707"
+    },
+    "runs/augmented_physics/real_evaluation_20261031_1a572ba/synthetic_vs_real_ap.png": {
+      "bytes": 39875,
+      "sha256": "2234d44e6d7fcc5c098628ffc8628761f96926b95fb582b5df4e8b2c5ecfd9be"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 232522.jpg": {
+      "bytes": 52915,
+      "sha256": "7877bbb0d2053e8181e48f4a74e32729399e00daf012d1e42dc7d981d384aa2f"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 232632.jpg": {
+      "bytes": 37124,
+      "sha256": "7592b63fdb1eba0cdf5a6c672ae427334697c23435f8c091756c6345073f7702"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 232905.jpg": {
+      "bytes": 45769,
+      "sha256": "2da575aea216fa530d55464ac7a798062cd9afa51fb97c6fbbc98e9171f0c9f8"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 232921.jpg": {
+      "bytes": 46135,
+      "sha256": "8e96db398a00796ebdbbe48a676acecf9efc4cd5b3d8d5e85adc2c241034ceb4"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234003.jpg": {
+      "bytes": 37076,
+      "sha256": "e92976215ed74c4b5d66be08b9f56fbbd06df77ef4923785af1dc3f24fe31467"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234104.jpg": {
+      "bytes": 29168,
+      "sha256": "226e6571890fd51213d3df23826651d326c2ecca56e365ff8c0a4ced81990225"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234210.jpg": {
+      "bytes": 20314,
+      "sha256": "a813b54d7e06fa1c9131052f50e19b8f750181538953f0ed0cb2d46617764e89"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234420.jpg": {
+      "bytes": 26899,
+      "sha256": "5d8c576ffdee522fe54ab8ac2bf3dc24556e14da3c087132b7f8df9a1be53a3e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234517.jpg": {
+      "bytes": 34863,
+      "sha256": "069e29ff533f49fc880b005be2d49bdd47196b31cc37138daf5132e0bb8632cb"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234541.jpg": {
+      "bytes": 29415,
+      "sha256": "2b51985c245acda35a3f9868663e5dc669961688a8c232bc360e4b62009388b8"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234621.jpg": {
+      "bytes": 34086,
+      "sha256": "b3801e735a0a7944da77b6927e60d1ea9b2e002dd46dcff14a2c8fb78bace191"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234647.jpg": {
+      "bytes": 30227,
+      "sha256": "424bffadfd7ab320c51602b549f57fe17a0d693d0537042530161f520218411d"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234712.jpg": {
+      "bytes": 21261,
+      "sha256": "e08ee742fdcc0fb413d661029f6792d5e95055e9919cc47a58efaa92bcd5e773"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234759.jpg": {
+      "bytes": 32652,
+      "sha256": "8fc34e4f1cd84db9361c84166fb71a839d45570718485b9e64d1a5d338df862e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234822.jpg": {
+      "bytes": 26481,
+      "sha256": "1e54300732db7363e1be51fb315d5dc9339febb1cda8be66ac00652d7929a9c6"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234851.jpg": {
+      "bytes": 39035,
+      "sha256": "a74d358001e2ef5ae44a16a5d43866c967066320c3fedff1214b73ca834464b0"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234914.jpg": {
+      "bytes": 28981,
+      "sha256": "60cd78b64311c2009d792ed624bff17f788101810ded4990cfef385327a10f94"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 234939.jpg": {
+      "bytes": 29241,
+      "sha256": "6de88c12c225341e3f33de767b8ad9709b442933acc1c14e80d89da614534e17"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235008.jpg": {
+      "bytes": 27933,
+      "sha256": "db91e6ae674fa3d1f6e8bd2a655287b0599c7cf0b6e3697660355acc3da6c12c"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235028.jpg": {
+      "bytes": 31192,
+      "sha256": "da121d43f008b4901eb66f0a91029fa436791b069da42ce4f82321bd3ec38775"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235106.jpg": {
+      "bytes": 30396,
+      "sha256": "b650c4157acc5ba7d44dfcc8ac288cbd6babbb5e1a1ba4161498f55ae17ea31b"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235305.jpg": {
+      "bytes": 25472,
+      "sha256": "83b21086cec9d4b46134853c603d06b1ad659faa45d4b30f2731590a4e933240"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235329.jpg": {
+      "bytes": 24165,
+      "sha256": "269e08ba951ce62297f61540ad9477cc65995dec586fc4855ef4293b134b9d65"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235350.jpg": {
+      "bytes": 27473,
+      "sha256": "0b0c60a84d2c32fee8221c54f725f6e098699426b78afeaf5b35694d5be6a286"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235413.jpg": {
+      "bytes": 31313,
+      "sha256": "b10cdf14228edd23e08d35def6b5c1199d7b395ca4dc64be80f891e6fadb31f8"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235428.jpg": {
+      "bytes": 38100,
+      "sha256": "a86e708f4ce1c9b809d64132c1bcbfe4a40916b59f0e85b6238b319299a8d8bd"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235447.jpg": {
+      "bytes": 34818,
+      "sha256": "db716985dfe76ccbc1c5473c7aaf7055e214c60c05ed721c96143a8a199f9309"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235508.jpg": {
+      "bytes": 22868,
+      "sha256": "efcad0e109e74e9ee9ad19cfcabb3a307d2f780243c9b638408e0b1f5c519f48"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235606.jpg": {
+      "bytes": 33742,
+      "sha256": "94a0628309d329125e57a9648ca61bcb46a7183afdcced99ef1c8ad8f77f27c0"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235636.jpg": {
+      "bytes": 33073,
+      "sha256": "0b6feaf4d0573ccb6863a1dcf3d149a9a2c51f9989668e5fa1464ed830de5c46"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235705.jpg": {
+      "bytes": 29697,
+      "sha256": "d5fbba00c368ae791764bdae107deeb9ef659cbde1f832e5c0ac044a8317319e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235725.jpg": {
+      "bytes": 39260,
+      "sha256": "6d9257e09aba9211bfdd52a1b4c62d2f1913c4fe9e5d16f16e5bb1157a775a14"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235808.jpg": {
+      "bytes": 28912,
+      "sha256": "c3a9b29839c0fca75f04e4f90ce661170681f3bc20aef024276be8cf34e0fc4e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235825.jpg": {
+      "bytes": 34863,
+      "sha256": "c5691054f5400157827350d0e54d15580e6ea7d161a044ae3b10db8e29910b07"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235847.jpg": {
+      "bytes": 42198,
+      "sha256": "0dc80731166d8d9013ebc78e07153bedc5c93257d9f1e98bcd3d01dfde8190e7"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-30 235951.jpg": {
+      "bytes": 32319,
+      "sha256": "899de010ee645346699fbc813a149bf8ae2c09d604e8101209f030ec45ef3169"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000005.jpg": {
+      "bytes": 33490,
+      "sha256": "5080511e1cb31a8fbe14dadff37e5c04f968a64b411b4f7cc527a2db284c94d3"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000027.jpg": {
+      "bytes": 40444,
+      "sha256": "e1b70c718b19ab8b233234f644cf0c2561532a3817133b57a93beeb769eec69c"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000052.jpg": {
+      "bytes": 41349,
+      "sha256": "5935272cbb8885aa56d242891a70d2bc66cae029396b434909029809b9370001"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000108.jpg": {
+      "bytes": 22653,
+      "sha256": "07c9e2e539e011219d61cfccb07176b48209d923f42511af438ac015dfd3f176"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000123.jpg": {
+      "bytes": 18194,
+      "sha256": "56beba4f0462717d52318a053acfdf72923b3f0c59feeba2a586874395ced402"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000634.jpg": {
+      "bytes": 33474,
+      "sha256": "0712309162e3a26a79c7d3a7cf85e895a6e1087b18e072d6adae73157431d1a0"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000654.jpg": {
+      "bytes": 51273,
+      "sha256": "90cb005c900d6469e2615b195df9532874ea863d2419e82d194bfbce6a403b82"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000742.jpg": {
+      "bytes": 34022,
+      "sha256": "355bcdeedbc182a744d67cc3d2a75d64773da34218e86f0f469595113321ea89"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000756.jpg": {
+      "bytes": 39147,
+      "sha256": "4e421584f526703010b1c31b712cff949c72ecf0a6b18e3e64752e35a1e5afd6"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000816.jpg": {
+      "bytes": 33552,
+      "sha256": "344c1c355a54d0cc1255070396efc60c519b9b827759e292012f8a2238497dcc"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000838.jpg": {
+      "bytes": 19055,
+      "sha256": "f844b67b86ba7940e326c603ba53572c67a87a1079a76f33a615660fe513726d"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000857.jpg": {
+      "bytes": 28969,
+      "sha256": "a3fdc63df50916544a118fb860f8c1972ee642f6ee5883dd8b00a72a59ee2053"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000926.jpg": {
+      "bytes": 39626,
+      "sha256": "eb58a6d61013a783c7555219c4341ad3c15ad1c0c8128ea501a9f806ef4d83f4"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 000946.jpg": {
+      "bytes": 40913,
+      "sha256": "2d260202f89b79f432b31d6519f826e5adad1e5b39213a387d405ac373ef3a7e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001022.jpg": {
+      "bytes": 28206,
+      "sha256": "79ccb5a39c31893c31f2eb6aa0796daa66d1843eaf717191a42b842d60ed19ae"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001102.jpg": {
+      "bytes": 25516,
+      "sha256": "af606d5a048f667b6ac9c016c435092d646edecce27089dac34cc9f38ddb5626"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001231.jpg": {
+      "bytes": 30294,
+      "sha256": "edfb9972ed56e15845ce185278ab0a7cc5d454a3fd2b3aa149228d3a83996148"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001314.jpg": {
+      "bytes": 25633,
+      "sha256": "a87e45a953fc578a398af4fbc8c804ef86a8058494de4466e86f1d5eefb10c02"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001333.jpg": {
+      "bytes": 17780,
+      "sha256": "e0b180b0eb632d9053f71973423bc064290912a583b10e1cd264f00a04db9599"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001404.jpg": {
+      "bytes": 25037,
+      "sha256": "23dfb209519458c92d8d7a0b2441b8756a5b7afb597f76b771bf48aff0b3896a"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001423.jpg": {
+      "bytes": 24026,
+      "sha256": "f011e67dcaabddc034f099271ac9392eb1945014034344957e7aefc8211d6e9a"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001447.jpg": {
+      "bytes": 27706,
+      "sha256": "115390676b86a6d56bd99f26dd883149b0d0660a7286532b49678ff6e6e9a5a2"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/Screenshot 2026-10-31 001508.jpg": {
+      "bytes": 29165,
+      "sha256": "175ef435b1eca508c807973136971f9c869b0a89eca545fa2f4573ece8ab8a72"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 232522.txt": {
+      "bytes": 242,
+      "sha256": "8bbf28b3af4b19f53c6f28db9dd41df66384fdb74ce316273a7e31e490d192f2"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 232632.txt": {
+      "bytes": 96,
+      "sha256": "d214e8df0724c8a607d74019bb2ffd9c8d4150cc41c1dd0c0236c8e9630bd735"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 232905.txt": {
+      "bytes": 338,
+      "sha256": "cb829381b42d125108beb28eb78a7175b65e749bcafa9851d888b4cfa55f4471"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 232921.txt": {
+      "bytes": 342,
+      "sha256": "9db8e4262365e5e958c4be61de3e591c885d29c003b24cc52183eff55b1cab4e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234003.txt": {
+      "bytes": 341,
+      "sha256": "a9a9326e18dcbc88ed42809cfea349c0af3c327a3543cc8eece8e1b0254acc73"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234104.txt": {
+      "bytes": 192,
+      "sha256": "55e171cb6cf68b58b1e336a9a110786ad6e604fe25fdfa6c58617711c6a97401"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234210.txt": {
+      "bytes": 192,
+      "sha256": "fadc30975a4d42c706ffef044c3f2d896209891311ee361acd5968ac26bd1f25"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234420.txt": {
+      "bytes": 192,
+      "sha256": "eb146014acc59ba9875fac92d970fda7018826259cf2ee64df1dba9e1d41f8f8"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234517.txt": {
+      "bytes": 294,
+      "sha256": "81015955061537f1c2e35821915c30b4ce5d002fc0d426b2cf0250cabad2eb1c"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234541.txt": {
+      "bytes": 243,
+      "sha256": "4c0082055cfe734241a9e357f483b06e9e690640fed728d369fe48480a09752c"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234621.txt": {
+      "bytes": 340,
+      "sha256": "afc62cbb5046ebbe7e774f9b70f2f54a163be43b86eca2ca56285a00cfbc1b48"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234647.txt": {
+      "bytes": 243,
+      "sha256": "d88ae1dc810ced59a58184176f4ff856e5d4b70165ca6d1c976765e4f3756a5f"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234712.txt": {
+      "bytes": 146,
+      "sha256": "bba869e98205a697be344081d3a26c37f3920fedcaff2e1c1e9f46a2a2730dc6"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234759.txt": {
+      "bytes": 342,
+      "sha256": "9a5ce584a0ff965a2db165a05a596240003bbb37c34c7ad7e0391ffc608c5a5a"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234822.txt": {
+      "bytes": 196,
+      "sha256": "a329d708b93ac42e6db7cfc9afc2d0a4b1a79de87390e8307dcf0300d552a893"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234851.txt": {
+      "bytes": 243,
+      "sha256": "6299e1d28299306b25c5f5a5d1bda8464472d9f4f55a383745be0ff47e12e97a"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234914.txt": {
+      "bytes": 288,
+      "sha256": "9636d43f736222389463a9a5a2f76115a38d3a454671c2e32053c9f291571fbf"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 234939.txt": {
+      "bytes": 242,
+      "sha256": "846a7e2dadf56c63fb0a98bb70e1572dcae923459acb6a267a021b90587738db"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235008.txt": {
+      "bytes": 241,
+      "sha256": "c7c0a6407396172cf1c0345f0c566a447f9e7009742279e086208747ebc2f9c8"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235028.txt": {
+      "bytes": 193,
+      "sha256": "dfd42900ebd97485e520670b34457810fc2181553a21069f05caa8254fbc54c2"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235106.txt": {
+      "bytes": 194,
+      "sha256": "bb0f5f494a9e0878d6c5223c1f404d8ab6adc27bd0ebfcfac8633c900472042d"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235305.txt": {
+      "bytes": 96,
+      "sha256": "d54a6e11f4f39d24bdabfe35a92ec2aec62536ba1511e5ea9f6a445a351406f1"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235329.txt": {
+      "bytes": 146,
+      "sha256": "9f73348b264b214b14ab01ea470664b1a4ec0e4aaba5977d6df8ec0715945289"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235350.txt": {
+      "bytes": 191,
+      "sha256": "4ba3a0e32c9103cd4dcc6ca6e2be2214a0f5d10f659dc0fab2229fef221cb8ad"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235413.txt": {
+      "bytes": 195,
+      "sha256": "468ec6bf860d10f19634b13868fa215c4fcfb5f27c1246a120d8246c1e7d27b3"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235428.txt": {
+      "bytes": 237,
+      "sha256": "a42b9347b42cc67a044e0f4bb6e1ef8b8f248cdede889afbcb86034199106ebb"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235447.txt": {
+      "bytes": 246,
+      "sha256": "e3104ff62d30a9a394dade7deed58debd3df02fba41e48e31c81b2717bde3333"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235508.txt": {
+      "bytes": 243,
+      "sha256": "241197a917b85853447dcb3c06d1dccdf84c210031e3e93563678fdce09d38a4"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235606.txt": {
+      "bytes": 295,
+      "sha256": "67eb7caa63884ea7581693a6007d1336ababcd844e72075d999b46ea814daa8c"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235636.txt": {
+      "bytes": 290,
+      "sha256": "05e3ba746b1a34db43586bcc469b88b948d6a2eb045009ba3f340884f7c26c4f"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235705.txt": {
+      "bytes": 194,
+      "sha256": "d237bfa2fba57aefb686065c93e2a6304fc3f5922ea7e76659c2c99059ce6275"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235725.txt": {
+      "bytes": 245,
+      "sha256": "4ed5d7ab39d556b2946cf9c5d20090e96e9a7933faeb41b8eb17c29c010d1cea"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235808.txt": {
+      "bytes": 194,
+      "sha256": "1e88f5383bc1498a353dfab67b9859f85e7e2bef54346b42849f77e5f80fc4c9"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235825.txt": {
+      "bytes": 194,
+      "sha256": "5c46e372d2c3e870cd310f04b2ddce72adb7cc4ab85e51f9f98f89bf7f7e92b2"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235847.txt": {
+      "bytes": 247,
+      "sha256": "30fdace2bf01412c6fb4d70bb9ad026f3882f250bfe32fdf91a71606b09ba728"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-30 235951.txt": {
+      "bytes": 243,
+      "sha256": "b25a691ae7dd038ee96a72a2bd2c193030a6ac778c3cf99baed48ba13f07bb5b"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000005.txt": {
+      "bytes": 243,
+      "sha256": "2d5b8791273ea0c369c71bb1a0174cceaad5f2cfdf98cb4d75c03b42941b6fd0"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000027.txt": {
+      "bytes": 246,
+      "sha256": "27a138e894564f222872ab4615acaf4adee171fcea4b2ed1ed09635cc4718bcd"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000052.txt": {
+      "bytes": 344,
+      "sha256": "0322a60ed4d9a75aba3b1035245fe64dcdb0c5807318f9febf56a72bd1885498"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000108.txt": {
+      "bytes": 192,
+      "sha256": "5858350d3a16910bee1ac602f2e5e05a97caf9f3597f63e915911a8d4e04bf0e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000123.txt": {
+      "bytes": 98,
+      "sha256": "03c16b7eb3fccd632b09c43a109ff1e7a022850c53cc9b5334dfa33cb1f7ea61"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000634.txt": {
+      "bytes": 439,
+      "sha256": "956c0f6b311964f9996c5857e06bf933dd349ed4ef3b224e7cee5b20ef3eb8af"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000654.txt": {
+      "bytes": 437,
+      "sha256": "5cf31631f4a038c9f9bce226418b0f5fdf7c803e179ce9cb5ab56c38db8db5cd"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000742.txt": {
+      "bytes": 241,
+      "sha256": "bd4260744cd3ac8a00372ba7bce532403e0c9660b2fb33ddc6bde4a1ab7c5798"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000756.txt": {
+      "bytes": 292,
+      "sha256": "e441aa5f7f402e50d7d0a4d7cf68279e78fc7676027edac9d6af5280e70fa50d"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000816.txt": {
+      "bytes": 289,
+      "sha256": "8f17c7cddf399af69a685390643527a3e84922b5f3372097cae1ac0b580b93ce"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000838.txt": {
+      "bytes": 195,
+      "sha256": "778ebdbae3f5509efea12e6ea80e63ba278cf22b44bb1098581759486635d240"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000857.txt": {
+      "bytes": 295,
+      "sha256": "1e691afdd81ec96fcd48df540a1d80baef4c3d803245a4f170aae91d20a73eb0"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000926.txt": {
+      "bytes": 439,
+      "sha256": "8df37163222b835e980a278bf265c658290a559bf482496c1fcbd79f48a9b1fa"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 000946.txt": {
+      "bytes": 435,
+      "sha256": "8c0ec44779b3462cd9fdcd6821f2399c1d436577a9ebdd95321f87c32fab35bc"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001022.txt": {
+      "bytes": 292,
+      "sha256": "a18e033ce951c392bc2f66f6403bd46bedf19403d4387f5892ea791e61bfda63"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001102.txt": {
+      "bytes": 292,
+      "sha256": "a9b4b0a54b42c90ed4f0b402acd2604fdcf6941a3ac13beb7f73671f7c647c63"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001231.txt": {
+      "bytes": 292,
+      "sha256": "96525402e26dbf2b198fa5324c231957e645135fce82d205a75a1a18680af514"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001314.txt": {
+      "bytes": 288,
+      "sha256": "86f185c4e8af76112cf068611041d80db7970c6d03fcc5aa6cdf906e00bd666e"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001333.txt": {
+      "bytes": 243,
+      "sha256": "c91a2dfcd42235d3d81498545db68cb2d40c20ee34bb8bf01318663ce3ae33cb"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001404.txt": {
+      "bytes": 245,
+      "sha256": "0927355246ee531ec886d60aa3e82b251cb08d8dc813bb661dac181b69209ebf"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001423.txt": {
+      "bytes": 343,
+      "sha256": "1f4ea57073d18b313a4d9d8dcbb28570436d1be73f706d38ae16fe8b8a98bf0b"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001447.txt": {
+      "bytes": 247,
+      "sha256": "a3d742c863c34905323ce9ea0fb15a797e008b30dc813d5f2a773993877c6368"
+    },
+    "runs/augmented_physics/real_textbook_test_20261031_1a572ba/labels/Screenshot 2026-10-31 001508.txt": {
+      "bytes": 343,
+      "sha256": "36ee2c764cc4ff27c9608c7d42b9ec878d406a5d5e12b075e5271a32a35b7183"
+    }
+  }
+}

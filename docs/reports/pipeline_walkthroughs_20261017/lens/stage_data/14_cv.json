@@ -1,0 +1,279 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 14,
+  "component": "Domain CV: raw candidates → selected geometry",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 200,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\thin_lens_cv.py",
+      "function": "ThinLensCVCandidateExtractor.extract",
+      "line": 28,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 215
+      }
+    }
+  ],
+  "upstream_stage": "OCR-region suppression before geometry detection",
+  "downstream_stage": "SAM2 segmentation prompted by CV",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00200_ThinLensCVCandidateExtractor.extract",
+        "value": {
+          "image_bgr": {
+            "shape": [
+              960,
+              1280,
+              3
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.npy",
+            "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.png"
+          },
+          "source_width": 1280,
+          "source_height": 960,
+          "ocr_boxes": [
+            {
+              "x": 197.0,
+              "y": 748.0,
+              "width": 859.0,
+              "height": 62.0
+            },
+            {
+              "x": 933.0,
+              "y": 189.0,
+              "width": 208.0,
+              "height": 55.0
+            },
+            {
+              "x": 188.0,
+              "y": 220.0,
+              "width": 135.0,
+              "height": 57.0
+            },
+            {
+              "x": 1118.0,
+              "y": 646.0,
+              "width": 129.0,
+              "height": 56.0
+            },
+            {
+              "x": 102.0,
+              "y": 449.0,
+              "width": 70.0,
+              "height": 51.0
+            },
+            {
+              "x": 1102.0,
+              "y": 449.0,
+              "width": 69.0,
+              "height": 51.0
+            },
+            {
+              "x": 356.0,
+              "y": 451.0,
+              "width": 42.0,
+              "height": 47.0
+            },
+            {
+              "x": 849.0,
+              "y": 449.0,
+              "width": 38.0,
+              "height": 43.0
+            }
+          ]
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Image/edge evidence and OCR boxes in source pixels, with no hand-authored landmarks.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00200_ThinLensCVCandidateExtractor.extract",
+        "return_value": {
+          "optical_axis": {
+            "start": {
+              "x": 650.0,
+              "y": 432.0
+            },
+            "end": {
+              "x": 1124.0,
+              "y": 432.0
+            }
+          },
+          "lens_center": {
+            "x": 641.0,
+            "y": 432.0
+          },
+          "lens_line": {
+            "start": {
+              "x": 641.0,
+              "y": 423.0
+            },
+            "end": {
+              "x": 641.0,
+              "y": 189.0
+            }
+          },
+          "object_arrow": null,
+          "image_arrow": {
+            "start": {
+              "x": 1176.0,
+              "y": 607.0
+            },
+            "end": {
+              "x": 1176.0,
+              "y": 432.0
+            }
+          },
+          "all_lines": [
+            {
+              "start": {
+                "x": 650.0,
+                "y": 432.0
+              },
+              "end": {
+                "x": 859.0,
+                "y": 432.0
+              }
+            },
+            {
+              "start": {
+                "x": 880.0,
+                "y": 435.0
+              },
+              "end": {
+                "x": 1124.0,
+                "y": 435.0
+              }
+            },
+            {
+              "start": {
+                "x": 635.0,
+                "y": 278.0
+              },
+              "end": {
+                "x": 860.0,
+                "y": 429.0
+              }
+            },
+            {
+              "start": {
+                "x": 880.0,
+                "y": 438.0
+              },
+              "end": {
+                "x": 1181.0,
+                "y": 641.0
+              }
+            },
+            {
+              "start": {
+                "x": 652.0,
+                "y": 435.0
+              },
+              "end": {
+                "x": 949.0,
+                "y": 550.0
+              }
+            },
+            {
+              "start": {
+                "x": 641.0,
+                "y": 423.0
+              },
+              "end": {
+                "x": 641.0,
+                "y": 189.0
+              }
+            },
+            {
+              "start": {
+                "x": 638.0,
+                "y": 680.0
+              },
+              "end": {
+                "x": 638.0,
+                "y": 484.0
+              }
+            },
+            {
+              "start": {
+                "x": 255.0,
+                "y": 281.0
+              },
+              "end": {
+                "x": 451.0,
+                "y": 281.0
+              }
+            },
+            {
+              "start": {
+                "x": 796.0,
+                "y": 495.0
+              },
+              "end": {
+                "x": 1166.0,
+                "y": 638.0
+              }
+            },
+            {
+              "start": {
+                "x": 471.0,
+                "y": 370.0
+              },
+              "end": {
+                "x": 629.0,
+                "y": 431.0
+              }
+            },
+            {
+              "start": {
+                "x": 470.0,
+                "y": 278.0
+              },
+              "end": {
+                "x": 642.0,
+                "y": 278.0
+              }
+            },
+            {
+              "start": {
+                "x": 1176.0,
+                "y": 607.0
+              },
+              "end": {
+                "x": 1176.0,
+                "y": 432.0
+              }
+            },
+            {
+              "start": {
+                "x": 263.0,
+                "y": 282.0
+              },
+              "end": {
+                "x": 454.0,
+                "y": 359.0
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "Source-supported candidate lines/circles/polygons and selected geometry, with scores, rejection/selection diagnostics and unresolved ambiguity where evidence is insufficient.",
+  "expected_diagram": "Ground the whole lens/axis, object base and tip, image base and tip, focal markers and ray paths independently. A missing object detection must remain missing evidence, not become an assumed exploration object.",
+  "status": "FAIL — PERCEPTION / SELECTION",
+  "finding": "Returned lens_center=(641,432), lens_line=(641,423)→(641,189), object_arrow=null. The partial line becomes aperture_height_px=234. The original shows an object arrow and a full lens; the selected overlay exposes this loss.",
+  "change_or_loss": "Candidate generation and selection are distinct. Compare all_candidates_overlay with selected output; inspect locals for fitted lines, rejected candidates and thresholds."
+}

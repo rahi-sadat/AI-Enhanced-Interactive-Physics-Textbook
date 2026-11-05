@@ -1,0 +1,413 @@
+{
+  "trace": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "stages": [
+    {
+      "stage": 1,
+      "title": "Browser selects the original diagram",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/01_upload.json",
+      "backend_calls": [],
+      "frontend_event_count": 2
+    },
+    {
+      "stage": 2,
+      "title": "HTTP request reaches /api/ingest",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/02_http_in.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 3,
+      "title": "Upload persistence and dimension decoding",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/03_asset.json",
+      "backend_calls": [
+        "00003_UploadService.ingest"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 4,
+      "title": "PageIR / whole-figure coordinate frame",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/04_page.json",
+      "backend_calls": [
+        "00006_PageIRBuilder.build"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 5,
+      "title": "Actual Gemini request and response",
+      "execution": "EXECUTED",
+      "status": "PASS WITH LIMITS",
+      "bundle": "stage_data/05_vlm.json",
+      "backend_calls": [
+        "00010_GeminiVisionProvider.analyze_diagram",
+        "00012_Models.generate_content"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 6,
+      "title": "Semantic validation, confidence caps and thresholds",
+      "execution": "EXECUTED",
+      "status": "PASS WITH LIMITS",
+      "bundle": "stage_data/06_semantic.json",
+      "backend_calls": [
+        "00009_PhysicsVisionAnalyzer.analyze",
+        "00015_validate_semantic_payload",
+        "00051_PhysicsVisionAnalyzer._apply_thresholds"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 7,
+      "title": "Initial semantic BookIR",
+      "execution": "EXECUTED",
+      "status": "PASS WITH LIMITS",
+      "bundle": "stage_data/07_book.json",
+      "backend_calls": [
+        "00007_BookUnderstandingPipeline.analyze",
+        "00052_BookUnderstandingPipeline._build_book_ir_from_result"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 8,
+      "title": "Evidence dispatch and source decode",
+      "execution": "EXECUTED",
+      "status": "PASS",
+      "bundle": "stage_data/08_route.json",
+      "backend_calls": [
+        "00055_GrounderRegistry.find_grounder",
+        "00063_load_and_validate_source_image"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 9,
+      "title": "RapidOCR: first text/box observations",
+      "execution": "EXECUTED",
+      "status": "OBSERVED / REVIEW ALTERNATIVES",
+      "bundle": "stage_data/09_rapid.json",
+      "backend_calls": [
+        "00067_RapidOCRProvider.extract"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 10,
+      "title": "EasyOCR: independent OCR candidates",
+      "execution": "EXECUTED",
+      "status": "OBSERVED / REVIEW ALTERNATIVES",
+      "bundle": "stage_data/10_easy.json",
+      "backend_calls": [
+        "00116_EasyOCRBanglaProvider.extract"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 11,
+      "title": "Symbol candidates, deduplication and final OCR",
+      "execution": "EXECUTED",
+      "status": "OBSERVED / REVIEW ALTERNATIVES",
+      "bundle": "stage_data/11_ocr.json",
+      "backend_calls": [
+        "00066_MultiOCRRouter.extract",
+        "00167_deduplicate_spatial_tokens",
+        "00175_GreekSymbolVisualOCR.extract_symbols",
+        "00176_PhysicsSymbolCandidateResolver.enrich_token",
+        "00178_PhysicsSymbolCandidateResolver.enrich_token",
+        "00180_PhysicsSymbolCandidateResolver.enrich_token",
+        "00182_PhysicsSymbolCandidateResolver.enrich_token",
+        "00184_PhysicsSymbolCandidateResolver.enrich_token",
+        "00186_PhysicsSymbolCandidateResolver.enrich_token",
+        "00188_PhysicsSymbolCandidateResolver.enrich_token"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 12,
+      "title": "Grayscale, blur and edge extraction",
+      "execution": "EXECUTED",
+      "status": "FRAME PASS / LOSSY PROCESSING",
+      "bundle": "stage_data/12_pre.json",
+      "backend_calls": [
+        "00197_preprocess_diagram"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 13,
+      "title": "OCR-region suppression before geometry detection",
+      "execution": "EXECUTED",
+      "status": "NO EARLIER GEOMETRIC FAILURE DEMONSTRATED",
+      "bundle": "stage_data/13_mask.json",
+      "backend_calls": [
+        "00198_mask_out_text_regions"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 14,
+      "title": "Domain CV: raw candidates → selected geometry",
+      "execution": "EXECUTED",
+      "status": "FAIL — PERCEPTION / SELECTION",
+      "bundle": "stage_data/14_cv.json",
+      "backend_calls": [
+        "00195_CircuitCVCandidateExtractor.extract"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 15,
+      "title": "SAM2 segmentation prompted by CV",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/15_sam.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 16,
+      "title": "Semantic-to-spatial grounding and parameter binding",
+      "execution": "EXECUTED",
+      "status": "FAIL / UPSTREAM DAMAGE PROPAGATES",
+      "bundle": "stage_data/16_ground.json",
+      "backend_calls": [
+        "01183_CircuitGrounder.ground"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 17,
+      "title": "Grounded BookIR and OCR-enriched PageIR",
+      "execution": "EXECUTED",
+      "status": "FAIL / UPSTREAM DAMAGE PROPAGATES",
+      "bundle": "stage_data/17_fused.json",
+      "backend_calls": [
+        "00054_EvidenceExtractionPipeline.extract_and_fuse"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 18,
+      "title": "Enforce authoritative source dimensions",
+      "execution": "EXECUTED",
+      "status": "FRAME PASS; GEOMETRY STILL WRONG",
+      "bundle": "stage_data/18_dimensions.json",
+      "backend_calls": [
+        "01234_enforce_source_dimensions"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 19,
+      "title": "Automatic resolution and explicit policy values",
+      "execution": "EXECUTED",
+      "status": "ASSUMPTIONS / UNRESOLVED EVIDENCE",
+      "bundle": "stage_data/19_auto.json",
+      "backend_calls": [
+        "01235_AutoResolutionEngine.resolve"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 20,
+      "title": "Resolution decisions, units and calibration",
+      "execution": "EXECUTED",
+      "status": "ASSUMPTIONS / UNRESOLVED EVIDENCE",
+      "bundle": "stage_data/20_calibration.json",
+      "backend_calls": [
+        "01257_ResolutionEngine.auto_resolve",
+        "01259_CalibrationEngine.derive_for_subtype",
+        "01260_CalibrationEngine.derive_for_subtype",
+        "01287_ResolutionEngine.auto_resolve",
+        "01289_CalibrationEngine.derive_for_subtype",
+        "01290_CalibrationEngine.derive_for_subtype",
+        "01352_ResolutionEngine.auto_resolve",
+        "01354_CalibrationEngine.derive_for_subtype",
+        "01355_CalibrationEngine.derive_for_subtype"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 21,
+      "title": "Requirement and ambiguity analysis",
+      "execution": "EXECUTED",
+      "status": "BLOCKS CORRECTLY",
+      "bundle": "stage_data/21_requirements.json",
+      "backend_calls": [
+        "01239_ResolutionAnalyzer.analyze",
+        "01241_ResolutionAnalyzer._check_geometry_requirements",
+        "01242_ResolutionAnalyzer._check_parameter_requirements",
+        "01244_ResolutionAnalyzer._check_circuit_components",
+        "01262_ResolutionAnalyzer.analyze",
+        "01264_ResolutionAnalyzer._check_geometry_requirements",
+        "01265_ResolutionAnalyzer._check_parameter_requirements",
+        "01267_ResolutionAnalyzer._check_circuit_components",
+        "01292_ResolutionAnalyzer.analyze",
+        "01294_ResolutionAnalyzer._check_geometry_requirements",
+        "01295_ResolutionAnalyzer._check_parameter_requirements",
+        "01297_ResolutionAnalyzer._check_circuit_components",
+        "01310_ResolutionAnalyzer.analyze",
+        "01312_ResolutionAnalyzer._check_geometry_requirements",
+        "01313_ResolutionAnalyzer._check_parameter_requirements",
+        "01315_ResolutionAnalyzer._check_circuit_components",
+        "01334_ResolutionAnalyzer.analyze",
+        "01336_ResolutionAnalyzer._check_geometry_requirements",
+        "01337_ResolutionAnalyzer._check_parameter_requirements",
+        "01339_ResolutionAnalyzer._check_circuit_components",
+        "01357_ResolutionAnalyzer.analyze",
+        "01359_ResolutionAnalyzer._check_geometry_requirements",
+        "01360_ResolutionAnalyzer._check_parameter_requirements",
+        "01362_ResolutionAnalyzer._check_circuit_components",
+        "01376_ResolutionAnalyzer.analyze",
+        "01378_ResolutionAnalyzer._check_geometry_requirements",
+        "01379_ResolutionAnalyzer._check_parameter_requirements",
+        "01381_ResolutionAnalyzer._check_circuit_components"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 22,
+      "title": "Readiness decision",
+      "execution": "EXECUTED",
+      "status": "BLOCKS CORRECTLY",
+      "bundle": "stage_data/22_readiness.json",
+      "backend_calls": [
+        "01238_ReadinessEvaluator.evaluate",
+        "01261_ReadinessEvaluator.evaluate",
+        "01291_ReadinessEvaluator.evaluate",
+        "01333_ReadinessEvaluator.evaluate",
+        "01356_ReadinessEvaluator.evaluate",
+        "01375_ReadinessEvaluator.evaluate"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 23,
+      "title": "PhysicsCompiler entry and gate",
+      "execution": "EXECUTED",
+      "status": "SAFE NULL SCENE",
+      "bundle": "stage_data/23_gate.json",
+      "backend_calls": [
+        "01280_PhysicsCompiler.compile"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 24,
+      "title": "Canonical scene construction and schema validation",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/24_compile.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 25,
+      "title": "API response delivered to the browser",
+      "execution": "EXECUTED",
+      "status": "SAFE NULL SCENE",
+      "bundle": "stage_data/25_response.json",
+      "backend_calls": [
+        "00001_ingest_diagram"
+      ],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 26,
+      "title": "Frontend receives result and selects next state",
+      "execution": "EXECUTED",
+      "status": "FRONTEND FLOW ISSUE",
+      "bundle": "stage_data/26_orchestrator.json",
+      "backend_calls": [],
+      "frontend_event_count": 10
+    },
+    {
+      "stage": 27,
+      "title": "Review / explicit compile request branch",
+      "execution": "EXECUTED",
+      "status": "FRONTEND FLOW ISSUE",
+      "bundle": "stage_data/27_review.json",
+      "backend_calls": [
+        "01281_review_book_ir",
+        "01326_compile_resolved"
+      ],
+      "frontend_event_count": 2
+    },
+    {
+      "stage": 28,
+      "title": "InteractiveFigure receives the compiled scene",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/28_figure.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 29,
+      "title": "FigureViewport background and layout",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/29_background.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 30,
+      "title": "PhysicsRuntime normalization and adapter initialization",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/30_runtime.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 31,
+      "title": "Domain solver and actual initial state",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/31_solver.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 32,
+      "title": "CoordinateMapper: source → overlay → browser",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/32_mapper.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 33,
+      "title": "Actual renderer at t=0 over the original",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/33_render.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    },
+    {
+      "stage": 34,
+      "title": "Activation, motion and reset",
+      "execution": "NOT EXECUTED",
+      "status": "NOT EXECUTED",
+      "bundle": "stage_data/34_motion.json",
+      "backend_calls": [],
+      "frontend_event_count": 0
+    }
+  ],
+  "backend_calls": 1393,
+  "backend_functions": 97,
+  "excluded_startup_events": 6
+}

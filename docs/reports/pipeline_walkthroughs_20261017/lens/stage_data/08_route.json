@@ -1,0 +1,95 @@
+{
+  "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+  "logical_stage": 8,
+  "component": "Evidence dispatch and source decode",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 53,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\grounding\\registry.py",
+      "function": "GrounderRegistry.find_grounder",
+      "line": 37,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 117
+      }
+    },
+    {
+      "trace_id": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017",
+      "sequence": 57,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\transforms.py",
+      "function": "load_and_validate_source_image",
+      "line": 256,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\pipeline.py",
+        "function": "extract_and_fuse",
+        "line": 130
+      }
+    }
+  ],
+  "upstream_stage": "Initial semantic BookIR",
+  "downstream_stage": "RapidOCR: first text/box observations",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00053_GrounderRegistry.find_grounder",
+        "value": {
+          "domain": "optics",
+          "subtype": "thin_lens"
+        }
+      },
+      {
+        "call": "00057_load_and_validate_source_image",
+        "value": {
+          "asset": {
+            "id": "dd013d21b8704bd296afcc9dcbc6a750",
+            "mime_type": "image/jpeg",
+            "original_filename": "photo_2026-10-10_12-06-36 (2).jpg",
+            "byte_size": 51136,
+            "width_px": 1280,
+            "height_px": 960,
+            "sha256": "b1146c485899630e983706b53cce5f2320164bc1d7324bfb1c47ff2b7dab7c5c",
+            "storage_path": "D:\\AugmentedPhysics\\storage\\uploads\\diagram_dd013d21.jpg"
+          }
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Supported domain/subtype, semantic BookIR, SourceAsset and PageIR.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00053_GrounderRegistry.find_grounder",
+        "return_value": {
+          "type": "ai.evidence.grounding.thin_lens.ThinLensGrounder",
+          "not_serialized": true
+        }
+      },
+      {
+        "call": "00057_load_and_validate_source_image",
+        "return_value": {
+          "shape": [
+            960,
+            1280,
+            3
+          ],
+          "dtype": "uint8",
+          "artifact": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.npy",
+          "image": "TRACE-LENS-20261016-001-NATIVE-RETRY-20261017\\arrays\\d3447de7e1291074a182a287c03b2ba24f9ea882846daa5b885d9c1cccdf32f5.png"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "The matching subtype grounder and the unchanged native BGR image array; decoder dimensions must match the asset.",
+  "expected_diagram": "15 cm is OCR-groundable focal length. Object/lens/image/ray positions and F spacing must be measured from the source. The drawing suggests the between-F-and-2F image-formation case; no exact object distance or annotated pixel coordinates are supplied.",
+  "status": "PASS",
+  "finding": "Original identity and native dimensions are preserved. This pass applies to transport/frame integrity, not landmark accuracy.",
+  "change_or_loss": "The pipeline routes to the domain module. Other grounders may execute supports() checks; their ground() methods are not thereby executed."
+}

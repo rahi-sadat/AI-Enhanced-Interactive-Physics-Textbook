@@ -1,0 +1,2891 @@
+
+
+> augmented_physics_v2@0.0.0 test
+
+> node ../../tests/unit/test_optics_engines.js && node ../../tests/unit/test_coordinate_mapper.js && node ../../tests/unit/test_registration_matrix.js && node ../../tests/unit/test_circuit_solver.js && node ../../tests/unit/test_circuit_transient.js && node ../../tests/unit/test_pendulum_physics.js && node ../../tests/unit/test_physics_runtime.js && node ../../tests/unit/test_canonical_runtime.js && node ../../tests/unit/test_architecture_boundaries.js && node ../../tests/unit/test_figure_viewport_fixtures.js && node ../../tests/unit/test_calibration_anchors.js && node ../../tests/unit/test_strict_analyzer.js && node ../../tests/unit/test_interactive_rendering.js && node ../../tests/unit/test_pr04_frontend_upload.js && node ../../tests/unit/test_pr08_orchestrator.js && node ../../tests/unit/test_pr08_review_ui.js && node ../../tests/unit/test_pr08_no_fabrication.js && node ../../tests/unit/test_pr08_golden_path.js
+
+
+
+==============================================
+
+  RUNNING OPTICS2D PHYSICS SUITE TESTS
+
+==============================================
+
+
+
+[1/4] Testing Thin Lens Formula (1/f = 1/u + 1/v)
+
+  ✓ PASS: Case 1 (u > 2f): image is real
+
+  ✓ PASS: Case 1 (u > 2f): image is inverted
+
+  ✓ PASS: Case 1: v = (f*u)/(u-f) = (100*300)/200 = 150 (expected ~150, got 150)
+
+  ✓ PASS: Case 1: m = -v/u = -150/300 = -0.5 (expected ~-0.5, got -0.5)
+
+  ✓ PASS: Case 1: image is diminished
+
+  ✓ PASS: Case 2 (u = 2f): image is real
+
+  ✓ PASS: Case 2: v = 200 (expected ~200, got 200)
+
+  ✓ PASS: Case 2: m = -1.0 (same size) (expected ~-1, got -1)
+
+  ✓ PASS: Case 2: imageType is same_size
+
+  ✓ PASS: Case 3 (f < u < 2f): image is real
+
+  ✓ PASS: Case 3: v = (100*150)/50 = 300 (expected ~300, got 300)
+
+  ✓ PASS: Case 3: m = -300/150 = -2.0 (expected ~-2, got -2)
+
+  ✓ PASS: Case 3: image is magnified
+
+  ✓ PASS: Case 4 (u = f): imageType is infinity
+
+  ✓ PASS: Case 4: v = Infinity
+
+  ✓ PASS: Case 5 (u < f): image is virtual
+
+  ✓ PASS: Case 5: image is upright
+
+  ✓ PASS: Case 5: v = (100*50)/(-50) = -100 (expected ~-100, got -100)
+
+  ✓ PASS: Case 5: m = -(-100)/50 = +2.0 (expected ~2, got 2)
+
+  ✓ PASS: Case 5: contains dashed virtual ray extensions
+
+  ✓ PASS: Case 6 (Concave lens): image is virtual
+
+  ✓ PASS: Case 6: image is upright
+
+  ✓ PASS: Case 6: image is diminished
+
+  ✓ PASS: Case 6: v = (-100*150)/(150 - (-100)) = -60 (expected ~-60, got -60)
+
+  ✓ PASS: Case 6: m = -(-60)/150 = +0.4 (expected ~0.4, got 0.4)
+
+  ✓ PASS: Case 6: lensType is concave
+
+
+
+[2/4] Testing Ray Vector Geometry & Snell Refraction
+
+  ✓ PASS: normalize produces unit length vector (expected ~1, got 1)
+
+  ✓ PASS: reflect preserves tangential component (expected ~0.7071067811865475, got 0.7071067811865475)
+
+  ✓ PASS: reflect inverts normal component (expected ~-0.7071067811865475, got -0.7071067811865475)
+
+  ✓ PASS: Normal incidence has no bending (expected ~0, got 0)
+
+  ✓ PASS: Normal incidence is refracted
+
+  ✓ PASS: High incidence angle (60 deg > 41.8 deg) inside dense medium triggers TIR
+
+
+
+[3/4] Testing Prism & Refractive Polygon Engines
+
+  ✓ PASS: Ray intersects triangular prism
+
+  ✓ PASS: Ray has incident, internal, and emergent segments
+
+  ✓ PASS: 2 surface normal lines generated
+
+  ✓ PASS: Incidence angle i1 calculated
+
+  ✓ PASS: Refraction angle r1 obeys Snell law (r1 < i1)
+
+  ✓ PASS: Deviation angle delta calculated
+
+  ✓ PASS: Critical angle theta_c ~ 41.14 deg for n=1.52 (expected ~41.14, got 41.139510414899156)
+
+  ✓ PASS: Ray enters rectangular glass slab
+
+  ✓ PASS: Ray transmits through glass slab without TIR
+
+  ✓ PASS: Glass slab emergent ray is parallel to incident ray (delta = 0) (expected ~0, got 0)
+
+  ✓ PASS: Ray enters 45-90-45 right angle prism
+
+  ✓ PASS: Ray undergoes 100% TIR at 45 deg hypotenuse
+
+  ✓ PASS: Segment 3 is TIR reflected downwards
+
+
+
+[4/4] Testing Spherical & Plane Mirror Engine
+
+  ✓ PASS: Concave mirror (u > 2f): image is real
+
+  ✓ PASS: Concave mirror: v = (100*250)/150 = 166.7 (expected ~166.67, got 166.66666666666666)
+
+  ✓ PASS: Concave mirror: real image is inverted
+
+  ✓ PASS: Convex mirror: image is always virtual
+
+  ✓ PASS: Convex mirror: image is upright
+
+  ✓ PASS: Convex mirror: image is diminished
+
+  ✓ PASS: Plane mirror: image is virtual
+
+  ✓ PASS: Plane mirror: v = -u = -150 (expected ~-150, got -150)
+
+  ✓ PASS: Plane mirror: m = 1.0 (expected ~1, got 1)
+
+
+
+[5/5] Testing Snell Interface Refraction & TIR
+
+  ✓ PASS: Air to Glass at 30 deg is not TIR
+
+  ✓ PASS: Air to Glass: sin(19.47) ~ 1.0*sin(30)/1.5 (expected ~19.47, got 19.471220634490688)
+
+  ✓ PASS: No critical angle when going rarer -> denser
+
+  ✓ PASS: Glass to Air at 30 deg (< theta_c) is not TIR
+
+  ✓ PASS: Critical angle for glass/air is 41.81 deg (expected ~41.81, got 41.810314895778596)
+
+  ✓ PASS: Glass to Air: theta2 is 48.59 deg (expected ~48.59, got 48.59037789072913)
+
+  ✓ PASS: Glass to Air at 50 deg (> theta_c) exhibits TIR
+
+  ✓ PASS: No refraction angle in TIR
+
+  ✓ PASS: Incident ray generated
+
+  ✓ PASS: Refracted ray generated
+
+  ✓ PASS: Incidence angle computed correctly (expected ~45, got 45)
+
+
+
+==============================================
+
+  TEST RESULTS: 65 passed, 0 failed
+
+==============================================
+
+
+
+All optics physics engine tests passed successfully!
+
+
+
+==============================================
+
+  RUNNING COORDINATE MAPPER TESTS
+
+==============================================
+
+
+
+[1/4] Testing Pillarbox Mapping (393x328 in 800x600)
+
+  ✓ PASS: Uniform scale fits height (expected ~1.829268292682927, got 1.829268292682927)
+
+  ✓ PASS: Y offset is 0 (expected ~0, got 0)
+
+  ✓ PASS: X offset is ~40.55 (expected ~40.54878048780489, got 40.54878048780489)
+
+  ✓ PASS: Normal line mapped to 432.0px (expected ~432.0122146341464, got 432.01219512195127)
+
+  ✓ PASS: Boundary line mapped to 290.85px (expected ~290.8536585365854, got 290.8536585365854)
+
+
+
+[2/4] Testing Letterbox Mapping (1536x1024 in 800x600)
+
+  ✓ PASS: Uniform scale fits width (expected ~0.5208333333333334, got 0.5208333333333334)
+
+  ✓ PASS: X offset is 0 (expected ~0, got 0)
+
+  ✓ PASS: Y offset is ~33.33 (expected ~33.333333333333314, got 33.333333333333314)
+
+
+
+[3/4] Testing Bidirectional Inversion
+
+  ✓ PASS: Invert X (0, 0) (expected ~0, got 0)
+
+  ✓ PASS: Invert Y (0, 0) (expected ~0, got 0)
+
+  ✓ PASS: Invert X (100, 200) (expected ~100, got 100)
+
+  ✓ PASS: Invert Y (100, 200) (expected ~200, got 200)
+
+  ✓ PASS: Invert X (393, 328) (expected ~393, got 393.00000000000006)
+
+  ✓ PASS: Invert Y (393, 328) (expected ~328, got 328)
+
+  ✓ PASS: Invert X (214.65, 158.82) (expected ~214.65, got 214.65)
+
+  ✓ PASS: Invert Y (214.65, 158.82) (expected ~158.82, got 158.82)
+
+
+
+[4/4] Testing Length & Box Scaling
+
+  ✓ PASS: Bidirectional length scaling (expected ~50, got 50)
+
+  ✓ PASS: Box round-trip X (expected ~10, got 10.000000000000002)
+
+  ✓ PASS: Box round-trip Y (expected ~20, got 20)
+
+  ✓ PASS: Box round-trip width (expected ~60, got 60)
+
+  ✓ PASS: Box round-trip height (expected ~40, got 40)
+
+
+
+Results: 21 passed, 0 failed
+
+Registration matrix: 320 landmarks, mean 1.58e-14 source px, max 2.27e-13 source px
+
+
+
+=== Testing Circuit MNA Solver & Linear Algebra ===
+
+
+
+  ✓ Series Circuit: 12V Battery + S1 (closed) + 10Ω (R1) + 20Ω (R2)
+
+  ✓ Series Circuit with Switch OPEN: Current must be 0A
+
+  ✓ Parallel Circuit: 12V Battery across 6Ω (R1) || 3Ω (R2)
+
+  ✓ Ideal Ammeter: 0V voltage drop, measures exact branch current
+
+  ✓ Wheatstone Bridge (Balanced): Galvanometer current must be 0A
+
+  ✓ Interactive Adjustment: R2 changed from 20Ω to 50Ω recalculates instantly
+
+
+
+Results: 6 / 6 passed
+
+
+
+RC transient tests passed: analytic charge/discharge, parallel and independent branches, convergence, lifecycle.
+
+
+
+==============================================
+
+  RUNNING PENDULUM & KINEMATICS PHYSICS TESTS
+
+==============================================
+
+
+
+[1/5] Testing small-angle pendulum period at 240 Hz
+
+  ✓ PASS: Theoretical small-angle period T ≈ 2.006 s
+
+  ✓ PASS: 240 Hz RK4 period matches theoretical within 0.25%
+
+
+
+[2/5] Testing nonlinear period elongation at 30° and 60°
+
+  ✓ PASS: Period at 30° is longer than small-angle period T0
+
+  ✓ PASS: 30° period matches elliptic series reference (~2.040 s)
+
+  ✓ PASS: Period at 60° is longer than at 30°
+
+  ✓ PASS: 60° period matches elliptic series reference (~2.15 s)
+
+
+
+[3/5] Testing undamped mechanical energy bounded drift
+
+  ✓ PASS: Energy variation over 10 cycles is bounded (< 0.05%): got 0.0000%
+
+
+
+[4/5] Testing MatterUnitAdapter SI unit translations
+
+  ✓ PASS: Matter gravity direction y is normalized to 1
+
+  ✓ PASS: Matter gravity scale matches (g * ppm) / 1,000,000
+
+  ✓ PASS: 15 m/s converted to Matter frame velocity (30 px/frame)
+
+  ✓ PASS: Matter velocity round-trip back to 15 m/s
+
+
+
+[5/5] Testing analytical closed-form projectile equations
+
+  ✓ PASS: Apex height matches vy0² / 2g exactly
+
+  ✓ PASS: Landing height returns to 0.0 at tFlight
+
+
+
+All Kinematics & Pendulum physics tests passed successfully!
+
+
+
+====================================================
+
+  TESTING COMMON INTERACTIVE CONTENT RUNTIME v1
+
+====================================================
+
+
+
+[1/4] Testing SolverRegistry registration and resolution:
+
+  ✓ PASS: Registry contains 3 domain adapters
+
+  ✓ PASS: Resolves MechanicsAdapter for domain "mechanics"
+
+  ✓ PASS: Resolves OpticsAdapter for domain "optics"
+
+  ✓ PASS: Resolves CircuitAdapter for domain "circuits"
+
+  ✓ PASS: Throws error for unregistered or unknown physics domain
+
+
+
+[2/4] Testing MechanicsAdapter (Nonlinear Pendulum):
+
+  ✓ PASS: Schema version is 1.0
+
+  ✓ PASS: Scene domain is mechanics
+
+  ✓ PASS: Length has observed provenance
+
+  ✓ PASS: Gravity has assumed provenance
+
+  ✓ PASS: Runtime state reports domain mechanics
+
+  ✓ PASS: Runtime state reports type pendulum
+
+  ✓ PASS: Initial length is 1.2 m (expected ~1.2, got 1.2)
+
+  ✓ PASS: Initial angle is -27.4° (expected ~-27.4, got -27.4)
+
+  ✓ PASS: Initially paused
+
+  ✓ PASS: Runtime starts playback on play()
+
+  ✓ PASS: Runtime pauses on pause()
+
+  ✓ PASS: Runtime resets state on reset()
+
+  ✓ PASS: Updated length to 2.0 m (expected ~2, got 2)
+
+  ✓ PASS: Parameter value in spec updated to 2.0
+
+  ✓ PASS: Modified parameter has student provenance
+
+  ✓ PASS: Runtime cleans up adapter on destroy()
+
+
+
+[3/4] Testing OpticsAdapter (Thin Convex Lens):
+
+  ✓ PASS: Scene domain is optics
+
+  ✓ PASS: Focal length is 130.0 px
+
+  ✓ PASS: Object distance is 260.0 px
+
+  ✓ PASS: Runtime state reports domain optics
+
+  ✓ PASS: Runtime state reports type thin_lens
+
+  ✓ PASS: Focal length is 130 (expected ~130, got 130)
+
+  ✓ PASS: Object distance u = 260 (expected ~260, got 260)
+
+  ✓ PASS: Image distance v = 260 (at 2f) (expected ~260, got 260)
+
+  ✓ PASS: Magnification m = -1.0 (same size) (expected ~-1, got -1)
+
+  ✓ PASS: Image is real
+
+  ✓ PASS: Image is inverted
+
+  ✓ PASS: Updated focal length to 100 (expected ~100, got 100)
+
+  ✓ PASS: Recalculated image distance v = 162.5 px (expected ~162.5, got 162.5)
+
+  ✓ PASS: Recalculated magnification m = -0.625 (expected ~-0.625, got -0.63)
+
+  ✓ PASS: Image type is real_diminished
+
+  ✓ PASS: Focal length provenance updated to student
+
+
+
+[4/4] Testing CircuitAdapter (DC Series Loop with MNA):
+
+  ✓ PASS: Scene domain is circuits
+
+  ✓ PASS: V1 is 12 V
+
+  ✓ PASS: R1 is 10 Ω
+
+  ✓ PASS: R2 is 20 Ω
+
+  ✓ PASS: Runtime state reports domain circuits
+
+  ✓ PASS: Node N1 voltage is 12.0 V (expected ~12, got 12)
+
+  ✓ PASS: Node N1b voltage is 12.0 V (expected ~12, got 12)
+
+  ✓ PASS: Node N2 voltage is 8.0 V (expected ~8, got 8)
+
+  ✓ PASS: Node N0 (ground) is 0.0 V (expected ~0, got 0)
+
+  ✓ PASS: Branch current through R1 is 400 mA (expected ~400, got 400)
+
+  ✓ PASS: Total DC power is 4.8 W (expected ~4.8, got 4.8)
+
+  ✓ PASS: Updated node N2 voltage is 6.0 V (expected ~6, got 6.000000000000001)
+
+  ✓ PASS: Updated branch current is 300 mA (expected ~300, got 299.99999999999994)
+
+  ✓ PASS: Updated total power is 3.6 W (expected ~3.6, got 3.6)
+
+  ✓ PASS: R1 provenance updated to student
+
+
+
+====================================================
+
+  RESULTS: 52 passed, 0 failed
+
+====================================================
+
+====================================================
+
+  TESTING PR-02 CANONICAL PHYSICS RUNTIME MATRIX
+
+====================================================
+
+
+
+[1/8] Testing operational physical unit conversions & validation:
+
+  ✓ PASS: 80 cm converts to 0.8 m (expected ~0.8, got 0.8)
+
+  ✓ PASS: 1.5 m converts to 150 cm (expected ~150, got 150)
+
+  ✓ PASS: 500 mm converts to 0.5 m (expected ~0.5, got 0.5)
+
+  ✓ PASS: 180 deg converts to π rad (expected ~3.141592653589793, got 3.141592653589793)
+
+  ✓ PASS: π/2 rad converts to 90 deg (expected ~90, got 90)
+
+  ✓ PASS: 10 kΩ converts to 10,000 Ω (expected ~10000, got 10000)
+
+  ✓ PASS: 500 mA converts to 0.5 A (expected ~0.5, got 0.5)
+
+  ✓ PASS: 5 kV converts to 5000 V (expected ~5000, got 5000)
+
+  ✓ PASS: Rejects incompatible unit conversion (kg to m) (threw Error)
+
+  ✓ PASS: getParameterInUnit resolves 80 cm as 0.8 m (expected ~0.8, got 0.8)
+
+  ✓ PASS: getParameterInUnit throws PhysicsSceneValidationError for incompatible target unit (threw PhysicsSceneValidationError)
+
+  ✓ PASS: getParameterInUnit throws PhysicsSceneValidationError for status unknown (threw PhysicsSceneValidationError)
+
+
+
+[2/8] Testing CoordinateSpace discriminated union (source_px, world, local):
+
+  ✓ PASS: source_px coordinateSpace loads successfully
+
+  ✓ PASS: coordinateSpace.type preserved as source_px
+
+  ✓ PASS: source_px width is 797
+
+  ✓ PASS: world coordinateSpace loads successfully
+
+  ✓ PASS: coordinateSpace.type preserved as world
+
+  ✓ PASS: world coordinateSpace unit is m
+
+  ✓ PASS: local coordinateSpace loads successfully
+
+  ✓ PASS: coordinateSpace.type preserved as local
+
+
+
+[3/8] Testing Mechanics routing & real headless physics execution:
+
+  ✓ PASS: Pendulum scene routes to pendulum solver
+
+  ✓ PASS: Simulation time advanced
+
+  ✓ PASS: Pendulum angle theta evolved via RK4 integration
+
+  ✓ PASS: Pendulum angular velocity omega evolved via RK4 integration
+
+  ✓ PASS: Projectile scene routes to projectile solver
+
+  ✓ PASS: Projectile time is 0.5s (expected ~0.5, got 0.5)
+
+  ✓ PASS: Projectile x position evolved analytically (expected ~7.07, got 7.071)
+
+  ✓ PASS: Projectile y position evolved analytically (expected ~5.84, got 5.845)
+
+  ✓ PASS: Projectile vertical velocity vy evolved analytically (expected ~9.24, got 9.237)
+
+  ✓ PASS: Pendulum missing length throws MissingRequiredParameterError (no fallback to 1.0m) (threw MissingRequiredParameterError)
+
+  ✓ PASS: Pendulum missing damping throws MissingRequiredParameterError (no silent zero damping) (threw MissingRequiredParameterError)
+
+  ✓ PASS: Pendulum missing bob_radius_px throws MissingRequiredParameterError (no fallback to 24px) (threw MissingRequiredParameterError)
+
+  ✓ PASS: Projectile missing gravity throws MissingRequiredParameterError (no fallback to 9.81) (threw MissingRequiredParameterError)
+
+  ✓ PASS: Projectile missing pixels_per_meter in source_px throws MissingRequiredParameterError (no fallback to 50) (threw MissingRequiredParameterError)
+
+  ✓ PASS: Well-formed inclined_plane throws UnsupportedPhysicsSubtypeError on execution (threw UnsupportedPhysicsSubtypeError)
+
+
+
+[4/8] Testing Optics routing matrix & zero fabrication:
+
+  ✓ PASS: Thin lens routes to thin lens solver
+
+  ✓ PASS: Thin lens solves v = 260 at u = 2f
+
+  ✓ PASS: Spherical mirror routes to mirror solver
+
+  ✓ PASS: Concave mirror solves v = 200 at u = 2f
+
+  ✓ PASS: Interface refraction routes to snell solver
+
+  ✓ PASS: Calculates refracted angle theta2
+
+  ✓ PASS: Snell interface missing n1/n2 throws MissingRequiredParameterError (no fallback) (threw MissingRequiredParameterError)
+
+  ✓ PASS: Prism routes to prism solver
+
+  ✓ PASS: Prism traces internal refraction rays
+
+  ✓ PASS: Prism missing vertices throws MissingRequiredParameterError (no synthetic prism) (threw MissingRequiredParameterError)
+
+
+
+[5/8] Testing Circuits routing (dc / MNA) & generic SI output:
+
+  ✓ PASS: Circuit routes to dc/MNA solver
+
+  ✓ PASS: Node N1 voltage is 12 V
+
+  ✓ PASS: Current through R1 is 2.0 A
+
+  ✓ PASS: State does NOT contain fixture-specific nodeV1
+
+  ✓ PASS: State does NOT contain fixture-specific currentR1_mA
+
+  ✓ PASS: State does NOT contain hardcoded type "series_parallel"
+
+
+
+[6/8] Testing atomic parameter updates, units & student provenance:
+
+  ✓ PASS: Initial N2 voltage is 8.0 V (expected ~8, got 8)
+
+  ✓ PASS: Invalid non-numeric parameter throws PhysicsSceneValidationError (threw PhysicsSceneValidationError)
+
+  ✓ PASS: Scene parameter was NOT mutated on validation failure
+
+  ✓ PASS: Solver state was NOT mutated on validation failure (expected ~8, got 8)
+
+  ✓ PASS: Negative resistance throws PhysicsSceneValidationError (threw PhysicsSceneValidationError)
+
+  ✓ PASS: Scene parameter was NOT mutated on negative resistance
+
+  ✓ PASS: 0.01 kΩ converted to 10 Ω
+
+  ✓ PASS: Recalculates N2 to 6.0 V (10Ω / 10Ω divider) (expected ~6, got 6.000000000000001)
+
+  ✓ PASS: R2 provenance updated to "student"
+
+  ✓ PASS: Initial length is 1.0 m (expected ~1, got 1)
+
+  ✓ PASS: 80 cm live update converted to 0.8 m in solver (expected ~0.8, got 0.8)
+
+  ✓ PASS: Scene parameter stored as 0.8 m
+
+  ✓ PASS: 0.5 rad live update maintained as 0.5 rad (not 0.5 deg) (expected ~0.5, got 0.5)
+
+  ✓ PASS: Initial projectile speed is 10 m/s (expected ~10, got 10)
+
+  ✓ PASS: Projectile solver updated speed to 30 m/s (expected ~30, got 30)
+
+  ✓ PASS: Step reflects updated speed (x ~ 10.6 m) (expected ~10.6, got 10.607)
+
+
+
+[7/8] Testing unified runtime lifecycle and clean reset:
+
+  ✓ PASS: Initially paused
+
+  ✓ PASS: start() sets running true
+
+  ✓ PASS: Simulation time stepped
+
+  ✓ PASS: Angle moved during step
+
+  ✓ PASS: reset() pauses simulation
+
+  ✓ PASS: reset() returns time to 0.0 (expected ~0, got 0)
+
+  ✓ PASS: reset() returns theta to initialAngle (0.3 rad) (expected ~0.3, got 0.3)
+
+  ✓ PASS: reset() returns angular velocity to 0.0 (expected ~0, got 0)
+
+  ✓ PASS: SolverRegistry rejects registration of class without domain (threw Error)
+
+  ✓ PASS: SolverRegistry registers with explicit domain string
+
+  ✓ PASS: Browser PendulumSimulation instantiated
+
+  ✓ PASS: Simulation and Adapter share the EXACT same physics kernel authority
+
+  ✓ PASS: Renderer theta matches physics kernel exactly
+
+  ✓ PASS: Runtime telemetry reflects active physics kernel with zero drift
+
+
+
+[8/8] Testing strict validation failures & non-fabrication:
+
+  ✓ PASS: Rejects missing schemaVersion (threw PhysicsSceneValidationError)
+
+  ✓ PASS: Rejects unsupported domain (threw PhysicsSceneValidationError)
+
+  ✓ PASS: Rejects domain object mismatch (optical lens in mechanics domain) (threw PhysicsSceneValidationError)
+
+  ✓ PASS: Rejects circuit with empty nodes (threw PhysicsSceneValidationError)
+
+
+
+====================================================
+
+  RESULTS: 85 passed, 0 failed
+
+====================================================
+
+
+
+====================================================
+
+  TESTING PR-02 ARCHITECTURAL BOUNDARIES & INVARIANTS
+
+====================================================
+
+
+
+[1/4] Verifying Engine/UI isolation (0 imports of apps/ in engine/):
+
+  ✓ PASS: Zero imports of apps/ across all engine files (found 0)
+
+  ✓ PASS: Required PR-03 file must exist: apps/web/src/features/simulations/core/SimulationRenderer.js
+
+  ✓ PASS: Required PR-03 file must exist: apps/web/src/features/simulations/core/RendererRegistry.js
+
+  ✓ PASS: Required PR-03 file must exist: apps/web/src/features/simulations/optics/OpticsRenderer.js
+
+  ✓ PASS: Required PR-03 file must exist: apps/web/src/features/simulations/circuits/CircuitRenderer.js
+
+  ✓ PASS: Required PR-03 file must exist: apps/web/src/features/simulations/legacy/legacySceneRouter.js
+
+  ✓ PASS: Required PR-03 file must exist: tests/unit/test_interactive_rendering.js
+
+  ✓ PASS: apps/web/src/features/simulations/core/SimulationRenderer.js does NOT import or call numerical solvers directly (renderer consumes RuntimeOutput only)
+
+  ✓ PASS: apps/web/src/features/simulations/core/RendererRegistry.js does NOT import or call numerical solvers directly (renderer consumes RuntimeOutput only)
+
+  ✓ PASS: apps/web/src/features/simulations/optics/OpticsRenderer.js does NOT import or call numerical solvers directly (renderer consumes RuntimeOutput only)
+
+  ✓ PASS: apps/web/src/features/simulations/circuits/CircuitRenderer.js does NOT import or call numerical solvers directly (renderer consumes RuntimeOutput only)
+
+
+
+[2/4] Verifying sceneRouter isolation (PhysicsRuntime and adapters must NOT import sceneRouter):
+
+  ✓ PASS: engine/core/PhysicsRuntime.js does NOT import or reference sceneRouter
+
+  ✓ PASS: engine/core/SimulationAdapter.js does NOT import or reference sceneRouter
+
+  ✓ PASS: engine/core/SolverRegistry.js does NOT import or reference sceneRouter
+
+  ✓ PASS: engine/mechanics/MechanicsAdapter.js does NOT import or reference sceneRouter
+
+  ✓ PASS: engine/optics/OpticsAdapter.js does NOT import or reference sceneRouter
+
+  ✓ PASS: engine/circuits/CircuitAdapter.js does NOT import or reference sceneRouter
+
+
+
+[3/4] Verifying zero fallback / fabrication anti-patterns in adapters:
+
+  ✓ PASS: MechanicsAdapter has no ?? "pendulum" fallback
+
+  ✓ PASS: MechanicsAdapter has no || "pendulum" fallback
+
+  ✓ PASS: MechanicsAdapter does not default all types to pendulum
+
+  ✓ PASS: OpticsAdapter has no ?? "thin_lens" fallback
+
+  ✓ PASS: OpticsAdapter has no || "thin_lens" fallback
+
+  ✓ PASS: PhysicsRuntime does not fabricate default 800x600 dimensions
+
+  ✓ PASS: PhysicsRuntime does not fabricate default mechanics domain
+
+  ✓ PASS: MechanicsAdapter has no synthetic pivot fallback
+
+  ✓ PASS: MechanicsAdapter has no default 45 deg projectile angle
+
+  ✓ PASS: MechanicsAdapter has no silent damping fallback (0.0)
+
+  ✓ PASS: MechanicsAdapter has no fallback bob radius (24px)
+
+  ✓ PASS: MechanicsAdapter has no fallback projectile radius (18px)
+
+  ✓ PASS: MechanicsAdapter has no fallback ppm (50)
+
+  ✓ PASS: OpticsAdapter has no fallback prism refractive index
+
+  ✓ PASS: OpticsAdapter has no fallback Snell n1
+
+  ✓ PASS: OpticsAdapter has no fallback Snell n2
+
+  ✓ PASS: OpticsAdapter has no fallback world bounds (10.0)
+
+  ✓ PASS: CircuitAdapter requires explicit subtype (no fallback to "dc")
+
+  ✓ PASS: CircuitAdapter has no hardcoded nodeV1 fixture state
+
+  ✓ PASS: CircuitAdapter has no hardcoded currentR1_mA fixture state
+
+
+
+[4/4] Verifying shared/schemas/physicsScene.schema.json as authoritative source of truth:
+
+  ✓ PASS: Schema file exists
+
+  ✓ PASS: Schema requires "subtype"
+
+  ✓ PASS: Schema requires "coordinateSpace"
+
+  ✓ PASS: Schema defines canonical "subtype" property
+
+  ✓ PASS: Schema defines "coordinateSpace" property or definition
+
+  ✓ PASS: CoordinateSpace is a discriminated union with at least 3 variants (source_px, world, local)
+
+  ✓ PASS: Parameter provenance enum includes "student"
+
+
+
+====================================================
+
+  RESULTS: 44 passed, 0 failed
+
+====================================================
+
+===============================================================
+
+  LAYOUT-INVARIANT AUGMENTED FIGURE SYSTEM FIXTURE TESTS
+
+===============================================================
+
+
+
+
+
+--- Testing Fixture 1: Nonlinear Pendulum (NCTB Class 9-10 Ch 4, test1.jpg) ---
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Rendered dimensions (1100.2x900.0) fit viewport (1440x900)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 169.92, expected: 169.92)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Pivot Pin" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Initial Bob Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Support Clamp Top" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Rendered dimensions (794.6x650.0) fit viewport (850x650)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 27.72, expected: 27.72)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Pivot Pin" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Initial Bob Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Support Clamp Top" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Rendered dimensions (600.0x490.8) fit viewport (600x600)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 54.58, expected: 54.58)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Pivot Pin" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Initial Bob Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Support Clamp Top" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Rendered dimensions (768.0x628.3) fit viewport (768x1024)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 197.86, expected: 197.86)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Pivot Pin" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Initial Bob Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Support Clamp Top" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Rendered dimensions (390.0x319.0) fit viewport (390x844)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 262.48, expected: 262.48)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Pivot Pin" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "pivot" (diff: 0.0000px, tol: 0.001px, actual: 99.70, expected: 99.70)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Initial Bob Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 246.58, expected: 246.58)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "bob_initial" (diff: 0.0000px, tol: 0.001px, actual: 527.56, expected: 527.56)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Support Clamp Top" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "clamp_top" (diff: 0.0000px, tol: 0.001px, actual: 30.00, expected: 30.00)
+
+
+
+--- Testing Fixture 2: Thin Convex Lens (NCTB Class 9-10 Ch 6, nctb_lens_diagram.png) ---
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Rendered dimensions (1200.0x900.0) fit viewport (1440x900)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Optical Center O" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "F1 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "F2 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Principal Axis Left" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Principal Axis Right" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Rendered dimensions (850.0x637.5) fit viewport (850x650)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 6.25, expected: 6.25)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Optical Center O" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "F1 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "F2 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Principal Axis Left" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Principal Axis Right" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Rendered dimensions (600.0x450.0) fit viewport (600x600)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 75.00, expected: 75.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Optical Center O" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "F1 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "F2 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Principal Axis Left" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Principal Axis Right" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Rendered dimensions (768.0x576.0) fit viewport (768x1024)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 224.00, expected: 224.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Optical Center O" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "F1 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "F2 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Principal Axis Left" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Principal Axis Right" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Rendered dimensions (390.0x292.5) fit viewport (390x844)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 275.75, expected: 275.75)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Optical Center O" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "optical_center" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "F1 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "f1_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "F2 Focal Point" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "f2_focus" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Principal Axis Left" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "axis_left" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Principal Axis Right" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 800.00, expected: 800.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "axis_right" (diff: 0.0000px, tol: 0.001px, actual: 300.00, expected: 300.00)
+
+
+
+--- Testing Fixture 3: DC Series Loop (NCTB Class 9-10 Ch 11, Fig 11.4) ---
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Rendered dimensions (1440.0x900.0) fit viewport (1440x900)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Battery V1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Switch S1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Resistor R1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Resistor R2 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Anchor "Junction Node N1" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse viewToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [1. Wide Desktop (Sidebar Closed)] Inverse overlayToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Rendered dimensions (850.0x531.3) fit viewport (850x650)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 59.38, expected: 59.38)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Battery V1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Switch S1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Resistor R1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Resistor R2 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Anchor "Junction Node N1" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse viewToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [2. Standard Book + Controls (Sidebar Open)] Inverse overlayToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Rendered dimensions (600.0x375.0) fit viewport (600x600)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 112.50, expected: 112.50)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Battery V1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Switch S1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Resistor R1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Resistor R2 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Anchor "Junction Node N1" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse viewToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [3. Narrow Column / AI Tutor Drawer Open] Inverse overlayToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Rendered dimensions (768.0x480.0) fit viewport (768x1024)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 272.00, expected: 272.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Battery V1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Switch S1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Resistor R1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Resistor R2 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Anchor "Junction Node N1" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse viewToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [4. Tablet Portrait Layout] Inverse overlayToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Rendered dimensions (390.0x243.8) fit viewport (390x844)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Symmetrical X offset (diff: 0.0000px, tol: 0.001px, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Symmetrical Y offset (diff: 0.0000px, tol: 0.001px, actual: 300.13, expected: 300.13)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Battery V1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "battery_v1" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Switch S1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "switch_s1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Resistor R1 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 400.00, expected: 400.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "resistor_r1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Resistor R2 Center" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "resistor_r2" (diff: 0.0000px, tol: 0.001px, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Anchor "Junction Node N1" error = 0.0000px (Target: <= 1.0px)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse viewToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource X for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: [5. Compact Mobile Breakpoint] Inverse overlayToSource Y for "junction_n1" (diff: 0.0000px, tol: 0.001px, actual: 120.00, expected: 120.00)
+
+
+
+--- Testing Dynamic Sidebar Resize Transition (1440px -> 650px -> 1440px) ---
+
+  Initial screen pivot at 1440x900: (815.94, 137.62)
+
+  ✓ PASS: Pivot X aligns exactly with narrowed diagram image (diff: 0.0000px, tol: 0.001px, actual: 381.68, expected: 381.68)
+
+  ✓ PASS: Pivot Y aligns exactly with narrowed diagram image (diff: 0.0000px, tol: 0.001px, actual: 140.44, expected: 140.44)
+
+  ✓ PASS: Pivot drift during sidebar open is 0.00px
+
+  ✓ PASS: Pivot X returns to initial position on sidebar close (diff: 0.0000px, tol: 0.001px, actual: 815.94, expected: 815.94)
+
+  ✓ PASS: Pivot Y returns to initial position on sidebar close (diff: 0.0000px, tol: 0.001px, actual: 137.62, expected: 137.62)
+
+
+
+===============================================================
+
+  RESULTS: 375 passed, 0 failed
+
+===============================================================
+
+ALL LAYOUT-INVARIANT FIXTURE TESTS PASSED WITH 0px DRIFT!
+
+Calibration reticles use only finite source coordinates.
+
+==============================================
+
+  RUNNING STRICT DIAGRAM ANALYZER TESTS
+
+==============================================
+
+
+
+[1/5] Testing uploadDiagramFile strict rejection on backend failure
+
+  ✓ PASS: Upload threw strict backend error
+
+  ✓ PASS: Upload must strictly reject when backend fails and demo fallback is off
+
+
+
+[2/5] Testing uploadDiagramFile fallback behind VITE_ENABLE_DEMO_FALLBACK
+
+npm.cmd : [Analyzer] Backend upload endpoint unavailable, using local Object URL (demo fallback enabled): Error:
+
+Connection refused: 500
+
+At line:2 char:1
+
++ npm.cmd test > ..\..\outputs\publish_web_tests_20261031.log 2>&1
+
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    + CategoryInfo          : NotSpecified: ([Analyzer] Back...on refused: 500:String) [], RemoteException
+
+    + FullyQualifiedErrorId : NativeCommandError
+
+
+
+    at globalThis.fetch (file:///D:/AugmentedPhysics/tests/unit/test_strict_analyzer.js:38:11)
+
+    at uploadDiagramFile (file:///D:/AugmentedPhysics/apps/web/src/features/simulations/core/diagramAnalyzer.js:24:23)
+
+    at runTests (file:///D:/AugmentedPhysics/tests/unit/test_strict_analyzer.js:66:32)
+
+  ✓ PASS: Upload fallback succeeds when demo flag is on
+
+  ✓ PASS: Upload fallback marked as local
+
+  ✓ PASS: Returns blob URL under demo flag
+
+
+
+[3/5] Testing analyzeDiagram strict rejection on network failure
+
+[Analyzer] Analysis failed: Error: Network unreachable
+
+    at globalThis.fetch (file:///D:/AugmentedPhysics/tests/unit/test_strict_analyzer.js:75:11)
+
+    at analyzeDiagram (file:///D:/AugmentedPhysics/apps/web/src/features/simulations/core/diagramAnalyzer.js:64:23)
+
+    at runTests (file:///D:/AugmentedPhysics/tests/unit/test_strict_analyzer.js:80:11)
+
+  ✓ PASS: Analysis threw strict error on backend failure
+
+  ✓ PASS: analyzeDiagram must not synthesize scenes when backend fails
+
+
+
+[4/5] Testing analyzeDiagram preserves needs_review without scene fabrication
+
+  ✓ PASS: Result status is needs_review
+
+  ✓ PASS: Result scene is strictly null
+
+  ✓ PASS: Issues preserved
+
+  ✓ PASS: Issue code matches backend
+
+
+
+[5/5] Testing payload passes null for unspecified focal length and gravity
+
+  ✓ PASS: Request payload captured
+
+  ✓ PASS: focal_length_cm is null, not 20.0
+
+  ✓ PASS: gravity is null, not 1.0
+
+
+
+==============================================
+
+  RESULTS: 14 passed, 0 failed
+
+==============================================
+
+===================================================================
+
+  RUNNING PR-03 SOURCE-ALIGNED INTERACTIVE RENDERING TEST SUITE
+
+===================================================================
+
+
+
+[1/10] Verifying RendererRegistry automatic subtype & domain resolution:
+
+  ✓ PASS: RendererRegistry has optics/thin_lens
+
+  ✓ PASS: RendererRegistry has optics/spherical_mirror
+
+  ✓ PASS: RendererRegistry has optics/interface_refraction
+
+  ✓ PASS: RendererRegistry has optics/prism
+
+  ✓ PASS: RendererRegistry has circuits/dc
+
+  ✓ PASS: RendererRegistry handles legacy subtype series_parallel
+
+  ✓ PASS: Resolved optics renderer is instance of OpticsRenderer
+
+  ✓ PASS: Resolved circuit renderer is instance of CircuitRenderer
+
+  ✓ PASS: Unsupported domain cleanly rejected by RendererRegistry
+
+
+
+[2/10] Verifying Thin Lens principal rays, direct dragging, and bidirectional lockstep:
+
+  ✓ PASS: Runtime successfully loaded thin lens scene and produced output
+
+  ✓ PASS: Runtime output includes solved geometry
+
+  ✓ PASS: Optical axis y-position is 300 source px
+
+  ✓ PASS: Optical center O is at (400, 300)
+
+  ✓ PASS: Front focus F1 is at x=270 (400 - 130) (diff: 0.0000, tol: 0.01, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: Back focus F2 is at x=530 (400 + 130) (diff: 0.0000, tol: 0.01, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: Output includes all 3 principal rays
+
+  ✓ PASS: Output includes resultant image arrow
+
+  ✓ PASS: Initial real image formed at x=660 (400 + 260) (diff: 0.0000, tol: 0.01, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: Initial image is inverted with height +80 (diff: 0.0000, tol: 0.01, actual: 380.00, expected: 380.00)
+
+  ✓ PASS: Initial magnification is -1.0 (diff: 0.0000, tol: 0.01, actual: -1.00, expected: -1.00)
+
+  -> Simulating horizontal pointer drag: objectDistance 260px -> 180px
+
+  ✓ PASS: Image distance recalculated to 468.0px (diff: 0.0000, tol: 0.1, actual: 468.00, expected: 468.00)
+
+  ✓ PASS: Magnification updated to -2.60 (diff: 0.0000, tol: 0.05, actual: -2.60, expected: -2.60)
+
+  ✓ PASS: Image arrow base moved to new position (diff: 0.0000, tol: 0.1, actual: 868.00, expected: 868.00)
+
+  ✓ PASS: Principal ray 1 re-traced through focus
+
+  ✓ PASS: Modified parameter provenance is "student"
+
+  -> Simulating vertical arrow-tip drag: objectHeight -80px -> -40px
+
+  ✓ PASS: Image height resized in proportion to tip drag (diff: 0.0000, tol: 0.1, actual: 104.00, expected: 104.00)
+
+  -> Simulating sidebar slider update: focalLength 130px -> 100px
+
+  ✓ PASS: Front focal point updated to x=300 (400 - 100) (diff: 0.0000, tol: 0.01, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: Back focal point updated to x=500 (400 + 100) (diff: 0.0000, tol: 0.01, actual: 500.00, expected: 500.00)
+
+  -> Verifying Reset restores original parameters and geometry
+
+  ✓ PASS: Focal point restored to x=270 (diff: 0.0000, tol: 0.01, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: Image position restored to x=660 (diff: 0.0000, tol: 0.01, actual: 660.00, expected: 660.00)
+
+  ✓ PASS: Magnification restored to -1.0 (diff: 0.0000, tol: 0.01, actual: -1.00, expected: -1.00)
+
+  ✓ PASS: Object distance restored to 260px
+
+
+
+[3/10] Verifying Optics Genericity: completely different lens diagram works with 0 code changes:
+
+  ✓ PASS: Different lens diagram loaded without errors
+
+  ✓ PASS: Lens center correctly extracted as 650 (diff: 0.0000, tol: 0.01, actual: 650.00, expected: 650.00)
+
+  ✓ PASS: Optical axis y correctly extracted as 450 (diff: 0.0000, tol: 0.01, actual: 450.00, expected: 450.00)
+
+  ✓ PASS: Real image base formed at x=1050 (650 + 400) (diff: 0.0000, tol: 0.1, actual: 1050.00, expected: 1050.00)
+
+  ✓ PASS: Magnification is -1.0 for symmetric 2f object distance (diff: 0.0000, tol: 0.01, actual: -1.00, expected: -1.00)
+
+
+
+[4/10] Verifying Spherical Mirror simulation:
+
+  ✓ PASS: Mirror scene loaded successfully
+
+  ✓ PASS: Mirror geometry exposed
+
+  ✓ PASS: Pole P is at x=600 (diff: 0.0000, tol: 0.01, actual: 600.00, expected: 600.00)
+
+  ✓ PASS: Focus F is at x=450 (600 - 150) (diff: 0.0000, tol: 0.01, actual: 450.00, expected: 450.00)
+
+  ✓ PASS: Center of curvature C is at x=300 (600 - 300) (diff: 0.0000, tol: 0.01, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: Principal incident and reflected rays generated
+
+  ✓ PASS: Real image forms at center of curvature (300px) (diff: 0.0000, tol: 0.1, actual: 300.00, expected: 300.00)
+
+
+
+[5/10] Verifying Interface Refraction & Prism simulation:
+
+  ✓ PASS: Refraction scene loaded
+
+  ✓ PASS: Refracted angle matches Snell's Law (19.47 deg) (diff: 0.0012, tol: 0.05, actual: 19.47, expected: 19.47)
+
+  ✓ PASS: Geometry contains refracted ray
+
+  ✓ PASS: Total internal reflection flagged correctly
+
+  ✓ PASS: Reflected ray emitted during TIR
+
+  ✓ PASS: Prism polygon geometry preserved
+
+  ✓ PASS: Incident, internal, and emergent rays traced through prism
+
+
+
+[6/10] Verifying Circuit graph-driven MNA solve, switch toggle, and parameter edits:
+
+  ✓ PASS: Circuit loaded and solved by MNA
+
+  ✓ PASS: Initial total loop current is 0.400 A (12V / 30Ω) (diff: 0.0000, tol: 0.001, actual: 0.40, expected: 0.40)
+
+  ✓ PASS: Node N1 voltage is 12.0 V (diff: 0.0000, tol: 0.001, actual: 12.00, expected: 12.00)
+
+  ✓ PASS: Node N2 voltage is 8.0 V (across R2=20Ω) (diff: 0.0000, tol: 0.001, actual: 8.00, expected: 8.00)
+
+  ✓ PASS: Geometry contains 4 wire paths
+
+  ✓ PASS: Wire w1 current is 0.4 A (diff: 0.0000, tol: 0.001, actual: 0.40, expected: 0.40)
+
+  -> Simulating switch S1 click to OPEN: closed=false
+
+  ✓ PASS: Current immediately halts to 0.0 A when switch opens (diff: 0.0000, tol: 0.0001, actual: 0.00, expected: 0.00)
+
+  ✓ PASS: Switch visual geometry state is "open"
+
+  ✓ PASS: Wire current is 0.0 A (current animation halts) (diff: 0.0000, tol: 0.0001, actual: 0.00, expected: 0.00)
+
+  -> Simulating switch S1 click to CLOSE: closed=true
+
+  ✓ PASS: Current resumes to 0.4 A when switch is closed (diff: 0.0000, tol: 0.001, actual: 0.40, expected: 0.40)
+
+  ✓ PASS: Switch visual geometry state is "closed"
+
+  -> Simulating sidebar edit: R1 resistance 10Ω -> 20Ω
+
+  ✓ PASS: Loop current recalculated to 0.300 A (12V / 40Ω) (diff: 0.0000, tol: 0.001, actual: 0.30, expected: 0.30)
+
+  ✓ PASS: Node N2 voltage recalculated to 6.0 V (diff: 0.0000, tol: 0.001, actual: 6.00, expected: 6.00)
+
+  ✓ PASS: Wire w1 current updated to 0.3 A (diff: 0.0000, tol: 0.001, actual: 0.30, expected: 0.30)
+
+  ✓ PASS: Reset restores loop current to 0.400 A (diff: 0.0000, tol: 0.001, actual: 0.40, expected: 0.40)
+
+  ✓ PASS: Reset restores switch to closed state
+
+
+
+[7/10] Verifying Circuit Genericity: arbitrary topology (series-parallel 3 resistors):
+
+  ✓ PASS: Parallel topology loaded and solved with zero solver/renderer code changes
+
+  ✓ PASS: Total current is 1.000 A (diff: 0.0000, tol: 0.001, actual: 1.00, expected: 1.00)
+
+  ✓ PASS: Junction node N2 voltage is 5.0 V (diff: 0.0000, tol: 0.001, actual: 5.00, expected: 5.00)
+
+
+
+[8/10] Verifying OpticsRenderer and CircuitRenderer DOM/SVG mounting & rendering:
+
+  ✓ PASS: OpticsRenderer mounted SVG overlay
+
+  ✓ PASS: OpticsRenderer created layer-rays group
+
+  ✓ PASS: OpticsRenderer created layer-handles group
+
+  ✓ PASS: Pointer drag triggered onInteract callback
+
+  ✓ PASS: Interaction mapped to "objectDistance"
+
+  ✓ PASS: Calculated distance relative to lens is 180 source px (diff: 0.0000, tol: 0.1, actual: 180.00, expected: 180.00)
+
+  ✓ PASS: OpticsRenderer properly disposed
+
+  ✓ PASS: CircuitRenderer mounted SVG overlay
+
+  ✓ PASS: CircuitRenderer created layer-switches group
+
+  ✓ PASS: CircuitRenderer created layer-wires group
+
+  ✓ PASS: CircuitRenderer properly disposed
+
+
+
+[9/10] Verifying responsive layout invariance across responsive viewports:
+
+  ✓ PASS: [Desktop 1440x900] Round-trip X exact (diff: 0.0000, tol: 0.0001, actual: 362.00, expected: 362.00)
+
+  ✓ PASS: [Desktop 1440x900] Round-trip Y exact (diff: 0.0000, tol: 0.0001, actual: 240.00, expected: 240.00)
+
+  ✓ PASS: [Tablet 768x1024] Round-trip X exact (diff: 0.0000, tol: 0.0001, actual: 362.00, expected: 362.00)
+
+  ✓ PASS: [Tablet 768x1024] Round-trip Y exact (diff: 0.0000, tol: 0.0001, actual: 240.00, expected: 240.00)
+
+  ✓ PASS: [Mobile 390x844] Round-trip X exact (diff: 0.0000, tol: 0.0001, actual: 362.00, expected: 362.00)
+
+  ✓ PASS: [Mobile 390x844] Round-trip Y exact (diff: 0.0000, tol: 0.0001, actual: 240.00, expected: 240.00)
+
+
+
+[10/10] Verifying zero diagram-specific positioning constants in renderers:
+
+  ✓ PASS: apps/web/src/features/simulations/optics/OpticsRenderer.js has 0 hardcoded physics coordinates (reads from runtimeOutput only)
+
+  ✓ PASS: apps/web/src/features/simulations/circuits/CircuitRenderer.js has 0 hardcoded physics coordinates (reads from runtimeOutput only)
+
+
+
+[11/17] Verifying high-res (1600x1200) diagram with physical cm calibration drags correctly:
+
+  ✓ PASS: Calibrated scene loaded successfully
+
+  ✓ PASS: Front focus is at x=600 (900 - 300px) (diff: 0.0000, tol: 0.01, actual: 600.00, expected: 600.00)
+
+  ✓ PASS: Back focus is at x=1200 (900 + 300px) (diff: 0.0000, tol: 0.01, actual: 1200.00, expected: 1200.00)
+
+  ✓ PASS: Object base is at x=300 (900 - 600px) (diff: 0.0000, tol: 0.01, actual: 300.00, expected: 300.00)
+
+  ✓ PASS: Image base is at x=1500 (900 + 600px) (diff: 0.0000, tol: 0.01, actual: 1500.00, expected: 1500.00)
+
+  ✓ PASS: Telemetry reports objectDistance in cm (30.0 cm) (diff: 0.0000, tol: 0.01, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: Telemetry reports imageDistance in cm (30.0 cm) (diff: 0.0000, tol: 0.01, actual: 30.00, expected: 30.00)
+
+  ✓ PASS: Telemetry reports focalLength in cm (15.0 cm) (diff: 0.0000, tol: 0.01, actual: 15.00, expected: 15.00)
+
+  ✓ PASS: Handle objectArrow created
+
+  ✓ PASS: Handle x-axis declares "cm" unit contract
+
+  ✓ PASS: Handle x-axis declares pixelsPerUnit = 20.0 (diff: 0.0000, tol: 0.01, actual: 20.00, expected: 20.00)
+
+  ✓ PASS: Handle carries canonical control min/max
+
+  ✓ PASS: Renderer triggered onInteract on calibrated diagram
+
+  ✓ PASS: Interaction targeted objectDistance
+
+  ✓ PASS: Interaction sent CANONICAL "cm" unit, NOT pixels!
+
+  ✓ PASS: Physical value correctly converted to 25.0 cm (500px / 20px/cm) (diff: 0.0000, tol: 0.05, actual: 25.00, expected: 25.00)
+
+  ✓ PASS: Runtime updated objectDistance to 25.0 cm (diff: 0.0000, tol: 0.05, actual: 25.00, expected: 25.00)
+
+  ✓ PASS: Image distance recalculated to 37.5 cm (diff: 0.0000, tol: 0.1, actual: 37.50, expected: 37.50)
+
+  ✓ PASS: Image base moved to 1650 px (diff: 0.0000, tol: 0.1, actual: 1650.00, expected: 1650.00)
+
+
+
+[12/17] Verifying missing required scene geometry throws explicit errors (never defaults to 400, 300, etc.):
+
+  ✓ PASS: Missing lensX throws explicit MissingRequiredParameterError (no synthetic 400)
+
+  ✓ PASS: Missing axisY throws explicit MissingRequiredParameterError (no synthetic 300)
+
+  ✓ PASS: Missing mirrorType throws explicit error (no silent "concave" default)
+
+
+
+[13/17] Verifying canonical param.control.min/max/step strictly governs drag limits:
+
+  ✓ PASS: Drag clamped to canonical control.max (350.0), got 350
+
+  ✓ PASS: Drag clamped to canonical control.min (50.0), got 50
+
+  ✓ PASS: Tip drag clamped to control.max (-20.0), got -20
+
+
+
+[14/17] Verifying branched circuit wire currents preserve signed value and branch-specific magnitude:
+
+  ✓ PASS: Branch 1 wire carries R1 current: 1.20 A (diff: 0.0000, tol: 0.01, actual: 1.20, expected: 1.20)
+
+  ✓ PASS: Branch 1 wire flows forward into R1
+
+  ✓ PASS: Branch 2 wire carries R2 current: 0.60 A (NOT 1.2A or 1.8A) (diff: 0.0000, tol: 0.01, actual: 0.60, expected: 0.60)
+
+  ✓ PASS: Branch 2 wire flows forward into R2
+
+  ✓ PASS: Main feeder wire carries total current: 1.80 A (diff: 0.0000, tol: 0.01, actual: 1.80, expected: 1.80)
+
+  ✓ PASS: Main feeder wire flows forward from V1.p
+
+  ✓ PASS: Return wire 1 carries R1 return current: 1.20 A (diff: 0.0000, tol: 0.01, actual: 1.20, expected: 1.20)
+
+  ✓ PASS: Return wire 2 carries R2 return current: 0.60 A (diff: 0.0000, tol: 0.01, actual: 0.60, expected: 0.60)
+
+
+
+[15/17] Verifying missing switch geometry produces hitTarget: null (no fabricated coordinates):
+
+  ✓ PASS: Valid switch has hitTarget
+
+  ✓ PASS: Valid switch hitTarget midpoint x=230 (diff: 0.0000, tol: 0.01, actual: 230.00, expected: 230.00)
+
+  ✓ PASS: Switch without geometry evidence has hitTarget === null (ZERO fabrication)
+
+  ✓ PASS: Renderer did NOT create any DOM handle for switch lacking geometry evidence
+
+
+
+[16/17] Verifying non-editable components are NOT exposed as editable parameters:
+
+  ✓ PASS: R_editable.resistance is exposed in editableParameters
+
+  ✓ PASS: R_locked.resistance is NOT exposed
+
+  ✓ PASS: V1.voltage is NOT exposed
+
+
+
+[17/17] Verifying rejected parameter updates throw, roll back, and preserve runtime authority:
+
+  ✓ PASS: Initial R1 is 25.0 Ω (diff: 0.0000, tol: 0.01, actual: 25.00, expected: 25.00)
+
+  ✓ PASS: Runtime rejected negative resistance (-100 Ω)
+
+  ✓ PASS: Error code is NON_POSITIVE_VALUE (got NON_POSITIVE_VALUE)
+
+  ✓ PASS: Runtime parameter remains exactly 25.0 Ω after rejected update (diff: 0.0000, tol: 0.01, actual: 25.00, expected: 25.00)
+
+  ✓ PASS: Solved current remains valid (10V / 25Ω = 0.4A) (diff: 0.0000, tol: 0.01, actual: 0.40, expected: 0.40)
+
+
+
+[18/23] Verifying physical units without calibration fail explicitly:
+
+  ✓ PASS: Physical unit parameter without calibration threw error
+
+  ✓ PASS: Error is MissingCalibrationError (got "MissingCalibrationError")
+
+
+
+[19/23] Verifying non-editable optics parameters produce no handles or controls:
+
+  ✓ PASS: editableParameters is empty for non-editable scene
+
+  ✓ PASS: No objectArrow handle in geometry for non-editable parameters
+
+  ✓ PASS: OpticsRenderer rendered ZERO handles for non-editable scene
+
+
+
+[20/23] Verifying arbitrary object IDs survive drag binding:
+
+  ✓ PASS: Handle objectArrow created for arbitrary object
+
+  ✓ PASS: Handle targetId carries actual scene object ID (got "probe_candle_99")
+
+  ✓ PASS: Handle parameter address is "probe_candle_99.objectDistance"
+
+  ✓ PASS: Interaction triggered by drag
+
+  ✓ PASS: Interaction dispatched targetId "probe_candle_99" (got "probe_candle_99")
+
+  ✓ PASS: Interaction dispatched full parameter address
+
+  ✓ PASS: Runtime parameter updated to 200.0px via arbitrary object ID (diff: 0.0000, tol: 0.1, actual: 200.00, expected: 200.00)
+
+
+
+[21/23] Verifying refraction with missing geometry produces no synthetic overlay:
+
+  ✓ PASS: Missing boundary geometry in interface refraction threw explicit error
+
+  ✓ PASS: No synthetic boundary or normal line drawn when geometry is missing
+
+  ✓ PASS: No synthetic medium text labels drawn when geometry is missing
+
+  ✓ PASS: No synthetic beam source handle drawn when geometry is missing
+
+
+
+[22/23] Verifying prism drag has zero non-functional handles:
+
+  ✓ PASS: Prism has ZERO non-functional visible handles
+
+
+
+[23/23] Verifying current direction does not depend on terminal ID naming:
+
+  ✓ PASS: Feed wire carries correct current 1.20 A without standard terminal names (diff: 0.0000, tol: 0.01, actual: 1.20, expected: 1.20)
+
+  ✓ PASS: Feed wire flows forward (got "forward") based on structural nodes
+
+  ✓ PASS: Return wire carries correct current 1.20 A without standard terminal names (diff: 0.0000, tol: 0.01, actual: 1.20, expected: 1.20)
+
+  ✓ PASS: Return wire flows forward (got "forward") based on structural nodes
+
+
+
+[24/27] Verifying unit-aware optical calibration (6.5 px/cm + 0.20 m -> 130 px):
+
+  ✓ PASS: Front focus is 270 px (400 - 130 px) (diff: 0.0000, tol: 0.01, actual: 270.00, expected: 270.00)
+
+  ✓ PASS: Back focus is 530 px (400 + 130 px) (diff: 0.0000, tol: 0.01, actual: 530.00, expected: 530.00)
+
+  ✓ PASS: Object is at 140 px (400 - 260 px) (diff: 0.0000, tol: 0.01, actual: 140.00, expected: 140.00)
+
+  ✓ PASS: Telemetry focalLength reports in its own declared unit: 0.20 m (diff: 0.0000, tol: 0.001, actual: 0.20, expected: 0.20)
+
+  ✓ PASS: Telemetry objectDistance reports in its own declared unit: 40.0 cm (diff: 0.0000, tol: 0.01, actual: 40.00, expected: 40.00)
+
+
+
+[25/27] Verifying CircuitCompiler terminal missing source_px compiles to null (no [0,0] fabrication):
+
+  ✓ PASS: Resistor terminal 1 source_px is null, not [0, 0]
+
+  ✓ PASS: Resistor terminal 2 source_px is null, not [0, 0]
+
+  ✓ PASS: Switch terminal 1 source_px is null, not [0, 0]
+
+  ✓ PASS: Switch terminal 2 source_px is null, not [0, 0]
+
+  ✓ PASS: Switch with unlocated terminals has hitTarget === null (no hit target at [0,0])
+
+
+
+[26/27] Verifying multi-source circuit telemetry correctness (no ambiguous totalCurrent_A):
+
+  ✓ PASS: Multi-source circuit omits ambiguous totalCurrent_A
+
+  ✓ PASS: Multi-source circuit omits ambiguous loopCurrent_A
+
+  ✓ PASS: Multi-source circuit exposes per-source currents
+
+  ✓ PASS: Multi-source circuit exposes totalDeliveredSourceCurrent_A
+
+  ✓ PASS: Multi-source circuit exposes branchCurrents
+
+
+
+[27/27] Verifying OpticsRenderer zero semantic identity fallbacks:
+
+  ✓ PASS: Missing subtype renders nothing (axis layer empty)
+
+  ✓ PASS: Missing subtype renders nothing (shapes layer empty)
+
+  ✓ PASS: Missing handle targetId produces ZERO interaction handles
+
+  ✓ PASS: Missing parameter address produces ZERO interaction handles
+
+
+
+[28/28] Verifying SimulationCapabilityRegistry & bidirectional direct manipulation:
+
+  ✓ PASS: objectDistance receives editable capability
+
+  ✓ PASS: objectDistance has editable === true
+
+  ✓ PASS: objectDistance has slider control
+
+  ✓ PASS: objectHeight receives editable capability
+
+  ✓ PASS: objectHeight has editable === true
+
+  ✓ PASS: focalLength receives editable capability
+
+  ✓ PASS: focalLength has editable === true
+
+  ✓ PASS: Handles created for object
+
+  ✓ PASS: Actual arbitrary ID green_arrow_7 is the drag target
+
+  ✓ PASS: X-axis drag is enabled
+
+  ✓ PASS: Y-axis drag is enabled
+
+  ✓ PASS: Renderer created object_pos DOM handle
+
+  ✓ PASS: DOM handle carries data-target-id="green_arrow_7"
+
+  ✓ PASS: Dragging triggered onInteract
+
+  ✓ PASS: Dispatched targetId is green_arrow_7
+
+  ✓ PASS: Dispatched key is objectDistance
+
+  ✓ PASS: Dispatched value is 200.0 px (diff: 0.0000, tol: 0.1, actual: 200.00, expected: 200.00)
+
+  ✓ PASS: editableParameters reflects dragged value 200.0 (diff: 0.0000, tol: 0.1, actual: 200.00, expected: 200.00)
+
+  ✓ PASS: Rendered object base moved to x=200 px (diff: 0.0000, tol: 0.1, actual: 200.00, expected: 200.00)
+
+  ✓ PASS: Slider update changed parameter to 320.0 (diff: 0.0000, tol: 0.1, actual: 320.00, expected: 320.00)
+
+  ✓ PASS: Rendered object base moved to 80 px (400 - 320) (diff: 0.0000, tol: 0.1, actual: 80.00, expected: 80.00)
+
+  ✓ PASS: Pendulum length receives editable capability
+
+  ✓ PASS: Pendulum length has editable === true
+
+  ✓ PASS: Pendulum initialAngle receives editable capability
+
+  ✓ PASS: Pendulum initialAngle has editable === true
+
+  ✓ PASS: Evidence-only gravity is NOT exposed in editableParameters
+
+  ✓ PASS: Mass is NOT exposed as student editable
+
+  ✓ PASS: Projectile speed receives editable capability
+
+  ✓ PASS: Projectile speed is editable === true
+
+  ✓ PASS: Projectile angle receives editable capability
+
+  ✓ PASS: Projectile angle is editable === true
+
+  ✓ PASS: Projectile gravity remains non-editable
+
+  ✓ PASS: custom_bat_1 gets voltage slider by component type
+
+  ✓ PASS: custom_res_99 gets resistance slider by component type
+
+  ✓ PASS: custom_sw_2 gets toggle control by component type
+
+  ✓ PASS: objectDistance is present and editable
+
+  ✓ PASS: ABSENT objectHeight is NEVER fabricated
+
+  ✓ PASS: No height drag handle when objectHeight is absent
+
+  ✓ PASS: Parameter remains editable in resolved scene
+
+  ✓ PASS: Slider control remains configured
+
+  ✓ PASS: No interaction handles bound when geometry is absent (zero fabrication)
+
+
+
+===================================================================
+
+  RESULTS: 215 passed, 0 failed
+
+===================================================================
+
+==============================================
+
+  RUNNING PR-04 FRONTEND UPLOAD TESTS
+
+==============================================
+
+
+
+[1/5] Testing UploadService sends multipart FormData with real file
+
+  ✓ PASS: Sent request to /api/ingest
+
+  ✓ PASS: Sent POST request
+
+  ✓ PASS: Sent multipart FormData (not JSON string)
+
+  ✓ PASS: FormData contains "file" entry with actual bytes
+
+  ✓ PASS: Reported upload progress callback
+
+  ✓ PASS: Returned typed IngestResult instance
+
+  ✓ PASS: Correctly reports isUnresolved === true
+
+  ✓ PASS: Correctly reports isReady === false
+
+  ✓ PASS: Native dimensions survive in IngestResult
+
+  ✓ PASS: SourceAsset SHA-256 preserved
+
+  ✓ PASS: BookIR domain is truthfully null
+
+
+
+[2/5] Testing UploadService strict rejection on backend failure
+
+  ✓ PASS: Error message includes HTTP 503 status
+
+  ✓ PASS: UploadService strictly throws without swallowing error
+
+
+
+[3/5] Testing Gate Zero file selection contract
+
+  ✓ PASS: Retains actual File reference
+
+  ✓ PASS: Immediate preview shows original filename
+
+  ✓ PASS: Immediate preview shows native width × height
+
+  ✓ PASS: Analyze button is enabled immediately upon selection
+
+
+
+[4/5] Testing real upload error has ZERO legacy fallback
+
+  ✓ PASS: Failed ingestion cleanly halts as fatal_error
+
+  ✓ PASS: CRITICAL: Legacy analysis path was NEVER called for uploaded file
+
+
+
+[5/6] Testing IngestResult READY scene preservation
+
+  ✓ PASS: IngestResult reports isReady === true for complete scene
+
+  ✓ PASS: IngestResult extracts domain
+
+  ✓ PASS: IngestResult provides executable scene
+
+
+
+[6/6] Testing Canonical PhysicsRuntime loads compiler-generated READY scene
+
+  ✓ PASS: PhysicsRuntime successfully loaded canonical compiled scene
+
+  ✓ PASS: PhysicsRuntime initialized MechanicsAdapter
+
+  ✓ PASS: MechanicsAdapter confirmed pendulum subtype
+
+  ✓ PASS: Runtime scene preserves canonical schemaVersion 1.0
+
+
+
+==============================================
+
+  RESULTS: 26 passed, 0 failed
+
+==============================================
+
+
+
+==============================================
+
+  RUNNING PR-08 SIMULATION ORCHESTRATOR TESTS
+
+==============================================
+
+
+
+  ✓ PASS: Review API preserves backend-resolved BookIR for compilation
+
+[defaults] Backend policies fill missing values without altering diagram evidence
+
+  ✓ PASS: Only missing gravity and the individual missing resistor receive defaults
+
+  ✓ PASS: Existing resistance is preserved
+
+  ✓ PASS: OCR candidate is not overwritten by a default
+
+  ✓ PASS: Missing geometry is not invented
+
+  ✓ PASS: Structural blockers still require review
+
+  ✓ PASS: Repeated default application is idempotent
+
+  ✓ PASS: Applied defaults are disclosed in runtime assumptions
+
+  ✓ PASS: Final default advances to a compiled scene when backend confirms readiness
+
+  ✓ PASS: Compiled scene retains the default disclosure
+
+[SimulationOrchestrator] Policy application error: Error: Policy refused
+
+    at Object.applyPolicy (file:///D:/AugmentedPhysics/tests/unit/test_pr08_orchestrator.js:100:57)
+
+    at SimulationOrchestrator.applyPolicy
+
+(file:///D:/AugmentedPhysics/apps/web/src/features/simulations/core/SimulationOrchestrator.js:369:34)
+
+    at SimulationOrchestrator.useStandardDefaults
+
+(file:///D:/AugmentedPhysics/apps/web/src/features/simulations/core/SimulationOrchestrator.js:309:18)
+
+    at runTests (file:///D:/AugmentedPhysics/tests/unit/test_pr08_orchestrator.js:105:21)
+
+  ✓ PASS: Refused default is not retried in an endless loop
+
+  ✓ PASS: Refused default does not generate a scene
+
+[SimulationOrchestrator] Compilation error: CompilationGatingError: BookIR is not ready to compile.
+
+    at Object.compile (file:///D:/AugmentedPhysics/tests/unit/test_pr08_orchestrator.js:110:34)
+
+    at SimulationOrchestrator.compile
+
+(file:///D:/AugmentedPhysics/apps/web/src/features/simulations/core/SimulationOrchestrator.js:533:38)
+
+    at runTests (file:///D:/AugmentedPhysics/tests/unit/test_pr08_orchestrator.js:115:28) {
+
+  blockers: [
+
+    'Battery voltage is missing.',
+
+    { message: 'Resistor resistance is missing.' }
+
+  ],
+
+  status: 'NEEDS_REVIEW'
+
+}
+
+  ✓ PASS: Compilation reports the specific missing voltage
+
+  ✓ PASS: Compilation reports structured blockers as readable messages
+
+  ✓ PASS: Provider outage does not produce a simulation
+
+  ✓ PASS: Provider outage is explained honestly
+
+  ✓ PASS: Retry is offered with the current image
+
+  ✓ PASS: Previous figure review is cleared on a new upload
+
+  ✓ PASS: No canned scene replaces a failed provider
+
+[1/8] Verifying initial orchestrator state
+
+  ✓ PASS: Initial state is IDLE
+
+  ✓ PASS: Initial bookIR is null
+
+  ✓ PASS: Initial compiledScene is null
+
+
+
+[2/8] Ingest flow transitions to NEEDS_REVIEW when evidence is incomplete
+
+  ✓ PASS: Final state is NEEDS_REVIEW
+
+  ✓ PASS: Went through UPLOADING
+
+  ✓ PASS: Went through ANALYZING
+
+  ✓ PASS: Recorded 3 review issues
+
+  ✓ PASS: Stored imageUrl
+
+
+
+[3/8] Resolution mutation replaces BookIR authoritatively
+
+  ✓ PASS: BookIR updated with backend returned length
+
+  ✓ PASS: Metric candidateConfirmations recorded
+
+
+
+[4/8] Resolving all blockers triggers compile -> READY_TO_SIMULATE
+
+  ✓ PASS: State transitioned to READY_TO_SIMULATE
+
+  ✓ PASS: Compiled scene is present
+
+  ✓ PASS: Compiled scene domain is mechanics
+
+  ✓ PASS: Metric policiesAccepted recorded
+
+  ✓ PASS: timeToReadyMs recorded
+
+
+
+[5/8] Decoupled simulation start: user action moves to SIMULATING
+
+  ✓ PASS: Remains READY_TO_SIMULATE before student click
+
+  ✓ PASS: Transitions to SIMULATING upon startSimulation()
+
+  ✓ PASS: startSimulation() returned compiled scene
+
+
+
+[6/8] Reversibility: removeResolution invalidates compiled scene
+
+  ✓ PASS: State reverted to NEEDS_REVIEW
+
+  ✓ PASS: Compiled scene was invalidated
+
+
+
+[7/8] Unsupported diagram reaches UNSUPPORTED without fallback
+
+  ✓ PASS: Transitions to UNSUPPORTED
+
+  ✓ PASS: Friendly unsupported message
+
+  ✓ PASS: No fake scene created for unsupported diagram
+
+
+
+[8/8] Stale async race condition protection
+
+  ✓ PASS: Orchestrator was reset to IDLE
+
+  ✓ PASS: Slow promise did complete
+
+  ✓ PASS: State remained IDLE (stale response was ignored)
+
+  ✓ PASS: Stale reviewState was NOT written
+
+
+
+==============================================
+
+  RESULTS: 46 passed, 0 failed
+
+==============================================
+
+==============================================
+
+  RUNNING PR-08 REVIEW UI & INTERACTION TESTS
+
+==============================================
+
+
+
+[1/8] Verifying domain-agnostic parameter presentation labels
+
+  ✓ PASS: length mapped to "String Length"
+
+  ✓ PASS: gravity mapped to Gravitational Acceleration
+
+  ✓ PASS: launch_speed mapped to "Launch Speed (v₀)"
+
+  ✓ PASS: pixels_per_meter mapped to "Diagram Spatial Scale"
+
+  ✓ PASS: n1 mapped to Refractive Index
+
+
+
+[2/8] Verifying default units catalog
+
+  ✓ PASS: length supports m and cm
+
+  ✓ PASS: gravity supports m/s²
+
+  ✓ PASS: launch_speed supports m/s
+
+
+
+[3/8] Review issue with OCR candidate displays value and triggers confirmation
+
+  ✓ PASS: Candidate box rendered for length
+
+  ✓ PASS: Candidate value 80 cm displayed in UI
+
+  ✓ PASS: Candidate confidence 88% displayed
+
+  ✓ PASS: Confirm button rendered
+
+  ✓ PASS: confirmCandidate called with parameterName "length"
+
+  ✓ PASS: confirmCandidate called with candidate numericValue 80
+
+
+
+[4/8] Clicking [Correct] reveals manual entry form
+
+  ✓ PASS: Correct button rendered
+
+  ✓ PASS: Manual entry form appeared after clicking Correct
+
+  ✓ PASS: Numeric input is present in manual form
+
+  ✓ PASS: submitManualValue called for length
+
+  ✓ PASS: submitManualValue called with corrected value 60
+
+
+
+[5/8] Explicit policy assumption renders with rationale
+
+  ✓ PASS: Policy assumption card rendered
+
+  ✓ PASS: Displays policy name
+
+  ✓ PASS: Displays policy value and unit
+
+  ✓ PASS: Displays educational rationale
+
+  ✓ PASS: Strict exclusion: Air Refractive Index does NOT appear for pendulum
+
+  ✓ PASS: applyPolicy invoked with policy_earth_gravity
+
+
+
+[6/8] Resolved items display provenance and reversibility
+
+  ✓ PASS: 2 resolved parameter items rendered
+
+  ✓ PASS: Reversibility: undo/change button is present
+
+  ✓ PASS: Undo button triggers removeResolution for length
+
+
+
+[7/8] READY_TO_SIMULATE state renders simulation ready hero
+
+  ✓ PASS: Simulation ready hero banner rendered
+
+  ✓ PASS: Footer Start Simulation button is visible
+
+  ✓ PASS: Clicking Start Simulation called orchestrator.startSimulation()
+
+  ✓ PASS: Modal closed automatically upon starting simulation
+
+
+
+[8/8] In-flight busy state disables mutation buttons
+
+  ✓ PASS: Displays busy status text
+
+
+
+[9] Circuit values target individual components and preserve provenance
+
+  ✓ PASS: Circuit review shows one resolved component, not topology arrays
+
+  ✓ PASS: Default voltage is labeled as an assumption
+
+  ✓ PASS: Default targets the selected missing resistor
+
+  ✓ PASS: Manual resistance targets the same individual component
+
+
+
+[10] Structural blockers never masquerade as simulation readiness
+
+  ✓ PASS: Hidden or unnamed blockers do not create a ready banner
+
+  ✓ PASS: Start button stays hidden while backend requires review
+
+  ✓ PASS: Unnamed structural blocker is visible
+
+  ✓ PASS: Coordinate blocker is visible
+
+  ✓ PASS: Structural issues do not request a numeric coordinate
+
+
+
+[11] Failed compilation preserves the original blocker
+
+[PhysicsReviewModal] Failed to start simulation: Error: The lens center could not be grounded.
+
+    at PhysicsReviewModal._startSimulation
+
+(file:///D:/AugmentedPhysics/apps/web/src/components/PhysicsReviewModal.js:231:15)
+
+    at async runTests (file:///D:/AugmentedPhysics/tests/unit/test_pr08_review_ui.js:464:3)
+
+  ✓ PASS: No startup attempted after compilation is refused
+
+  ✓ PASS: Review stays open after failed compilation
+
+  ✓ PASS: Original compilation error remains visible
+
+
+
+[12] Runtime load failures stay visible and permit retry
+
+  ✓ PASS: Playback waits for asynchronous runtime loading
+
+  ✓ PASS: Successful loading starts playback and closes review
+
+[PhysicsReviewModal] Failed to start simulation: Error: Renderer failed to load
+
+    at modal.options.onStartSimulation (file:///D:/AugmentedPhysics/tests/unit/test_pr08_review_ui.js:479:57)
+
+    at PhysicsReviewModal._startSimulation
+
+(file:///D:/AugmentedPhysics/apps/web/src/components/PhysicsReviewModal.js:234:45)
+
+    at runTests (file:///D:/AugmentedPhysics/tests/unit/test_pr08_review_ui.js:482:15)
+
+  ✓ PASS: Failed runtime load does not claim simulation started
+
+  ✓ PASS: Runtime failure is shown to the user
+
+  ✓ PASS: Runtime loading failure allows retry
+
+
+
+==============================================
+
+  RESULTS: 50 passed, 0 failed
+
+==============================================
+
+==============================================
+
+  RUNNING PR-08 NO-FABRICATION FRONTEND TESTS
+
+==============================================
+
+
+
+[1/5] Incomplete BookIR missing gravity never fabricates default
+
+  ✓ PASS: State is NEEDS_REVIEW, not READY_TO_SIMULATE
+
+  ✓ PASS: CRITICAL: compiledScene is strictly null
+
+  ✓ PASS: CRITICAL: gravity is NOT fabricated in BookIR
+
+  ✓ PASS: startSimulation() threw error when unready (cannot launch)
+
+
+
+[2/5] Compilation gating failure never falls back to demo scene
+
+[SimulationOrchestrator] Compilation error: CompilationGatingError: BookIR is not ready to compile.
+
+    at Object.compile (file:///D:/AugmentedPhysics/tests/unit/test_pr08_no_fabrication.js:85:13)
+
+    at SimulationOrchestrator.compile
+
+(file:///D:/AugmentedPhysics/apps/web/src/features/simulations/core/SimulationOrchestrator.js:533:38)
+
+    at runTests (file:///D:/AugmentedPhysics/tests/unit/test_pr08_no_fabrication.js:91:15) {
+
+  blockers: [ 'gravity is missing' ],
+
+  status: 'NEEDS_REVIEW'
+
+}
+
+  ✓ PASS: Gating refusal returns to NEEDS_REVIEW
+
+  ✓ PASS: CRITICAL: No canned scene substituted on error
+
+  ✓ PASS: Honest gating error message displayed
+
+
+
+[3/5] Unsupported subtype strictly halts in UNSUPPORTED
+
+  ✓ PASS: Transitions to UNSUPPORTED
+
+  ✓ PASS: No nearest-renderer fallback scene created
+
+
+
+[4/5] Backend offline network failure cleanly fails without canned demo
+
+[SimulationOrchestrator] Ingestion error: Error: Backend server is offline (port 8000).
+
+    at Object.ingest (file:///D:/AugmentedPhysics/tests/unit/test_pr08_no_fabrication.js:120:13)
+
+    at SimulationOrchestrator.startWithFile
+
+(file:///D:/AugmentedPhysics/apps/web/src/features/simulations/core/SimulationOrchestrator.js:138:41)
+
+    at runTests (file:///D:/AugmentedPhysics/tests/unit/test_pr08_no_fabrication.js:124:15)
+
+  ✓ PASS: Transitions to ERROR
+
+  ✓ PASS: CRITICAL: No canned demo simulation launched on network failure
+
+  ✓ PASS: Displays actual offline error
+
+
+
+[5/5] Invariant: Only backend can confirm readiness
+
+  ✓ PASS: State remains NEEDS_REVIEW when backend says not ready
+
+  ✓ PASS: BookIR status remains NEEDS_REVIEW
+
+  ✓ PASS: Latest negative review overrides stale canCompile hint
+
+  ✓ PASS: Stale readiness creates no scene
+
+
+
+==============================================
+
+  RESULTS: 16 passed, 0 failed
+
+==============================================
+
+==============================================
+
+  RUNNING PR-08 GOLDEN PATH ACCEPTANCE TESTS
+
+==============================================
+
+
+
+[1/4] Real pendulum end-to-end orchestration slice
+
+  ✓ PASS: Ingest reached NEEDS_REVIEW
+
+  ✓ PASS: 4 blockers detected (length, gravity, mass, damping)
+
+  ✓ PASS: Length confirmed as 0.8 m
+
+  ✓ PASS: Still in NEEDS_REVIEW (remaining blockers exist)
+
+  ✓ PASS: Earth gravity policy applied
+
+  ✓ PASS: Still in NEEDS_REVIEW (mass & damping left)
+
+  ✓ PASS: Standard mass policy applied
+
+  ✓ PASS: Zero damping policy applied
+
+  ✓ PASS: All blockers resolved: state is READY_TO_SIMULATE
+
+  ✓ PASS: Compiled canonical scene generated
+
+  ✓ PASS: Domain is mechanics
+
+  ✓ PASS: Subtype is pendulum
+
+  ✓ PASS: Transitioned to SIMULATING upon explicit student start
+
+  ✓ PASS: Active scene matches compiled scene
+
+
+
+[2/4] Native source_px coordinate preservation
+
+  ✓ PASS: Coordinate space is native source_px
+
+  ✓ PASS: Native pivot (250, 80) preserved exactly
+
+  ✓ PASS: Native bob_center (250, 480) preserved exactly
+
+  ✓ PASS: Native string_length_px 400.0 preserved
+
+  ✓ PASS: Native bob_radius_px 20.0 preserved
+
+  ✓ PASS: Viewport pivot X correctly scaled by 0.5 (diff: 0.0000, tol: 0.1, actual: 125.00, expected: 125.00)
+
+  ✓ PASS: Viewport pivot Y correctly scaled by 0.5 (diff: 0.0000, tol: 0.1, actual: 40.00, expected: 40.00)
+
+  ✓ PASS: Reverse transform restores source_px pivot X (diff: 0.0000, tol: 0.1, actual: 250.00, expected: 250.00)
+
+  ✓ PASS: Reverse transform restores source_px pivot Y (diff: 0.0000, tol: 0.1, actual: 80.00, expected: 80.00)
+
+
+
+[3/4] Canonical PhysicsRuntime execution of compiled scene
+
+  ✓ PASS: Runtime initialized mechanics
+
+  ✓ PASS: Runtime confirmed pendulum subtype
+
+  ✓ PASS: Runtime length is 0.8 m
+
+  ✓ PASS: Runtime gravity is 9.80665 m/s²
+
+  ✓ PASS: Simulation is running
+
+
+
+[4/4] Preserving source BookIR evidence vs simulation experimentation
+
+  ✓ PASS: Source BookIR length is 0.8 m initially
+
+  ✓ PASS: Simulation runtime updated to 1.5 m
+
+  ✓ PASS: CRITICAL: BookIR length remains 0.8 m during slider experiment
+
+  ✓ PASS: Compiled source scene length remains 0.8 m
+
+  ✓ PASS: Runtime restored to textbook length 0.8 m
+
+  ✓ PASS: Source BookIR length remains 0.8 m
+
+
+
+==============================================
+
+  RESULTS: 34 passed, 0 failed
+
+==============================================

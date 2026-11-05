@@ -1,0 +1,111 @@
+{
+  "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+  "logical_stage": 13,
+  "component": "OCR-region suppression before geometry detection",
+  "execution": "EXECUTED",
+  "location_and_callers": [
+    {
+      "trace_id": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017",
+      "sequence": 198,
+      "status": "EXECUTED",
+      "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+      "function": "mask_out_text_regions",
+      "line": 38,
+      "caller": {
+        "file": "D:\\AugmentedPhysics\\ai\\evidence\\cv\\preprocessing.py",
+        "function": "preprocess_for_geometry",
+        "line": 79
+      }
+    }
+  ],
+  "upstream_stage": "Grayscale, blur and edge extraction",
+  "downstream_stage": "Domain CV: raw candidates → selected geometry",
+  "actual_input": {
+    "records": [
+      {
+        "call": "00198_mask_out_text_regions",
+        "value": {
+          "edge_map": {
+            "shape": [
+              960,
+              1280
+            ],
+            "dtype": "uint8",
+            "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\c4e36da9d2001992b7a9a749be2d9134bd440ff858c17f6a70cac952eb884a27.npy",
+            "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\c4e36da9d2001992b7a9a749be2d9134bd440ff858c17f6a70cac952eb884a27.png"
+          },
+          "ocr_boxes": [
+            {
+              "x": 336.0,
+              "y": 817.0,
+              "width": 603.0,
+              "height": 70.0
+            },
+            {
+              "x": 1029.0,
+              "y": 421.0,
+              "width": 241.0,
+              "height": 71.0
+            },
+            {
+              "x": 636.0,
+              "y": 148.0,
+              "width": 242.0,
+              "height": 68.0
+            },
+            {
+              "x": 39.0,
+              "y": 426.0,
+              "width": 123.0,
+              "height": 63.0
+            },
+            {
+              "x": 378.0,
+              "y": 159.0,
+              "width": 47.0,
+              "height": 53.0
+            },
+            {
+              "x": 613.0,
+              "y": 706.0,
+              "width": 39.0,
+              "height": 52.0
+            },
+            {
+              "x": 175.0,
+              "y": 362.0,
+              "width": 40.0,
+              "height": 40.0
+            }
+          ],
+          "margin_px": 4
+        }
+      }
+    ],
+    "capture_note": "Exact available recorded inputs. File/DOM/library objects may be represented as opaque metadata; raw byte/array references remain authoritative."
+  },
+  "expected_input": "Actual edge map, selected OCR boxes and margin_px.",
+  "actual_output": {
+    "records": [
+      {
+        "call": "00198_mask_out_text_regions",
+        "return_value": {
+          "shape": [
+            960,
+            1280
+          ],
+          "dtype": "uint8",
+          "artifact": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\e43fd5c1f17898d796fc4383315ee7be81c112e7ccb418ec93c4483ed9cd79a2.npy",
+          "image": "TRACE-CIRCUIT-20261016-002-NATIVE-RETRY-20261017\\arrays\\e43fd5c1f17898d796fc4383315ee7be81c112e7ccb418ec93c4483ed9cd79a2.png"
+        }
+      }
+    ],
+    "in_place_outputs": [],
+    "capture_note": "Return values are retained unchanged. captureError for JSON.stringify(undefined) is a recorder serialization limitation, not an application exception. Use observed resulting state for void methods."
+  },
+  "expected_output_contract": "An edge map suppressing text while preserving relevant diagram boundaries/rays. This is the registration requirement; the implementation zeros the entire expanded rectangle without distinguishing text from geometry.",
+  "expected_diagram": "12 V, 10 Ω and 20 Ω are printed evidence. The switch must retain its visible gap. No measured current, numerical node coordinates or validated MNA graph is supplied.",
+  "status": "NO EARLIER GEOMETRIC FAILURE DEMONSTRATED",
+  "finding": "Removed-edge overlay was inspected. No earlier failure explaining the later rail/pivot error is established by this mask capture.",
+  "change_or_loss": "Every pixel removed by the actual mask is shown in red on the original. A valid OCR box does not guarantee safe geometry suppression."
+}
