@@ -15,6 +15,7 @@ import numpy as np
 from shared.schemas.evidence import SourceLine, SourcePoint
 from .circuit_paths import raster, trace_paths
 from .circuit_symbols import detect_symbols, proposal
+from .circuit_body_mask import remove_verified_bodies
 
 
 def _intersection_area(first, second):
@@ -46,7 +47,7 @@ def _recover_resistor_symbols(ink, stroke, components, resistor_regions):
                 'resistor',
                 np.asarray(symbol['symbol_path']) + [x0, y0],
                 [(symbol[k].x + x0, symbol[k].y + y0) for k in ('terminal_1', 'terminal_2')],
-                stroke, notation=symbol['notation'],
+                stroke, notation=symbol['notation'], measurement_max_tooth_step_px=max_step,
             )
             overlap = region.iou(native['bbox'])
             if overlap >= .30:
@@ -54,6 +55,10 @@ def _recover_resistor_symbols(ink, stroke, components, resistor_regions):
         candidates.sort(key=lambda candidate: candidate[0], reverse=True)
         if candidates and (len(candidates) == 1 or candidates[0][0] - candidates[1][0] >= .10):
             best = candidates[0][1]
+            best['refinement_evidence'] = [dict(candidate_id=c['id'],type=c['type'],
+                bbox=c['bbox'].to_dict(),proposal_iou=float(region.iou(c['bbox'])),
+                reason='Re-measured local zigzag strokes; excluded adjoining conductor segments')
+                for c in components if c['type']=='resistor' and _intersection_area(c['bbox'],best['bbox'])>0]
             if all(best['bbox'].iou(c['bbox']) <= .40 for c in recovered):
                 recovered.append(best)
 
@@ -90,6 +95,46 @@ def _separate_overlapping_hypotheses(components, symbol_regions):
         else:
             kept.append(candidate)
     return kept, rejected
+
+
+def _recover_source_symbols(ink, stroke, components, symbol_regions):
+    """Inspect all measured plates in a source proposal, including small cells.
+
+    The full-image 15 px noise floor excludes short plates in small scans. A
+    detector region restricts this search; the existing stroke-relative plate
+    rule still applies. Neither a box nor a class prediction supplies polarity.
+    """
+    for kind, region in symbol_regions:
+        if kind != 'voltage_source':
+            continue
+        pad = int(np.ceil(stroke * 6))
+        x0, y0 = max(0, int(region.x)-pad), max(0, int(region.y)-pad)
+        x1, y1 = min(ink.shape[1], int(np.ceil(region.x_max))+pad), min(ink.shape[0], int(np.ceil(region.y_max))+pad)
+        measured, _ = detect_symbols(ink[y0:y1, x0:x1], stroke, include_switches=False, min_plate_length=0)
+        matches = []
+        for c in measured:
+            if c['type'] != 'voltage_source' or not c.get('polarity_verified'):
+                continue
+            native = proposal('voltage_source', np.asarray(c['symbol_path'])+[x0,y0],
+                [(c[k].x+x0,c[k].y+y0) for k in ('terminal_1','terminal_2')], stroke,
+                notation=c['notation'], polarity_verified=True,
+                plates=[[int(x+x0),int(y+y0),int(w),int(h)] for x,y,w,h in c['plates']])
+            if region.iou(native['bbox']) >= .30:
+                matches.append(native)
+        if len(matches) == 1:
+            native = matches[0]
+            # Retain competing candidates in diagnostics upstream; replace only
+            # the same measured plate group before cutting the conductor mask.
+            replaced = [c for c in components if (
+                c['type'] in {'capacitor','voltage_source'} and native['bbox'].contains(c['center']))]
+            native['refinement_evidence'] = [dict(candidate_id=c['id'], type=c['type'],
+                bbox=c['bbox'].to_dict(), plates=[list(map(int,p)) for p in c.get('plates',[])],
+                proposal_iou=float(region.iou(c['bbox'])),
+                reason='Re-measured the complete local plate group using the existing stroke-relative rule') for c in replaced]
+            components = [c for c in components if c not in replaced]
+            native['id'] = f'cv_local_source_{len(components)+1}'
+            components.append(native)
+    return components
 
 
 class CircuitCVCandidateExtractor:
@@ -150,19 +195,13 @@ class CircuitCVCandidateExtractor:
                                       restored_ink_pixels=int(np.count_nonzero(ink[restore]))))
         components,rejected=detect_symbols(clean,stroke,polarity_ink=ink,semantic_types=semantic_types)
         if symbol_regions:
+            components = _recover_source_symbols(clean, stroke, components, symbol_regions)
             components = _recover_resistor_symbols(
                 clean, stroke, components, [box for kind, box in symbol_regions if kind == 'resistor'],
             )
             components, conflicts = _separate_overlapping_hypotheses(components, symbol_regions)
             rejected.extend(conflicts)
-        conductor=clean.copy()
-        for c in components:
-            b=c['bbox']
-            # Remove physical symbol ink before graph construction. Switch arm
-            # and contact rings are not conducting wire paths between terminals.
-            pad=0
-            conductor[max(0,int(b.y-pad)):min(h,int(np.ceil(b.y_max+pad))+1),
-                      max(0,int(b.x-pad)):min(w,int(np.ceil(b.x_max+pad))+1)]=0
+        conductor, removed, mask_audit = remove_verified_bodies(clean, components, stroke)
         paths,junctions,crossings,skeleton=trace_paths(conductor,stroke)
         wires=[]
         for i,p in enumerate(paths):
@@ -177,6 +216,9 @@ class CircuitCVCandidateExtractor:
                     # Retained for older diagnostic consumers, never used for topology.
                     rails_y=[], branches_x=[],
                     gray=gray,edges=cv2.Canny(gray,50,150),ink=clean,
+                    original_binary=ink.copy(), body_mask_before=clean.copy(),
+                    component_body_mask=removed, removed_symbol_pixels=removed.copy(),
+                    body_mask_audit=mask_audit,
                     conductor_mask=conductor,skeleton=skeleton,stroke_width_px=stroke,
                     raw_candidates=components,rejected_candidates=rejected,
                     ocr_symbol_conflicts=protected,

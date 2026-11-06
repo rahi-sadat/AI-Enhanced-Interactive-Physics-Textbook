@@ -46,7 +46,7 @@ def positive_terminal_from_marker(ink, terminals, plate_length, stroke):
 
 
 def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, include_switches=True,
-                   max_resistor_step=None):
+                   max_resistor_step=None, min_plate_length=15.0):
     paths, _, _, _ = trace_paths(ink, stroke, spur_widths=3)
     components, rejected = [], []
 
@@ -73,7 +73,10 @@ def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, inclu
             runs = []
             curr = []
             for r in reversals:
-                if not curr or r - curr[-1] <= 2:
+                # Raster plateaus add vertices without adding a new tooth.
+                # Group by measured path length using the existing tooth bound,
+                # rather than an index count that truncates small zigzags.
+                if not curr or np.linalg.norm(np.diff(pts[curr[-1]:r+1], axis=0), axis=1).sum() <= max_step:
                     curr.append(r)
                 else:
                     if len(curr) >= 3:
@@ -85,6 +88,13 @@ def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, inclu
             for run in runs:
                 start_idx = max(0, run[0] - 1)
                 end_idx = min(len(pts) - 1, run[-1] + 1)
+                # The vertex after the final reversal can be a distant rail
+                # junction. The existing tooth-step bound also bounds the
+                # adjoining symbol segment; never erase that rail as body ink.
+                if np.linalg.norm(pts[end_idx] - pts[run[-1]]) > max_step:
+                    end_idx = run[-1]
+                if np.linalg.norm(pts[start_idx] - pts[run[0]]) > max_step:
+                    start_idx = run[0]
                 body = pts[start_idx:end_idx + 1]
                 amp = np.ptp(body[:, trans])
                 span = np.ptp(body[:, axis])
@@ -186,7 +196,7 @@ def detect_symbols(ink, stroke, *, semantic_types=None, polarity_ink=None, inclu
         for j in range(1, n):
             x, y, pw, ph, area = stats[j]
             length, thickness = (ph, pw) if axis == 0 else (pw, ph)
-            if max(stroke * 3.5, 15.0) < length < stroke * 40 and thickness <= stroke * 12:
+            if max(stroke * 3.5, min_plate_length) < length < stroke * 40 and thickness <= stroke * 12:
                 plates.append(dict(center=centroids[j], length=float(length), thickness=float(thickness), bbox=[x, y, pw, ph]))
         plates.sort(key=lambda p: p['center'][axis])
         used = set()

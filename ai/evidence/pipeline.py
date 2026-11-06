@@ -291,12 +291,20 @@ class EvidenceExtractionPipeline:
         if book_ir.domain == "circuits":
             from ai.evidence.segmentation.circuit_prompts import segment_circuit_candidates
             from ai.evidence.cv.circuit_geometry_validator import CircuitGeometryValidator
+            if book_ir.provenance.get("pipeline") == "circuit_v2":
+                cv_candidates['detector_proposals'] = [dict(id=e.id, type=e.type,
+                    bbox=SourceBBox.from_dict(e.attributes['circuitV2BBox'])) for e in book_ir.entities]
             seg_result = segment_circuit_candidates(self.segmentation_provider, img_bgr, cv_candidates, asset)
             cv_candidates = CircuitGeometryValidator().validate(
                 img_bgr, cv_candidates, source_asset_id=asset.id, figure_id=book_ir.figure_id,
             )
 
         # 5. Fuse evidence via Subtype Grounder
+        ocr_refinements=[]
+        if book_ir.domain=='circuits':
+            from ai.evidence.grounding.circuit_ocr_refinement import refine_circuit_ocr
+            ocr_result,ocr_refinements=refine_circuit_ocr(self.ocr_provider,img_bgr,cv_candidates,ocr_result)
+            page_ir.metadata['circuit_ocr_refinements']=ocr_refinements
         outcome = grounder.ground(
             book_ir=book_ir,
             cv_candidates=cv_candidates,
@@ -309,6 +317,11 @@ class EvidenceExtractionPipeline:
         grounded_ir = outcome.grounded_book_ir
         if book_ir.domain == "circuits":
             grounded_ir.provenance["circuit_segmentation"] = cv_candidates.get("segmentation_diagnostics", [])
+            grounded_ir.provenance['circuit_ocr_refinements']=ocr_refinements
+            from ai.evidence.segmentation.circuit_prompts import circuit_segmentation_state
+            grounded_ir.provenance['circuit_segmentation_state']=circuit_segmentation_state(
+                grounded_ir.provenance['circuit_segmentation'],
+                grounded_ir.geometry.get('circuit_validation',{}).get('geometry',False))
         if grounded_ir.geometry is None:
             grounded_ir.geometry = {}
         if src_w and not grounded_ir.geometry.get("width"):

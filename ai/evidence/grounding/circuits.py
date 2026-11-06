@@ -60,107 +60,8 @@ def parse_and_cluster_circuit_tokens(
     Groups designators (e.g. 'R1', 'V1') with their adjacent physical values (e.g. '100Ω', '24 V').
     Filters out diagram titles, figure numbers, and non-component annotations.
     """
-    parsed = []
-    ignored_keywords = [
-        'parallel circuit', 'combination circuit', 'series-parallel', 'series circuit',
-        'fig.', 'figure', 'dc circuit', 'circuit diagram'
-    ]
-
-    SUBSCRIPT_MAP = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
-
-    for tok in tokens:
-        raw = tok.raw_text.strip()
-        raw_norm = raw.translate(SUBSCRIPT_MAP)
-        lower = raw_norm.lower()
-        if any(ik in lower for ik in ignored_keywords):
-            continue
-
-        b = tok.bbox_source_px
-        if not b:
-            continue
-        cx = b.x + b.width / 2.0
-        cy = b.y + b.height / 2.0
-
-        ptype = None
-        pdesig = None
-        pval = None
-        punit = None
-
-        m_r_desig = re.fullmatch(r'^[Rr](\d+)$', raw_norm)
-        m_v_desig = re.fullmatch(r'^[Vv](\d+)$', raw_norm)
-        m_c = re.fullmatch(r'(?:[Cc](\d*)\s*(?:=\s*)?)?(\d+(?:\.\d+)?)\s*([munpµμ]?F)', raw_norm)
-        m_c_desig = re.fullmatch(r'[Cc](\d*)', raw_norm)
-
-        m_r_comb = re.match(r'^[Rr](\d+?)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
-        m_v_comb = re.match(r'^[Vv](\d*)\s*(?:=|\s)?\s*(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
-
-        # OCR can split a label into a designator and a separate "= 10 Ω".
-        m_r_val = re.fullmatch(r'^(?:=\s*)?(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm)$', raw_norm, re.IGNORECASE)
-        m_v_val = re.fullmatch(r'^(?:=\s*)?(\d+(?:\.\d+)?)\s*[vV]$', raw_norm, re.IGNORECASE)
-
-        if m_c:
-            quantity=UnitEngine.parse_quantity(float(m_c[2]),m_c[3],'capacitance')
-            ptype='capacitor';pdesig=f'C{m_c[1] or 1}' if m_c[1] is not None else None
-            pval=quantity.canonical_value;punit='F'
-        elif m_c_desig:
-            ptype='capacitor';pdesig=f'C{m_c_desig[1] or 1}'
-        elif m_r_desig:
-            ptype = 'resistor'
-            pdesig = f"R{m_r_desig.group(1)}"
-        elif m_v_desig:
-            ptype = 'voltage_source'
-            pdesig = f"V{m_v_desig.group(1)}"
-        elif m_r_comb:
-            ptype = 'resistor'
-            pdesig = f"R{m_r_comb.group(1)}"
-            pval = float(m_r_comb.group(2))
-            punit = 'ohm'
-            if 'k' in m_r_comb.group(3).lower():
-                pval *= 1000.0
-        elif m_v_comb:
-            ptype = 'voltage_source'
-            pdesig = f"V{m_v_comb.group(1)}" if m_v_comb.group(1) else "V1"
-            pval = float(m_v_comb.group(2))
-            punit = 'V'
-        elif m_r_val:
-            ptype = 'resistor'
-            pval = float(m_r_val.group(1))
-            punit = 'ohm'
-            if 'k' in m_r_val.group(2).lower():
-                pval *= 1000.0
-        elif m_v_val:
-            ptype = 'voltage_source'
-            pval = float(m_v_val.group(1))
-            punit = 'V'
-        elif raw in ('+', '-', '十'):
-            ptype = 'polarity'
-            pdesig = '+' if raw in ('+', '十') else '-'
-        else:
-            m_num = re.search(r'^(\d+(?:\.\d+)?)\s*([kK]?[Ωω]|ohm|kohm|[vV]|volt)?$', raw_norm, re.IGNORECASE)
-            if m_num:
-                clean_num = m_num.group(1)
-                unit_part = (m_num.group(2) or '').lower()
-                has_unit = bool(unit_part or ('k' in lower and re.search(r'\d+[kK]', raw_norm)))
-                mult = 1000.0 if 'k' in unit_part or 'k' in lower else 1.0
-                try:
-                    pval = float(clean_num) * mult
-                    punit = 'V' if any(u in unit_part for u in ('v', 'volt')) else 'ohm'
-                    ptype = 'value_only' if has_unit else 'raw_number'
-                except ValueError:
-                    pass
-
-        if ptype:
-            parsed.append({
-                'tok': tok,
-                'raw': raw,
-                'type': ptype,
-                'desig': pdesig,
-                'val': pval,
-                'unit': punit,
-                'bbox': b,
-                'cx': cx,
-                'cy': cy,
-            })
+    from .circuit_ocr import parse_circuit_ocr_tokens
+    parsed = parse_circuit_ocr_tokens(tokens)
 
     # Cluster parsed tokens into distinct components
     components = []
@@ -177,7 +78,7 @@ def parse_and_cluster_circuit_tokens(
                 'type': p['type'],
                 'val': p['val'],
                 'unit': p['unit'],
-                'tokens': [p['tok']],
+                'tokens': p['tokens'],
                 'cx': p['cx'],
                 'cy': p['cy'],
                 'bbox': p['bbox'],
@@ -192,7 +93,7 @@ def parse_and_cluster_circuit_tokens(
         desig = p['desig']
         val = p['val']
         unit = p['unit']
-        c_tokens = [p['tok']]
+        c_tokens = list(p['tokens'])
         used.add(i)
 
         best_j = None
@@ -201,6 +102,13 @@ def parse_and_cluster_circuit_tokens(
             if j in used or q['type'] == 'polarity':
                 continue
             if q['val'] is not None and q['desig'] is None and q['type'] in (c_type, 'value_only'):
+                # Split designators and values must share a text row or column.
+                # A nearest label elsewhere on the page is not an association.
+                a, bq = p['bbox'], q['bbox']
+                aligned = (min(a.x_max,bq.x_max) > max(a.x,bq.x) or
+                           min(a.y_max,bq.y_max) > max(a.y,bq.y))
+                if not aligned:
+                    continue
                 dist = ((p['cx'] - q['cx']) ** 2 + (p['cy'] - q['cy']) ** 2) ** 0.5
                 if keep_standalone_values and any(
                     other is not p and other['type'] == c_type and other['desig']
@@ -217,7 +125,7 @@ def parse_and_cluster_circuit_tokens(
             q = parsed[best_j]
             val = q['val']
             unit = q['unit']
-            c_tokens.append(q['tok'])
+            c_tokens.extend(q['tokens'])
             used.add(best_j)
 
         xs = [t.bbox_source_px.x for t in c_tokens if t.bbox_source_px]
@@ -287,7 +195,7 @@ def parse_and_cluster_circuit_tokens(
             'type': c_type,
             'val': p['val'],
             'unit': p['unit'] or ('V' if c_type == 'voltage_source' else 'ohm'),
-            'tokens': [p['tok']],
+            'tokens': p['tokens'],
             'cx': p['cx'],
             'cy': p['cy'],
             'bbox': p['bbox'],
@@ -322,6 +230,15 @@ def _associate_local_ocr(assigned, clusters, scale):
             if component['type'] != cluster['type']:
                 continue
             box = component['bbox']
+            # Labels must overlap the symbol along its measured axis, placing
+            # them alongside/above it rather than diagonally near another part.
+            label_box = cluster['bbox']
+            if component['orientation'] == 'horizontal':
+                aligned = min(box.x_max,label_box.x_max) > max(box.x,label_box.x)
+            else:
+                aligned = min(box.y_max,label_box.y_max) > max(box.y,label_box.y)
+            if not aligned:
+                continue
             dx = max(box.x - cluster['cx'], cluster['cx'] - box.x_max, 0)
             dy = max(box.y - cluster['cy'], cluster['cy'] - box.y_max, 0)
             distance = np.hypot(dx, dy) / scale
@@ -347,7 +264,7 @@ class CircuitGrounder:
         return self.fuse(book, cv_candidates, seg_result, ocr_result)
 
     def fuse(self, book_ir, cv_candidates, segmentation_candidates=None, ocr_result=None):
-        from .circuit_graph import build_conductor_graph
+        from .circuit_graph import build_conductor_graph, build_geometric_conductor_graph
         from .circuit_integrity import COMPONENT_TYPES, validate_circuit_integrity
         book=book_ir
         verified=[c for c in cv_candidates.get('components',[])
@@ -393,23 +310,35 @@ class CircuitGrounder:
         # Global one-to-one assignment: type mismatch forbidden; OCR is only a
         # distance/identity cue, never the returned center or terminal geometry.
         costs=np.full((len(semantics),len(verified)+len(semantics)),1e6)
+        reconciliations=[]
         for i,e in enumerate(semantics):
             cluster=labels.get(e.id)
             proposal = SourceBBox.from_dict(e.attributes['circuitV2BBox']) if local_detection else None
             for j,c in enumerate(verified):
+                if proposal:
+                    from .circuit_reconciliation import reconcile_candidate
+                    if proposal.iou(c['bbox']) > 0:
+                        score,record=reconcile_candidate(proposal,normalize(e.type),c,cv_candidates)
+                        record['entity_id']=e.id
+                        reconciliations.append(record)
+                        if score is not None:
+                            costs[i,j]=score
+                    continue
                 if normalize(e.type)!=c['type']:
                     continue
-                if proposal:
-                    overlap = proposal.iou(c['bbox'])
-                    if overlap >= .20:
-                        costs[i, j] = 1 - overlap
-                elif cluster:
+                if cluster:
                     center=c['center']
                     distance=np.hypot(center.x-cluster['cx'],center.y-cluster['cy'])
                     if distance < scale*.25:
                         costs[i,j]=distance/scale
                 elif sum(normalize(x.type)==normalize(e.type) for x in semantics)==1 and sum(x['type']==c['type'] for x in verified)==1:
                     costs[i,j]=.2
+            if proposal:
+                for c in cv_candidates.get('components',[]):
+                    if c.get('verification_status')!='VERIFIED' and proposal.iou(c['bbox'])>0:
+                        _,record=reconcile_candidate(proposal,normalize(e.type),c,cv_candidates)
+                        record['entity_id']=e.id
+                        reconciliations.append(record)
         assigned = {semantics[i].id: verified[j]
                     for i, j in _unique_matches(costs, .10 if local_detection else .015)}
         if local_detection:
@@ -431,12 +360,17 @@ class CircuitGrounder:
                     provider='circuit_geometry_validator',payload={
                         'bbox':c['bbox'].to_dict(),'terminals':[c['terminal_1'].to_dict(),c['terminal_2'].to_dict()],
                         'orientation':c['orientation'],'uncertainty_px':c['uncertainty_px'],
-                        'terminal_attachments':c['terminal_attachments'],'state':c.get('state')})
+                        'terminal_attachments':c['terminal_attachments'],'state':c.get('state'),
+                        'symbol_path_source_px':c['symbol_path'],'plates':[list(map(int,p)) for p in c.get('plates',[])],
+                        'polarity_verified':c.get('polarity_verified'),
+                        'refinement_evidence':c.get('refinement_evidence',[])})
                 terms=[]
                 for i,(t,a) in enumerate(zip([c['terminal_1'],c['terminal_2']],c['terminal_attachments'])):
                     nid=wire_nodes.get(a['wire_id']) if a else None
                     terms.append({'id':f'{e.id}.t{i+1}','source_px':[float(t.x),float(t.y)],
-                                  'node':nid,'wire_id':a['wire_id'] if a else None})
+                                  'node':nid,'wire_id':a['wire_id'] if a else None,
+                                  'wire_end':a['end'] if a else None,
+                                  'attachment_distance_px':a['distance_px'] if a else None})
                 b=c['bbox'];center=c['center']
                 geometry={'center_source_px':[float(center.x),float(center.y)],
                           'bbox_source_px':[float(b.x),float(b.y),float(b.x_max),float(b.y_max)],
@@ -454,7 +388,11 @@ class CircuitGrounder:
                     component.update(state=c['state'],state_verified=True)
                 elif cluster and cluster['val'] is not None:
                     component.update(value=cluster['val'],unit=cluster['unit'],
-                                     value_provenance={'source':'ocr','evidence_refs':refs[1:]})
+                                     value_provenance={'source':'ocr','evidence_refs':refs[1:],
+                                         'confidence':min((t.confidence or 0.0 for t in cluster['tokens']),default=0.0),
+                                         'association':{'method':'unique_type_axis_aligned_assignment',
+                                             'label_bbox_source_px':cluster['label_bbox'],
+                                             'component_orientation':c['orientation']}})
                     book.parameter_provenance[e.id]=ProvenanceRecord(source='ocr',evidence_refs=refs[1:],
                         notes='OCR value assigned to this verified physical symbol; geometry has separate CV provenance.')
                 e.position_source_px={'x':float(center.x),'y':float(center.y),'provenance':c['provenance']}
@@ -478,6 +416,10 @@ class CircuitGrounder:
         book.parameters.update(components=components,nodes=nodes,wires=wires,
             reference_node=next((c['nodes'][1] for c in components if c['type']=='voltage_source'),
                                 next((c['nodes'][1] for c in components if c['type']=='capacitor'),None)))
+        book.parameters['geometric_conductor_graph']=build_geometric_conductor_graph(wires,components,
+            junctions=cv_candidates.get('junction_evidence',[]),crossings=cv_candidates.get('crossings',[]),
+            source_asset_id=book.source_asset_id)
+        book.provenance['circuit_body_mask_audit']=cv_candidates.get('body_mask_audit',{})
         book.evidence.update({k:v.to_dict() for k,v in evidence.items()})
         assigned_ids = {candidate['id'] for candidate in assigned.values()}
         unmatched = [candidate for candidate in verified if candidate['id'] not in assigned_ids]
@@ -497,11 +439,14 @@ class CircuitGrounder:
         topology_ok=geometry_ok and bool(nodes) and all(all(c['nodes']) for c in components)
         book.geometry['circuit_validation']={'semantic':book.isPhysics is True,
             'geometry':geometry_ok,'topology':topology_ok,'referential_integrity':False,'physics_readiness':False}
-        book.geometry['circuit_topology']={'verified_connectivity':topology_ok,'node_count':len(nodes)}
+        book.geometry['circuit_topology']={'verified_connectivity':topology_ok,'node_count':len(nodes),
+            'junction_evidence':cv_candidates.get('junction_evidence',[]),
+            'crossing_evidence':cv_candidates.get('crossings',[])}
         book.provenance['grounding_diagnostics']=[d.to_dict() for d in diagnostics]
         book.provenance['candidate_parameters']=[c.to_dict() for c in values]
         book.provenance['semantic_geometry_identity_map']={key:c['id'] for key,c in assigned.items()}
         book.provenance['circuit_geometry_issues']=cv_candidates.get('validation_issues',[])
+        book.provenance['circuit_reconciliation']=reconciliations
         for key in ('components','nodes'):
             book.parameter_provenance[key]=ProvenanceRecord(source='diagram_measurement',
                 evidence_refs=list(evidence),notes='Verified physical symbols and continuous conductor graph.')

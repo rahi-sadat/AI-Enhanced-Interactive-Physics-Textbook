@@ -17,15 +17,17 @@ class CircuitGeometryValidator:
             p=deepcopy(path)
             support=sample_support(ink,p['points'],stroke*.25)
             bounds=all(0 <= x < w and 0 <= y < h for x,y in p['points'])
-            through_body=False
-            for a,b in zip(p['points'],p['points'][1:]):
-                samples=np.linspace(a,b,max(2,int(np.linalg.norm(np.subtract(b,a)))+1))
-                for component in candidates.get('components',[]):
-                    box=component['bbox']
-                    inside=(samples[:,0]>box.x+stroke)&(samples[:,0]<box.x_max-stroke)&(samples[:,1]>box.y+stroke)&(samples[:,1]<box.y_max-stroke)
-                    through_body |= bool(inside.any())
+            # Polyline simplification may touch a removed boundary pixel while
+            # its measured stroke remains continuously supported alongside it.
+            # Check the post-mask raster with the same stroke uncertainty as the
+            # original source, rather than treating one sampled mask pixel as
+            # an entire physical body crossing. No missing pixels are filled.
+            conductor=candidates.get('conductor_mask')
+            remaining=sample_support(conductor,p['points'],stroke*.25) if conductor is not None else support
+            through_body=remaining['support_fraction']<.98 or remaining['max_gap_px']>max(1,stroke*.4)
             valid=bounds and not through_body and support['support_fraction'] >= .98 and support['max_gap_px'] <= max(1,stroke*.4)
-            p.update(verification_status='VERIFIED' if valid else 'REJECTED',**support)
+            p.update(verification_status='VERIFIED' if valid else 'REJECTED',**support,
+                     conductor_support_fraction=remaining['support_fraction'],conductor_max_gap_px=remaining['max_gap_px'])
             if valid:
                 paths.append(p)
             else:
@@ -37,6 +39,8 @@ class CircuitGeometryValidator:
             b=c['bbox']
             terms=[c['terminal_1'],c['terminal_2']]
             reasons=[]
+            if c.get('body_mask_status') == 'REJECTED':
+                reasons.extend(c.get('body_mask_reasons', ['body_mask_unverified']))
             if not (0<=b.x<b.x_max<=w and 0<=b.y<b.y_max<=h):
                 reasons.append('out_of_source_bounds')
             if not c.get('symbol_path') or c.get('type') not in {'resistor','voltage_source','switch','capacitor'}:

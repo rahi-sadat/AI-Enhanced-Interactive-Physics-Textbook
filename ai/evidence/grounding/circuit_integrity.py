@@ -71,6 +71,8 @@ def validate_circuit_integrity(book):
                 all(isinstance(v,(int,float)) and math.isfinite(v) for v in point) and
                 0<=point[0]<width and 0<=point[1]<height)
     wire_by_id={w.get('id'):w for w in wires}
+    value_owners=Counter(ref for c in comps if c.get('value_provenance',{}).get('source')=='ocr'
+                         for ref in c.get('value_provenance',{}).get('evidence_refs',[]))
     for c in comps:
         if not isinstance(c,dict):
             fail('INVALID_COMPONENT','Circuit component must be an object.');continue
@@ -96,6 +98,18 @@ def validate_circuit_integrity(book):
         if strict and c.get('verification_status')!='VERIFIED':
             fail('GEOMETRY_UNVERIFIED',f'{cid} has not passed raster/terminal verification.',cid)
         if strict:
+            value_provenance=c.get('value_provenance',{})
+            if c.get('value') is not None and value_provenance.get('source')=='auto_policy' and not value_provenance.get('user_accepted'):
+                fail('UNCONFIRMED_CIRCUIT_VALUE',f'{cid} requires observed OCR or an explicit user decision; automatic assumptions cannot authorize source playback.',cid)
+            if c.get('value') is not None:
+                source=value_provenance.get('source')
+                if source not in {'ocr','user_supplied','user_confirmed','user_corrected','author_override','user','manual','policy_default'}:
+                    fail('UNVERIFIED_CIRCUIT_VALUE',f'{cid} has no accepted parameter provenance.',cid)
+                if source=='policy_default' and not value_provenance.get('user_accepted'):
+                    fail('UNCONFIRMED_CIRCUIT_VALUE',f'{cid} policy assumption requires explicit user acceptance.',cid)
+                if source=='ocr' and (not value_provenance.get('evidence_refs') or any(
+                        value_owners[ref]!=1 for ref in value_provenance.get('evidence_refs',[]))):
+                    fail('AMBIGUOUS_VALUE_OWNER',f'{cid} requires unique ownership of its OCR value evidence.',cid)
             geometry=c.get('geometry',{})
             bbox=geometry.get('bbox_source_px',[])
             if (not point_valid(geometry.get('center_source_px')) or len(bbox)!=4 or
