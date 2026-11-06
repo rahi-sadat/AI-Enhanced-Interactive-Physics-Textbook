@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 import cv2
 import httpx
+from fastapi.testclient import TestClient
 
 from ai.evidence.ocr import MockOCRProvider
 from ai.evidence.pipeline import EvidenceExtractionPipeline
@@ -87,6 +88,19 @@ def test_circuit_v2_upload_compiles_only_verified_topology(monkeypatch, tmp_path
 
     good, damaged, unknown, parallel, symbolic, mixed = asyncio.run(upload_examples())
     vlm.assert_not_called()
+    assert good['compiler']['status']=='NEEDS_REVIEW' and good['scene'] is None
+    assert not good['book_ir']['assumptions']
+    # The omitted source voltage now requires a real user decision. Exercise
+    # the production resolution/compile endpoints before testing playback.
+    with TestClient(main.app) as client:
+        source_id=next(c['id'] for c in good['book_ir']['parameters']['components'] if c['type']=='voltage_source')
+        resolved=client.post('/api/resolution/resolve',json={'book_ir':good['book_ir'],'resolution':{
+            'parameter_name':f'component.{source_id}.value','resolved_value':12,'canonical_unit':'V',
+            'resolution_source':'user_supplied','user_accepted':True}})
+        assert resolved.status_code==200,resolved.text
+        compiled=client.post('/api/resolution/compile',json={'book_ir':resolved.json()['book_ir']})
+        assert compiled.status_code==200,compiled.text
+        good.update(compiled.json())
     book = good["book_ir"]
     assert book["provenance"]["model"] == "circuit_v2"
     assert good["compiler"]["status"] == "READY", good["issues"]
@@ -100,7 +114,7 @@ def test_circuit_v2_upload_compiles_only_verified_topology(monkeypatch, tmp_path
     assert {(c["label"], c["value"], parameters[c["id"]]["provenance"])
             for c in components if c["type"] == "resistor"} == {("R1", 10, "ocr"), ("R2", 20, "ocr")}
     source = next(c for c in components if c["type"] == "voltage_source")
-    assert parameters[source["id"]]["provenance"] == "auto_policy"
+    assert parameters[source["id"]]["provenance"] == "user_supplied"
     assert (good["scene"]["coordinateSpace"]["width"], good["scene"]["coordinateSpace"]["height"]) == (1280, 960)
 
     assert damaged["book_ir"]["provenance"]["model"] == "circuit_v2"
@@ -110,15 +124,19 @@ def test_circuit_v2_upload_compiles_only_verified_topology(monkeypatch, tmp_path
     assert unknown["domain"] is None and unknown["scene"] is None
 
     assert parallel["compiler"]["status"] == "READY", parallel["book_ir"]["reviewIssues"]
-    assert parallel["book_ir"]["provenance"]["off_circuit_candidates"]
+    # Pixel-specific masks can reject caption glyphs before assignment, so
+    # their old off-circuit *verified* count is not a readiness requirement.
+    assert parallel['book_ir']['provenance']['circuit_reconciliation']
+    assert all(r['status']=='SUPPORTED' for r in parallel['book_ir']['provenance']['circuit_reconciliation']
+               if r['candidate_id'] in parallel['book_ir']['provenance']['semantic_geometry_identity_map'].values())
     parallel_components = parallel["scene"]["circuit"]["components"]
     assert {c["label"]: c["value"] for c in parallel_components} == {"V1": 6, "R1": 10, "R2": 15}
     assert len({frozenset(c["nodes"]) for c in parallel_components}) == 1
 
-    assert symbolic["compiler"]["status"] == "READY", symbolic["book_ir"]["reviewIssues"]
-    assert Counter(c["type"] for c in symbolic["scene"]["circuit"]["components"]) == {"resistor": 1, "voltage_source": 1}
-    assert all(c["nodes"][0] != c["nodes"][1] for c in symbolic["scene"]["circuit"]["components"])
+    assert symbolic["compiler"]["status"] == "NEEDS_REVIEW" and symbolic['scene'] is None
+    assert Counter(c["type"] for c in symbolic['book_ir']['parameters']['components']) == {"resistor": 1, "voltage_source": 1}
+    assert all(c["nodes"][0] != c["nodes"][1] for c in symbolic['book_ir']['parameters']['components'])
 
-    assert mixed["compiler"]["status"] == "READY", mixed["book_ir"]["reviewIssues"]
-    assert Counter(c["type"] for c in mixed["scene"]["circuit"]["components"]) == {"resistor": 4, "voltage_source": 1}
-    assert len(mixed["scene"]["circuit"]["nodes"]) == 4
+    assert mixed["compiler"]["status"] == "NEEDS_REVIEW" and mixed['scene'] is None
+    assert Counter(c["type"] for c in mixed['book_ir']['parameters']['components']) == {"resistor": 4, "voltage_source": 1}
+    assert len(mixed['book_ir']['parameters']['nodes']) == 4

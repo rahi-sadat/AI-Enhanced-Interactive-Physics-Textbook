@@ -4,8 +4,9 @@ from time import perf_counter
 
 from ai.evidence.transforms import load_and_validate_source_image
 from ai.ingestion.source_dimensions import enforce_source_dimensions
-from ai.resolution.auto import AutoResolutionEngine
 from ai.resolution.engine import ResolutionEngine
+from ai.resolution.evaluator import ReadinessEvaluator
+from ai.perception.circuits.fault_analysis import analyze_book_circuit
 from shared.schemas.ingestion import BookEntity, BookIR, BookIRStatus
 
 
@@ -36,7 +37,7 @@ def make_preview(detections, asset, image_url):
         x, y, w, h = (box[k] for k in ("x", "y", "width", "height"))
         points = [[x, y+h/2], [x+w, y+h/2]] if w >= h else [[x+w/2, y], [x+w/2, y+h]]
         nodes = [f"N{i}", f"N{(i+1)%count}"]
-        provenance = {"source": "experimental_assumption", "verified": False,
+        provenance = {"source": "experimental_assumption", "verified": False, "confidence": 0.0,
                       "reason": "Preview-only defaults; not extracted from the diagram."}
         comp = dict(id=cid, type=kind, label=cid, nodes=nodes, value=defaults[kind], unit=units[kind],
                     editable=True, state="closed", initial_voltage=0,
@@ -49,7 +50,7 @@ def make_preview(detections, asset, image_url):
         if kind != "switch":
             parameters[cid] = dict(value=defaults[kind], unit=units[kind], editable=True, min=1e-9,
                                    max=max(defaults[kind]*10,.01), step="any", label=cid,
-                                   provenance="experimental_assumption")
+                                   provenance="experimental_assumption", source="experimental_preview", confidence=0.0)
     for i, comp in enumerate(components):
         nxt = components[(i+1)%count]
         wires.append(dict(id=f"preview_wire_{i}", node=comp["nodes"][1],
@@ -99,7 +100,11 @@ def run_experiment(data, filename, mime_type, services):
         result["model"] = {"name": "circuit_v2", "checkpoint": str(detector.checkpoint),
                            "sha256": stage("checkpoint", lambda: hashlib.sha256(detector.checkpoint.read_bytes()).hexdigest())}
         detections = stage("detection", lambda: detector.predict(load_and_validate_source_image(asset)))
-        result["detections"] = [dict(kind=d.kind, confidence=d.confidence, bbox=d.bbox.to_dict()) for d in detections]
+        from ai.perception.circuits.circuit_v2 import MODEL_CLASSES
+        result['model']['classes'] = MODEL_CLASSES
+        result["detections"] = [dict(candidate_id=f'det_{d.kind}_{i}',kind=d.kind,confidence=d.confidence,
+            bbox=d.bbox.to_dict(),bbox_axis_hint='horizontal' if d.bbox.width >= d.bbox.height else 'vertical',
+            orientation_verified=False,model_provenance=deepcopy(result['model'])) for i,d in enumerate(detections,1)]
         if not detections:
             stages[-1].update(status="blocked", message="No circuit symbols detected at confidence >= 0.25.")
         book = BookIR(source_asset_id=asset.id, page_ir_version=page.version,
@@ -107,7 +112,8 @@ def run_experiment(data, filename, mime_type, services):
                       domain="circuits" if detections else None, subtype="dc_linear" if detections else None,
                       status=BookIRStatus.NEEDS_REVIEW if detections else BookIRStatus.UNRESOLVED,
                       entities=[BookEntity(id=f"det_{d.kind}_{i}", type=d.kind,
-                                           attributes={"circuitV2BBox": d.bbox.to_dict(), "confidence": d.confidence, "source": "circuit_v2"})
+                                           attributes={"circuitV2BBox": d.bbox.to_dict(), "confidence": d.confidence,
+                                                       "source": "circuit_v2", "model_provenance":deepcopy(result['model'])})
                                 for i,d in enumerate(detections,1)],
                       provenance={"pipeline":"circuit_v2", "model":"circuit_v2", "classification":"supported" if detections else "unknown"})
         result["book_ir"] = book.to_dict()
@@ -127,20 +133,29 @@ def run_experiment(data, filename, mime_type, services):
                                "duration_ms": 0, "message": f"Grounder {key} check: {checks[key]}",
                                "issues": deepcopy(book.review_issues) if not checks[key] else []})
         stage("source_dimensions", lambda: enforce_source_dimensions(book, asset))
-        auto = stage("resolution", lambda: AutoResolutionEngine.resolve(book))
-        stage("readiness", lambda: ResolutionEngine.auto_resolve(book))
+        resolved = stage("resolution", lambda: ResolutionEngine.auto_resolve(book, assume_missing=False))
+        if not resolved.ready:
+            stages[-1].update(status="blocked", message="Evidence-only resolution still requires review.")
+        readiness = stage("readiness", lambda: ReadinessEvaluator.evaluate(book, mutate_status=True))
+        if not readiness.ready:
+            stages[-1].update(status="blocked", message="Backend readiness is false.", issues=deepcopy(book.review_issues))
         result.update(book_ir=book.to_dict(), grounding=book.provenance.get("grounding_diagnostics", []),
-                      auto_failures=auto.failures)
+                      auto_failures=[])
         compiled = stage("compilation", lambda: compiler.compile(book))
         result["compiler"] = compiled.to_dict()
         result["scene"] = compiled.scene
         if compiled.status != "READY":
             stages[-1].update(status="blocked", issues=compiled.issues,
                               message=f"Compiler returned {compiled.status}.")
+        result['ideal_analysis'] = stage('ideal_analysis', lambda: analyze_book_circuit(book, mode='ideal'))
+        if result['ideal_analysis']['status'] != 'IDEAL_SOLVED':
+            stages[-1].update(status='blocked', message=result['ideal_analysis'].get('explanation') or
+                             result['ideal_analysis'].get('error','Ideal analysis requires review.'))
+        if result['ideal_analysis']['status'] == 'IDEAL_REJECTED':
+            result['fault_analysis'] = stage('qualitative_fault', lambda: analyze_book_circuit(book, mode='qualitative'))
     except Exception:
         # The failed record carries the actual exception and stage. Keep earlier
-        # evidence available and still offer the expressly requested preview.
+        # evidence available. Never replace failed extraction with a made-up circuit.
         pass
-    result["preview_scene"] = stage("experimental_preview", lambda: make_preview(detections, asset, url))
     result["first_blocker"] = next((s for s in stages if s["status"] in {"blocked", "failed"}), None)
     return result

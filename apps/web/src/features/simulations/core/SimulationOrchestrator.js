@@ -51,6 +51,7 @@ export class SimulationOrchestrator {
     this.compiledScene = null;
     this.currentError = null;
     this.resolutionHistory = [];
+    this.reconstructionBlockers = [];
 
     this._listeners = new Set();
     this._operationId = 0;
@@ -110,6 +111,7 @@ export class SimulationOrchestrator {
       compiledScene: this.compiledScene,
       currentError: this.currentError,
       resolutionHistory: [...this.resolutionHistory],
+      reconstructionBlockers: this.reconstructionBlockers,
       metrics: this.getResearchMetrics(),
     };
   }
@@ -127,6 +129,7 @@ export class SimulationOrchestrator {
     this.currentError = null;
     this.compiledScene = null;
     this.resolutionHistory = [];
+    this.reconstructionBlockers = [];
 
     // A new upload must not inherit review details from a previous figure.
     this.reviewState = null;
@@ -193,16 +196,19 @@ export class SimulationOrchestrator {
         return;
       }
 
-      // Circuit uploads compile during ingestion. Keep any blocker in the
-      // upload dialog so students can retry without an evidence review step.
+      // Failed source reconstruction retains its original image and blockers
+      // in evidence review. No preview or running state substitutes for it.
       if (this.bookIR?.domain === 'circuits') {
+        this.reconstructionBlockers = [...(this.bookIR.reviewIssues || []), ...(compilerResult.issues || []),
+          ...(this.bookIR.provenance?.circuit_geometry_issues || [])];
         const codes = new Set([...(this.bookIR.reviewIssues || []), ...(compilerResult.issues || [])]
           .map(issue => issue.code));
         const shorted = codes.has('SHORTED_CIRCUIT_SOURCE') && !codes.has('GROUNDING_INCOMPLETE');
         const message = shorted
           ? 'Short circuit detected. A wire connects both terminals of the voltage source. The ideal circuit has no finite current to simulate.'
           : 'Circuit symbols were detected, but the app could not verify every component and wire connection. Try a clear crop of the complete diagram.';
-        this._setState(OrchestratorState.ERROR, message);
+        await this._fetchReviewAnalysis(opId);
+        if (this.state === OrchestratorState.NEEDS_REVIEW) this._setState(OrchestratorState.NEEDS_REVIEW, message);
         return;
       }
 
@@ -296,6 +302,7 @@ export class SimulationOrchestrator {
    * standard-value preference. Never promote OCR candidates or invent topology.
    */
   async useStandardDefaults() {
+    if (this.bookIR?.domain === 'circuits') return;
     const attempted = new Set();
     while (this.state === OrchestratorState.NEEDS_REVIEW) {
       const policies = this.reviewState?.availablePolicies || [];

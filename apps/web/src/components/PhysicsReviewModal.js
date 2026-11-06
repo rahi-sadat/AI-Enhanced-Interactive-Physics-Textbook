@@ -16,6 +16,7 @@
  */
 
 import { OrchestratorState } from '../features/simulations/core/SimulationOrchestrator.js';
+import { circuitInspection,renderCircuitInspection } from '../features/circuit-v2/evidenceInspection.js';
 
 export const PARAMETER_LABELS = {
   length: 'String Length',
@@ -295,6 +296,9 @@ export class PhysicsReviewModal {
     }
 
     // 4. Calculate Unresolved Issues
+    if (bookIR?.domain==='circuits' && state===OrchestratorState.NEEDS_REVIEW) {
+      renderCircuitInspection(this.dom.body,circuitInspection(bookIR,ctx.imageUrl,ctx.sourceAsset));
+    }
     const issues = reviewState?.issues || [];
     // Backend issues include invalid existing values and structural blockers.
     // Neither parameter presence nor hiding a coordinate makes an issue resolved.

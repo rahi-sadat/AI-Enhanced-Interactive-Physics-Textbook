@@ -30,9 +30,11 @@ def test_preview_keeps_proposals_immutable_and_discloses_synthetic_components():
     assert any("Added synthetic voltage_source" in a["reason"] for a in preview["assumptions"])
     assert all(c["provenance"]["verified"] is False for c in preview["circuit"]["components"])
     assert all(p["provenance"] == "experimental_assumption" for p in preview["parameters"].values())
+    assert all(p["source"] == "experimental_preview" and p["confidence"] == 0.0
+               for p in preview["parameters"].values())
 
 
-def test_failed_grounding_still_returns_preview_and_exact_failure(tmp_path):
+def test_failed_grounding_keeps_exact_failure_without_guessed_simulation(tmp_path):
     checkpoint = tmp_path/"model.pt"
     checkpoint.write_bytes(b"offline canned checkpoint identity")
     understanding = BookUnderstandingPipeline(analyzer=PhysicsVisionAnalyzer(provider=MockVisionProvider()))
@@ -46,7 +48,7 @@ def test_failed_grounding_still_returns_preview_and_exact_failure(tmp_path):
     assert ok
     result = run_experiment(encoded.tobytes(),"unrelated-name.png","image/png",services)
     assert result["scene"] is None
-    assert result["preview_scene"]["metadata"]["experimental"] is True
+    assert result["preview_scene"] is None
     assert result["first_blocker"]["stage"] == "grounding"
     assert result["first_blocker"]["message"] == "CV could not trace wire endpoints"
     assert result["book_ir"]["parameters"] == {}
@@ -59,5 +61,14 @@ def test_failed_grounding_still_returns_preview_and_exact_failure(tmp_path):
         response = client.post("/api/experiments/circuit-v2",files={"file":("test.png",encoded.tobytes(),"image/png")})
         assert response.status_code == 200
         assert response.json()["first_blocker"]["stage"] == "grounding"
+        analysis_id = response.json()['analysis_id']
+        analysis = client.post('/api/experiments/circuit-v2/analysis',json={'analysis_id':analysis_id,'mode':'non_ideal'})
+        assert analysis.status_code == 200 and analysis.json()['status'] == 'NEEDS_REVIEW'
+        assert analysis.json()['electrical_state'] is None
+        invalid_parameter = client.post('/api/experiments/circuit-v2/analysis',json={
+            'analysis_id':analysis_id,'mode':'non_ideal','short_path_resistance_ohm':0})
+        assert invalid_parameter.status_code == 422
+        unknown = client.post('/api/experiments/circuit-v2/analysis',json={'analysis_id':'unknown'})
+        assert unknown.status_code == 404
         invalid = client.post("/api/experiments/circuit-v2",files={"file":("test.png",b"not an image","image/png")})
         assert invalid.status_code == 422

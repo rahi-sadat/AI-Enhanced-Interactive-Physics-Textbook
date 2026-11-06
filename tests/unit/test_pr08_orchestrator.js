@@ -137,16 +137,17 @@ async function runTests() {
     ingest: async () => ({ status: 'needs-review', book_ir: {
       domain: 'circuits', subtype: 'dc_linear', status: 'NEEDS_REVIEW', reviewIssues: circuitIssues,
     } }),
-    review: async () => { circuitReviewCalls++; },
+    review: async () => { circuitReviewCalls++; return {readyToCompile:false,reviewState:{issues:circuitIssues}}; },
   } });
   await circuitUpload.startWithFile(new Blob(['bytes']));
-  assert(circuitUpload.state === OrchestratorState.ERROR, 'A shorted circuit stops in the upload dialog');
+  assert(circuitUpload.state === OrchestratorState.NEEDS_REVIEW, 'A shorted circuit opens evidence inspection');
   assert(circuitUpload.currentError.includes('Short circuit detected'), 'The detected short is explained');
   circuitIssues = [{ code: 'SHORTED_CIRCUIT_SOURCE' }, { code: 'GROUNDING_INCOMPLETE' }];
   await circuitUpload.startWithFile(new Blob(['bytes']));
   assert(circuitUpload.currentError.includes('Try a clear crop'), 'An ungrounded circuit offers a retry');
   assert(!circuitUpload.currentError.includes('Short circuit detected'), 'Incomplete grounding cannot establish a short circuit');
-  assert(circuitReviewCalls === 0 && circuitUpload.reviewState === null, 'Circuit uploads skip evidence review');
+  assert(circuitReviewCalls === 2 && circuitUpload.reviewState.issues.length === 2, 'Failed circuits retain every blocker in evidence review');
+  assert(circuitUpload.compiledScene === null, 'A failed circuit never creates a running scene');
 
   // Test 1: Initial State is IDLE
   console.log('[1/8] Verifying initial orchestrator state');

@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "annotation_provenance": "Source inspection before this repair's inference run. Component identities, topology, values, approximate terminals and conductor polylines were annotated independently of pipeline predictions by the coding assistant. Not a blind human annotation study. Original user-reviewed CVAT annotations remain unchanged.",
+  "terminal_annotation_uncertainty_px": 3,
+  "cases": [
+    {
+      "id": "recorded_series_parallel_84",
+      "source": "datasets/circuits_v2/user_verified_99_20261105/images/test/084__Screenshot 2026-11-03 215120.png",
+      "strata": ["low_resolution", "series_parallel"],
+      "valid": true,
+      "expected_resistance_ohm": 10,
+      "source_current_a": 1,
+      "components": [
+        {"id":"V", "type":"voltage_source", "value":10, "bbox":[48,70,85,90], "terminals":[[64,74],[64,87]], "nodes":["A","D"], "current_a":1},
+        {"id":"R1", "type":"resistor", "value":5, "bbox":[108,21,142,40], "terminals":[[109,29],[140,29]], "nodes":["A","B"], "current_a":1},
+        {"id":"R4", "type":"resistor", "value":3, "bbox":[132,129,165,145], "terminals":[[134,134],[163,134]], "nodes":["D","C"], "current_a":1},
+        {"id":"R2", "type":"resistor", "value":3, "bbox":[169,64,190,98], "terminals":[[177,65],[177,97]], "nodes":["B","C"], "current_a":0.6666666666666666},
+        {"id":"R3", "type":"resistor", "value":6, "bbox":[246,63,264,96], "terminals":[[259,64],[259,96]], "nodes":["B","C"], "current_a":0.3333333333333333}
+      ],
+      "junctions": [[177,29],[177,134]],
+      "crossings": [],
+      "wires": [[[64,74],[64,29],[109,29]],[[64,87],[64,134],[134,134]],[[140,29],[177,29]],[[177,29],[177,65]],[[177,29],[259,29],[259,64]],[[163,134],[177,134]],[[177,134],[177,97]],[[177,134],[259,134],[259,96]]]
+    },
+    {
+      "id": "recorded_junction_83",
+      "source": "datasets/circuits_v2/user_verified_99_20261105/images/test/083__Screenshot 2026-11-03 215056.png",
+      "strata": ["low_resolution", "junction", "bent_wires"],
+      "valid": true,
+      "annotation_note": "The CVAT reference's resistor box around letter A is a text-label error. This separate topology annotation contains the four physical resistors visible in the source.",
+      "expected_resistance_ohm": 7,
+      "source_current_a": 0.8571428571428571,
+      "components": [
+        {"id":"V", "type":"voltage_source", "value":6, "bbox":[20,58,41,86], "terminals":[[29,65],[29,78]], "nodes":["A","D"], "current_a":0.8571428571428571},
+        {"id":"top", "type":"resistor", "value":2, "bbox":[92,14,127,33], "terminals":[[95,21],[123,21]], "nodes":["A","B"], "current_a":0.8571428571428571},
+        {"id":"bottom", "type":"resistor", "value":3, "bbox":[93,116,127,134], "terminals":[[96,122],[124,122]], "nodes":["D","C"], "current_a":0.8571428571428571},
+        {"id":"middle", "type":"resistor", "value":3, "bbox":[161,57,182,92], "terminals":[[170,59],[170,91]], "nodes":["B","C"], "current_a":0.5714285714285714},
+        {"id":"right", "type":"resistor", "value":6, "bbox":[201,54,224,87], "terminals":[[213,56],[213,87]], "nodes":["B","C"], "current_a":0.2857142857142857}
+      ],
+      "junctions": [[192,21],[192,122]],
+      "crossings": [],
+      "wires": [[[29,65],[29,21],[95,21]],[[29,78],[29,122],[96,122]],[[123,21],[192,21]],[[192,21],[170,46],[170,59]],[[192,21],[213,45],[213,56]],[[124,122],[192,122]],[[192,122],[170,100],[170,91]],[[192,122],[213,100],[213,87]]]
+    }
+  ]
+}

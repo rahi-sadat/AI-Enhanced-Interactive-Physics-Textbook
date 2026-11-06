@@ -119,6 +119,10 @@ export const reviewModal = new PhysicsReviewModal(document.body, orchestrator, {
 // Resolving a structural issue resumes the diagram automatically when the
 // backend produces a scene; review is a recovery tool, not an activation gate.
 orchestrator.onStateChange((state) => {
+  if (state === OrchestratorState.UPLOADING) {
+    activeFigure?.pause?.();
+    currentController?.pause?.();
+  }
   if (state === OrchestratorState.READY_TO_SIMULATE && reviewModal.isOpen) {
     void reviewModal._startSimulation();
   }
