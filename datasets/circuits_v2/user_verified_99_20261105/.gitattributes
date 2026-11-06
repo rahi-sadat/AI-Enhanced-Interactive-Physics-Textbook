@@ -1,0 +1,3 @@
+# Preserve the recorded dataset hashes on Windows and Linux checkouts.
+* -text whitespace=cr-at-eol
+images/test/* binary

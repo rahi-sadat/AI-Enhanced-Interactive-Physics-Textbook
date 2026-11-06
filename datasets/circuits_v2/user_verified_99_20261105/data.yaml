@@ -1,0 +1,11 @@
+# Paths resolve relative to this YAML file. No training split is supplied.
+train: null
+val: images/test
+test: images/test
+names:
+  0: resistor
+  1: voltage_source
+  2: capacitor
+  3: switch
+  4: ammeter
+  5: voltmeter
