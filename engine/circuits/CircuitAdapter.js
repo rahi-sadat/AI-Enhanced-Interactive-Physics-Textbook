@@ -11,6 +11,7 @@ import { SimulationAdapter } from '../core/SimulationAdapter.js';
 import { CircuitCompiler } from './CircuitCompiler.js';
 import { CircuitSolver } from './CircuitSolver.js';
 import { CircuitTransientSolver } from './CircuitTransientSolver.js';
+import { measuredWireFlows } from './MeasuredWireFlow.js';
 import { UnsupportedPhysicsSubtypeError, PhysicsSceneValidationError } from '../core/errors.js';
 
 export class CircuitAdapter extends SimulationAdapter {
@@ -123,10 +124,11 @@ export class CircuitAdapter extends SimulationAdapter {
   getOutput() {
     const state = this.getState();
     const model = this.model || {};
+    const measuredFlows=measuredWireFlows(this.scene?.circuit,state.branchCurrents || state.componentCurrents);
 
     // Map compiled wires with topology-aware directional branch current
     const wires = (model.wires || []).map(w => {
-      const flow = this._resolveWireFlow(w, model, state);
+      const flow = measuredFlows?.get(w.id) || this._resolveWireFlow(w, model, state);
 
       return {
         id: w.id,

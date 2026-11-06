@@ -107,18 +107,9 @@ class AutoResolutionEngine:
             return result
         targets = []
         if book_ir.subtype == "dc_linear":
-            from ai.evidence.grounding.circuit_integrity import validate_circuit_integrity
-            from ai.resolution.circuit_values import value_spec
-            if (not (book_ir.geometry or {}).get("circuit_topology", {}).get("verified_connectivity")
-                    or validate_circuit_integrity(book_ir)):
-                return result
-            for component in book_ir.parameters.get("components", []):
-                if component.get("verification_status") != "VERIFIED":
-                    continue
-                for field_name in ("value", "initial_voltage"):
-                    definition = value_spec(component, field_name)
-                    if definition and component.get(field_name) is None:
-                        targets.append((f"component.{component['id']}.{field_name}", definition[2]))
+            # Source circuit playback requires observed values or an explicit
+            # recorded user decision. Review still offers named policies.
+            return result
         else:
             for name, requirement in spec.parameters.items():
                 if _grounded_value(book_ir, name) is not None or book_ir.parameters.get(name) is not None:

@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[3]
 CHECKPOINT = ROOT / "runs/augmented_physics/circuits_real_v2_20261031/weights/last.pt"
 MODEL_NAME = "circuit_v2"
 SYMBOL_TYPES = {"resistor", "voltage_source", "capacitor", "switch"}
+MODEL_CLASSES = {0:"resistor",1:"voltage_source",2:"capacitor",3:"switch"}
 MIN_CONFIDENCE = 0.25
 
 
@@ -43,6 +44,8 @@ class CircuitV2Detector:
                 from ultralytics import YOLO
 
                 self._model = YOLO(str(self.checkpoint))
+            if dict(self._model.names) != MODEL_CLASSES:
+                raise ValueError('Circuit V2 checkpoint class indices do not match the four-class schema')
             result = self._model.predict(
                 image_bgr, imgsz=960, conf=MIN_CONFIDENCE, device="cpu", save=False, verbose=False,
             )[0]
@@ -52,6 +55,8 @@ class CircuitV2Detector:
         height, width = image_bgr.shape[:2]
         if result.orig_shape != (height, width):
             raise ValueError(f"{MODEL_NAME} result does not match the source image dimensions")
+        if dict(result.names) != MODEL_CLASSES:
+            raise ValueError('Circuit V2 inference class mapping changed')
         detections = []
         for cls, confidence, coords in zip(
             result.boxes.cls.tolist(), result.boxes.conf.tolist(), result.boxes.xyxy.tolist(),

@@ -9,23 +9,25 @@ from shared.schemas.ingestion import BookEntity, BookIR, ProvenanceRecord
 from tests.unit.test_circuit_capacitor_pipeline import grounded_rc
 
 
-def test_symbolic_rc_starts_with_defaults_without_a_review_decision():
+def test_symbolic_rc_requires_explicit_circuit_policy_decisions():
     _, book, _ = grounded_rc(symbolic=True)
     geometry, evidence = deepcopy(book.geometry), deepcopy(book.evidence)
     report = ResolutionEngine.auto_resolve(book)
-    assert report.ready, report.blockers
+    assert not report.ready and not book.assumptions
+    for cid,policy in [('supply','policy_standard_dc_voltage'),('load','policy_standard_dc_resistance'),
+                       ('storage','policy_standard_capacitance')]:
+        assert ResolutionEngine.apply_policy(book,policy,f'component.{cid}.value').success
+    assert ResolutionEngine.apply_policy(book,'policy_uncharged_capacitor','component.storage.initial_voltage').success
     values = {c['type']: c for c in book.parameters['components']}
     assert values['voltage_source']['value'] == 10
     assert values['resistor']['value'] == 100
     assert values['capacitor']['value'] == .001
     assert values['capacitor']['initial_voltage'] == 0
-    assert len(book.assumptions) == 4
     for decision in book.resolutions.values():
-        assert decision['resolvedBy'] == 'auto_policy'
-        assert decision['userAccepted'] is False
+        assert decision['userAccepted'] is True
     compiled = PhysicsCompiler().compile(book)
     assert compiled.status == 'READY', compiled.issues
-    assert compiled.scene['parameters']['load']['provenance'] == 'auto_policy'
+    assert compiled.scene['parameters']['load']['provenance'] == 'policy_default'
     assert compiled.scene['source']['width'] == geometry['width']
     assert book.geometry == geometry and book.evidence == evidence
     snapshot = book.to_dict()
@@ -33,16 +35,18 @@ def test_symbolic_rc_starts_with_defaults_without_a_review_decision():
     assert book.to_dict() == snapshot
 
 
-def test_observed_circuit_values_survive_automatic_initial_condition():
+def test_observed_circuit_values_survive_reviewed_initial_condition():
     _, book, _ = grounded_rc()
     before = {c['id']: (c['value'], deepcopy(c.get('value_provenance')))
               for c in book.parameters['components']}
     result = AutoResolutionEngine.resolve(book)
-    assert result.readiness.ready, result.readiness.blockers
+    assert not result.readiness.ready
     assert not result.failures
     for component in book.parameters['components']:
         assert (component['value'], component.get('value_provenance')) == before[component['id']]
-    assert [a['parameter'] for a in result.assumptions] == ['component.storage.initial_voltage']
+    assert result.assumptions==[]
+    assert PhysicsCompiler().compile(book).scene is None
+    assert ResolutionEngine.apply_policy(book,'policy_uncharged_capacitor','component.storage.initial_voltage').success
     assert PhysicsCompiler().compile(book).status == 'READY'
 
 

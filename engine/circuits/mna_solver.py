@@ -49,6 +49,7 @@ class ElectricalState:
     equivalent_resistance_ohm: Optional[float] = None
     total_power_w: float = 0.0
     error_message: Optional[str] = None
+    solver_diagnostics: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -64,6 +65,7 @@ class ElectricalState:
             ),
             "total_power_w": round(self.total_power_w, 6),
             "error_message": self.error_message,
+            "solver_diagnostics": self.solver_diagnostics,
         }
 
 
@@ -73,7 +75,7 @@ class MNASolver:
     def __init__(self, scene: CircuitScene) -> None:
         self.scene = scene
 
-    def solve_dc(self) -> ElectricalState:
+    def solve_dc(self, *, strict: bool = False, tolerance: float = 1e-9) -> ElectricalState:
         """Solve DC operating point using Modified Nodal Analysis (Ax = z)."""
         scene = self.scene
         circuit_nodes = scene.nodes
@@ -199,9 +201,16 @@ class MNASolver:
             # 3d. Capacitors in DC steady-state act as open circuits (no conductance)
 
         # 4. Solve the linear system Ax = z
+        if strict and (not np.isfinite(A).all() or not np.isfinite(z).all()
+                       or np.linalg.matrix_rank(A) != dim):
+            return ElectricalState(status="singular", reference_node=ref_node, node_voltages={}, components={},
+                error_message="Strict MNA requires a finite, full-rank system; no least-squares fallback.")
         try:
             x = np.linalg.solve(A, z)
         except np.linalg.LinAlgError:
+            if strict:
+                return ElectricalState(status="singular", reference_node=ref_node, node_voltages={}, components={},
+                    error_message="Strict MNA matrix is singular; numerical simulation rejected.")
             # Try pseudo-inverse for singular/unconnected floating segments
             try:
                 x = np.linalg.lstsq(A, z, rcond=1e-10)[0]
@@ -214,6 +223,11 @@ class MNASolver:
                     error_message=f"Singular MNA matrix: {e}",
                 )
 
+        residual = float(np.linalg.norm(A @ x - z, ord=np.inf))
+        normalized_residual = residual / max(1.0, float(np.linalg.norm(z, ord=np.inf)))
+        if strict and (not np.isfinite(x).all() or not np.isfinite(residual) or normalized_residual > tolerance):
+            return ElectricalState(status="unsolved", reference_node=ref_node, node_voltages={}, components={},
+                error_message="Strict MNA solution is non-finite or exceeds the residual tolerance.")
         # 5. Extract node voltages
         voltages: dict[str, float] = {ref_node: 0.0}
         for nid, idx in node_idx.items():
@@ -345,4 +359,6 @@ class MNASolver:
             kcl_residuals=kcl_residuals,
             equivalent_resistance_ohm=r_eq,
             total_power_w=total_power,
+            solver_diagnostics={"strict":strict,"matrix_dimension":dim,"matrix_residual_inf":residual,
+                                "normalized_residual":normalized_residual,"tolerance":tolerance},
         )
