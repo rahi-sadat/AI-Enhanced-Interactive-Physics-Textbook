@@ -18,6 +18,7 @@ import time
 import hashlib
 import json
 import threading
+import importlib
 from pathlib import Path
 from typing import Optional
 
@@ -44,6 +45,13 @@ _CACHED_SAM2_PREDICTOR = None
 _CACHED_SAM2_KEY = None
 _CACHED_IMAGE_SIG = None
 _PREDICTOR_LOCK = threading.RLock()
+_INITIALIZATION_FAILURES = {}
+
+
+class SAM2InitializationError(RuntimeError):
+    def __init__(self, state, message):
+        super().__init__(message)
+        self.state = state
 
 
 class SAM2SegmentationProvider:
@@ -62,6 +70,7 @@ class SAM2SegmentationProvider:
         self.device = device  # auto-detected if None
         self._predictor = None
         self._model = None
+        self._diagnostics = {"state": "NOT_INITIALIZED"}
 
     @property
     def device_name(self) -> str:
@@ -78,15 +87,33 @@ class SAM2SegmentationProvider:
         return "sam2.1"
 
     def available(self) -> bool:
-        """Check whether SAM 2 package and checkpoint file exist."""
-        if not Path(self.checkpoint_path).exists():
-            return False
+        """Ready means the configured checkpoint has actually initialized."""
         try:
-            self._ensure_sam2_on_path()
-            import sam2
+            self._get_predictor()
             return True
-        except Exception:
+        except SAM2InitializationError:
             return False
+
+    def readiness(self):
+        self.available()
+        return dict(self._diagnostics)
+
+    def _load_runtime(self):
+        """Import the actual architecture explicitly so Hydra cannot hide its cause."""
+        self._ensure_sam2_on_path()
+        try:
+            torch = importlib.import_module("torch")
+            sam = importlib.import_module("sam2")
+            importlib.import_module("sam2.modeling.backbones.hieradet").Hiera
+            builder = importlib.import_module("sam2.build_sam").build_sam2
+            predictor_class = importlib.import_module("sam2.sam2_image_predictor").SAM2ImagePredictor
+        except ModuleNotFoundError as exc:
+            raise SAM2InitializationError("MISSING_DEPENDENCY", str(exc)) from exc
+        except Exception as exc:
+            raise SAM2InitializationError("IMPORT_FAILURE", str(exc)) from exc
+        self._diagnostics.update(sam2_file=sam.__file__, torch_version=torch.__version__,
+                                 architecture="sam2.modeling.backbones.hieradet.Hiera")
+        return builder, predictor_class
 
     def _ensure_sam2_on_path(self):
         """Ensure sam2 directory is at sys.path[0] to prevent repo parent shadowing."""
@@ -96,37 +123,46 @@ class SAM2SegmentationProvider:
 
     def _get_predictor(self):
         """Lazily initialize SAM 2 model and predictor with singleton caching."""
-        global _CACHED_SAM2_MODEL, _CACHED_SAM2_PREDICTOR, _CACHED_SAM2_KEY
-        key=(str(Path(self.checkpoint_path).resolve()),self.config_path,self.device_name)
-        if _CACHED_SAM2_PREDICTOR is not None and _CACHED_SAM2_KEY==key:
-            self._model = _CACHED_SAM2_MODEL
-            self._predictor = _CACHED_SAM2_PREDICTOR
-            return self._predictor
-
-        if self._predictor is None:
-            self._ensure_sam2_on_path()
+        global _CACHED_SAM2_MODEL, _CACHED_SAM2_PREDICTOR, _CACHED_SAM2_KEY, _CACHED_IMAGE_SIG
+        # A new checkpoint/config file (including a previously missing one)
+        # invalidates both success and failure caches. No per-component retries.
+        def identity(path):
+            p = Path(path).resolve()
+            stat = p.stat() if p.is_file() else None
+            return str(p), (stat.st_size, stat.st_mtime_ns) if stat else None
+        config_file = _PROJECT_ROOT / "sam2" / "sam2" / self.config_path
+        key = (identity(self.checkpoint_path), self.config_path, identity(config_file), self.device_name)
+        with _PREDICTOR_LOCK:
+            self._diagnostics.update(checkpoint=str(Path(self.checkpoint_path).resolve()),
+                                     config=self.config_path, device=self.device_name)
+            if key in _INITIALIZATION_FAILURES:
+                self._diagnostics.update(_INITIALIZATION_FAILURES[key])
+                raise SAM2InitializationError(self._diagnostics['state'], self._diagnostics['error'])
+            if _CACHED_SAM2_PREDICTOR is not None and _CACHED_SAM2_KEY == key:
+                self._model, self._predictor = _CACHED_SAM2_MODEL, _CACHED_SAM2_PREDICTOR
+                self._diagnostics.update(state="READY", error=None)
+                return self._predictor
             try:
-                import torch
-                from sam2.build_sam import build_sam2
-                from sam2.sam2_image_predictor import SAM2ImagePredictor
-            except ImportError as e:
-                raise RuntimeError(f"SAM 2 dependencies could not be imported: {e}")
-
-            if not Path(self.checkpoint_path).exists():
-                raise FileNotFoundError(f"SAM 2 checkpoint missing at: {self.checkpoint_path}")
-
-            dev = self.device
-            if dev is None:
-                dev = "cuda" if torch.cuda.is_available() else "cpu"
-
-            logger.info("[SAM2SegmentationProvider] Loading model on %s from %s...", dev, self.checkpoint_path)
-            self._model = build_sam2(self.config_path, self.checkpoint_path, device=dev)
-            self._predictor = SAM2ImagePredictor(self._model)
+                if not Path(self.checkpoint_path).is_file():
+                    raise SAM2InitializationError("MISSING_CHECKPOINT", f"SAM2 checkpoint missing: {self.checkpoint_path}")
+                build_sam2, predictor_class = self._load_runtime()
+                self._model = build_sam2(self.config_path, self.checkpoint_path, device=self.device_name)
+                self._predictor = predictor_class(self._model)
+            except Exception as exc:
+                state = getattr(exc, 'state', None)
+                if state is None:
+                    state = ("CONFIGURATION_FAILURE" if type(exc).__module__.startswith(('hydra', 'omegaconf'))
+                             else "MODEL_INITIALIZATION_FAILURE")
+                self._diagnostics.update(state=state, error=f"{type(exc).__name__}: {exc}")
+                _INITIALIZATION_FAILURES[key] = dict(self._diagnostics)
+                self._model = self._predictor = None
+                raise SAM2InitializationError(state, self._diagnostics['error']) from exc
             _CACHED_SAM2_MODEL = self._model
             _CACHED_SAM2_PREDICTOR = self._predictor
             _CACHED_SAM2_KEY = key
-
-        return self._predictor
+            _CACHED_IMAGE_SIG = None
+            self._diagnostics.update(state="READY", error=None)
+            return self._predictor
 
     def segment(
         self, image_bgr, prompt, *, source_width, source_height, entity_id=None,
@@ -153,12 +189,14 @@ class SAM2SegmentationProvider:
                 masks=[],
                 provider=self.name,
                 model="sam2.1_hiera_tiny",
-                error=f"SAM 2 checkpoint missing or package not installed (checked {self.checkpoint_path}).",
+                error=f"{self._diagnostics['state']}: {self._diagnostics.get('error')}",
             )
 
         start_time = time.perf_counter()
 
         try:
+            if image_bgr.shape[:2] != (source_height, source_width):
+                raise ValueError("SAM2 input does not match the native source frame")
             predictor = self._get_predictor()
 
             # Reuse image embedding if identical image array is already loaded in predictor
@@ -199,6 +237,8 @@ class SAM2SegmentationProvider:
             )
 
         except Exception as e:
+            _CACHED_IMAGE_SIG = None
+            self._diagnostics.update(state="INFERENCE_FAILURE", error=str(e))
             logger.error("[SAM2SegmentationProvider] Segmentation failed: %s", e)
             return SegmentationResult(
                 status=ExtractionStatus.ERROR,
@@ -218,8 +258,17 @@ class SAM2SegmentationProvider:
                 latency_ms=(time.perf_counter() - start_time) * 1000.0,
             )
 
-        # Select highest scoring mask
-        best_idx = int(np.argmax(scores))
+        # Reject malformed candidates before ranking; a high score alone does
+        # not establish valid pixels or the correct source frame.
+        valid = [i for i, (mask, score) in enumerate(zip(masks, scores))
+                 if mask.shape == (source_height, source_width)
+                 and np.isfinite(mask).all() and np.isfinite(score) and 0 <= score <= 1
+                 and np.any(mask)]
+        if not valid:
+            return SegmentationResult(status=ExtractionStatus.NO_EVIDENCE, masks=[], provider=self.name,
+                model="sam2.1_hiera_tiny", error="No valid finite mask in the native source frame.",
+                latency_ms=(time.perf_counter() - start_time) * 1000)
+        best_idx = max(valid, key=lambda i: scores[i])
         best_mask = masks[best_idx].astype(bool)
         best_score = float(scores[best_idx])
         area = float(np.sum(best_mask))
@@ -280,7 +329,7 @@ class SAM2SegmentationProvider:
             area_px=area,
             rle_counts=json.dumps(_encode_mask_runs(best_mask)),
             polygon_approx=polygon,
-            confidence=best_score,
+            confidence=min(best_score, .95),
             provider=self.name,
             model="sam2.1_hiera_tiny",
             prompt_provenance={

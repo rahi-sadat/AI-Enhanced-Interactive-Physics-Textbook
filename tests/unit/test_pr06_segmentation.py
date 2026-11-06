@@ -55,9 +55,14 @@ class TestPR06Segmentation(unittest.TestCase):
         self.assertEqual(len(result.masks), 0)
 
     def test_sam2_provider_availability(self):
-        provider = SAM2SegmentationProvider()
-        # In our workspace, checkpoints/sam2.1_hiera_tiny.pt exists and sam2 is installed
-        self.assertTrue(provider.available())
+        # Unit suites must not depend on a locally installed real model. Real
+        # initialization/inference is exercised separately by acceptance runs.
+        from unittest.mock import Mock, patch
+        provider = SAM2SegmentationProvider(checkpoint_path=__file__, config_path='offline-test', device='cpu')
+        builder = Mock(return_value=object())
+        with patch.object(provider, '_load_runtime', return_value=(builder, Mock())):
+            self.assertTrue(provider.available())
+        builder.assert_called_once()
 
 
 if __name__ == "__main__":

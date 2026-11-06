@@ -1,0 +1,6 @@
+# Matched to the existing SAM2 source checkout (not an unpinned latest install).
+# sam2 commit: 2b90b9f5ceec907a1c18123530e92e794ad901a4
+# With compatible torch/torchvision and hydra already installed:
+# python -m pip install -r requirements/sam2-local.txt
+iopath==0.1.10
+portalocker==3.2.0

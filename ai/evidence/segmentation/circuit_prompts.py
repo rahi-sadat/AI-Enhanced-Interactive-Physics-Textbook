@@ -11,11 +11,31 @@ from .base import SegmentationPrompt
 from shared.schemas.evidence import ExtractionStatus, SegmentationResult
 
 
+def circuit_segmentation_state(records, geometry_verified):
+    """Keep optional segmentation health separate from source readiness."""
+    masks=[m for record in records for m in record.get('masks',[])]
+    accepted=sum(m.get('promptProvenance',{}).get('verification_status')=='CORROBORATING' for m in masks)
+    available=any(record.get('status') in {'success','no_evidence'} for record in records)
+    state=('WORKING_MASKS_ACCEPTED' if accepted else 'WORKING_MASKS_REJECTED') if available else (
+        'UNAVAILABLE_CV_VERIFIED' if geometry_verified else 'UNAVAILABLE_GEOMETRY_INSUFFICIENT')
+    return dict(state=state,accepted_masks=accepted,rejected_masks=len(masks)-accepted,
+                cv_geometry_verified=bool(geometry_verified),sam_required_for_readiness=False,
+                geometry_blocked=not geometry_verified)
+
+
 def segment_circuit_candidates(provider, image, candidates, asset):
     records=[]
     masks=[]
     available=provider.available()
-    for c in candidates.get('components',[]):
+    proposals = candidates.get('detector_proposals', candidates.get('components',[]))
+    for proposal in proposals:
+        c = proposal
+        if 'detector_proposals' in candidates:
+            compatible = [body for body in candidates.get('components',[])
+                          if body['type'] == proposal['type'] and body['bbox'].iou(proposal['bbox']) >= .20]
+            if len(compatible) == 1:
+                c = dict(compatible[0], id=proposal['id'], bbox=proposal['bbox'],
+                         cv_candidate_id=compatible[0]['id'])
         box=c['bbox']
         # A zigzag center may be whitespace: choose a measured stroke as the
         # positive point. Bounding box and points remain in native source pixels.
@@ -33,7 +53,9 @@ def segment_circuit_candidates(provider, image, candidates, asset):
         record={'entity_candidate_id':c['id'],'source_bbox':box.to_dict(),
                 'prompt_points':points,'prompt_labels':prompt.labels,
                 'source_asset_id':asset.id,'provider':result.provider,'model':result.model,
-                'status':result.status.value,'error':result.error,'masks':[]}
+                'status':result.status.value,'error':result.error,'masks':[],
+                'latency_ms':result.latency_ms,'cv_candidate_id':c.get('cv_candidate_id'),
+                'readiness':provider.readiness() if hasattr(provider,'readiness') else None}
         for mask in result.masks:
             reasons=[]
             mb=mask.bbox_source_px
